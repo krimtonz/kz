@@ -4,29 +4,22 @@
 #include <stdlib.h>
 #include <startup.h>
 
+extern void game_update_start(z64_game_t *game);
+
 __attribute__((section(".data")))
 kz_ctxt_t kz = { 
     .ready = 0, 
 };
 
 static void kz_main(void) {
-    watch_t *watch = vector_at(&kz.watches, 0);
-    watch->address++;
 }
 
 void init() {
     vector_init(&kz.watches, sizeof(watch_t));
-    watch_t watch;
-    watch.address= (void*)0x80000000;
-    watch.type=WATCH_TYPE_X32;
-    watch.x = 10;
-    watch.y = 10;
-    vector_insert(&kz.watches, 0, 1, &watch);
-    kz.ptr = malloc(8*1024*1024);
     kz.ready = 1;
 }
 
-
+// Uses kz's stack instead of graph stack. 
 static void kz_stack(void (*kzfunc)(void)) {
     static __attribute__((section(".stack"))) _Alignas(8)
     char stack[0x2000];
@@ -43,8 +36,7 @@ static void kz_stack(void (*kzfunc)(void)) {
                         "i"(&stack[sizeof(stack)]));
 }
 
-extern void game_update_start(z64_game_t *game);
-
+/* Entry Point of KZ executable */
 ENTRY void _start() {
     init_gp();
     if(!kz.ready){

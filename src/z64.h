@@ -63,6 +63,7 @@ typedef struct {
     z64_ctxt_t  common;                     // 0x00
 } z64_game_t;                               // 0x00A4
 
-#define z64_game (*(z64_game_t*) 0x803E6B20)
+//#define z64_game (*(z64_game_t*) 0x803E6B20)
+extern z64_game_t z64_game;
 
 #endif

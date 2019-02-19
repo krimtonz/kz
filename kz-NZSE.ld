@@ -7,12 +7,7 @@ OUTPUT_ARCH(mips)
 ENTRY(_start)
 SECTIONS
 {
-  PROVIDE(game_update_start = 0x80168F64);
-  /*PROVIDE(z64_game = 0x803E6B20);*/
-  PROVIDE(z64_file = 0x801EF670);
-
-
-  PROVIDE(start = 0x80000400);
+  PROVIDE(start = 0x80080000);
   . = start;
 
   .text :
@@ -151,3 +146,8 @@ SECTIONS
     *(.*)
   }
 }
+
+/* Symbols for NZSE */
+PROVIDE(game_update_start   = 0x80168F64);
+PROVIDE(z64_game            = 0x803E6B20);
+PROVIDE(z64_file            = 0x801EF670);

@@ -7,6 +7,7 @@
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
 .definelabel G_PAYLOAD_SIZE, 0x7D500
 .definelabel G_PAYLOAD_ADDR, (0x80780000 - G_PAYLOAD_SIZE)
+.definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
 .orga 0x10
 .word 0xDDF7E3E7, 0x4774416C
@@ -50,14 +51,14 @@ nop
 nop
 
 ; ==================================================================================================
-; Game Class Frame Start Hook
+; Game Class Frame Start Hook ; Probably want to look for a better hook here.  
 ; ==================================================================================================
 
 ; 80168F64
 .org 0x8016A8A8
-lui     t4, hi(G_PAYLOAD_ADDR + 0x500)
+lui     t4, hi(G_KZ_ADDR)
 .org 0x8016A8B0
-addiu   t4, lo(G_PAYLOAD_ADDR + 0x500)
+addiu   t4, lo(G_KZ_ADDR)
 
 ; ==================================================================================================
 ; New code region
@@ -66,7 +67,7 @@ addiu   t4, lo(G_PAYLOAD_ADDR + 0x500)
 .headersize(G_PAYLOAD_ADDR - G_PAYLOAD_VROM)
 .org G_PAYLOAD_ADDR
 .include "init.asm"
-.org G_PAYLOAD_ADDR + 0x500
+.org G_KZ_ADDR
 .incbin("bin/kz.bin")
 .align 8
 .close
