@@ -1,0 +1,9 @@
+obj/
+notes/
+bin/
+*.o
+*.bin
+*.elf
+.vs/
+*.z64
+*.wad
