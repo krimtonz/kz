@@ -3,6 +3,28 @@
 #include <n64.h>
 #include <stdint.h>
 
+typedef struct
+{
+    int16_t x;
+    int16_t y;
+    int16_t z;
+} z64_xyz_t;
+
+typedef struct
+{
+    float x;
+    float y;
+    float z;
+} z64_xyzf_t;
+
+typedef uint16_t z64_angle_t;
+typedef struct
+{
+    z64_angle_t x;
+    z64_angle_t y;
+    z64_angle_t z;
+} z64_rot_t;
+
 typedef enum {
     Z64_ITEM_NULL = -1,
     Z64_ITEM_OCARINA,
@@ -55,8 +77,7 @@ typedef enum {
     Z64_ITEM_KAFEI_LETTER,
     Z64_ITEM_PENDANT,
     Z64_ITEM_UNK_MAP,
-    Z64_ITEM_BOW_FIRE_ARROW,
-    Z64_MASK_DEKU = 0x32,
+    Z64_MASK_DEKU,
     Z64_MASK_GORON,
     Z64_MASK_ZORA,
     Z64_MASK_FIERCE_DEITY,
@@ -80,6 +101,7 @@ typedef enum {
     Z64_MASK_BLAST,
     Z64_MASK_SCENTS,
     Z64_MASK_GIANT,
+    Z64_ITEM_BOW_FIRE_ARROW,
     Z64_ITEM_BOW_ICE_ARROW,
     Z64_ITEM_BOW_LIGHT_ARROW,
     Z64_ITEM_KOKIRI_SWORD,
@@ -310,6 +332,100 @@ typedef struct {
     int32_t         file_index;                    // 0x3CA0
 } z64_file_t;
 
+typedef struct z64_actor_s z64_actor_t;
+struct z64_actor_s
+{
+    int16_t         id;               /* 0x0000 */
+    uint8_t         type;             /* 0x0002 */
+    int8_t          room;             /* 0x0003 */
+    uint32_t        flags;            /* 0x0004 */
+    z64_xyzf_t      pos_1;            /* 0x0008 */
+    z64_rot_t       rot_init;         /* 0x0014 */
+    char            unk_01_[0x0002];  /* 0x001A */
+    uint16_t        variable;         /* 0x001C */
+    uint8_t         alloc_index;      /* 0x001E */
+    char            unk_02_;          /* 0x001F */
+    uint16_t        sound_effect;     /* 0x0020 */
+    char            unk_03_[0x0002];  /* 0x0022 */
+    z64_xyzf_t      pos_2;            /* 0x0024 */
+    z64_rot_t       rot_dir;          /* 0x0030 */
+    char            unk_0x36[0x0002]; /* 0x0036 */
+    int8_t          unk_0x38;         /* 0x0038 */
+    uint8_t         unk_0x39;         /* 0x0039 */
+    char            unk_0x3A[0x002];  /* 0x003A */
+    z64_xyzf_t      pos_3;            /* 0x003C */
+    z64_rot_t       rot_1;            /* 0x0048 */
+    char            unk_06_[0x0002];  /* 0x004E */ //padding?
+    uint32_t        unk_0x50;         /* 0x0050 */
+    float           unk_0x54;         /* 0x0054 */
+    z64_xyzf_t      scale;            /* 0x0058 */
+    z64_xyzf_t      vel_1;            /* 0x0064 */
+    float           xz_speed;         /* 0x0070 */
+    float           gravity;          /* 0x0074 */
+    float           min_vel_y;        /* 0x0078 */
+
+                                      /* struct bgcheck common */
+    z64_col_poly_t *wall_poly;                /* 0x007C */
+    z64_col_poly_t *floor_poly;               /* 0x0080 */
+    uint8_t         wall_poly_source;         /* 0x0084 */
+    uint8_t         floor_poly_source;        /* 0x0085 */
+    int16_t         wall_rot;                 /* 0x0086 */
+    float           floor_height;             /* 0x0088 */ //maybe?
+    float           water_surface_dist;       /* 0x008C */
+    uint16_t        bgcheck_flags;            /* 0x0090 */
+    int16_t         unk_0x92_rot;             /* 0x0092 */
+    float           unk_0x94;                 /* 0x0094 */
+    float           dist_from_link_xz;        /* 0x0098 */
+    float           dist_from_link_y;         /* 0x009C */
+
+                                              /* struct collision_check common */
+    void           *damage_table;     /* 0x00A0 */
+    z64_xyzf_t      vel_2;            /* 0x00A4 */
+    char            unk_0C_[0x0006];  /* 0x00B0 */
+    uint8_t         mass;             /* 0x00B6 */
+    uint8_t         health;           /* 0x00B7 */
+    uint8_t         damage;           /* 0x00B8 */
+    uint8_t         damage_effect;    /* 0x00B9 */
+    uint8_t         impact_effect;    /* 0x00BA */
+    uint8_t         unk_0xBB;         /* 0x00BB */
+
+                                      /* struct start */
+    z64_rot_t       rot_2;            /* 0x00BC */
+    char            unk_0F_[0x0002];  /* 0x00C2 */
+    float           unk_0xC4;         /* 0x00C4 */
+    void           *draw_drop_shadow; /* 0x00C8 */
+    float           unk_0xCC;         /* 0x00CC */
+    uint8_t         unk_0xD0;         /* 0x00D0 */
+    char            pad_0xD1_[0x0003];/* 0x00D1 */
+                                      /* struct end */
+
+    z64_xyzf_t      unk_0xD4;         /* 0x00D4 */
+    z64_xyzf_t      unk_0xE0;         /* 0x00E0 */
+    z64_xyzf_t      unk_0xEC;         /* 0x00EC */
+    float           unk_0xF8;         /* 0x00F8 */
+    float           unk_0xFC;         /* 0x00FC */
+    float           unk_0x100;        /* 0x0100 */
+    float           unk_0x104;        /* 0x0104 */
+    z64_xyzf_t      pos_4;            /* 0x0108 */
+    uint16_t        unk_10_;          /* 0x0114 */
+    uint16_t        text_id;          /* 0x0116 */
+    int16_t         frozen;           /* 0x0118 */
+    char            unk_11_[0x0003];  /* 0x011A */
+    uint8_t         active;           /* 0x011D */
+    char            unk_0x11E;        /* 0x011E */
+    uint8_t         tatl_enemy_text_id; /*0x011F */
+    z64_actor_t     *attached_a;        /* 0x0120 */
+    z64_actor_t     *attached_b;        /* 0x0124 */
+    z64_actor_t     *prev;              /* 0x0128 */
+    z64_actor_t     *next;              /* 0x012C */
+    void           *ctor;               /* 0x0130 */
+    void           *dtor;               /* 0x0134 */
+    void           *main_proc;          /* 0x0138 */
+    void           *draw_proc;          /* 0x013C */
+    void           *code_entry;         /* 0x0140 */
+                                        /* 0x0144 */
+};
+
 typedef struct {
     union {
         struct {
@@ -379,7 +495,7 @@ typedef struct {
     void            *frame_buffer;          // 0x2DC
     char            unk_0x2E0_[0x08];       // 0x2E0
     uint32_t        frame_cnt_2;            // 0x2E8
-};                                          // 0x2EC
+}z64_gfx_t;                                  // 0x2EC
 
 typedef struct {
     void            *gfx;                   // 0x00
@@ -399,9 +515,343 @@ typedef struct {
     int32_t         unk_0xA0;               // 0xA0
 } z64_ctxt_t;                               // 0xA4
 
+typedef struct 
+{
+    char            view_magic[4];          /* 0x0000 */
+    z64_gfx_t       *gfx;                  /* 0x0004 */
+    struct
+    {
+        uint32_t        top;                /* 0x0008 */
+        uint32_t        bottom;             /* 0x000C */
+        uint32_t        left;               /* 0x0010 */
+        uint32_t        right;              /* 0x0014 */
+    } screen;
+    float           camera_distance;        /* 0x0018 */
+    float           fog_distance;           /* 0x001C */
+    float           z_distance;             /* 0x0020 */
+    char            unk_0x24[0x004];        /* 0x0024 */
+    z64_xyzf_t      unk_0x28;               /* 0x0028 */
+    z64_xyzf_t      unk_0x34;
+    z64_xyzf_t      unk_0x40;
+    Vp              viewport_movemem;       /* 0x0050 */
+    Mtx             unk_mtx_0x60;
+    Mtx             unk_mtx_0xA0;
+    char            unk_0x00E0[0x40];       /* 0x00E0 */
+    Mtx            *unk_mtx_0x60_task;      /* 0x0120 */
+    Mtx            *unk_mtx_0xA0_task;      /* 0x0124 */
+    float           unk_0x128;
+    float           unk_0x12C;
+    float           unk_0x130;
+    float           unk_0x134;
+    float           unk_0x138;
+    float           unk_0x13C;
+    float           unk_0x140;
+    float           unk_0x144;
+    float           unk_0x148;
+    char            unk_0x14C[0x10];
+
+    uint16_t        perspnorm_scale;        /* 0x015C */
+    uint32_t        unk_0x160;
+    uint32_t        unk_0x164;
+    /* 0x0168 */
+} z64_view_t;
+
+typedef struct /* z2_camera_t */
+{
+    union
+    {
+        struct
+        {
+            z64_xyzf_t unk_0x00;
+            struct /* 0x24 */
+            {
+                float       unk_0x00;
+                float       unk_0x04;
+                int16_t     unk_0x08;
+                int16_t     unk_0x0A;
+                int16_t     unk_0x0C;
+                float       unk_0x10;
+            };
+
+        } t1;
+        struct
+        {
+            uint16_t unk_0x00;
+        } t2;
+        char    unk_0x00[0x50];
+    };
+    /* 0x0000 */
+
+    z64_xyzf_t      unk_0x50;
+    z64_xyzf_t      unk_0x5C;
+    z64_xyzf_t      unk_0x68;
+
+    char            unk_0x74[0x0C];
+
+    z64_xyzf_t      unk_0x80;
+    z64_ctxt_t     *game;                   /* 0x008C */
+    z64_actor_t     *focus;                  /* 0x0090 */
+    z64_xyzf_t      focus_pos;              /* 0x0094 */
+    uint32_t        unk_0xA0;
+    uint32_t        unk_0xA4;
+    uint32_t        unk_0xA8;
+    char            unk_0xAC[0xCC];
+    /* 0x0178 */
+} z64_camera_t;
+
+typedef struct /* z2_actor_ctxt_t */
+{
+    /* game_t 0x1CA0 */
+    uint8_t         unk_0x0000;             /* 0x0000 */
+    uint8_t         unk_0x0001;             /* 0x0001 */
+    uint8_t         unk_0x0002;             /* 0x0002 */
+    uint8_t         unk_0x0003;             /* 0x0003 */
+    int8_t          unk_0x0004;             /* 0x0004 */
+    uint8_t         unk_0x0005;             /* 0x0005 */
+    char            unk_0x0006[5];          /* 0x0006 */
+    int8_t          unk_0x000B;             /* 0x000B */
+    char            unk_0x000C[2];          /* 0x000C */
+    uint8_t         n_actors_loaded;        /* 0x000E */
+    uint8_t         unk_0x000F;             /* 0x000F */
+    struct
+    {
+        int32_t     count;                  /* 0x0000 */
+        z2_actor_t *first;                  /* 0x0004 */
+        int32_t     unk;                    /* 0x0008 */
+                                            /* 0x000C */
+
+    }               actor_list[16];         /* 0x0010 */
+    char            unk_0x00D0[0x50];       /* 0x00D0 */
+    struct
+    {
+        MtxF            unk_0x0120;             /* 0x0120 */
+        float           unk_0x0160;             /* 0x0160 */
+        float           unk_0x0164;             /* 0x0164 */
+        int16_t         unk_0x0168;             /* 0x0168 */
+        uint8_t         unk_0x016A;             /* 0x016A */
+        uint8_t         unk_0x016B;             /* 0x016B */
+        int8_t          unk_0x016C;             /* 0x016C */
+        struct
+        {
+            float           unk_0x00;
+            float           unk_0x04;
+            float           unk_0x08;
+            float           unk_0x0C;
+            int32_t         unk_0x10;
+            /* 0x0014 */
+
+        }               unk_0x0170[3];      /* 0x0170 */
+        int32_t         unk_0x01AC;         /* 0x01AC */
+        int32_t         unk_0x01B0;         /* 0x01B0 */
+        int32_t         unk_0x01B4;         /* 0x01B4 */
+    };
+    int32_t         switch_1;           /* 0x01B8 */ //perm
+    int32_t         switch_2;           /* 0x01BC */ //perm
+    int32_t         switch_3;           /* 0x01C0 */
+    int32_t         switch_4;           /* 0x01C4 */
+    int32_t         chest;              /* 0x01C8 */
+    int32_t         clear;              /* 0x01CC */
+    int32_t         unk_0x01D0;         /* 0x01D0 */
+    int32_t         collectible_1;      /* 0x01D4 */ //Perm
+    int32_t         collectible_2;      /* 0x01D8 */
+    int32_t         collectible_3;      /* 0x01DC */
+    int32_t         collectible_4;      /* 0x01E0 */
+    struct
+    {
+        char        unk_0x00[0x0A];
+        int8_t      unk_0x0A;
+        int8_t      unk_0x0B;
+        int16_t     unk_0x0C;
+        int16_t     unk_0x0E;
+    }   unk_0x01E4;                     /* 0x01E4 */
+    int8_t          unk_0x01F4;
+    uint8_t         unk_0x01F5;
+    float           unk_0x01F8;
+    char            unk_0x01FC[0x54];
+
+    int32_t         unk_0x0250;
+    char            unk_0x0254[0x14];
+    uint8_t         unk_0x0268;         /* 0x0268 */
+    char            unk_0x0269[3];
+    char            unk_0x026C[0x18];   /* 0x026C */
+                                        /* 0x0284 */
+
+} z64_actor_ctxt_t;
+
+typedef struct
+{
+    int16_t           poly_idx;                 /* 0x0000 */
+    uint16_t          list_next;                /* 0x0002 */
+                                                /* 0x0004 */
+} z64_col_list_t;
+
+typedef struct
+{
+    /* index of z64_col_type in scene file */
+    uint16_t    type;
+    /* vertex indices, a and b are bitmasked for some reason */
+    struct
+    {
+        uint16_t  unk_00_ : 3;
+        uint16_t  va : 13;
+    };
+    struct
+    {
+        uint16_t  unk_01_ : 3;
+        uint16_t  vb : 13;
+    };
+    uint16_t    vc;
+    /* normal vector */
+    z64_xyz_t   norm;
+    /* plane distance from origin */
+    int16_t     dist;
+} z64_col_poly_t;
+
+typedef struct
+{
+    struct
+    {
+        uint32_t  unk_00_ : 1;
+        uint32_t  drop : 1; /* link drops one unit into the floor */
+        uint32_t  special : 4;
+        uint32_t  interaction : 5;
+        uint32_t  unk_01_ : 3;
+        uint32_t  behavior : 5;
+        uint32_t  exit : 5;
+        uint32_t  camera : 8;
+    } flags_1;                    /* 0x0000 */
+    struct
+    {
+        uint32_t  pad_00_ : 4;
+        uint32_t  wall_damage : 1;
+        uint32_t  unk_00_ : 6;
+        uint32_t  unk_01_ : 3;
+        uint32_t  hookshot : 1;
+        uint32_t  echo : 6;
+        uint32_t  unk_02_ : 5;
+        uint32_t  terrain : 2;
+        uint32_t  material : 4;
+    } flags_2;                    /* 0x0004 */
+} z64_col_type_t;
+
+typedef struct
+{
+    z64_xyz_t     pos;
+    int16_t       width;
+    int16_t       depth;
+    struct
+    {
+        uint32_t    unk_00_ : 12;
+        uint32_t    active : 1;
+        uint32_t    group : 6; /* ? */
+        uint32_t    unk_01_ : 5;
+        uint32_t    camera : 8;
+    } flags;
+} z64_col_water_t;
+
+typedef struct
+{
+    z64_xyz_t         min;
+    z64_xyz_t         max;
+    uint16_t          n_vtx;
+    z64_xyz_t        *vtx;
+    uint16_t          n_poly;
+    z64_col_poly_t   *poly;
+    z64_col_type_t   *type;
+    z64_camera_t     *camera;
+    uint16_t          n_water;
+    z64_col_water_t  *water;
+} z64_col_hdr_t;
+
+typedef struct
+{
+    z64_actor_t       *actor;                    /* 0x0000 */
+    z64_col_hdr_t    *col_hdr;                  /* 0x0004 */
+    uint16_t          unk_0x08;                 /* 0x0008 */
+    uint16_t          unk_0x0A;                 /* 0x000A */
+    uint16_t          unk_0x0C;                 /* 0x000C */
+    int16_t           unk_0x0E;                 /* 0x000E */ //number of polys?
+    int16_t           unk_0x10;                 /* 0x0010 */
+    z64_xyzf_t        scale_1;                  /* 0x0014 */
+    z64_rot_t         rot_1;                    /* 0x0020 */
+    z64_xyzf_t        pos_1;                    /* 0x0028 */
+    z64_xyzf_t        scale_2;                  /* 0x0034 */
+    z64_rot_t         rot_2;                    /* 0x0040 */
+    z64_xyzf_t        pos_2;                    /* 0x0048 */
+    int16_t           unk_0x54;                 /* 0x0054 */
+    int16_t           unk_0x56;                 /* 0x0056 */
+    int16_t           unk_0x58;                 /* 0x0058 */
+    int16_t           unk_0x5A;                 /* 0x005A */
+    char              unk_0x5C[0x8];            /* 0x005C */
+                                                /* 0x0064 */
+} z64_col_chk_actor_t;
+
+typedef struct
+{
+    uint16_t          floor_list_idx;           /* 0x0000 */
+    uint16_t          wall_list_idx;            /* 0x0002 */
+    uint16_t          ceil_list_idx;            /* 0x0004 */
+                                                /* 0x0006 */
+} z64_col_lut_t;
+
+typedef struct /* z64_col_ctxt_t */
+{
+    /* static collision stuff */
+    z64_col_hdr_t      *col_hdr;                  /* 0x0000 */
+    z64_xyzf_t          bbox_min;                 /* 0x0004 */
+    z64_xyzf_t          bbox_max;                 /* 0x0010 */
+    int32_t             n_sect_x;                 /* 0x001C */
+    int32_t             n_sect_y;                 /* 0x0020 */
+    int32_t             n_sect_z;                 /* 0x0024 */
+    z64_xyzf_t          sect_size;                /* 0x0028 */
+    z64_xyzf_t          sect_inv;                 /* 0x0034 */
+    z64_col_lut_t      *stc_lut;                  /* 0x0040 */
+    uint16_t            stc_list_max;             /* 0x0044 */
+    uint16_t            stc_list_pos;             /* 0x0046 */
+    z64_col_list_t     *stc_list;                 /* 0x0048 */
+    uint8_t            *stc_check;                /* 0x004C */
+
+                                                  /* bg actor collision struct start */
+    int8_t              unk_0x0050;               /* 0x0050 */
+    z64_col_chk_actor_t  actors[50];               /* 0x0054 */
+    uint16_t            actor_loaded[50];         /* 0x13DC */
+                                                  /* dynamic collision stuff */
+    z64_col_poly_t     *dyn_poly;                 /* 0x1440 */
+    z64_xyz_t          *dyn_vtx;                  /* 0x1444 */
+    int32_t             unk_0x1448;               /* 0x1448 */
+    void               *unk_0x144C;               /* 0x144C */
+                                                  /* struct */
+    struct
+    {
+        z64_col_list_t   *list;                 /* 0x1450 */
+        int32_t           count;                /* 0x1454 */
+        int32_t           max;                  /* 0x1458 */
+    } dyn;
+    /* bg actor collision struct end */
+    uint32_t            dyn_list_max;             /* 0x145C */
+    uint32_t            dyn_poly_max;             /* 0x1460 */
+    uint32_t            dyn_vtx_max;              /* 0x1464 */
+    uint32_t            mem_size;                 /* 0x1468 */
+    uint32_t            unk_0x146C;               /* 0x146C */
+                                                  /* 0x1470 */
+} z64_col_ctxt_t;
+
 typedef struct {
-    z64_ctxt_t  common;                     // 0x00
-} z64_game_t;                               // 0xA4
+    z64_ctxt_t          common;                 // 0x0000
+    uint16_t            scene_index;            // 0x00A4 */
+    uint8_t             scene_draw_id;          // 0x00A6 */
+    char                unk_0x000A7[9];         // 0x00A7 */
+    void*               scene_addr;             // 0x00B0 */
+    char                unk_0x00B4[4];          // 0x00B4 */
+    z64_view_t          view_scene;             // 0x00B8 */
+    z64_camera_t        cameras[4];             // 0x0220 */
+    z64_camera_t       *active_cameras[4];      // 0x0800 */
+    int16_t             camera_cur;             // 0x0810 */
+    int16_t             camera_next;            // 0x0812 */
+    char                unk_0x814[0x1C];        // 0x0814 */
+    z64_col_ctxt_t      col_ctxt;               // 0x0830 */
+    z64_actor_ctxt_t    actor_ctxt;             // 0x1CA0 */
+} z64_game_t;                               // 
 
 extern z64_game_t z64_game;
 
