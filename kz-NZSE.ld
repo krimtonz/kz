@@ -148,6 +148,7 @@ SECTIONS
 }
 
 /* Symbols for NZSE */
-PROVIDE(game_update_start   = 0x80168F64);
 PROVIDE(z64_game            = 0x803E6B20);
 PROVIDE(z64_file            = 0x801EF670);
+PROVIDE(z64_link            = 0x803FFDB0);
+PROVIDE(z64_segment         = 0x801F8180);

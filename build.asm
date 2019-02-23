@@ -5,7 +5,7 @@
 .incbin "base.z64"
 
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_SIZE, 0x7D500
+.definelabel G_PAYLOAD_SIZE, 0xAF000
 .definelabel G_PAYLOAD_ADDR, (0x80780000 - G_PAYLOAD_SIZE)
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
@@ -51,14 +51,15 @@ nop
 nop
 
 ; ==================================================================================================
-; Game Class Frame Start Hook ; Probably want to look for a better hook here.  
+; Game Class Frame Start Hook 
 ; ==================================================================================================
 
-; 80168F64
-.org 0x8016A8A8
-lui     t4, hi(G_KZ_ADDR)
-.org 0x8016A8B0
-addiu   t4, lo(G_KZ_ADDR)
+; 801737A0
+; Replaces jalr ra, t9
+;          nop
+.org 0x801737A0
+jal     G_KZ_ADDR
+or      a1, r0, t9
 
 ; ==================================================================================================
 ; New code region
