@@ -1091,9 +1091,16 @@ struct kz_scene_category scene_categories[] = {
     },
     {
         "bosses",
-        4, (uint8_t[]){
-            23, 58, 85, 45,
+        6, (uint8_t[]){
+            23, 58, 85, 45, 01,
+            76,
         },
+    },
+    {
+        "trials",
+        4, (uint8_t[]){
+            34, 53, 61, 92,
+        }
     },
     {
         "overworld",
@@ -1111,4 +1118,26 @@ struct kz_scene_category scene_categories[] = {
             67, 62, 41, 42, 
         },
     },
+    {
+        "shops",
+        7, (uint8_t[]){
+            2, 7, 13, 43, 48, 
+            51, 94
+        }
+    },
+    {
+        "minigames",
+        11, (uint8_t[]){
+            4, 22, 24, 28, 38, 
+            55, 56, 74, 86, 71,
+            72, 
+        }
+    },
+    {
+        "houses",
+        10, (uint8_t[]){
+            0, 3, 39, 40, 50,
+            69, 75, 77, 87, 36
+        }
+    }
 };

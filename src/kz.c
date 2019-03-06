@@ -19,6 +19,8 @@ kz_ctxt_t kz = {
     .ready = 0, 
 };
 
+extern void *end;
+
 static void kz_main(void) {
     gfx_begin();
 
@@ -125,13 +127,11 @@ static void kz_main(void) {
     menu_navigate(kz_menu,navdir);
     menu_draw(kz_menu);
 
-    gfx_printf_color(170,200,GPACK_RGBA8888(0x00,0xFF,0x00,0xFF),"%8x",sbrk(0));
-
     gfx_finish();
 }
 
 void test(struct menu_item *item){
-    z64_game.entrance_index = (uint16_t)item->data;
+    z64_game.entrance_index = (uint16_t)((uint32_t)item->data);
     z64_game.scene_load_flag = 0x14;
 }
 
@@ -178,12 +178,12 @@ void init() {
                 menu_init(entrance_menu);
                 menu_add_button(entrance_menu,"return",menu_return,NULL);
                 for(int k=0;k<scene.entrance_cnt;k++){
-                    menu_add_button(entrance_menu,scene.entrances[k],test,((scene.scene & 0xFF) << 8) | ((k & 0xFF) <<4));
+                    menu_add_button(entrance_menu,scene.entrances[k],test,(void*)(((scene.scene & 0xFF) << 8) | ((k & 0xFF) <<4)));
                 }
                 menu_add_submenu(cat_menu,entrance_menu,scene.scene_name);
                 entrance_menu->selected_item = entrance_menu->items.first;
             }else{
-                menu_add_button(cat_menu,scene.scene_name,test,((scene.scene & 0xFF) << 8) | ((0 & 0xFF) << 4));
+                menu_add_button(cat_menu,scene.scene_name,test,(void*)(((scene.scene & 0xFF) << 8) | ((0 & 0xFF) << 4)));
             }
         }
         menu_add_submenu(&warps,cat_menu,cat.name);

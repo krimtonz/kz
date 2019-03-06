@@ -16,6 +16,6 @@ struct kz_scene {
 };
 
 extern struct kz_scene          scenes[];
-extern struct kz_scene_category scene_categories[4];
+extern struct kz_scene_category scene_categories[8];
 
 #endif
