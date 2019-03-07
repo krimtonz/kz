@@ -159,7 +159,7 @@ struct kz_scene scenes[] = {
             "telescope",
             "oob hookshot room",
             "balcony",
-            "uuper hookshot room",
+            "upper hookshot room",
             "unknown (crash)",
         },
     },
@@ -1009,9 +1009,9 @@ struct kz_scene scenes[] = {
         210, 13,
         "east clock town",
         (const char*[]){
-            "termina field (freeze)",
-            "south clock town (freeze)",
-            "observatory (freeze)",
+            "termina field",
+            "south clock town",
+            "observatory",
             "south clock town",
             "treasure chest shop",
             "north clock town",
@@ -1085,8 +1085,9 @@ struct kz_scene scenes[] = {
 struct kz_scene_category scene_categories[] = {
     {
         "dungeons",
-        5, (uint8_t[]){
+        6, (uint8_t[]){
             19, 25, 63, 14, 16,
+            21, 
         },
     },
     {
@@ -1104,18 +1105,20 @@ struct kz_scene_category scene_categories[] = {
     },
     {
         "overworld",
-        15, (uint8_t[]){
+        19, (uint8_t[]){
             37, 54, 06, 59, 60,
             20, 83, 84, 81, 82,
             46, 47, 73, 11, 26,
+            29, 49, 78, 79, 
         },
     },
     {
         "towns",
-        14, (uint8_t[]){
+        17, (uint8_t[]){
             101, 100, 98, 99, 102, 
             44, 35, 52, 70, 80, 
-            67, 62, 41, 42, 
+            67, 62, 41, 42, 12,
+            27, 57,
         },
     },
     {
@@ -1123,21 +1126,37 @@ struct kz_scene_category scene_categories[] = {
         7, (uint8_t[]){
             2, 7, 13, 43, 48, 
             51, 94
-        }
+        },
     },
     {
         "minigames",
         11, (uint8_t[]){
             4, 22, 24, 28, 38, 
             55, 56, 74, 86, 71,
-            72, 
-        }
+            72, 15,
+        },
     },
     {
         "houses",
-        10, (uint8_t[]){
+        12, (uint8_t[]){
             0, 3, 39, 40, 50,
-            69, 75, 77, 87, 36
-        }
+            69, 75, 77, 87, 36,
+            33, 66, 
+        },
+    },
+    {
+        "misc",
+        18, (uint8_t[]){
+            5, 9, 17, 18, 30,
+            31, 32, 64, 65, 68,
+            88, 89, 90, 91, 93,
+            95, 96, 97,
+        },
+    },
+    {
+        "beta",
+        2, (uint8_t[]){
+            8, 10,
+        },
     }
 };
