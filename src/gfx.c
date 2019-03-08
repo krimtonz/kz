@@ -7,13 +7,8 @@
 
 #define     GFX_SIZE 0x7500
 
-/*static Gfx *gfx_disp;
-static Gfx *gfx_disp_w;
-static Gfx *gfx_disp_p;
-static Gfx *gfx_disp_d;*/
-
-static z64_disp_buf_t gfx_disp;
-static z64_disp_buf_t gfx_disp_work;
+static z2_disp_buf_t gfx_disp;
+static z2_disp_buf_t gfx_disp_work;
 
 extern char _raw_font[];
 
@@ -78,21 +73,21 @@ void gfx_printf_va_color(uint16_t left, uint16_t top, uint32_t color, const char
     gfx_printchars(kfont, left, top, color, buf, l);
 }
 
-void gfx_disp_buf_init(z64_disp_buf_t *db, size_t size){
+void gfx_disp_buf_init(z2_disp_buf_t *db, size_t size){
     db->size = size;
     db->buf = malloc(size);
     db->p = db->buf;
     db->d = db->buf + (size + sizeof(*(db->buf)) - 1) / sizeof(db->buf);
 }
 
-void gfx_disp_buf_copy(z64_disp_buf_t *src, z64_disp_buf_t *dst){
+void gfx_disp_buf_copy(z2_disp_buf_t *src, z2_disp_buf_t *dst){
     dst->buf = src->buf;
     dst->size = src->size;
     dst->p = dst->buf;
     dst->d = dst->buf + (dst->size + sizeof(*(dst->buf)) - 1) / sizeof(dst->buf);
 }
 
-void gfx_disp_buf_destroy(z64_disp_buf_t *db){
+void gfx_disp_buf_destroy(z2_disp_buf_t *db){
     if(db->buf){
         free(db->buf);
         db->buf = NULL;
@@ -102,7 +97,7 @@ void gfx_disp_buf_destroy(z64_disp_buf_t *db){
     db->d = NULL;
 }
 
-void gfx_disp_buf_reset(z64_disp_buf_t *db, size_t newsize){
+void gfx_disp_buf_reset(z2_disp_buf_t *db, size_t newsize){
     if(db->buf==NULL){
         gfx_disp_buf_init(db,newsize);
         return;
@@ -140,8 +135,8 @@ void gfx_begin(){
 
 void gfx_finish(){
     gSPEndDisplayList(gfx_disp.p++);
-    gSPDisplayList(z64_game.common.gfx->overlay.p++, gfx_disp.buf);
-    z64_disp_buf_t disp_w;
+    gSPDisplayList(z2_game.common.gfx->overlay.p++, gfx_disp.buf);
+    z2_disp_buf_t disp_w;
     gfx_disp_buf_copy(&gfx_disp_work, &disp_w);
     gfx_disp_buf_copy(&gfx_disp,&gfx_disp_work);
     gfx_disp_buf_copy(&disp_w, &gfx_disp);
@@ -170,12 +165,12 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
         gfx_load_tile(font->texture,i);
         int char_x = 0;
         int char_y = 0;
-        for(int j=0;j<charcnt;j++, char_x += font->c_width + 2){
+        for(int j=0;j<charcnt;j++, char_x += font->c_width){
             char c = chars[j];
             if(c<33) continue;
             c-=33;
             if(c<tile_start || c>=tile_end) continue;
-            c-=tile_start;
+            c-=tile_start; 
             gDPSetPrimColor(gfx_disp.p++, 0, 0, 0x00,0x00,0x00, 0xFF);
             gSPScisTextureRectangle(gfx_disp.p++,
                          qs102(x + char_x + 1 ),

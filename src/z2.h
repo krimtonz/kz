@@ -12,22 +12,22 @@ typedef struct
     int16_t x;
     int16_t y;
     int16_t z;
-} z64_xyz_t;
+} z2_xyz_t;
 
 typedef struct
 {
     float x;
     float y;
     float z;
-} z64_xyzf_t;
+} z2_xyzf_t;
 
-typedef uint16_t z64_angle_t;
+typedef uint16_t z2_angle_t;
 typedef struct
 {
-    z64_angle_t x;
-    z64_angle_t y;
-    z64_angle_t z;
-} z64_rot_t;
+    z2_angle_t  x;
+    z2_angle_t  y;
+    z2_angle_t  z;
+} z2_rot_t;
 
 typedef enum {
     Z64_ITEM_NULL = -1,
@@ -128,7 +128,7 @@ typedef enum {
     Z64_ITEM_GYORGS_REMAINS,
     Z64_ITEM_TWINMOLDS_REMAINS,
     Z64_ITEM_BOMBERS_NOTEBOOK = 0x6D
-} z64_item_t;
+} z2_item_t;
 
 typedef enum {
     Z64_SLOT_OCARINA,
@@ -155,7 +155,7 @@ typedef enum {
     Z64_SLOT_BOTTLE_4,
     Z64_SLOT_BOTTLE_5,
     Z64_SLOT_BOTTLE_6
-} z64_item_slot_t;
+} z2_item_slot_t;
 
 typedef enum {
     Z64_SLOT_POSTMAN,
@@ -182,7 +182,7 @@ typedef enum {
     Z64_SLOT_CAPTAIN,
     Z64_SLOT_GIANT,
     Z64_SLOT_FIERCE_DEITY
-} z64_mask_slot_t;
+} z2_mask_slot_t;
 
 typedef struct {
     union {
@@ -334,11 +334,11 @@ typedef struct {
     char            unk_0x0E7A_[0x2E26];            /* 0x0E7A */
 
     int32_t         file_index;                     /* 0x3CA0 */
-} z64_file_t;
+} z2_file_t;                                        /* 0x3Ca4 */
 
 typedef struct
 {
-    /* index of z64_col_type in scene file */
+    /* index of z2_col_type in scene file */
     uint16_t    type;
     /* vertex indices, a and b are bitmasked for some reason */
     struct
@@ -353,46 +353,46 @@ typedef struct
     };
     uint16_t    vc;
     /* normal vector */
-    z64_xyz_t   norm;
+    z2_xyz_t    norm;
     /* plane distance from origin */
     int16_t     dist;
-} z64_col_poly_t;
+} z2_col_poly_t;
 
-typedef struct z64_actor_s z64_actor_t;
-struct z64_actor_s
+typedef struct z2_actor_s z2_actor_t;
+struct z2_actor_s
 {
     int16_t         id;                         /* 0x0000 */
     uint8_t         type;                       /* 0x0002 */
     int8_t          room;                       /* 0x0003 */
     uint32_t        flags;                      /* 0x0004 */
-    z64_xyzf_t      pos_1;                      /* 0x0008 */
-    z64_rot_t       rot_init;                   /* 0x0014 */
+    z2_xyzf_t       pos_1;                      /* 0x0008 */
+    z2_rot_t        rot_init;                   /* 0x0014 */
     char            unk_01_[0x0002];            /* 0x001A */
     uint16_t        variable;                   /* 0x001C */
     uint8_t         alloc_index;                /* 0x001E */
     char            unk_02_;                    /* 0x001F */
     uint16_t        sound_effect;               /* 0x0020 */
     char            unk_03_[0x0002];            /* 0x0022 */
-    z64_xyzf_t      pos_2;                      /* 0x0024 */
-    z64_rot_t       rot_dir;                    /* 0x0030 */
+    z2_xyzf_t       pos_2;                      /* 0x0024 */
+    z2_rot_t        rot_dir;                    /* 0x0030 */
     char            unk_0x36[0x0002];           /* 0x0036 */
     int8_t          unk_0x38;                   /* 0x0038 */
     uint8_t         unk_0x39;                   /* 0x0039 */
     char            unk_0x3A[0x002];            /* 0x003A */
-    z64_xyzf_t      pos_3;                      /* 0x003C */
-    z64_rot_t       rot_1;                      /* 0x0048 */
+    z2_xyzf_t       pos_3;                      /* 0x003C */
+    z2_rot_t        rot_1;                      /* 0x0048 */
     char            unk_06_[0x0002];            /* 0x004E */ // padding?
     uint32_t        unk_0x50;                   /* 0x0050 */
     float           unk_0x54;                   /* 0x0054 */
-    z64_xyzf_t      scale;                      /* 0x0058 */
-    z64_xyzf_t      vel_1;                      /* 0x0064 */
+    z2_xyzf_t       scale;                      /* 0x0058 */
+    z2_xyzf_t       vel_1;                      /* 0x0064 */
     float           xz_speed;                   /* 0x0070 */
     float           gravity;                    /* 0x0074 */
     float           min_vel_y;                  /* 0x0078 */
 
                                                 /* struct bgcheck common */
-    z64_col_poly_t *wall_poly;                  /* 0x007C */
-    z64_col_poly_t *floor_poly;                 /* 0x0080 */
+    z2_col_poly_t  *wall_poly;                  /* 0x007C */
+    z2_col_poly_t  *floor_poly;                 /* 0x0080 */
     uint8_t         wall_poly_source;           /* 0x0084 */
     uint8_t         floor_poly_source;          /* 0x0085 */
     int16_t         wall_rot;                   /* 0x0086 */
@@ -406,7 +406,7 @@ struct z64_actor_s
 
                                                 /* struct collision_check common */
     void           *damage_table;               /* 0x00A0 */
-    z64_xyzf_t      vel_2;                      /* 0x00A4 */
+    z2_xyzf_t       vel_2;                      /* 0x00A4 */
     char            unk_0C_[0x0006];            /* 0x00B0 */
     uint8_t         mass;                       /* 0x00B6 */
     uint8_t         health;                     /* 0x00B7 */
@@ -416,7 +416,7 @@ struct z64_actor_s
     uint8_t         unk_0xBB;                   /* 0x00BB */
 
                                                 /* struct start */
-    z64_rot_t       rot_2;                      /* 0x00BC */
+    z2_rot_t        rot_2;                      /* 0x00BC */
     char            unk_0F_[0x0002];            /* 0x00C2 */
     float           unk_0xC4;                   /* 0x00C4 */
     void           *draw_drop_shadow;           /* 0x00C8 */
@@ -425,14 +425,14 @@ struct z64_actor_s
     char            pad_0xD1_[0x0003];          /* 0x00D1 */
                                                 /* struct end */
 
-    z64_xyzf_t      unk_0xD4;                   /* 0x00D4 */
-    z64_xyzf_t      unk_0xE0;                   /* 0x00E0 */
-    z64_xyzf_t      unk_0xEC;                   /* 0x00EC */
+    z2_xyzf_t       unk_0xD4;                   /* 0x00D4 */
+    z2_xyzf_t       unk_0xE0;                   /* 0x00E0 */
+    z2_xyzf_t       unk_0xEC;                   /* 0x00EC */
     float           unk_0xF8;                   /* 0x00F8 */
     float           unk_0xFC;                   /* 0x00FC */
     float           unk_0x100;                  /* 0x0100 */
     float           unk_0x104;                  /* 0x0104 */
-    z64_xyzf_t      pos_4;                      /* 0x0108 */
+    z2_xyzf_t       pos_4;                      /* 0x0108 */
     uint16_t        unk_10_;                    /* 0x0114 */
     uint16_t        text_id;                    /* 0x0116 */
     int16_t         frozen;                     /* 0x0118 */
@@ -440,17 +440,16 @@ struct z64_actor_s
     uint8_t         active;                     /* 0x011D */
     char            unk_0x11E;                  /* 0x011E */
     uint8_t         tatl_enemy_text_id;         /* 0x011F */
-    z64_actor_t     *attached_a;                /* 0x0120 */
-    z64_actor_t     *attached_b;                /* 0x0124 */
-    z64_actor_t     *prev;                      /* 0x0128 */
-    z64_actor_t     *next;                      /* 0x012C */
+    z2_actor_t     *attached_a;                 /* 0x0120 */
+    z2_actor_t     *attached_b;                 /* 0x0124 */
+    z2_actor_t     *prev;                       /* 0x0128 */
+    z2_actor_t     *next;                       /* 0x012C */
     void           *ctor;                       /* 0x0130 */
     void           *dtor;                       /* 0x0134 */
     void           *main_proc;                  /* 0x0138 */
     void           *draw_proc;                  /* 0x013C */
     void           *code_entry;                 /* 0x0140 */
-                                                /* 0x0144 */
-};
+};                                              /* 0x0144 */
 
 typedef struct {
     union {
@@ -475,12 +474,12 @@ typedef struct {
     };
     int8_t              x;                  /* 0x0002 */
     int8_t              y;                  /* 0x0003 */
-} z64_controller_t;                         /* 0x0004 */
+} z2_controller_t;                          /* 0x0004 */
 
 typedef struct {
-    z64_controller_t    raw;                /* 0x0000 */
+    z2_controller_t     raw;                /* 0x0000 */
     uint16_t            status;             /* 0x0004 */
-    z64_controller_t    raw_prev;           /* 0x0006 */
+    z2_controller_t     raw_prev;           /* 0x0006 */
     uint16_t            status_prev;        /* 0x000A */
     uint16_t            pad_pressed;        /* 0x000C */
     int8_t              x_diff;             /* 0x000E */
@@ -490,14 +489,14 @@ typedef struct {
     int8_t              adjusted_x;         /* 0x0014 */
     int8_t              adjusted_y;         /* 0x0015 */
     char                unk_0x16[0x02];     /* 0x0016 */
-} z64_input_t;                              /* 0x0018 */
+} z2_input_t;                               /* 0x0018 */
 
 typedef struct {
     uint32_t    size;   /* 0x00 */
     Gfx         *buf;   /* 0x04 */
     Gfx         *p;     /* 0x08 */
     Gfx         *d;     /* 0x0C */
-} z64_disp_buf_t;       /* 0x10 */
+} z2_disp_buf_t;        /* 0x10 */
 
 typedef struct {
     Gfx             *poly_opa_d_start;      /* 0x0000 */
@@ -512,24 +511,24 @@ typedef struct {
     OSScTask        task;                   /* 0x0078 */
     char            unk_0xD0_[0xD0];        /* 0x00D0 */
     Gfx             *work_d_start;          /* 0x01A0 */
-    z64_disp_buf_t  work;                   /* 0x01A4 */
+    z2_disp_buf_t   work;                   /* 0x01A4 */
     char            unk_0x1C4_[0xE4];       /* 0x01B4 */
-    z64_disp_buf_t  overlay;                /* 0x0298 */
-    z64_disp_buf_t  poly_opa;               /* 0x02A8 */
-    z64_disp_buf_t  poly_xlu;               /* 0x02B8 */
+    z2_disp_buf_t   overlay;                /* 0x0298 */
+    z2_disp_buf_t   poly_opa;               /* 0x02A8 */
+    z2_disp_buf_t   poly_xlu;               /* 0x02B8 */
     uint32_t        frame_cnt_1;            /* 0x02C8 */
     void            *frame_buffer;          /* 0x02CC */
     char            unk_0x2E0_[0x08];       /* 0x02D0 */
     uint32_t        frame_cnt_2;            /* 0x02D8 */
-}z64_gfx_t;                                 /* 0x02DC */
+} z2_gfx_t;                                 /* 0x02DC */
 
 typedef struct {
-    z64_gfx_t       *gfx;                   /* 0x0000 */
+    z2_gfx_t        *gfx;                   /* 0x0000 */
     void            *gamestate_update;      /* 0x0004 */
     void            *gamestate_dtor;        /* 0x0008 */
     void            *gamestate_ctor;        /* 0x000C */
     void            *ctxt_size;             /* 0x0010 */
-    z64_input_t     input[4];               /* 0x0014 */
+    z2_input_t      input[4];               /* 0x0014 */
     uint32_t        gamestate_heap_size;    /* 0x0074 */
     void            *gamestate_heap_ptr;    /* 0x0078 */
     void            *heap_append_start;     /* 0x007C */
@@ -539,12 +538,12 @@ typedef struct {
     int32_t         execute_state;          /* 0x0098 */
     int32_t         gamestate_frames;       /* 0x009C */
     int32_t         unk_0xA0;               /* 0x00A0 */
-} z64_ctxt_t;                               /* 0x00A4 */
+} z2_ctxt_t;                                /* 0x00A4 */
 
 typedef struct 
 {
     char            view_magic[4];          /* 0x0000 */
-    z64_gfx_t       *gfx;                   /* 0x0004 */
+    z2_gfx_t        *gfx;                   /* 0x0004 */
     struct
     {
         uint32_t        top;                /* 0x0008 */
@@ -556,9 +555,9 @@ typedef struct
     float           fog_distance;           /* 0x001C */
     float           z_distance;             /* 0x0020 */
     char            unk_0x24[0x004];        /* 0x0024 */
-    z64_xyzf_t      unk_0x28;               /* 0x0028 */
-    z64_xyzf_t      unk_0x34;
-    z64_xyzf_t      unk_0x40;
+    z2_xyzf_t       unk_0x28;               /* 0x0028 */
+    z2_xyzf_t       unk_0x34;
+    z2_xyzf_t       unk_0x40;
     Vp              viewport_movemem;       /* 0x0050 */
     Mtx             unk_mtx_0x60;
     Mtx             unk_mtx_0xA0;
@@ -570,7 +569,7 @@ typedef struct
     uint16_t        perspnorm_scale;        /* 0x015C */
     uint32_t        unk_0x160;              /* 0x0160 */
     uint32_t        unk_0x164;              /* 0x0168 */
-} z64_view_t;                               /* 0x016C */
+} z2_view_t;                                /* 0x016C */
 
 typedef struct /* z2_camera_t */
 {
@@ -578,7 +577,7 @@ typedef struct /* z2_camera_t */
     {
         struct
         {
-            z64_xyzf_t unk_0x00;            /* 0x0000 */
+            z2_xyzf_t  unk_0x00;            /* 0x0000 */
             struct /* 0x24 */
             {
                 float       unk_1_0x00;
@@ -598,21 +597,21 @@ typedef struct /* z2_camera_t */
     };
     /* 0x0000 */
 
-    z64_xyzf_t      unk_0x50;               /* 0x0050 */
-    z64_xyzf_t      unk_0x5C;               /* 0x005C */
-    z64_xyzf_t      unk_0x68;               /* 0x0068 */
+    z2_xyzf_t       unk_0x50;               /* 0x0050 */
+    z2_xyzf_t       unk_0x5C;               /* 0x005C */
+    z2_xyzf_t       unk_0x68;               /* 0x0068 */
 
     char            unk_0x74[0x0C];         /* 0x0074 */
 
-    z64_xyzf_t      unk_0x80;               /* 0x0080 */
-    z64_ctxt_t     *game;                   /* 0x008C */
-    z64_actor_t     *focus;                 /* 0x0090 */
-    z64_xyzf_t      focus_pos;              /* 0x0094 */
+    z2_xyzf_t       unk_0x80;               /* 0x0080 */
+    z2_ctxt_t      *game;                   /* 0x008C */
+    z2_actor_t      *focus;                 /* 0x0090 */
+    z2_xyzf_t       focus_pos;              /* 0x0094 */
     uint32_t        unk_0xA0;               /* 0x00A0 */
     uint32_t        unk_0xA4;               /* 0x00A4 */
     uint32_t        unk_0xA8;               /* 0x00A8 */
     char            unk_0xAC[0xCC];         /* 0x00AC */
-} z64_camera_t;                             /* 0x0178 */
+} z2_camera_t;                              /* 0x0178 */
 
 typedef struct /* z2_actor_ctxt_t */
 {
@@ -631,7 +630,7 @@ typedef struct /* z2_actor_ctxt_t */
     struct
     {
         int32_t     count;                  /* 0x0000 */
-        z64_actor_t *first;                 /* 0x0004 */
+        z2_actor_t  *first;                 /* 0x0004 */
         int32_t     unk;                    /* 0x0008 */
                                             /* 0x000C */
 
@@ -690,14 +689,13 @@ typedef struct /* z2_actor_ctxt_t */
     uint8_t         unk_0x0268;             /* 0x0268 */
     char            unk_0x0269[3];
     char            unk_0x026C[0x18];       /* 0x026C */
-
-} z64_actor_ctxt_t;                         /* 0x0284 */
+} z2_actor_ctxt_t;                          /* 0x0284 */
 
 typedef struct
 {
     int16_t           poly_idx;             /* 0x0000 */
     uint16_t          list_next;            /* 0x0002 */
-} z64_col_list_t;                           /* 0x0004 */
+} z2_col_list_t;                            /* 0x0004 */
 
 typedef struct
 {
@@ -724,11 +722,11 @@ typedef struct
         uint32_t  terrain : 2;
         uint32_t  material : 4;
     } flags_2;                    /* 0x0004 */
-} z64_col_type_t;
+} z2_col_type_t;
 
 typedef struct
 {
-    z64_xyz_t     pos;
+    z2_xyz_t      pos;
     int16_t       width;
     int16_t       depth;
     struct
@@ -739,83 +737,81 @@ typedef struct
         uint32_t    unk_01_ : 5;
         uint32_t    camera : 8;
     } flags;
-} z64_col_water_t;
+} z2_col_water_t;
 
 typedef struct
 {
-    z64_xyz_t         min;                      /* 0x0000 */
-    z64_xyz_t         max;                      /* 0x0006 */
-    uint16_t          n_vtx;                    /* 0x000C */
-    z64_xyz_t        *vtx;                      /* 0x000E */
+    z2_xyz_t          min;
+    z2_xyz_t          max;
+    uint16_t          n_vtx;
+    z2_xyz_t         *vtx;
     uint16_t          n_poly;                   
-    z64_col_poly_t   *poly;
-    z64_col_type_t   *type;
-    z64_camera_t     *camera;
+    z2_col_poly_t    *poly;
+    z2_col_type_t    *type;
+    z2_camera_t      *camera;
     uint16_t          n_water;
-    z64_col_water_t  *water;
-} z64_col_hdr_t;
+    z2_col_water_t   *water;
+} z2_col_hdr_t;
 
 typedef struct
 {
-    z64_actor_t      *actor;                    /* 0x0000 */
-    z64_col_hdr_t    *col_hdr;                  /* 0x0004 */
+    z2_actor_t       *actor;                    /* 0x0000 */
+    z2_col_hdr_t     *col_hdr;                  /* 0x0004 */
     uint16_t          unk_0x08;                 /* 0x0008 */
     uint16_t          unk_0x0A;                 /* 0x000A */
     uint16_t          unk_0x0C;                 /* 0x000C */
     int16_t           unk_0x0E;                 /* 0x000E number of polys? */
     int16_t           unk_0x10;                 /* 0x0010 */
-    z64_xyzf_t        scale_1;                  /* 0x0014 */
-    z64_rot_t         rot_1;                    /* 0x0020 */
-    z64_xyzf_t        pos_1;                    /* 0x0028 */
-    z64_xyzf_t        scale_2;                  /* 0x0034 */
-    z64_rot_t         rot_2;                    /* 0x0040 */
-    z64_xyzf_t        pos_2;                    /* 0x0048 */
+    z2_xyzf_t         scale_1;                  /* 0x0014 */
+    z2_rot_t          rot_1;                    /* 0x0020 */
+    z2_xyzf_t         pos_1;                    /* 0x0028 */
+    z2_xyzf_t         scale_2;                  /* 0x0034 */
+    z2_rot_t          rot_2;                    /* 0x0040 */
+    z2_xyzf_t         pos_2;                    /* 0x0048 */
     int16_t           unk_0x54;                 /* 0x0054 */
     int16_t           unk_0x56;                 /* 0x0056 */
     int16_t           unk_0x58;                 /* 0x0058 */
     int16_t           unk_0x5A;                 /* 0x005A */
     char              unk_0x5C[0x8];            /* 0x005C */
-                                                /* 0x0064 */
-} z64_col_chk_actor_t;
+} z2_col_chk_actor_t;                           /* 0x0064 */
 
 typedef struct
 {
     uint16_t          floor_list_idx;           /* 0x0000 */
     uint16_t          wall_list_idx;            /* 0x0002 */
     uint16_t          ceil_list_idx;            /* 0x0004 */
-                                                /* 0x0006 */
-} z64_col_lut_t;
+} z2_col_lut_t;                                 /* 0x0006 */
 
-typedef struct /* z64_col_ctxt_t */
+typedef struct /* z2_col_ctxt_t */
 {
     /* static collision stuff */
-    z64_col_hdr_t      *col_hdr;                /* 0x0000 */
-    z64_xyzf_t          bbox_min;               /* 0x0004 */
-    z64_xyzf_t          bbox_max;               /* 0x0010 */
+    z2_col_hdr_t       *col_hdr;                /* 0x0000 */
+    z2_xyzf_t           bbox_min;               /* 0x0004 */
+    z2_xyzf_t           bbox_max;               /* 0x0010 */
     int32_t             n_sect_x;               /* 0x001C */
     int32_t             n_sect_y;               /* 0x0020 */
     int32_t             n_sect_z;               /* 0x0024 */
-    z64_xyzf_t          sect_size;              /* 0x0028 */
-    z64_xyzf_t          sect_inv;               /* 0x0034 */
-    z64_col_lut_t      *stc_lut;                /* 0x0040 */
+    z2_xyzf_t           sect_size;              /* 0x0028 */
+    z2_xyzf_t           sect_inv;               /* 0x0034 */
+    z2_col_lut_t       *stc_lut;                /* 0x0040 */
     uint16_t            stc_list_max;           /* 0x0044 */
     uint16_t            stc_list_pos;           /* 0x0046 */
-    z64_col_list_t     *stc_list;               /* 0x0048 */
+    z2_col_list_t      *stc_list;               /* 0x0048 */
     uint8_t            *stc_check;              /* 0x004C */
 
                                                 /* bg actor collision struct start */
     int8_t              unk_0x0050;             /* 0x0050 */
-    z64_col_chk_actor_t actors[50];             /* 0x0054 */
+    z2_col_chk_actor_t  actors[50];             /* 0x0054 */
     uint16_t            actor_loaded[50];       /* 0x13DC */
                                                 /* dynamic collision stuff */
-    z64_col_poly_t     *dyn_poly;               /* 0x1440 */
-    z64_xyz_t          *dyn_vtx;                /* 0x1444 */
+    z2_col_poly_t      *dyn_poly;               /* 0x1440 */
+    z2_xyz_t           *dyn_vtx;                /* 0x1444 */
     int32_t             unk_0x1448;             /* 0x1448 */
     void               *unk_0x144C;             /* 0x144C */
                                                 /* struct */
     struct
     {
-        z64_col_list_t   *list;                 /* 0x1450 */
+        z2_col_list_t    *list;                 /* 0x1450 */
         int32_t           count;                /* 0x1454 */
         int32_t           max;                  /* 0x1458 */
     } dyn;
@@ -825,42 +821,92 @@ typedef struct /* z64_col_ctxt_t */
     uint32_t            dyn_vtx_max;            /* 0x1464 */
     uint32_t            mem_size;               /* 0x1468 */
     uint32_t            unk_0x146C;             /* 0x146C */
-                                                /* 0x1470 */
-} z64_col_ctxt_t;
+} z2_col_ctxt_t;                                /* 0x1470 */
 
 typedef struct{
-    z64_view_t          if_view;                /* 0x0000 */
-    void               *parameter_static;       /* 0x016C */
-    void               *do_action_static;       /* 0x0170 */
-    void               *icon_item_static;       /* 0x0174 */
-    void               *minimap_texture;        /* 0x0178 */
-    void               *unk_0x17C;              /* 0x017C */
+    uint32_t            vrom_addr;              /* 0x0000 */
+    void               *dram;                   /* 0x0004 */
+    uint32_t            size;                   /* 0x0008 */
+    char               *filename;               /* 0x000C */
+    int32_t             line;                   /* 0x0010 */
+    char                unk_0x14[0x4];          /* 0x0014 */
+    OSMesgQueue        *notify_mq;              /* 0x0018 */
+    OSMesg              notify_msg;             /* 0x001C */
+} z2_loadfile_t;                                /* 0x0020 */
 
-} z64_interface_ctxt_t;
+typedef struct{
+    uint16_t            id;                     /* 0x0000 */
+    char                pad_0x02[0x02];         /* 0x0002 */
+    void               *data;                   /* 0x0004 */
+    z2_loadfile_t       loadfile;               /* 0x0008 */
+    OSMesgQueue         load_mq;                /* 0x0028 */
+    OSMesg              load_msg;               /* 0x0040 */
+} z2_obj_t;                                     /* 0x0044 */
+
+typedef struct{
+    void               *obj_space_start;        /* 0x0000 */
+    void               *obj_space_end;          /* 0x0004 */
+    uint8_t             obj_cnt;                /* 0x0008 */
+    uint8_t             spec_cnt;               /* 0x0009 */
+    uint8_t             keep_idx;               /* 0x000A */
+    uint8_t             skeep_idx;              /* 0x000B */ // Maybe?  keep & skeep both 0
+    z2_obj_t            obj[35];                /* 0x000C */
+} z2_obj_ctxt_t;                                /* 0x0958 */
+
+typedef struct{
+    uint8_t             idx;                    /* 0x0000 */
+    char                unk_0x01[0x03];         /* 0x0001 */
+    uint8_t             echo;                   /* 0x0004 */
+    uint8_t             show_invisible_actor;   /* 0x0005 */
+    char                pad_0x06[0x02];         /* 0x0006 */
+    void               *mesh_hdr;               /* 0x0008 */
+    void               *file;                   /* 0x000C */
+    char               *unk_0x10[0x04];         /* 0x0010 */
+} z2_room_t;                                    /* 0x0014 */
+
+typedef struct{
+    z2_room_t           rooms[2];               /* 0x0000 */
+    void               *room_space_start;       /* 0x0028 */
+    void               *room_space_end;         /* 0x002C */
+    uint8_t             load_slot;              /* 0x0030 */
+    uint8_t             load_active;            /* 0x0031 */
+    char                pad_0x32[0x02];         /* 0x0032 */
+    void               *load_addr;              /* 0x0034 */
+    z2_loadfile_t       loadfile;               /* 0x0038 */
+    OSMesgQueue         load_mq;                /* 0x0058 */
+    OSMesg              load_msg;               /* 0x0070 */
+    char                unk_0x0074[0x04];       /* 0x0074 */
+    uint8_t             transition_cnt;         /* 0x0078 */
+    char                pad_0x0079[0x03];       /* 0x0079 */
+    void               *transition_list;        /* 0x007C */
+} z2_room_ctxt_t;                               /* 0x0080 */
 
 typedef struct {
-    z64_ctxt_t          common;                 /* 0x00000 */
+    z2_ctxt_t           common;                 /* 0x00000 */
     uint16_t            scene_index;            /* 0x000A4 */
     uint8_t             scene_draw_id;          /* 0x000A6 */
     char                unk_0x000A7[9];         /* 0x000A7 */
     void               *scene_addr;             /* 0x000B0 */
     char                unk_0x00B4[4];          /* 0x000B4 */
-    z64_view_t          view_scene;             /* 0x000B8 */
-    z64_camera_t        cameras[4];             /* 0x00220 */
-    z64_camera_t       *active_cameras[4];      /* 0x00800 */
+    z2_view_t           view_scene;             /* 0x000B8 */
+    z2_camera_t         cameras[4];             /* 0x00220 */
+    z2_camera_t        *active_cameras[4];      /* 0x00800 */
     int16_t             camera_cur;             /* 0x00810 */
     int16_t             camera_next;            /* 0x00812 */
     char                unk_0x814[0x1C];        /* 0x00814 */
-    z64_col_ctxt_t      col_ctxt;               /* 0x00830 */
-    z64_actor_ctxt_t    actor_ctxt;             /* 0x01CA0 */
-    char                unk_0x1F24[0x16951];    /* 0x01F24 */
+    z2_col_ctxt_t       col_ctxt;               /* 0x00830 */
+    z2_actor_ctxt_t     actor_ctxt;             /* 0x01CA0 */
+    char                unk_0x1F24[0x15E64];    /* 0x01F24 */
+    z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */
+    z2_room_ctxt_t      room_ctx;               /* 0x186E0 */
+    char                unk_0x18760[0x115];     /* 0x18760 */
     uint8_t             scene_load_flag;        /* 0x18875 */
     char                unk_0x18876[0x04];      /* 0x18876 */
     uint16_t            entrance_index;         /* 0x18878 */
-} z64_game_t;                                   /* 0x1887A */
+} z2_game_t;                                    /* 0x1887A */
 
 typedef struct{
-    z64_actor_t         common;                 /* 0x0000 */
+    z2_actor_t          common;                 /* 0x0000 */
     char                unk_0x144[0x98C];       /* 0x0144 */
     float               linear_velocity;        /* 0x0AD0 */
     uint16_t            movement_angle;         /* 0x0AD4 */
@@ -868,7 +914,7 @@ typedef struct{
     uint8_t             sword_active;           /* 0x0ADB */
     char                unk_0xADC[0x84];        /* 0x0ADC */
     uint16_t            blast_mask_timer;       /* 0x0B60 */
-} z64_link_t;                                   /* 0x0B62 */
+} z2_link_t;                                    /* 0x0B62 */
 
 typedef struct{
     uint32_t    direct_reference;               /* 0x0000 */
@@ -887,11 +933,11 @@ typedef struct{
     uint32_t    unk_0x0034;                     /* 0x0034 */
     uint32_t    z_buffer;                       /* 0x0038 */
     uint32_t    frame_buffer;                   /* 0x003C */
-} z64_segment_t;                                /* 0x0040 */
+} z2_segment_t;                                /* 0x0040 */
 
-extern z64_game_t       z64_game;
-extern z64_link_t       z64_link;
-extern z64_file_t       z64_file;
-extern z64_segment_t    z64_segment;
+extern z2_game_t        z2_game;
+extern z2_link_t        z2_link;
+extern z2_file_t        z2_file;
+extern z2_segment_t     z2_segment;
 
 #endif

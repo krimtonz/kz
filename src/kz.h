@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <vector/vector.h>
-#include "z64.h"
+#include "z2.h"
 #include "menu.h"
 
 typedef struct  {
@@ -28,6 +28,7 @@ typedef struct  {
             uint8_t col_enable : 1;
             uint8_t col_gen : 1 ;
             uint8_t col_opaque : 1;
+            uint8_t col_redux : 1;
         };
         uint8_t collision_view_settings;
     };

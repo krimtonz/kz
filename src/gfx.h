@@ -2,7 +2,7 @@
 #define _GFX_H
 #include <n64.h>
 #include <stdarg.h>
-#include "z64.h"
+#include "z2.h"
 
 typedef struct{
     void *data;
@@ -31,10 +31,10 @@ void gfx_printf(uint16_t,uint16_t,const char*,...);
 void gfx_printf_color(uint16_t,uint16_t,uint32_t,const char*,...);
 void gfx_printf_va_color(uint16_t,uint16_t,uint32_t,const char*,va_list);
 void gfx_printchars(gfx_font *, uint16_t, uint16_t, uint32_t, const char *, size_t);
-void gfx_disp_buf_init(z64_disp_buf_t *db, size_t size);
-void gfx_disp_buf_copy(z64_disp_buf_t *src, z64_disp_buf_t *dst);
-void gfx_disp_buf_destroy(z64_disp_buf_t *db);
-void gfx_disp_buf_reset(z64_disp_buf_t *db, size_t newsize);
+void gfx_disp_buf_init(z2_disp_buf_t *db, size_t size);
+void gfx_disp_buf_copy(z2_disp_buf_t *src, z2_disp_buf_t *dst);
+void gfx_disp_buf_destroy(z2_disp_buf_t *db);
+void gfx_disp_buf_reset(z2_disp_buf_t *db, size_t newsize);
 
 extern gfx_font *kfont;
 

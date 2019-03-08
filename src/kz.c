@@ -3,16 +3,14 @@
 #include <startup.h>
 #include <inttypes.h>
 #include "kz.h"
-#include "z64.h"
 #include "gfx.h"
 #include "watches.h"
 #include "input.h"
 #include "collision_view.h"
 #include "scenes.h"
-#include "menu.h"
 
-extern void game_update_start(z64_game_t *game);
-typedef void (*game_update_start_t)(z64_game_t *game);
+extern void game_update_start(z2_game_t *game);
+typedef void (*game_update_start_t)(z2_game_t *game);
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = { 
@@ -26,7 +24,7 @@ static void kz_main(void) {
 
     /* input display */
     {
-        z64_controller_t inp = z64_game.common.input[0].raw;
+        z2_controller_t inp = z2_game.common.input[0].raw;
         gfx_printf(16,240-16,"%4i %4i",inp.x,inp.y);
         gfx_printf_color(106,240-16,GPACK_RGBA8888(0x00,0x00,0xFF,0xFF),"%s", inp.a?"A":" ");
         gfx_printf_color(116,240-16,GPACK_RGBA8888(0x00,0xFF,0x00,0xFF),"%s", inp.b?"B":" ");
@@ -80,26 +78,26 @@ static void kz_main(void) {
     /* activate cheats */
     {
         if(kz.cheat_blast_mask)
-            z64_link.blast_mask_timer = 0x00;
+            z2_link.blast_mask_timer = 0x00;
         if(kz.cheat_isg)
-            z64_link.sword_active = 0x01;
+            z2_link.sword_active = 0x01;
         if(kz.cheat_infinite_arrows)
-            z64_file.ammo[Z64_SLOT_BOW] = 0x10;
+            z2_file.ammo[Z64_SLOT_BOW] = 0x10;
         if(kz.cheat_infinite_bombs)
-            z64_file.ammo[Z64_SLOT_BOMB] = 0x10;
+            z2_file.ammo[Z64_SLOT_BOMB] = 0x10;
         if(kz.cheat_infinite_bombchu)
-            z64_file.ammo[Z64_SLOT_BOMBCHU] = 0x10;
+            z2_file.ammo[Z64_SLOT_BOMBCHU] = 0x10;
         if(kz.cheat_infinite_powder_keg)
-            z64_file.ammo[Z64_SLOT_POWDER_KEG] = 0x01;
+            z2_file.ammo[Z64_SLOT_POWDER_KEG] = 0x01;
         if(kz.cheat_infinite_health){
-            z64_file.current_health = z64_file.max_health;
+            z2_file.current_health = z2_file.max_health;
         }
         if(kz.cheat_infinite_magic){
-            z64_file.current_magic = z64_file.magic_level * 0x30;
+            z2_file.current_magic = z2_file.magic_level * 0x30;
         }
     }
 
-    z64_input_t input = z64_game.common.input[0];
+    z2_input_t input = z2_game.common.input[0];
 
     /* collision view */
     {
@@ -131,8 +129,8 @@ static void kz_main(void) {
 }
 
 void test(struct menu_item *item){
-    z64_game.entrance_index = (uint16_t)((uint32_t)item->data);
-    z64_game.scene_load_flag = 0x14;
+    z2_game.entrance_index = (uint16_t)((uint32_t)item->data);
+    z2_game.scene_load_flag = 0x14;
 }
 
 void collison_show(struct menu_item *item){
@@ -147,23 +145,33 @@ void collison_gen(struct menu_item *item){
     kz.col_gen = 1;
 }
 
+void collision_reduced(struct menu_item *item){
+    kz.col_redux = !kz.col_redux;
+}
+
+void collision_opaque(struct menu_item *item){
+    kz.col_opaque = !kz.col_opaque;
+}
+
 void init() {
     gfx_init();
     vector_init(&kz.watches, sizeof(watch_t));
-    
+
     menu_init(&kz.main_menu);
     static struct menu warps;
-    static struct menu collison;
+    static struct menu collision;
 
     menu_init(&warps);
     menu_add_submenu(&kz.main_menu,&warps,"warps");
-    menu_add_submenu(&kz.main_menu,&collison,"collision");
+    menu_add_submenu(&kz.main_menu,&collision,"collision");
 
-    menu_init(&collison);
-    collison.selected_item = menu_add_button(&collison,"return",menu_return,NULL);
-    menu_add_button(&collison, "show", collison_show, NULL);
-    menu_add_button(&collison, "hide", collison_hide, NULL);
-    menu_add_button(&collison, "gen", collison_gen, NULL);
+    menu_init(&collision);
+    collision.selected_item = menu_add_button(&collision,"return",menu_return,NULL);
+    menu_add_button(&collision, "show", collison_show, NULL);
+    menu_add_button(&collision, "hide", collison_hide, NULL);
+    menu_add_button(&collision, "gen", collison_gen, NULL);
+    menu_add_button(&collision, "reduce", collision_reduced, NULL);
+    menu_add_button(&collision, "opaque",collision_opaque, NULL);
 
     warps.selected_item = menu_add_button(&warps,"return",menu_return,NULL);
     for(int i=0;i<sizeof(scene_categories)/sizeof(struct kz_scene_category);i++){
@@ -212,7 +220,7 @@ static void kz_stack(void (*kzfunc)(void)) {
 }
 
 /* Entry Point of KZ executable */
-ENTRY void _start(z64_game_t *game, game_update_start_t game_update_start) {
+ENTRY void _start(z2_game_t *game, game_update_start_t game_update_start) {
     init_gp();
     if(!kz.ready){
         kz_stack(init);
