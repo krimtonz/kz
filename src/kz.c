@@ -82,13 +82,13 @@ static void kz_main(void) {
         if(kz.cheat_isg)
             z2_link.sword_active = 0x01;
         if(kz.cheat_infinite_arrows)
-            z2_file.ammo[Z64_SLOT_BOW] = 0x10;
+            z2_file.ammo[Z2_SLOT_BOW] = 0x10;
         if(kz.cheat_infinite_bombs)
-            z2_file.ammo[Z64_SLOT_BOMB] = 0x10;
+            z2_file.ammo[Z2_SLOT_BOMB] = 0x10;
         if(kz.cheat_infinite_bombchu)
-            z2_file.ammo[Z64_SLOT_BOMBCHU] = 0x10;
+            z2_file.ammo[Z2_SLOT_BOMBCHU] = 0x10;
         if(kz.cheat_infinite_powder_keg)
-            z2_file.ammo[Z64_SLOT_POWDER_KEG] = 0x01;
+            z2_file.ammo[Z2_SLOT_POWDER_KEG] = 0x01;
         if(kz.cheat_infinite_health){
             z2_file.current_health = z2_file.max_health;
         }
@@ -125,6 +125,26 @@ static void kz_main(void) {
     menu_navigate(kz_menu,navdir);
     menu_draw(kz_menu);
 
+    if(input.pad_pressed & BUTTON_D_RIGHT){
+        uint8_t new_room_index = 0;
+        if (new_room_index == z2_game.room_ctx.rooms[0].idx) {
+            z2_game.room_ctx.rooms[0].idx = -1;
+            z2_game.room_ctx.rooms[0].file = NULL;
+            z2_unloadroom(&z2_game, &z2_game.room_ctx);
+            z2_game.room_ctx.rooms[0].idx = -1;
+            z2_game.room_ctx.rooms[0].file = NULL;
+        }
+        else {
+            z2_game.room_ctx.rooms[0].idx = -1;
+            z2_game.room_ctx.rooms[0].file = NULL;
+            z2_unloadroom(&z2_game, &z2_game.room_ctx);
+            z2_game.room_ctx.rooms[0].idx = -1;
+            z2_game.room_ctx.rooms[0].file = NULL;
+            z2_loadroom(&z2_game, &z2_game.room_ctx, new_room_index);
+        }
+    }
+
+    gfx_printf(100,100,"%8x %x %x",&z2_game.room_ctx.rooms[0].idx,sizeof(z2_room_ctxt_t),sizeof(z2_room_t));
     gfx_finish();
 }
 
@@ -159,19 +179,20 @@ void init() {
 
     menu_init(&kz.main_menu);
     static struct menu warps;
-    static struct menu collision;
+    static struct menu scene;
 
     menu_init(&warps);
     menu_add_submenu(&kz.main_menu,&warps,"warps");
-    menu_add_submenu(&kz.main_menu,&collision,"collision");
+    menu_add_submenu(&kz.main_menu,&scene,"scene");
 
-    menu_init(&collision);
-    collision.selected_item = menu_add_button(&collision,"return",menu_return,NULL);
-    menu_add_button(&collision, "show", collison_show, NULL);
-    menu_add_button(&collision, "hide", collison_hide, NULL);
-    menu_add_button(&collision, "gen", collison_gen, NULL);
-    menu_add_button(&collision, "reduce", collision_reduced, NULL);
-    menu_add_button(&collision, "opaque",collision_opaque, NULL);
+    menu_init(&scene);
+    scene.selected_item = menu_add_button(&scene,"return",menu_return,NULL);
+    menu_add(&scene, "collision viewer");
+    menu_add_button(&scene, "show", collison_show, NULL);
+    menu_add_button(&scene, "hide", collison_hide, NULL);
+    menu_add_button(&scene, "gen", collison_gen, NULL);
+    menu_add_button(&scene, "reduce", collision_reduced, NULL);
+    menu_add_button(&scene, "opaque",collision_opaque, NULL);
 
     warps.selected_item = menu_add_button(&warps,"return",menu_return,NULL);
     for(int i=0;i<sizeof(scene_categories)/sizeof(struct kz_scene_category);i++){
@@ -197,8 +218,8 @@ void init() {
         menu_add_submenu(&warps,cat_menu,cat.name);
         cat_menu->selected_item=cat_menu->items.first;
     }
-    
-    kz.main_menu.selected_item= kz.main_menu.items.first;
+
+    kz.main_menu.selected_item = kz.main_menu.items.first;
     kz.ready = 1;
 }
 

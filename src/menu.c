@@ -79,6 +79,7 @@ struct menu_item *menu_add(struct menu *menu, const char *text){
     if(item){
         item->text = text;
         item->owner = menu;
+        item->interactive = 0;
     }
     return item;
 }
@@ -93,6 +94,7 @@ struct menu_item *menu_add_submenu(struct menu *menu, struct menu *submenu, cons
     if(item){
         item->activate_proc = menu_submenu_activate;
         item->data = submenu;
+        item->interactive = 1;
     }
     return item;
 }
@@ -102,6 +104,7 @@ struct menu_item *menu_add_button(struct menu *menu, const char *name, menu_butt
     if(item){
         item->activate_proc = callback;
         item->data = data;
+        item->interactive = 1;
     }
     return item;
 }
@@ -114,6 +117,7 @@ struct menu_item *menu_add_watch(struct menu *menu, uint32_t address, watch_type
         data->type = type;
         item->data = data;
         item->draw_proc = menu_draw_watch;
+        item->interactive = 0;
     }
     return item;
 }
@@ -133,6 +137,7 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
         menu->selected_item = list_prev(menu->selected_item);
         if(!menu->selected_item) menu->selected_item = menu->items.last;
     }
+    if(!menu->selected_item->interactive) menu_navigate(menu,nav);
 }
 
 void menu_callback(struct menu *menu, enum menu_callback callback){

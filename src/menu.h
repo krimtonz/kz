@@ -18,14 +18,15 @@ enum menu_callback{
 };
 
 struct menu_item{
-    struct menu *owner;
-    void (*draw_proc)(struct menu_item *item);
-    void (*activate_proc)(struct menu_item *item);
-    int (*navigate_proc)(struct menu_item *item, enum menu_nav nav);
-    const char *text;
-    void *data;
-    int x;
-    int y;
+    struct menu    *owner;
+    void          (*draw_proc)(struct menu_item *item);
+    void          (*activate_proc)(struct menu_item *item);
+    int           (*navigate_proc)(struct menu_item *item, enum menu_nav nav);
+    const char     *text;
+    void           *data;
+    uint16_t        x;
+    uint16_t        y;
+    uint8_t         interactive;
 };
 
 struct menu{

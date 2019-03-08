@@ -1,11 +1,11 @@
-#ifndef _Z64_H
-#define _Z64_H
+#ifndef _Z2_H
+#define _Z2_H
 #include <n64.h>
 #include <stdint.h>
 #include "gu.h"
 
-#define Z64_SCREEN_WIDTH    320
-#define Z64_SCREEN_HEIGHT   240
+#define Z2_SCREEN_WIDTH    320
+#define Z2_SCREEN_HEIGHT   240
 
 typedef struct
 {
@@ -30,158 +30,158 @@ typedef struct
 } z2_rot_t;
 
 typedef enum {
-    Z64_ITEM_NULL = -1,
-    Z64_ITEM_OCARINA,
-    Z64_ITEM_HEROS_BOW,
-    Z64_ITEM_FIRE_ARROW,
-    Z64_ITEM_ICE_ARROW,
-    Z64_ITEM_LIGHT_ARROW,
-    Z64_ITEM_FAIRY_OCARINA,
-    Z64_ITEM_BOMB,
-    Z64_ITEM_BOMBCHU,
-    Z64_ITEM_STICK,
-    Z64_ITEM_NUT,
-    Z64_ITEM_MAGIC_BEAN,
-    Z64_ITEM_SLINGSHOT,
-    Z64_ITEM_POWDER_KEG,
-    Z64_ITEM_PICTOGRAPH_BOX,
-    Z64_ITEM_LENS,
-    Z64_ITEM_HOOKSHOT,
-    Z64_ITEM_GREAT_FAIRY_SWORD,
-    Z64_ITEM_OOT_HOOKSHOT,
-    Z64_ITEM_BOTTLE,
-    Z64_ITEM_RED_POTION,
-    Z64_ITEM_GREEN_POTION,
-    Z64_ITEM_BLUE_POTION,
-    Z64_ITEM_FAIRY,
-    Z64_ITEM_DEKU_PRINCESS,
-    Z64_ITEM_MILK,
-    Z64_ITEM_HALF_MILK,
-    Z64_ITEM_FISH,
-    Z64_ITEM_BUGS,
-    Z64_ITEM_BLUE_FIRE,
-    Z64_ITEM_POE,
-    Z64_ITEM_BIG_POE,
-    Z64_ITEM_SPRING_WATER,
-    Z64_ITEM_HOT_SPRING_WATER,
-    Z64_ITEM_ZORA_EGG,
-    Z64_ITEM_GOLD_DUST,
-    Z64_ITEM_MUSHROOM,
-    Z64_ITEM_SEAHORSE,
-    Z64_ITEM_CHATEAU_ROMANI,
-    Z64_ITEM_HYLIAN_LOACH,
-    Z64_ITEM_BOTTLE2,
-    Z64_ITEM_MOONS_TEAR,
-    Z64_ITEM_LAND_DEED,
-    Z64_ITEM_SWAP_DEED,
-    Z64_ITEM_MOUNTAIN_DEED,
-    Z64_ITEM_OCEAN_DEED,
-    Z64_ITEM_ROOM_KEY,
-    Z64_ITEM_MAMA_LETTER,
-    Z64_ITEM_KAFEI_LETTER,
-    Z64_ITEM_PENDANT,
-    Z64_ITEM_UNK_MAP,
-    Z64_MASK_DEKU,
-    Z64_MASK_GORON,
-    Z64_MASK_ZORA,
-    Z64_MASK_FIERCE_DEITY,
-    Z64_MASK_MASK_OF_TRUTH,
-    Z64_MASK_KAFEI,
-    Z64_MASK_ALL_NIGHT,
-    Z64_MASK_BUNNY_HOOD,
-    Z64_MASK_KEATON,
-    Z64_MASK_GARO,
-    Z64_MASK_ROMANI,
-    Z64_MASK_CIRCUS_LEADER,
-    Z64_MASK_POSTMAN,
-    Z64_MASK_COUPLE,
-    Z64_MASK_GREAT_FAIRY,
-    Z64_MASK_GIBDO,
-    Z64_MASK_DON_GERO,
-    Z64_MASK_KAMARO,
-    Z64_MASK_CAPTAINSHAT,
-    Z64_MASK_STONE,
-    Z64_MASK_BREMEN,
-    Z64_MASK_BLAST,
-    Z64_MASK_SCENTS,
-    Z64_MASK_GIANT,
-    Z64_ITEM_BOW_FIRE_ARROW,
-    Z64_ITEM_BOW_ICE_ARROW,
-    Z64_ITEM_BOW_LIGHT_ARROW,
-    Z64_ITEM_KOKIRI_SWORD,
-    Z64_ITEM_RAZOR_SWORD,
-    Z64_ITEM_GILDED_SWORD,
-    Z64_ITEM_DEITY_SWORD,
-    Z64_ITEM_HERO_SHIELD,
-    Z64_ITEM_MIRROR_SHIELD,
-    Z64_ITEM_QUIVER_30,
-    Z64_ITEM_QUIVER_40,
-    Z64_ITEM_QUIVER_50,
-    Z64_ITEM_BOMB_BAG_20,
-    Z64_ITEM_BOMB_BAG_30,
-    Z64_ITEM_BOMB_BAG_40,
-    Z64_ITEM_MAGIC,
-    Z64_ITEM_ADULTS_WALLET,
-    Z64_ITEM_GIANTS_WALLET,
-    Z64_ITEM_ODOLWAS_REMAINS,
-    Z64_ITEM_GOHTS_REMAINS,
-    Z64_ITEM_GYORGS_REMAINS,
-    Z64_ITEM_TWINMOLDS_REMAINS,
-    Z64_ITEM_BOMBERS_NOTEBOOK = 0x6D
+    Z2_ITEM_NULL = -1,
+    Z2_ITEM_OCARINA,
+    Z2_ITEM_HEROS_BOW,
+    Z2_ITEM_FIRE_ARROW,
+    Z2_ITEM_ICE_ARROW,
+    Z2_ITEM_LIGHT_ARROW,
+    Z2_ITEM_FAIRY_OCARINA,
+    Z2_ITEM_BOMB,
+    Z2_ITEM_BOMBCHU,
+    Z2_ITEM_STICK,
+    Z2_ITEM_NUT,
+    Z2_ITEM_MAGIC_BEAN,
+    Z2_ITEM_SLINGSHOT,
+    Z2_ITEM_POWDER_KEG,
+    Z2_ITEM_PICTOGRAPH_BOX,
+    Z2_ITEM_LENS,
+    Z2_ITEM_HOOKSHOT,
+    Z2_ITEM_GREAT_FAIRY_SWORD,
+    Z2_ITEM_OOT_HOOKSHOT,
+    Z2_ITEM_BOTTLE,
+    Z2_ITEM_RED_POTION,
+    Z2_ITEM_GREEN_POTION,
+    Z2_ITEM_BLUE_POTION,
+    Z2_ITEM_FAIRY,
+    Z2_ITEM_DEKU_PRINCESS,
+    Z2_ITEM_MILK,
+    Z2_ITEM_HALF_MILK,
+    Z2_ITEM_FISH,
+    Z2_ITEM_BUGS,
+    Z2_ITEM_BLUE_FIRE,
+    Z2_ITEM_POE,
+    Z2_ITEM_BIG_POE,
+    Z2_ITEM_SPRING_WATER,
+    Z2_ITEM_HOT_SPRING_WATER,
+    Z2_ITEM_ZORA_EGG,
+    Z2_ITEM_GOLD_DUST,
+    Z2_ITEM_MUSHROOM,
+    Z2_ITEM_SEAHORSE,
+    Z2_ITEM_CHATEAU_ROMANI,
+    Z2_ITEM_HYLIAN_LOACH,
+    Z2_ITEM_BOTTLE2,
+    Z2_ITEM_MOONS_TEAR,
+    Z2_ITEM_LAND_DEED,
+    Z2_ITEM_SWAP_DEED,
+    Z2_ITEM_MOUNTAIN_DEED,
+    Z2_ITEM_OCEAN_DEED,
+    Z2_ITEM_ROOM_KEY,
+    Z2_ITEM_MAMA_LETTER,
+    Z2_ITEM_KAFEI_LETTER,
+    Z2_ITEM_PENDANT,
+    Z2_ITEM_UNK_MAP,
+    Z2_MASK_DEKU,
+    Z2_MASK_GORON,
+    Z2_MASK_ZORA,
+    Z2_MASK_FIERCE_DEITY,
+    Z2_MASK_MASK_OF_TRUTH,
+    Z2_MASK_KAFEI,
+    Z2_MASK_ALL_NIGHT,
+    Z2_MASK_BUNNY_HOOD,
+    Z2_MASK_KEATON,
+    Z2_MASK_GARO,
+    Z2_MASK_ROMANI,
+    Z2_MASK_CIRCUS_LEADER,
+    Z2_MASK_POSTMAN,
+    Z2_MASK_COUPLE,
+    Z2_MASK_GREAT_FAIRY,
+    Z2_MASK_GIBDO,
+    Z2_MASK_DON_GERO,
+    Z2_MASK_KAMARO,
+    Z2_MASK_CAPTAINSHAT,
+    Z2_MASK_STONE,
+    Z2_MASK_BREMEN,
+    Z2_MASK_BLAST,
+    Z2_MASK_SCENTS,
+    Z2_MASK_GIANT,
+    Z2_ITEM_BOW_FIRE_ARROW,
+    Z2_ITEM_BOW_ICE_ARROW,
+    Z2_ITEM_BOW_LIGHT_ARROW,
+    Z2_ITEM_KOKIRI_SWORD,
+    Z2_ITEM_RAZOR_SWORD,
+    Z2_ITEM_GILDED_SWORD,
+    Z2_ITEM_DEITY_SWORD,
+    Z2_ITEM_HERO_SHIELD,
+    Z2_ITEM_MIRROR_SHIELD,
+    Z2_ITEM_QUIVER_30,
+    Z2_ITEM_QUIVER_40,
+    Z2_ITEM_QUIVER_50,
+    Z2_ITEM_BOMB_BAG_20,
+    Z2_ITEM_BOMB_BAG_30,
+    Z2_ITEM_BOMB_BAG_40,
+    Z2_ITEM_MAGIC,
+    Z2_ITEM_ADULTS_WALLET,
+    Z2_ITEM_GIANTS_WALLET,
+    Z2_ITEM_ODOLWAS_REMAINS,
+    Z2_ITEM_GOHTS_REMAINS,
+    Z2_ITEM_GYORGS_REMAINS,
+    Z2_ITEM_TWINMOLDS_REMAINS,
+    Z2_ITEM_BOMBERS_NOTEBOOK = 0x6D
 } z2_item_t;
 
 typedef enum {
-    Z64_SLOT_OCARINA,
-    Z64_SLOT_BOW,
-    Z64_SLOT_FIRE_ARROW,
-    Z64_SLOT_ICE_ARROW,
-    Z64_SLOT_LIGHT_ARROW,
-    Z64_SLOT_QUEST_1,
-    Z64_SLOT_BOMB,
-    Z64_SLOT_BOMBCHU,
-    Z64_SLOT_STICK,
-    Z64_SLOT_NUT,
-    Z64_SLOT_MAGIC_BEAN,
-    Z64_SLOT_QUEST_2,
-    Z64_SLOT_POWDER_KEG,
-    Z64_SLOT_PICTOGRAPH_BOX,
-    Z64_SLOT_LENS,
-    Z64_SLOT_HOOKSHOT,
-    Z64_SLOT_GREAT_FAIRY_SWORD,
-    Z64_SLOT_QUEST_3,
-    Z64_SLOT_BOTTLE_1,
-    Z64_SLOT_BOTTLE_2,
-    Z64_SLOT_BOTTLE_3,
-    Z64_SLOT_BOTTLE_4,
-    Z64_SLOT_BOTTLE_5,
-    Z64_SLOT_BOTTLE_6
+    Z2_SLOT_OCARINA,
+    Z2_SLOT_BOW,
+    Z2_SLOT_FIRE_ARROW,
+    Z2_SLOT_ICE_ARROW,
+    Z2_SLOT_LIGHT_ARROW,
+    Z2_SLOT_QUEST_1,
+    Z2_SLOT_BOMB,
+    Z2_SLOT_BOMBCHU,
+    Z2_SLOT_STICK,
+    Z2_SLOT_NUT,
+    Z2_SLOT_MAGIC_BEAN,
+    Z2_SLOT_QUEST_2,
+    Z2_SLOT_POWDER_KEG,
+    Z2_SLOT_PICTOGRAPH_BOX,
+    Z2_SLOT_LENS,
+    Z2_SLOT_HOOKSHOT,
+    Z2_SLOT_GREAT_FAIRY_SWORD,
+    Z2_SLOT_QUEST_3,
+    Z2_SLOT_BOTTLE_1,
+    Z2_SLOT_BOTTLE_2,
+    Z2_SLOT_BOTTLE_3,
+    Z2_SLOT_BOTTLE_4,
+    Z2_SLOT_BOTTLE_5,
+    Z2_SLOT_BOTTLE_6
 } z2_item_slot_t;
 
 typedef enum {
-    Z64_SLOT_POSTMAN,
-    Z64_SLOT_ALL_NIGHT,
-    Z64_SLOT_BLAST,
-    Z64_SLOT_STONE,
-    Z64_SLOT_GREAT_FAIRY,
-    Z64_SLOT_DEKU,
-    Z64_SLOT_KEATON,
-    Z64_SLOT_BREMEN,
-    Z64_SLOT_BUNNY_HOOD,
-    Z64_SLOT_DON_GERO,
-    Z64_SLOT_SCENTS,
-    Z64_SLOT_GORON,
-    Z64_SLOT_ROMANI,
-    Z64_SLOT_CIRCUS_LEADER,
-    Z64_SLOT_KAFEI,
-    Z64_SLOT_COUPLE,
-    Z64_SLOT_MASK_OF_TRUTH,
-    Z64_SLOT_ZORA,
-    Z64_SLOT_KAMARO,
-    Z64_SLOT_GIBDO,
-    Z64_SLOT_GARO,
-    Z64_SLOT_CAPTAIN,
-    Z64_SLOT_GIANT,
-    Z64_SLOT_FIERCE_DEITY
+    Z2_SLOT_POSTMAN,
+    Z2_SLOT_ALL_NIGHT,
+    Z2_SLOT_BLAST,
+    Z2_SLOT_STONE,
+    Z2_SLOT_GREAT_FAIRY,
+    Z2_SLOT_DEKU,
+    Z2_SLOT_KEATON,
+    Z2_SLOT_BREMEN,
+    Z2_SLOT_BUNNY_HOOD,
+    Z2_SLOT_DON_GERO,
+    Z2_SLOT_SCENTS,
+    Z2_SLOT_GORON,
+    Z2_SLOT_ROMANI,
+    Z2_SLOT_CIRCUS_LEADER,
+    Z2_SLOT_KAFEI,
+    Z2_SLOT_COUPLE,
+    Z2_SLOT_MASK_OF_TRUTH,
+    Z2_SLOT_ZORA,
+    Z2_SLOT_KAMARO,
+    Z2_SLOT_GIBDO,
+    Z2_SLOT_GARO,
+    Z2_SLOT_CAPTAIN,
+    Z2_SLOT_GIANT,
+    Z2_SLOT_FIERCE_DEITY
 } z2_mask_slot_t;
 
 typedef struct {
@@ -861,7 +861,7 @@ typedef struct{
     char                pad_0x06[0x02];         /* 0x0006 */
     void               *mesh_hdr;               /* 0x0008 */
     void               *file;                   /* 0x000C */
-    char               *unk_0x10[0x04];         /* 0x0010 */
+    char                unk_0x10[0x04];         /* 0x0010 */
 } z2_room_t;                                    /* 0x0014 */
 
 typedef struct{
@@ -899,7 +899,8 @@ typedef struct {
     char                unk_0x1F24[0x15E64];    /* 0x01F24 */
     z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */
     z2_room_ctxt_t      room_ctx;               /* 0x186E0 */
-    char                unk_0x18760[0x115];     /* 0x18760 */
+    uint8_t             room_cnt;               /* 0x18760 */
+    char                unk_0x18761[0x114];     /* 0x18761 */
     uint8_t             scene_load_flag;        /* 0x18875 */
     char                unk_0x18876[0x04];      /* 0x18876 */
     uint16_t            entrance_index;         /* 0x18878 */
@@ -933,7 +934,16 @@ typedef struct{
     uint32_t    unk_0x0034;                     /* 0x0034 */
     uint32_t    z_buffer;                       /* 0x0038 */
     uint32_t    frame_buffer;                   /* 0x003C */
-} z2_segment_t;                                /* 0x0040 */
+} z2_segment_t;                                 /* 0x0040 */
+
+typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
+typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
+
+#define z2_loadroom_addr    0x8012E96C
+#define z2_unloadroom_addr  0x8012EBf8
+
+#define z2_loadroom         ((z2_loadroom_t) z2_loadroom_addr)
+#define z2_unloadroom       ((z2_unloadroom_t) z2_unloadroom_addr)
 
 extern z2_game_t        z2_game;
 extern z2_link_t        z2_link;
