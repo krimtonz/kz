@@ -968,5 +968,6 @@ extern z2_link_t        z2_link;
 extern z2_file_t        z2_file;
 extern z2_segment_t     z2_segment;
 extern z2_arena_t       z2_arena;
+extern z2_arena_t       z2_game_arena;
 
 #endif
