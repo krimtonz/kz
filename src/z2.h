@@ -936,6 +936,24 @@ typedef struct{
     uint32_t    frame_buffer;                   /* 0x003C */
 } z2_segment_t;                                 /* 0x0040 */
 
+typedef struct z2_arena_node    z2_arena_node_t;
+typedef struct z2_arena         z2_arena_t;
+
+struct z2_arena_node {
+    uint16_t            magic;                  /* 0x0000 */
+    uint16_t            free;                   /* 0x0002 */
+    uint32_t            size;                   /* 0x0004 */
+    z2_arena_node_t    *next;                   /* 0x0008 */
+    z2_arena_node_t    *prev;                   /* 0x000C */
+};                                              /* 0x0010 */
+
+struct z2_arena {
+    z2_arena_node_t    *first;                  /* 0x0000 */
+    void               *start;                  /* 0x0004 */
+    void               *unk_0x08_;              /* 0x0008 */    
+    void               *unk_0x0C_;              /* 00000C */
+};                                              /* 0x0010 */
+
 typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 
@@ -949,5 +967,6 @@ extern z2_game_t        z2_game;
 extern z2_link_t        z2_link;
 extern z2_file_t        z2_file;
 extern z2_segment_t     z2_segment;
+extern z2_arena_t       z2_arena;
 
 #endif

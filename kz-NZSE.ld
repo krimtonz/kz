@@ -152,3 +152,4 @@ PROVIDE(z2_game             = 0x803E6B20);
 PROVIDE(z2_file             = 0x801EF670);
 PROVIDE(z2_link             = 0x803FFDB0);
 PROVIDE(z2_segment          = 0x801F8180);
+PROVIDE(z2_arena            = 0x8009CD20);
