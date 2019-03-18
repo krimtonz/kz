@@ -125,26 +125,6 @@ static void kz_main(void) {
     menu_navigate(kz_menu,navdir);
     menu_draw(kz_menu);
 
-    if(input.pad_pressed & BUTTON_D_RIGHT){
-        uint8_t new_room_index = 0;
-        if (new_room_index == z2_game.room_ctx.rooms[0].idx) {
-            z2_game.room_ctx.rooms[0].idx = -1;
-            z2_game.room_ctx.rooms[0].file = NULL;
-            z2_unloadroom(&z2_game, &z2_game.room_ctx);
-            z2_game.room_ctx.rooms[0].idx = -1;
-            z2_game.room_ctx.rooms[0].file = NULL;
-        }
-        else {
-            z2_game.room_ctx.rooms[0].idx = -1;
-            z2_game.room_ctx.rooms[0].file = NULL;
-            z2_unloadroom(&z2_game, &z2_game.room_ctx);
-            z2_game.room_ctx.rooms[0].idx = -1;
-            z2_game.room_ctx.rooms[0].file = NULL;
-            z2_loadroom(&z2_game, &z2_game.room_ctx, new_room_index);
-        }
-    }
-
-    gfx_printf(100,100,"%8x %x %x",&z2_game.room_ctx.rooms[0].idx,sizeof(z2_room_ctxt_t),sizeof(z2_room_t));
     gfx_finish();
 }
 
@@ -178,44 +158,46 @@ void init() {
     vector_init(&kz.watches, sizeof(watch_t));
 
     menu_init(&kz.main_menu);
+    kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
     static struct menu warps;
     static struct menu scene;
 
     menu_init(&warps);
-    menu_add_submenu(&kz.main_menu,&warps,"warps");
-    menu_add_submenu(&kz.main_menu,&scene,"scene");
+    menu_add_submenu(&kz.main_menu,0,1,&warps,"warps");
+    menu_add(&kz.main_menu,7,0,"Hi :)");
+    menu_add_submenu(&kz.main_menu,0,2,&scene,"scene");
 
     menu_init(&scene);
-    scene.selected_item = menu_add_button(&scene,"return",menu_return,NULL);
-    menu_add(&scene, "collision viewer");
-    menu_add_button(&scene, "show", collison_show, NULL);
-    menu_add_button(&scene, "hide", collison_hide, NULL);
-    menu_add_button(&scene, "gen", collison_gen, NULL);
-    menu_add_button(&scene, "reduce", collision_reduced, NULL);
-    menu_add_button(&scene, "opaque",collision_opaque, NULL);
+    scene.selected_item = menu_add_button(&scene,0,0,"return",menu_return,NULL);
+    menu_add(&scene, 0,1, "collision viewer");
+    menu_add_button(&scene, 0, 2, "show", collison_show, NULL);
+    menu_add_button(&scene, 0, 3, "hide", collison_hide, NULL);
+    menu_add_button(&scene, 0,4, "gen", collison_gen, NULL);
+    menu_add_button(&scene, 0,5,"reduce", collision_reduced, NULL);
+    menu_add_button(&scene, 0,6,"opaque",collision_opaque, NULL);
 
-    warps.selected_item = menu_add_button(&warps,"return",menu_return,NULL);
+    warps.selected_item = menu_add_button(&warps,0,0,"return",menu_return,NULL);
     for(int i=0;i<sizeof(scene_categories)/sizeof(struct kz_scene_category);i++){
         struct kz_scene_category cat = scene_categories[i];
         struct menu *cat_menu = malloc(sizeof(*cat_menu));
         menu_init(cat_menu);
-        menu_add_button(cat_menu,"return",menu_return,NULL);
+        menu_add_button(cat_menu,0,0,"return",menu_return,NULL);
         for(int j = 0; j<cat.scene_cnt;j++){
             struct kz_scene scene = scenes[cat.scenes[j]];
             if(scene.entrance_cnt>1){
                 struct menu *entrance_menu = malloc(sizeof(*entrance_menu));
                 menu_init(entrance_menu);
-                menu_add_button(entrance_menu,"return",menu_return,NULL);
+                menu_add_button(entrance_menu,0,0,"return",menu_return,NULL);
                 for(int k=0;k<scene.entrance_cnt;k++){
-                    menu_add_button(entrance_menu,scene.entrances[k],test,(void*)(((scene.scene & 0xFF) << 8) | ((k & 0xFF) <<4)));
+                    menu_add_button(entrance_menu,0,k+1,scene.entrances[k],test,(void*)(((scene.scene & 0xFF) << 8) | ((k & 0xFF) <<4)));
                 }
-                menu_add_submenu(cat_menu,entrance_menu,scene.scene_name);
+                menu_add_submenu(cat_menu,0,j+1,entrance_menu,scene.scene_name);
                 entrance_menu->selected_item = entrance_menu->items.first;
             }else{
-                menu_add_button(cat_menu,scene.scene_name,test,(void*)(((scene.scene & 0xFF) << 8) | ((0 & 0xFF) << 4)));
+                menu_add_button(cat_menu,0,j+1,scene.scene_name,test,(void*)(((scene.scene & 0xFF) << 8) | ((0 & 0xFF) << 4)));
             }
         }
-        menu_add_submenu(&warps,cat_menu,cat.name);
+        menu_add_submenu(&warps,0,i+1,cat_menu,cat.name);
         cat_menu->selected_item=cat_menu->items.first;
     }
 

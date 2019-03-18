@@ -6,6 +6,14 @@ struct menu_data_watch{
     watch_type type;
 };
 
+inline int get_item_x_pos(struct menu_item *item){
+    return item->x * kfont->c_width;
+}
+
+inline int get_item_y_pos(struct menu_item *item){
+    return item->y * kfont->c_height;
+}
+
 void menu_init(struct menu *menu){
     list_init(&menu->items, sizeof(struct menu_item));
     menu->child=NULL;
@@ -56,13 +64,9 @@ void menu_draw(struct menu *menu){
         menu_draw(menu->child);
         return;
     }
-    int x = 0;
-    int y = 0;
+
     for(struct menu_item *item = menu->items.first; item; item = list_next(item)){
-        y+=10;
         if(item->draw_proc){
-            item->y = y;
-            item->x = x;
             item->draw_proc(item);
             continue;
         }
@@ -70,16 +74,18 @@ void menu_draw(struct menu *menu){
         if(item == menu->selected_item){
             color = GPACK_RGBA8888(0x80,0x80,0xFF,0xFF);
         }
-        gfx_printf_color(x,y,color,"%s",item->text);
+        gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"%s",item->text);
     }
 }
 
-struct menu_item *menu_add(struct menu *menu, const char *text){
+struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text){
     struct menu_item *item = list_push_back(&menu->items,NULL);
     if(item){
         item->text = text;
         item->owner = menu;
         item->interactive = 0;
+        item->x = x;
+        item->y = y;
     }
     return item;
 }
@@ -89,18 +95,20 @@ void menu_submenu_activate(struct menu_item *item){
     ((struct menu*)item->data)->parent = item->owner;
 }
 
-struct menu_item *menu_add_submenu(struct menu *menu, struct menu *submenu, const char *name){
-    struct menu_item *item = menu_add(menu,name);
+struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name){
+    struct menu_item *item = menu_add(menu,x,y,name);
     if(item){
         item->activate_proc = menu_submenu_activate;
         item->data = submenu;
         item->interactive = 1;
+        item->x = x;
+        item->y = y;
     }
     return item;
 }
 
-struct menu_item *menu_add_button(struct menu *menu, const char *name, menu_button_callback callback, void *data){
-    struct menu_item *item = menu_add(menu,name);
+struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *name, menu_button_callback callback, void *data){
+    struct menu_item *item = menu_add(menu,x,y,name);
     if(item){
         item->activate_proc = callback;
         item->data = data;
@@ -109,8 +117,8 @@ struct menu_item *menu_add_button(struct menu *menu, const char *name, menu_butt
     return item;
 }
 
-struct menu_item *menu_add_watch(struct menu *menu, uint32_t address, watch_type type){
-    struct menu_item *item = menu_add(menu,NULL);
+struct menu_item *menu_add_watch(struct menu *menu,uint16_t x, uint16_t y, uint32_t address, watch_type type){
+    struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct menu_data_watch *data = malloc(sizeof(*data));
         data->address = address;
@@ -130,14 +138,17 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
     }
     if(menu->selected_item && menu->selected_item->navigate_proc && menu->selected_item->navigate_proc(menu->selected_item,nav))
         return;
-    if(nav==MENU_NAV_DOWN){
-        menu->selected_item = list_next(menu->selected_item);
-        if(!menu->selected_item) menu->selected_item = menu->items.first;
-    }else if(nav==MENU_NAV_UP){
-        menu->selected_item = list_prev(menu->selected_item);
-        if(!menu->selected_item) menu->selected_item = menu->items.last;
-    }
-    if(!menu->selected_item->interactive) menu_navigate(menu,nav);
+
+    
+
+    struct menu_item *item = menu->items.first;
+    struct menu_item *sel = menu->selected_item;
+
+    do{
+        int distance_x = get_item_x_pos(item) - sel->x;
+        int distance_y = get_item_y_pos(item) - sel->y;
+    }while((item=list_next(item))!=NULL);
+    
 }
 
 void menu_callback(struct menu *menu, enum menu_callback callback){

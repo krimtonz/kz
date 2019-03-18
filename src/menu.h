@@ -41,11 +41,10 @@ typedef void (*menu_button_callback)(struct menu_item *item);
 void menu_init(struct menu *menu);
 void menu_draw(struct menu *menu);
 
-struct menu_item *menu_add(struct menu *menu, const char *text);
-struct menu_item *menu_add_submenu(struct menu *menu, struct menu *submenu, const char *name);
-struct menu_item *menu_add_button(struct menu *menu, const char *text, menu_button_callback callback, void *data);
-struct menu_item *menu_add_watch(struct menu *menu, uint32_t address, watch_type type);
-struct menu_item *menu_add_addrinp(struct menu *menu);
+struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text);
+struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name);
+struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *text, menu_button_callback callback, void *data);
+struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, uint32_t address, watch_type type);
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);
 void menu_return(struct menu_item *item);
