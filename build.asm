@@ -5,7 +5,7 @@
 .incbin "base.z64"
 
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_SIZE, 0xF0000
+.definelabel G_PAYLOAD_SIZE, 0xB0000
 .definelabel G_PAYLOAD_ADDR, (0x80780000 - G_PAYLOAD_SIZE)
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 

@@ -17,8 +17,6 @@ kz_ctxt_t kz = {
     .ready = 0, 
 };
 
-extern void *end;
-
 static void kz_main(void) {
     gfx_begin();
 
@@ -34,44 +32,15 @@ static void kz_main(void) {
         gfx_printf_color(206,240-16,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s%s", inp.dl?"<":" ",inp.du?"^":" ", inp.dr?">":" ",inp.dd?"v":" ");
     }
 
-    /* print watches */
+    /* draw floating watches */
     {
-        for(int i=0;i<kz.watchescnt;i++){
+        static char watch_buf[16];
+        for(int i=0;i<kz.watch_cnt;i++){
             watch_t *watch = vector_at(&kz.watches,i);
-            char buf[16];
-            switch(watch->type){
-                case WATCH_TYPE_U8:
-                snprintf(buf,16,"%" PRIu8,*(uint8_t*)watch->address);
-                break;
-                case WATCH_TYPE_S8:
-                snprintf(buf,16,"%" PRIi8,*(int8_t*)watch->address);
-                break;
-                case WATCH_TYPE_X8:
-                snprintf(buf,16,"0x%" PRIx8,*(uint8_t*)watch->address);
-                case WATCH_TYPE_U16:
-                snprintf(buf,16,"%" PRIu16,*(uint16_t*)watch->address);
-                break;
-                case WATCH_TYPE_S16:
-                snprintf(buf,16,"%" PRIi16,*(int16_t*)watch->address);
-                break;
-                case WATCH_TYPE_X16:
-                snprintf(buf,16,"0x%" PRIx16,*(uint16_t*)watch->address);
-                break;
-                case WATCH_TYPE_U32:
-                snprintf(buf,16,"%" PRIu32,*(uint32_t*)watch->address);
-                break;
-                case WATCH_TYPE_S32:
-                snprintf(buf,16,"%" PRIi32,*(int32_t*)watch->address);
-                break;
-                case WATCH_TYPE_X32:
-                snprintf(buf,16,"0x%" PRIx32,*(uint32_t*)watch->address);
-                break;
-                case WATCH_TYPE_FLOAT:
-                snprintf(buf,16,"%f", *(float*)watch->address);
-                break;
+            if(watch->floating){
+                watch_printf(watch,watch_buf);
+                gfx_printf(watch->x,watch->y,"%s",watch_buf);
             }
-            gfx_printf(watch->x,watch->y,"%s",buf);
-            
         }
     }
 
@@ -153,40 +122,79 @@ void collision_opaque(struct menu_item *item){
     kz.col_opaque = !kz.col_opaque;
 }
 
+void watch_update_callback(struct menu_item *item, void *data, uint32_t value){
+    watch_t *watch = data;
+    watch->address = (void*)value;
+}
+
+void menu_watch_delete(struct menu_item *item){
+    
+}
+
+void menu_watch_anchor(struct menu_item *item){
+    watch_t *watch = item->data;
+    watch->floating = !watch->floating;
+}
+
+void menu_watch_move(struct menu_item *item){
+    
+}
+
+void watches_button_add(struct menu_item *item){
+    watch_t *watch = vector_push_back(&kz.watches,1,NULL);
+    watch->address = (void*)0x80000000;
+    watch->type = WATCH_TYPE_X32;
+
+    /* Add New Watch Row */
+    int x = item->x;
+    menu_add_button(item->owner,x,item->y,"X",menu_watch_delete,watch);
+    menu_add_button(item->owner,x+1,item->y,"V",menu_watch_anchor,watch);
+    menu_add_button(item->owner,x+2,item->y,"<>",menu_watch_move,watch);
+    menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,watch,16,8,0x80000000);
+    menu_add_watch(item->owner,x + 15,item->y,watch);
+
+    kz.watch_cnt++;
+    item->y++;
+}
+
 void init() {
     gfx_init();
     vector_init(&kz.watches, sizeof(watch_t));
-
-    menu_init(&kz.main_menu);
+    vector_reserve(&kz.watches,10);
+    kz.watch_cnt = 0;
+    menu_init(&kz.main_menu, 10, 10);
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
     static struct menu warps;
     static struct menu scene;
+    static struct menu watches;
 
-    menu_init(&warps);
+    menu_init(&warps, 0, 0);
+    menu_init(&scene, 0, 0);
+    menu_init(&watches, 0, 0);
+
     menu_add_submenu(&kz.main_menu,0,1,&warps,"warps");
-    menu_add(&kz.main_menu,7,0,"Hi :)");
     menu_add_submenu(&kz.main_menu,0,2,&scene,"scene");
+    menu_add_submenu(&kz.main_menu,0,3,&watches,"watches");
 
-    menu_init(&scene);
     scene.selected_item = menu_add_button(&scene,0,0,"return",menu_return,NULL);
-    menu_add(&scene, 0,1, "collision viewer");
-    menu_add_button(&scene, 0, 2, "show", collison_show, NULL);
-    menu_add_button(&scene, 0, 3, "hide", collison_hide, NULL);
-    menu_add_button(&scene, 0,4, "gen", collison_gen, NULL);
-    menu_add_button(&scene, 0,5,"reduce", collision_reduced, NULL);
-    menu_add_button(&scene, 0,6,"opaque",collision_opaque, NULL);
+    menu_add(&scene,0,1,"collision viewer");
+    menu_add_button(&scene,0,2,"show", collison_show, NULL);
+    menu_add_button(&scene,0,3,"hide", collison_hide, NULL);
+    menu_add_button(&scene,0,4,"gen", collison_gen, NULL);
+    menu_add_button(&scene,0,5,"reduce", collision_reduced, NULL);
+    menu_add_button(&scene,0,6,"opaque",collision_opaque, NULL);
 
     warps.selected_item = menu_add_button(&warps,0,0,"return",menu_return,NULL);
     for(int i=0;i<sizeof(scene_categories)/sizeof(struct kz_scene_category);i++){
         struct kz_scene_category cat = scene_categories[i];
         struct menu *cat_menu = malloc(sizeof(*cat_menu));
-        menu_init(cat_menu);
+        menu_init(cat_menu, 0, 0);
         menu_add_button(cat_menu,0,0,"return",menu_return,NULL);
         for(int j = 0; j<cat.scene_cnt;j++){
             struct kz_scene scene = scenes[cat.scenes[j]];
             if(scene.entrance_cnt>1){
                 struct menu *entrance_menu = malloc(sizeof(*entrance_menu));
-                menu_init(entrance_menu);
+                menu_init(entrance_menu, 0, 0);
                 menu_add_button(entrance_menu,0,0,"return",menu_return,NULL);
                 for(int k=0;k<scene.entrance_cnt;k++){
                     menu_add_button(entrance_menu,0,k+1,scene.entrances[k],test,(void*)(((scene.scene & 0xFF) << 8) | ((k & 0xFF) <<4)));
@@ -200,6 +208,9 @@ void init() {
         menu_add_submenu(&warps,0,i+1,cat_menu,cat.name);
         cat_menu->selected_item=cat_menu->items.first;
     }
+
+    watches.selected_item = menu_add_button(&watches,0,0,"return",menu_return,NULL);
+    menu_add_button(&watches,0,1,"+",watches_button_add,NULL);
 
     kz.main_menu.selected_item = kz.main_menu.items.first;
     kz.ready = 1;

@@ -5,7 +5,7 @@ OBJCOPY     = mips64-objcopy
 ARMIPS      = armips
 BUILDFILE   = build.asm
 
-ADDRESS     = 0x80690020
+ADDRESS     = 0x806D0020
 CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks
 LDFLAGS     = -T kz-NZSE.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections -Wl,--defsym,start=$(ADDRESS) 
 SRCDIR      = src

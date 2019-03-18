@@ -9,7 +9,7 @@
 typedef struct  {
     _Bool ready;    
     struct vector watches;
-    size_t watchescnt;
+    size_t watch_cnt;
     union{
         struct{
             uint16_t cheat_infinite_arrows      : 1;

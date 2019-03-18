@@ -11,24 +11,6 @@ static z2_disp_buf_t gfx_disp;
 static z2_disp_buf_t gfx_disp_work;
 
 extern char _raw_font[];
-
-typedef struct{
-    union{
-        struct{
-            uint32_t c : 8;
-            uint32_t x : 12;
-            uint32_t y : 12;
-        };
-        uint32_t ch;
-    };
-    struct{
-        uint8_t r;
-        uint8_t g;
-        uint8_t b;
-        uint8_t a;
-    } color;;
-} gfx_char_t;
-
 gfx_font *kfont;
 
 static Gfx kzgfx[] = {

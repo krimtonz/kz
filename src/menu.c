@@ -1,62 +1,13 @@
 #include <stdlib.h>
 #include "menu.h"
 
-struct menu_data_watch{
-    uint32_t address;
-    watch_type type;
-};
-
-inline int get_item_x_pos(struct menu_item *item){
-    return item->x * kfont->c_width;
-}
-
-inline int get_item_y_pos(struct menu_item *item){
-    return item->y * kfont->c_height;
-}
-
-void menu_init(struct menu *menu){
+void menu_init(struct menu *menu, uint16_t x, uint16_t y){
     list_init(&menu->items, sizeof(struct menu_item));
     menu->child=NULL;
     menu->parent=NULL;
     menu->selected_item=NULL;
-}
-
-void menu_draw_watch(struct menu_item *item){
-    struct menu_data_watch *watch = (struct menu_data_watch*)item->data;
-    int x = item->x;
-    int y = item->y;
-    switch(watch->type){
-        case WATCH_TYPE_U8:
-            gfx_printf(x,y,"%u",*(uint8_t*)watch->address);
-            break;
-        case WATCH_TYPE_S8:
-            gfx_printf(x,y,"%d",*(int8_t*)watch->address);
-            break;
-        case WATCH_TYPE_X8:
-            gfx_printf(x,y,"%1X",*(uint8_t*)watch->address);
-            break;
-        case WATCH_TYPE_U16:
-            gfx_printf(x,y,"%u",*(uint16_t*)watch->address);
-            break;
-        case WATCH_TYPE_S16:
-            gfx_printf(x,y,"%d",*(int16_t*)watch->address);
-            break;
-        case WATCH_TYPE_X16:
-            gfx_printf(x,y,"%2X",*(uint16_t*)watch->address);
-            break;
-        case WATCH_TYPE_U32:
-            gfx_printf(x,y,"%u",*(uint32_t*)watch->address);
-            break;
-        case WATCH_TYPE_S32:
-            gfx_printf(x,y,"%d",*(int32_t*)watch->address);
-            break;
-        case WATCH_TYPE_X32:
-            gfx_printf(x,y,"%4X",*(uint32_t*)watch->address);
-            break;
-        case WATCH_TYPE_FLOAT:
-            gfx_printf(x,y,"%f",*(float*)watch->address);
-            break;
-    }
+    menu->x = x;
+    menu->y = y;
 }
 
 void menu_draw(struct menu *menu){
@@ -70,9 +21,9 @@ void menu_draw(struct menu *menu){
             item->draw_proc(item);
             continue;
         }
-        uint32_t color = GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF);
+        uint32_t color = MENU_DEFAULT_COLOR;
         if(item == menu->selected_item){
-            color = GPACK_RGBA8888(0x80,0x80,0xFF,0xFF);
+            color = MENU_SELECTED_COLOR;
         }
         gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"%s",item->text);
     }
@@ -90,64 +41,58 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
     return item;
 }
 
-void menu_submenu_activate(struct menu_item *item){
-    item->owner->child = (struct menu*)item->data;
-    ((struct menu*)item->data)->parent = item->owner;
-}
-
-struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name){
-    struct menu_item *item = menu_add(menu,x,y,name);
-    if(item){
-        item->activate_proc = menu_submenu_activate;
-        item->data = submenu;
-        item->interactive = 1;
-        item->x = x;
-        item->y = y;
-    }
-    return item;
-}
-
-struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *name, menu_button_callback callback, void *data){
-    struct menu_item *item = menu_add(menu,x,y,name);
-    if(item){
-        item->activate_proc = callback;
-        item->data = data;
-        item->interactive = 1;
-    }
-    return item;
-}
-
-struct menu_item *menu_add_watch(struct menu *menu,uint16_t x, uint16_t y, uint32_t address, watch_type type){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
-    if(item){
-        struct menu_data_watch *data = malloc(sizeof(*data));
-        data->address = address;
-        data->type = type;
-        item->data = data;
-        item->draw_proc = menu_draw_watch;
-        item->interactive = 0;
-    }
-    return item;
-}
-
 void menu_navigate(struct menu *menu, enum menu_nav nav){
     if(nav==MENU_NAV_NONE) return;
+
     if(menu->child){
         menu_navigate(menu->child,nav);
         return;
     }
+
     if(menu->selected_item && menu->selected_item->navigate_proc && menu->selected_item->navigate_proc(menu->selected_item,nav))
         return;
 
+    int dir_horiz = nav == MENU_NAV_LEFT?-1:(nav == MENU_NAV_RIGHT?1:0);
+    int dir_vert = nav == MENU_NAV_UP?-1:(nav == MENU_NAV_DOWN?1:0);
+
+    int ndist_pa = 0;
+    int ndist_pe = 0;
+    int fdist_pa = 0;
+    int fdist_pe = 0;
+    int cur_x_pos = get_item_x_pos(menu->selected_item);
+    int cur_y_pos = get_item_y_pos(menu->selected_item);
+
+    struct menu_item *near = NULL;
+    struct menu_item *far = NULL;
+
+    for(struct menu_item *item = menu->items.first;item!=NULL;item=list_next(item)){
+
+        int distance_x = get_item_x_pos(item) - cur_x_pos;
+        int distance_y = get_item_y_pos(item) - cur_y_pos;
+
+        int pa = dir_horiz?dir_horiz*distance_x:(dir_vert?dir_vert*distance_y:0);
+        int pe = dir_vert?distance_x:distance_y;
+
+        if(pe<0) pe = -pe;
+
+        if(pa > 0 && (near == NULL || pe<ndist_pe || (pe==ndist_pe && pa<ndist_pa))){
+            ndist_pa=pa;
+            ndist_pe=pe;
+            near=item;
+        }
+
+        if(pa<0 && (far == NULL || -pa>fdist_pa || (-pa==fdist_pa && pe<fdist_pe))){
+            far = item;
+            fdist_pa = -pa;
+            fdist_pe = pe;
+        }
+    }
     
-
-    struct menu_item *item = menu->items.first;
-    struct menu_item *sel = menu->selected_item;
-
-    do{
-        int distance_x = get_item_x_pos(item) - sel->x;
-        int distance_y = get_item_y_pos(item) - sel->y;
-    }while((item=list_next(item))!=NULL);
+    if(near){
+        menu->selected_item = near;
+    }else if(far){
+        menu->selected_item = far;
+    }
     
 }
 
