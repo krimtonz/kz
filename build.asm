@@ -39,16 +39,17 @@ sw      a1, 0x1528(v1)
 
 
 .org 0x801748A0
-lui     a0, hi(G_PAYLOAD_ADDR)
-addiu   a0, lo(G_PAYLOAD_ADDR)
-lui     a1, hi(G_PAYLOAD_VROM)
-addiu   a1, lo(G_PAYLOAD_VROM)
-lui     a2, hi(G_PAYLOAD_SIZE)
-jal     0x80080C90
-addiu   a2, lo(G_PAYLOAD_SIZE)
-j       ainit
-nop
-nop
+    addiu   sp, sp, -0x340
+    sw      ra, 0x002C(sp)
+    lui     a0, hi(G_PAYLOAD_ADDR)
+    addiu   a0, lo(G_PAYLOAD_ADDR)
+    lui     a1, hi(G_PAYLOAD_VROM)
+    addiu   a1, lo(G_PAYLOAD_VROM)
+    lui     a2, hi(G_PAYLOAD_SIZE)
+    jal     0x80080C90
+    addiu   a2, lo(G_PAYLOAD_SIZE)
+    jal     ainit
+    lui     a0, 0x0004
 
 ; ==================================================================================================
 ; Game Class Frame Start Hook 

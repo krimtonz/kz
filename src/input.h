@@ -16,4 +16,8 @@
 #define BUTTON_B              0x4000
 #define BUTTON_A              0x8000
 
+void input_update();
+uint16_t get_pad_pressed();
+uint16_t get_pad_released();
+
 #endif

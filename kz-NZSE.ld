@@ -154,3 +154,6 @@ PROVIDE(z2_link             = 0x803FFDB0);
 PROVIDE(z2_segment          = 0x801F8180);
 PROVIDE(z2_arena            = 0x8009CD20);
 PROVIDE(z2_game_arena       = 0x801F5100);
+PROVIDE(z2_gamestate_table  = 0x801BD910);
+PROVIDE(z2_actor_ovl_table  = 0x801AEFD0);
+PROVIDE(z2_player_ovl_table = 0x801D0B70);

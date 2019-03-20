@@ -4,6 +4,8 @@
 #include <stdarg.h>
 #include "z2.h"
 
+#define COLOR_GREEN GPACK_RGBA8888(0x00,0xFF,0x00,0xFF)
+
 typedef struct{
     void *data;
     uint16_t tile_width;

@@ -8,6 +8,7 @@
 #include "input.h"
 #include "collision_view.h"
 #include "scenes.h"
+#include "commands.h"
 
 extern void game_update_start(z2_game_t *game);
 typedef void (*game_update_start_t)(z2_game_t *game);
@@ -16,9 +17,48 @@ __attribute__((section(".data")))
 kz_ctxt_t kz = { 
     .ready = 0, 
 };
-
 static void kz_main(void) {
     gfx_begin();
+
+    input_update();
+
+    /* :relaxed: */
+    {
+        uint16_t pressed = get_pad_pressed();
+        static uint16_t timer;
+        if(pressed){
+            static const uint16_t konami_code[] = {
+                BUTTON_D_UP,
+                BUTTON_D_UP,
+                BUTTON_D_DOWN,
+                BUTTON_D_DOWN,
+                BUTTON_D_LEFT,
+                BUTTON_D_RIGHT,
+                BUTTON_D_LEFT,
+                BUTTON_D_RIGHT,
+                BUTTON_B,
+                BUTTON_A,
+                BUTTON_START,
+            };
+            static int kc_pos = 0;
+            size_t kc_code_size = sizeof(konami_code)/sizeof(*konami_code);
+            
+            if(pressed == konami_code[kc_pos]){
+                kc_pos++;
+                if(kc_pos == kc_code_size){
+                    kc_pos = 0;
+                    timer = 0x100;
+                }
+            }else{
+                kc_pos = 0;
+            }
+        }
+        if(timer>0){
+            timer--;
+            gfx_printf_color(100,100,GPACK_RGBA8888(0xFF,0,0,0xFF),"Congratulations!");
+            gfx_printf_color(35,108,GPACK_RGBA8888(0xFF,0,0,0xFF),"You have undermined Jimmie1717");
+        }
+    }
 
     /* input display */
     {
@@ -94,12 +134,33 @@ static void kz_main(void) {
     menu_navigate(kz_menu,navdir);
     menu_draw(kz_menu);
 
+    /* print logo */
+#define MAKESTRING(S) MAKESTRING_(S)
+#define MAKESTRING_(S) #S
+    {
+        static uint16_t logo_time = 0x100;
+        if(logo_time>0){
+            const char *name = MAKESTRING(PACKAGE);
+            const char *url = MAKESTRING(URL);
+            gfx_printf_color(10, Z2_SCREEN_HEIGHT - 20 - kfont->c_height, COLOR_GREEN, name);
+            gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 20 - kfont->c_height,COLOR_GREEN,url);
+            logo_time--;
+        }
+    }
+#undef MAKESTRING_
+#undef MAKESTRING
+
+    gfx_printf(200,150,"%x",z2_game.actor_ctxt.actor_list[5].first);
+
     gfx_finish();
 }
 
 void test(struct menu_item *item){
     z2_game.entrance_index = (uint16_t)((uint32_t)item->data);
-    z2_game.scene_load_flag = 0x14;
+    z2_file.exit = z2_game.entrance_index;
+    z2_game.common.execute_state = 0;
+    z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
+    z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
 }
 
 void collison_show(struct menu_item *item){
@@ -211,7 +272,6 @@ void init() {
 
     watches.selected_item = menu_add_button(&watches,0,0,"return",menu_return,NULL);
     menu_add_button(&watches,0,1,"+",watches_button_add,NULL);
-
     kz.main_menu.selected_item = kz.main_menu.items.first;
     kz.ready = 1;
 }

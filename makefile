@@ -1,3 +1,5 @@
+PACKAGE	   ?= $(NAME)
+URL		   ?= github.com/krimtonz/kz
 CC          = mips64-gcc
 LD          = mips64-g++
 AS			= mips64-gcc
@@ -7,6 +9,7 @@ BUILDFILE   = build.asm
 
 ADDRESS     = 0x806D0020
 CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks
+CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL)
 LDFLAGS     = -T kz-NZSE.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections -Wl,--defsym,start=$(ADDRESS) 
 SRCDIR      = src
 OBJDIR      = obj
@@ -27,7 +30,7 @@ OUTDIR      = $(OBJDIR) $(BINDIR)
 all: $(BIN)
 
 $(COBJ)     : $(OBJDIR)/%.o: $(SRCDIR)/% | $(OBJDIR)
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) $(CPPFLAGS) $(CFLAGS) $< -o $@
 
 $(SOBJ)		: $(OBJDIR)/%.o: $(SRCDIR)/% | $(OBJDIR)
 	$(AS) -c -MMD -MP $< -o $@

@@ -318,7 +318,7 @@ typedef struct {
     uint8_t         dungeon_keys[0x9];              /* 0x00CA */
     uint8_t         defense_hearts;                 /* 0x00D3 */
     uint8_t         stray_fairies[0xA];             /* 0x00D4 */
-    char            form_name[0x6][0x3];            /* 0x00DE */
+    char            form_name[0x8][0x3];            /* 0x00DE */
     char            unk_0x00F6_[0x2];               /* 0x00F6 */
     struct
     {
@@ -330,11 +330,12 @@ typedef struct {
         uint32_t    unk_0x14;                       /* 0x0014 */
         uint32_t    unk_0x18;                       /* 0x0018 */
     }               scene_flags[0x78];              /* 0x00F8 */
-    char            unk_0x0E18_[0x62];              /* 0x0E18 */
-    char            unk_0x0E7A_[0x2E26];            /* 0x0E7A */
+    char            unk_0x0E18_[0x2E88];            /* 0x0E18 */
 
     int32_t         file_index;                     /* 0x3CA0 */
-} z2_file_t;                                        /* 0x3Ca4 */
+    char            unk_0x3CA4[0x0C];               /* 0x3CA4 */
+    int             void_flag;                      /* 0x3CB0 */
+} z2_file_t;                                        /* 0x3CB4 */
 
 typedef struct
 {
@@ -527,7 +528,7 @@ typedef struct {
     void            *gamestate_update;      /* 0x0004 */
     void            *gamestate_dtor;        /* 0x0008 */
     void            *gamestate_ctor;        /* 0x000C */
-    void            *ctxt_size;             /* 0x0010 */
+    uint32_t         ctxt_size;             /* 0x0010 */
     z2_input_t      input[4];               /* 0x0014 */
     uint32_t        gamestate_heap_size;    /* 0x0074 */
     void            *gamestate_heap_ptr;    /* 0x0078 */
@@ -954,6 +955,42 @@ struct z2_arena {
     void               *unk_0x0C_;              /* 00000C */
 };                                              /* 0x0010 */
 
+typedef struct {
+    void               *ram;                    /* 0x0000 */
+    uint32_t            vrom_start;             /* 0x0004 */
+    uint32_t            vrom_end;               /* 0x0008 */
+    uint32_t            vram_start;             /* 0x000C */
+    uint32_t            vram_end;               /* 0x0010 */   
+    char                unk_0x14[0x04];         /* 0x0014 */
+    void               *vram_ctor;              /* 0x0018 */
+    void               *vram_dtor;              /* 0x001C */
+    char                unk_0x20[0xC];          /* 0x0020 */
+    uint32_t            alloc_size;             /* 0x002C */
+} z2_gamestate_table_t;                         /* 0x0030 */
+
+typedef struct {
+    uint32_t            vrom_start;             /* 0x0000 */
+    uint32_t            vrom_end;               /* 0x0004 */
+    uint32_t            vram_start;             /* 0x0008 */
+    uint32_t            vram_end;               /* 0x000C */
+    void               *ram;                    /* 0x0010 */
+    uint32_t            initialization;         /* 0x0014 */
+    void               *filename;               /* 0x0018 */
+    uint16_t            alloc_type;             /* 0x001C */
+    uint8_t             loaded_cnt;             /* 0x001E */
+    char                pad_0x19;               /* 0x001F */
+} z2_actor_ovl_table_t;                         /* 0x0020 */
+
+typedef struct {
+    void               *ram;                    /* 0x0000 */
+    uint32_t            vrom_start;             /* 0x0004 */
+    uint32_t            vrom_end;               /* 0x0008 */
+    uint32_t            vram_start;             /* 0x000C */
+    uint32_t            vram_end;               /* 0x0010 */
+    char                unk_0x14[4];            /* 0x0014 */
+    char               *filename;               /* 0x0018 */
+} z2_player_ovl_table_t;                        /* 0x001C */
+
 typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 
@@ -963,11 +1000,14 @@ typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 #define z2_loadroom         ((z2_loadroom_t) z2_loadroom_addr)
 #define z2_unloadroom       ((z2_unloadroom_t) z2_unloadroom_addr)
 
-extern z2_game_t        z2_game;
-extern z2_link_t        z2_link;
-extern z2_file_t        z2_file;
-extern z2_segment_t     z2_segment;
-extern z2_arena_t       z2_arena;
-extern z2_arena_t       z2_game_arena;
+extern z2_game_t                z2_game;
+extern z2_link_t                z2_link;
+extern z2_file_t                z2_file;
+extern z2_segment_t             z2_segment;
+extern z2_arena_t               z2_arena;
+extern z2_arena_t               z2_game_arena;
+extern z2_gamestate_table_t     z2_gamestate_table[];
+extern z2_actor_ovl_table_t     z2_actor_ovl_table[];
+extern z2_player_ovl_table_t    z2_player_ovl_table[];
 
 #endif
