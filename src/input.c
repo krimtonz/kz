@@ -16,11 +16,19 @@ void input_update(){
 }
 
 uint16_t get_pad_pressed(){
+    return (pad_pressed ^ reserved) & pad_pressed;
+}
+
+uint16_t get_pad_pressed_unrestricted(){
     return pad_pressed;
 }
 
 uint16_t get_pad_released(){
     return pad_released;
+}
+
+uint16_t get_pad_held(){
+    return (pad_held ^ reserved) & pad_held;
 }
 
 void reserve_buttons(uint16_t button_bitmask){

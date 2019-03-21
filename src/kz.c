@@ -113,26 +113,55 @@ static void kz_main(void) {
         kz_col_view();
     }   
 
-    struct menu *kz_menu = &kz.main_menu;
-    
+    static _Bool skip_menu = 0;
 
-    enum menu_nav navdir = MENU_NAV_NONE;
-    enum menu_callback callback = MENU_CALLBACK_NONE;
-    if(input.pad_pressed & BUTTON_D_DOWN){
-        navdir=MENU_NAV_DOWN;
-    }else if(input.pad_pressed & BUTTON_D_UP){
-        navdir=MENU_NAV_UP;
-    }else if(input.pad_pressed & BUTTON_D_LEFT){
-        navdir=MENU_NAV_LEFT;
-    }else if(input.pad_pressed & BUTTON_D_RIGHT){
-        navdir=MENU_NAV_RIGHT;
-    }else if(input.pad_pressed & BUTTON_L){
-        callback = MENU_CALLBACK_ACTIVATE;
+    if((get_pad_pressed_unrestricted() & kz_commands[0].bind) == kz_commands[0].bind){
+        skip_menu = 1;
+        kz.menu_active = !kz.menu_active;
+        if(kz.menu_active){
+            reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+        }else{
+            free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+        }
     }
 
-    menu_callback(kz_menu,callback);
-    menu_navigate(kz_menu,navdir);
-    menu_draw(kz_menu);
+    if(kz.menu_active && !skip_menu){
+        struct menu *kz_menu = &kz.main_menu;
+        enum menu_nav navdir = MENU_NAV_NONE;
+        enum menu_callback callback = MENU_CALLBACK_NONE;
+        if(input.pad_pressed & BUTTON_D_DOWN){
+            navdir=MENU_NAV_DOWN;
+        }else if(input.pad_pressed & BUTTON_D_UP){
+            navdir=MENU_NAV_UP;
+        }else if(input.pad_pressed & BUTTON_D_LEFT){
+            navdir=MENU_NAV_LEFT;
+        }else if(input.pad_pressed & BUTTON_D_RIGHT){
+            navdir=MENU_NAV_RIGHT;
+        }else if(input.pad_pressed & BUTTON_L){
+            callback = MENU_CALLBACK_ACTIVATE;
+        }
+
+        menu_callback(kz_menu,callback);
+        menu_navigate(kz_menu,navdir);
+        menu_draw(kz_menu);
+    }
+
+    skip_menu = 0;
+
+    for(int i=0;i<COMMAND_CNT;i++){
+        _Bool activate = 0;
+        switch(kz_commands[i].type){
+            case COMMAND_HOLD:
+                activate = (get_pad_held() & kz_commands[i].bind) == kz_commands[i].bind;
+                break;
+            case COMMAND_PRESS:
+                activate = (get_pad_pressed() & kz_commands[i].bind) == kz_commands[i].bind;
+                break;
+        }
+        if(activate && kz_commands[i].proc){
+            kz_commands[i].proc();
+        }
+    }
 
     /* print logo */
 #define MAKESTRING(S) MAKESTRING_(S)
@@ -149,8 +178,6 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
-
-    gfx_printf(200,150,"%x",z2_game.actor_ctxt.actor_list[5].first);
 
     gfx_finish();
 }
@@ -223,6 +250,7 @@ void init() {
     vector_init(&kz.watches, sizeof(watch_t));
     vector_reserve(&kz.watches,10);
     kz.watch_cnt = 0;
+    kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
     static struct menu warps;

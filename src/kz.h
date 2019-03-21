@@ -33,6 +33,7 @@ typedef struct  {
         uint8_t collision_view_settings;
     };
     struct menu main_menu;
+    _Bool menu_active;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;

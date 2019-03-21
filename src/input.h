@@ -19,5 +19,9 @@
 void input_update();
 uint16_t get_pad_pressed();
 uint16_t get_pad_released();
+uint16_t get_pad_held();
+uint16_t get_pad_pressed_unrestricted();
+void reserve_buttons(uint16_t button_bitmask);
+void free_buttons(uint16_t button_bitmask);
 
 #endif

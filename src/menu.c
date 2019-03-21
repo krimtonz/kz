@@ -1,5 +1,15 @@
 #include <stdlib.h>
 #include "menu.h"
+#include "input.h"
+#include "kz.h"
+
+int get_item_x_pos(struct menu_item *item){
+    return item->owner->x + item->x * kfont->c_width;
+}
+
+int get_item_y_pos(struct menu_item *item){
+    return item->owner->y + item->y * kfont->c_height;
+}
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y){
     list_init(&menu->items, sizeof(struct menu_item));
@@ -109,5 +119,8 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
 void menu_return(struct menu_item *item){
     if(item->owner->parent){
         item->owner->parent->child = NULL;
+    }else{
+        kz.menu_active = 0;
+        free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
     }
 }

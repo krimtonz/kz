@@ -57,12 +57,7 @@ void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);
 void menu_return(struct menu_item *item);
 
-inline int get_item_x_pos(struct menu_item *item){
-    return item->owner->x + item->x * kfont->c_width;
-}
-
-inline int get_item_y_pos(struct menu_item *item){
-    return item->owner->y + item->y * kfont->c_height;
-}
+int get_item_x_pos(struct menu_item *item);
+int get_item_y_pos(struct menu_item *item);
 
 #endif
