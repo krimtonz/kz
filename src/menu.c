@@ -16,6 +16,7 @@ void menu_init(struct menu *menu, uint16_t x, uint16_t y){
     menu->child=NULL;
     menu->parent=NULL;
     menu->selected_item=NULL;
+    menu->callback_proc = NULL;
     menu->x = x;
     menu->y = y;
 }
@@ -118,6 +119,9 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
 
 void menu_return(struct menu_item *item){
     if(item->owner->parent){
+        if(item->owner->callback_proc){
+            item->owner->callback_proc(MENU_CALLBACK_EXIT);
+        }
         item->owner->parent->child = NULL;
     }else{
         kz.menu_active = 0;

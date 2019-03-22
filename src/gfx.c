@@ -3,12 +3,13 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
+#include <malloc.h>
 #include "gfx.h"
 
 #define     GFX_SIZE 0x7500
 
-static z2_disp_buf_t gfx_disp;
-static z2_disp_buf_t gfx_disp_work;
+ static z2_disp_buf_t gfx_disp;
+ static z2_disp_buf_t gfx_disp_work;
 
 extern char _raw_font[];
 gfx_font *kfont;
@@ -123,15 +124,166 @@ void gfx_finish(){
     gfx_disp_buf_copy(&gfx_disp,&gfx_disp_work);
     gfx_disp_buf_copy(&disp_w, &gfx_disp);
 }
+
 void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
-    gDPLoadTextureTile_4b(gfx_disp.p++, texture->data + (texture->tile_size * tilenum),
-        texture->img_fmt, texture->tile_width, texture->tile_height,
-        0, 0, texture->tile_width - 1, texture->tile_height-1,
-        0, 
-        G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMIRROR | G_TX_WRAP,
-        G_TX_NOMASK, G_TX_NOMASK,
-        G_TX_NOLOD, G_TX_NOLOD);
+    if(texture->img_size == G_IM_SIZ_4b){
+        gDPLoadTextureTile_4b(gfx_disp.p++, texture->data + (texture->tile_size * tilenum),
+            texture->img_fmt, texture->tile_width, texture->tile_height,
+            0, 0, texture->tile_width - 1, texture->tile_height-1,
+            0, 
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK,
+            G_TX_NOLOD, G_TX_NOLOD);
+    }else{
+        gDPLoadTextureTile(gfx_disp.p++, texture->data + (texture->tile_size * tilenum),
+            texture->img_fmt, texture->img_size,
+            texture->tile_width, texture->tile_height,
+            0, 0, texture->tile_width - 1, texture->tile_height-1,
+            0, 
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK,
+            G_TX_NOLOD, G_TX_NOLOD);
+    }
+}
+
+void desaturate(void *data, size_t len){
+    struct rgba{
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t a;
+    };
+
+    MtxF m = guDefMtxF(0.3086f, 0.6094f, 0.0820f, 0.f,
+                       0.3086f, 0.6094f, 0.0820f, 0.f,
+                       0.3086f, 0.6094f, 0.0820f, 0.f,
+                       0.f,     0.f,     0.f,     1.f);
+
+    struct rgba *datargba = data;
+    for(int i=0;i<len/sizeof(struct rgba);i++){
+        struct rgba p = datargba[i];
+        float r = p.r * m.xx + p.g*m.xy + p.g*m.xz + p.a*m.xw;
+        float g = p.r * m.yx + p.g*m.yy + p.g*m.yz + p.a*m.yw;
+        float b = p.r * m.zx + p.g*m.zy + p.g*m.zz + p.a*m.zw;
+        float a = p.r * m.wx + p.g*m.wy + p.g*m.wz + p.a*m.ww;
+        struct rgba n = {
+            r<0?0:r>0xFF?0xFF:r,
+            g<0?0:g>0xFF?0xFF:g,
+            b<0?0:g>0xFF?0xFF:b,
+            a<0?0:a>0xFF?0xFF:a,
+        };
+        datargba[i] = n;
+    }
+}
+
+gfx_texture *gfx_load_icon_item_static(){
+    gfx_texture *texture = malloc(sizeof(*texture));
+    if(texture){
+        texture->data = memalign(64, (0x1000 * (Z2_ITEM_BOTTLE + 1)) * 2 );
+        for(int i=0;i<=Z2_ITEM_BOTTLE;i++){
+            z2_DecodeArchiveFile(z2_icon_item_static_vrom,i,texture->data + (0x1000 * i));
+            // Copy newly decoded file and desaturate
+            memcpy(texture->data + (0x1000 * (Z2_ITEM_BOTTLE + 1)) + (0x1000 * i), texture->data + (0x1000 * i), 0x1000);
+            desaturate(texture->data + (0x1000 * (Z2_ITEM_BOTTLE + 1)) + (0x1000 * i),0x1000);
+        }
+        texture->img_fmt = G_IM_FMT_RGBA;
+        texture->img_size = G_IM_SIZ_32b;
+        texture->tile_width = 32;
+        texture->tile_height = 32;
+        texture->x_tiles = 1;
+        texture->y_tiles = (Z2_ITEM_BOTTLE + 1) * 2;
+        texture->tile_size = G_SIZ_BITS(G_IM_FMT_RGBA) * texture->tile_width * texture->tile_height;
+    }
+    return texture;
+}
+
+gfx_texture *gfx_load_bottle_icons(){
+    gfx_texture *texture = malloc(sizeof(*texture));
+    if(texture){
+        texture->data = memalign(64, 0x1000 * (Z2_ITEM_BOTTLE2 - Z2_ITEM_BOTTLE + 1));
+        for(int i=Z2_ITEM_BOTTLE;i<=Z2_ITEM_BOTTLE2;i++){
+            z2_DecodeArchiveFile(z2_icon_item_static_vrom,i,texture->data + (0x1000 * (i - Z2_ITEM_BOTTLE)));
+        }
+        texture->img_fmt = G_IM_FMT_RGBA;
+        texture->img_size = G_IM_SIZ_32b;
+        texture->tile_width = 32;
+        texture->tile_height = 32;
+        texture->x_tiles = 1;
+        texture->y_tiles = Z2_ITEM_BOTTLE2 - Z2_ITEM_BOTTLE + 1;
+        texture->tile_size = G_SIZ_BITS(G_IM_FMT_RGBA) * texture->tile_width * texture->tile_height;
+    }
+    return texture;
+}
+
+gfx_texture *gfx_load_trade_icons(){
+    gfx_texture *texture = malloc(sizeof(*texture));
+    if(texture){
+        texture->data = memalign(64, 0x1000 * (Z2_ITEM_PENDANT - Z2_ITEM_MOONS_TEAR + 1));
+        for(int i=Z2_ITEM_MOONS_TEAR;i<=Z2_ITEM_PENDANT;i++){
+            z2_DecodeArchiveFile(z2_icon_item_static_vrom,i,texture->data + (0x1000 * (i - Z2_ITEM_MOONS_TEAR)));
+        }
+        texture->img_fmt = G_IM_FMT_RGBA;
+        texture->img_size = G_IM_SIZ_32b;
+        texture->tile_width = 32;
+        texture->tile_height = 32;
+        texture->x_tiles = 1;
+        texture->y_tiles = Z2_ITEM_PENDANT - Z2_ITEM_MOONS_TEAR + 1;
+        texture->tile_size = G_SIZ_BITS(G_IM_FMT_RGBA) * texture->tile_width * texture->tile_height;
+    }
+    return texture;
+}
+
+gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t width, uint16_t height, uint16_t x_tiles, uint16_t y_tiles, int file, uint32_t offset){
+    gfx_texture *texture = malloc(sizeof(*texture));
+    if(texture){
+        texture->tile_size = ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+        texture->data = memalign(64, texture->tile_size * x_tiles * y_tiles);
+        texture->img_fmt = format;
+        texture->img_size = size;
+        texture->tile_width = 32;
+        texture->tile_height = 32;
+        texture->x_tiles = x_tiles;
+        texture->y_tiles = y_tiles;
+        void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
+        OSMesgQueue queue;
+        OSMesg msg;
+        z2_createOSMesgQueue(&queue,&msg,1);
+        z2_getfile_t getfile = {
+            z2_file_table[file].vrom_start, tempdata,
+            z2_file_table[file].vrom_end - z2_file_table[file].vrom_start,
+            NULL, 0, 0,
+            &queue, 0
+        };
+        z2_osSendMessage(&z2_file_msgqueue, &getfile, OS_MESG_NOBLOCK);
+        z2_osRecvMessage(&queue,NULL,OS_MESG_BLOCK);
+        memcpy(texture->data,tempdata + offset,texture->tile_size * x_tiles * y_tiles);
+        free(tempdata);
+    }
+    return texture;
+}
+
+void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
+    gfx_load_tile(texture, tile);
+    gDPSetPrimColor(gfx_disp.p++,0,0,0xFF,0xFF,0xFF,0xFF);
+    gSPScisTextureRectangle(gfx_disp.p++,
+                         qs102(x) & ~3,
+                         qs102(y) & ~3,
+                         qs102(x + texture->tile_width * 1 + 1) & ~3,
+                         qs102(y + texture->tile_height * 1 + 1) & ~3,
+                         G_TX_RENDERTILE,
+                         qu105(0),
+                         qu105(0),
+                         qu510(1/1), qu510(1/1));
+}
+
+void gfx_destroy_texture(gfx_texture *texture){
+    if(texture){
+        if(texture->data) free(texture->data);
+        free(texture);
+    }
+    texture = NULL;
 }
 
 void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt){

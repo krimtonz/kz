@@ -18,6 +18,8 @@ enum menu_nav{
 enum menu_callback{
     MENU_CALLBACK_NONE = -1,
     MENU_CALLBACK_ACTIVATE,
+    MENU_CALLBACK_ENTER,
+    MENU_CALLBACK_EXIT,
 };
 
 struct menu_item{
@@ -37,6 +39,7 @@ struct menu{
     struct menu_item   *selected_item;
     struct menu        *child;
     struct menu        *parent;
+    void              (*callback_proc)(enum menu_callback callback);
     uint16_t            x;
     uint16_t            y;
 };

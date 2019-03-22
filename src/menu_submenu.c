@@ -3,6 +3,9 @@
 void menu_submenu_activate(struct menu_item *item){
     item->owner->child = (struct menu*)item->data;
     ((struct menu*)item->data)->parent = item->owner;
+    if(item->owner->child->callback_proc){
+        item->owner->child->callback_proc(MENU_CALLBACK_ENTER);
+    }
 }
 
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name){

@@ -179,73 +179,14 @@ static void kz_main(void) {
 #undef MAKESTRING_
 #undef MAKESTRING
 
+    gfx_printf(100,100,"%8x",sbrk(0));
+
     gfx_finish();
 }
 
-void test(struct menu_item *item){
-    z2_game.entrance_index = (uint16_t)((uint32_t)item->data);
-    z2_file.exit = z2_game.entrance_index;
-    z2_game.common.execute_state = 0;
-    z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
-    z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
-}
-
-void collison_show(struct menu_item *item){
-    kz.col_enable = 1;
-}
-
-void collison_hide(struct menu_item *item){
-    kz.col_enable = 0;
-}
-
-void collison_gen(struct menu_item *item){
-    kz.col_gen = 1;
-}
-
-void collision_reduced(struct menu_item *item){
-    kz.col_redux = !kz.col_redux;
-}
-
-void collision_opaque(struct menu_item *item){
-    kz.col_opaque = !kz.col_opaque;
-}
-
-void watch_update_callback(struct menu_item *item, void *data, uint32_t value){
-    watch_t *watch = data;
-    watch->address = (void*)value;
-}
-
-void menu_watch_delete(struct menu_item *item){
-    
-}
-
-void menu_watch_anchor(struct menu_item *item){
-    watch_t *watch = item->data;
-    watch->floating = !watch->floating;
-}
-
-void menu_watch_move(struct menu_item *item){
-    
-}
-
-void watches_button_add(struct menu_item *item){
-    watch_t *watch = vector_push_back(&kz.watches,1,NULL);
-    watch->address = (void*)0x80000000;
-    watch->type = WATCH_TYPE_X32;
-
-    /* Add New Watch Row */
-    int x = item->x;
-    menu_add_button(item->owner,x,item->y,"X",menu_watch_delete,watch);
-    menu_add_button(item->owner,x+1,item->y,"V",menu_watch_anchor,watch);
-    menu_add_button(item->owner,x+2,item->y,"<>",menu_watch_move,watch);
-    menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,watch,16,8,0x80000000);
-    menu_add_watch(item->owner,x + 15,item->y,watch);
-
-    kz.watch_cnt++;
-    item->y++;
-}
-
 void init() {
+    clear_bss();
+    do_global_ctors();
     gfx_init();
     vector_init(&kz.watches, sizeof(watch_t));
     vector_reserve(&kz.watches,10);
@@ -253,54 +194,12 @@ void init() {
     kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
-    static struct menu warps;
-    static struct menu scene;
-    static struct menu watches;
 
-    menu_init(&warps, 0, 0);
-    menu_init(&scene, 0, 0);
-    menu_init(&watches, 0, 0);
+    menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
+    menu_add_submenu(&kz.main_menu,0,2,create_scene_menu(),"scene");
+    //menu_add_submenu(&kz.main_menu,0,3,create_watches_menu(),"watches");
+    menu_add_submenu(&kz.main_menu,0,4,create_inventory_menu(),"inventory");
 
-    menu_add_submenu(&kz.main_menu,0,1,&warps,"warps");
-    menu_add_submenu(&kz.main_menu,0,2,&scene,"scene");
-    menu_add_submenu(&kz.main_menu,0,3,&watches,"watches");
-
-    scene.selected_item = menu_add_button(&scene,0,0,"return",menu_return,NULL);
-    menu_add(&scene,0,1,"collision viewer");
-    menu_add_button(&scene,0,2,"show", collison_show, NULL);
-    menu_add_button(&scene,0,3,"hide", collison_hide, NULL);
-    menu_add_button(&scene,0,4,"gen", collison_gen, NULL);
-    menu_add_button(&scene,0,5,"reduce", collision_reduced, NULL);
-    menu_add_button(&scene,0,6,"opaque",collision_opaque, NULL);
-
-    warps.selected_item = menu_add_button(&warps,0,0,"return",menu_return,NULL);
-    for(int i=0;i<sizeof(scene_categories)/sizeof(struct kz_scene_category);i++){
-        struct kz_scene_category cat = scene_categories[i];
-        struct menu *cat_menu = malloc(sizeof(*cat_menu));
-        menu_init(cat_menu, 0, 0);
-        menu_add_button(cat_menu,0,0,"return",menu_return,NULL);
-        for(int j = 0; j<cat.scene_cnt;j++){
-            struct kz_scene scene = scenes[cat.scenes[j]];
-            if(scene.entrance_cnt>1){
-                struct menu *entrance_menu = malloc(sizeof(*entrance_menu));
-                menu_init(entrance_menu, 0, 0);
-                menu_add_button(entrance_menu,0,0,"return",menu_return,NULL);
-                for(int k=0;k<scene.entrance_cnt;k++){
-                    menu_add_button(entrance_menu,0,k+1,scene.entrances[k],test,(void*)(((scene.scene & 0xFF) << 8) | ((k & 0xFF) <<4)));
-                }
-                menu_add_submenu(cat_menu,0,j+1,entrance_menu,scene.scene_name);
-                entrance_menu->selected_item = entrance_menu->items.first;
-            }else{
-                menu_add_button(cat_menu,0,j+1,scene.scene_name,test,(void*)(((scene.scene & 0xFF) << 8) | ((0 & 0xFF) << 4)));
-            }
-        }
-        menu_add_submenu(&warps,0,i+1,cat_menu,cat.name);
-        cat_menu->selected_item=cat_menu->items.first;
-    }
-
-    watches.selected_item = menu_add_button(&watches,0,0,"return",menu_return,NULL);
-    menu_add_button(&watches,0,1,"+",watches_button_add,NULL);
-    kz.main_menu.selected_item = kz.main_menu.items.first;
     kz.ready = 1;
 }
 

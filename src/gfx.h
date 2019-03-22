@@ -26,6 +26,7 @@ typedef struct{
     uint16_t cy_tile;
 } gfx_font;
 
+
 void gfx_init();
 void gfx_begin();
 void gfx_finish();
@@ -33,6 +34,12 @@ void gfx_printf(uint16_t,uint16_t,const char*,...);
 void gfx_printf_color(uint16_t,uint16_t,uint32_t,const char*,...);
 void gfx_printf_va_color(uint16_t,uint16_t,uint32_t,const char*,va_list);
 void gfx_printchars(gfx_font *, uint16_t, uint16_t, uint32_t, const char *, size_t);
+void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height);
+void gfx_destroy_texture(gfx_texture *texture);
+gfx_texture *gfx_load_icon_item_static();
+gfx_texture *gfx_load_bottle_icons();
+gfx_texture *gfx_load_trade_icons();
+gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t width, uint16_t height, uint16_t x_tiles, uint16_t y_tiles, int file, uint32_t offset);
 void gfx_disp_buf_init(z2_disp_buf_t *db, size_t size);
 void gfx_disp_buf_copy(z2_disp_buf_t *src, z2_disp_buf_t *dst);
 void gfx_disp_buf_destroy(z2_disp_buf_t *db);

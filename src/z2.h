@@ -991,23 +991,59 @@ typedef struct {
     char               *filename;               /* 0x0018 */
 } z2_player_ovl_table_t;                        /* 0x001C */
 
+typedef struct {
+    uint32_t            vrom_start;             /* 0x0000 */
+    uint32_t            vrom_end;               /* 0x0004 */
+    uint32_t            prom_start;             /* 0x0008 */
+    uint32_t            prom_end;               /* 0x000C */
+} z2_file_table_t;                              /* 0x0010 */
+
+typedef struct
+{
+  /* file loading params */
+  uint32_t          vrom_addr;                  /* 0x0000 */
+  void             *dram_addr;                  /* 0x0004 */
+  uint32_t          size;                       /* 0x0008 */
+  /* debug stuff */
+  char             *filename;                   /* 0x000C */
+  int32_t           line;                       /* 0x0010 */
+  int32_t           unk_00_;                    /* 0x0014 */
+  /* completion notification params */
+  OSMesgQueue      *notify_mq;                  /* 0x0018 */
+  OSMesg            notify_msg;                 /* 0x001C */
+                                                /* 0x0020 */
+} z2_getfile_t;
+
 typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
+typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 
-#define z2_loadroom_addr    0x8012E96C
-#define z2_unloadroom_addr  0x8012EBf8
+#define z2_osSendMessage_addr       0x80087B10
+#define z2_osRecvMessage_addr       0x80087ED0
+#define z2_osCreateMesgQueue_addr   0x8008F240
+#define z2_loadroom_addr            0x8012E96C
+#define z2_unloadroom_addr          0x8012EBF8
+#define z2_DecodeArchiveFile_addr   0x80178DAC
 
-#define z2_loadroom         ((z2_loadroom_t) z2_loadroom_addr)
-#define z2_unloadroom       ((z2_unloadroom_t) z2_unloadroom_addr)
+#define z2_icon_item_static_vrom    0x00A36C10
 
-extern z2_game_t                z2_game;
-extern z2_link_t                z2_link;
-extern z2_file_t                z2_file;
-extern z2_segment_t             z2_segment;
-extern z2_arena_t               z2_arena;
-extern z2_arena_t               z2_game_arena;
-extern z2_gamestate_table_t     z2_gamestate_table[];
-extern z2_actor_ovl_table_t     z2_actor_ovl_table[];
-extern z2_player_ovl_table_t    z2_player_ovl_table[];
+#define z2_loadroom                 ((z2_loadroom_t)            z2_loadroom_addr)
+#define z2_unloadroom               ((z2_unloadroom_t)          z2_unloadroom_addr)
+#define z2_createOSMesgQueue        ((osCreateMesgQueue_t)      z2_osCreateMesgQueue_addr)
+#define z2_osSendMessage            ((osSendMesg_t)             z2_osSendMessage_addr)
+#define z2_osRecvMessage            ((osRecvMesg_t)             z2_osRecvMessage_addr)
+#define z2_DecodeArchiveFile        ((z2_DecodeArchiveFile_t)   z2_DecodeArchiveFile_addr)
+
+extern z2_game_t                    z2_game;
+extern z2_link_t                    z2_link;
+extern z2_file_t                    z2_file;
+extern z2_segment_t                 z2_segment;
+extern z2_arena_t                   z2_arena;
+extern z2_arena_t                   z2_game_arena;
+extern z2_gamestate_table_t         z2_gamestate_table[];
+extern z2_actor_ovl_table_t         z2_actor_ovl_table[];
+extern z2_player_ovl_table_t        z2_player_ovl_table[];
+extern z2_file_table_t              z2_file_table[];
+extern OSMesgQueue                  z2_file_msgqueue;
 
 #endif

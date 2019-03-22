@@ -38,4 +38,9 @@ typedef struct  {
 
 extern kz_ctxt_t kz;
 
+struct menu *create_warps_menu();
+struct menu *create_inventory_menu();
+struct menu *create_scene_menu();
+struct menu *create_watches_menu();
+
 #endif

@@ -1,5 +1,13 @@
 #ifndef _GU_H
-#define _GU_h
+#define _GU_H
+
+#define guDefMtxF(xx,xy,xz,xw,  \
+                  yx,yy,yz,yw,  \
+                  zx,zy,zz,zw,  \
+                  wx,wy,wz,ww)    {.f={xx,xy,xz,xw,                           \
+                                       yx,yy,yz,yw,                           \
+                                       zx,zy,zz,zw,                           \
+                                       wx,wy,wz,ww}}
 
 typedef float MtxF_t[4][4];
 

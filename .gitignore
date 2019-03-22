@@ -6,3 +6,4 @@ bin/
 .vs/
 *.z64
 *.wad
+.vscode/
