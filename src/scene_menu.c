@@ -2,23 +2,23 @@
 #include "menu.h"
 #include "kz.h"
 
-void collison_show(struct menu_item *item){
+static void collison_show(struct menu_item *item){
     kz.col_enable = 1;
 }
 
-void collison_hide(struct menu_item *item){
+static void collison_hide(struct menu_item *item){
     kz.col_enable = 0;
 }
 
-void collison_gen(struct menu_item *item){
+static void collison_gen(struct menu_item *item){
     kz.col_gen = 1;
 }
 
-void collision_reduced(struct menu_item *item){
+static void collision_reduced(struct menu_item *item){
     kz.col_redux = !kz.col_redux;
 }
 
-void collision_opaque(struct menu_item *item){
+static void collision_opaque(struct menu_item *item){
     kz.col_opaque = !kz.col_opaque;
 }
 

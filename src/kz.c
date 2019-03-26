@@ -179,8 +179,6 @@ static void kz_main(void) {
 #undef MAKESTRING_
 #undef MAKESTRING
 
-    gfx_printf(100,100,"%8x",sbrk(0));
-
     gfx_finish();
 }
 
@@ -197,7 +195,7 @@ void init() {
 
     menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
     menu_add_submenu(&kz.main_menu,0,2,create_scene_menu(),"scene");
-    //menu_add_submenu(&kz.main_menu,0,3,create_watches_menu(),"watches");
+    menu_add_submenu(&kz.main_menu,0,3,create_watches_menu(),"watches");
     menu_add_submenu(&kz.main_menu,0,4,create_inventory_menu(),"inventory");
 
     kz.ready = 1;

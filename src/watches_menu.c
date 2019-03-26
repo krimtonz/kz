@@ -1,25 +1,25 @@
 #include "menu.h"
 #include "kz.h"
 
-void watch_update_callback(struct menu_item *item, void *data, uint32_t value){
+static void watch_update_callback(struct menu_item *item, void *data, uint32_t value){
     watch_t *watch = data;
     watch->address = (void*)value;
 }
 
-void menu_watch_delete(struct menu_item *item){
+static void menu_watch_delete(struct menu_item *item){
     
 }
 
-void menu_watch_anchor(struct menu_item *item){
+static void menu_watch_anchor(struct menu_item *item){
     watch_t *watch = item->data;
     watch->floating = !watch->floating;
 }
 
-void menu_watch_move(struct menu_item *item){
+static void menu_watch_move(struct menu_item *item){
     
 }
 
-void watches_button_add(struct menu_item *item){
+static void watches_button_add(struct menu_item *item){
     watch_t *watch = vector_push_back(&kz.watches,1,NULL);
     watch->address = (void*)0x80000000;
     watch->type = WATCH_TYPE_X32;
@@ -38,8 +38,8 @@ void watches_button_add(struct menu_item *item){
 }
 struct menu *create_watches_menu(){
     static struct menu watches;
+    menu_init(&watches,0,0);
     watches.selected_item = menu_add_button(&watches,0,0,"return",menu_return,NULL);
     menu_add_button(&watches,0,1,"+",watches_button_add,NULL);
-    kz.main_menu.selected_item = kz.main_menu.items.first;
     return &watches;
 }

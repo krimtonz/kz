@@ -4,11 +4,11 @@
 #include "kz.h"
 
 int get_item_x_pos(struct menu_item *item){
-    return item->owner->x + item->x * kfont->c_width;
+    return item->owner->x + item->x * item->owner->cell_width + item->x * item->owner->x_padding;
 }
 
 int get_item_y_pos(struct menu_item *item){
-    return item->owner->y + item->y * kfont->c_height;
+    return item->owner->y + item->y * item->owner->cell_height + item->y * item->owner->y_padding;
 }
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y){
@@ -19,6 +19,20 @@ void menu_init(struct menu *menu, uint16_t x, uint16_t y){
     menu->callback_proc = NULL;
     menu->x = x;
     menu->y = y;
+    menu->cell_height = kfont->c_height;
+    menu->cell_width = kfont->c_width;
+    menu->x_padding = 0;
+    menu->y_padding = 0;
+}
+
+void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height){
+    menu->cell_width = width;
+    menu->cell_height = height;
+}
+
+void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y){
+    menu->x_padding = x;
+    menu->y_padding = y;
 }
 
 void menu_draw(struct menu *menu){

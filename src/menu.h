@@ -42,6 +42,10 @@ struct menu{
     void              (*callback_proc)(enum menu_callback callback);
     uint16_t            x;
     uint16_t            y;
+    uint16_t            cell_width;
+    uint16_t            cell_height;
+    uint16_t            x_padding;
+    uint16_t            y_padding;
 };
 
 typedef void (*menu_button_callback)(struct menu_item *item);
@@ -49,6 +53,8 @@ typedef void (*menu_number_callback)(struct menu_item *item, void *data, uint32_
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y);
 void menu_draw(struct menu *menu);
+void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height);
+void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y);
 
 struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text);
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name);

@@ -1025,8 +1025,6 @@ typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 #define z2_unloadroom_addr          0x8012EBF8
 #define z2_DecodeArchiveFile_addr   0x80178DAC
 
-#define z2_icon_item_static_vrom    0x00A36C10
-
 #define z2_loadroom                 ((z2_loadroom_t)            z2_loadroom_addr)
 #define z2_unloadroom               ((z2_unloadroom_t)          z2_unloadroom_addr)
 #define z2_createOSMesgQueue        ((osCreateMesgQueue_t)      z2_osCreateMesgQueue_addr)

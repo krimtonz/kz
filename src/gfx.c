@@ -8,8 +8,10 @@
 
 #define     GFX_SIZE 0x7500
 
- static z2_disp_buf_t gfx_disp;
- static z2_disp_buf_t gfx_disp_work;
+static Gfx *gfx_disp;
+static Gfx *gfx_disp_p;
+static Gfx *gfx_disp_d;
+static Gfx *gfx_disp_work;
 
 extern char _raw_font[];
 gfx_font *kfont;
@@ -56,44 +58,11 @@ void gfx_printf_va_color(uint16_t left, uint16_t top, uint32_t color, const char
     gfx_printchars(kfont, left, top, color, buf, l);
 }
 
-void gfx_disp_buf_init(z2_disp_buf_t *db, size_t size){
-    db->size = size;
-    db->buf = malloc(size);
-    db->p = db->buf;
-    db->d = db->buf + (size + sizeof(*(db->buf)) - 1) / sizeof(db->buf);
-}
-
-void gfx_disp_buf_copy(z2_disp_buf_t *src, z2_disp_buf_t *dst){
-    dst->buf = src->buf;
-    dst->size = src->size;
-    dst->p = dst->buf;
-    dst->d = dst->buf + (dst->size + sizeof(*(dst->buf)) - 1) / sizeof(dst->buf);
-}
-
-void gfx_disp_buf_destroy(z2_disp_buf_t *db){
-    if(db->buf){
-        free(db->buf);
-        db->buf = NULL;
-    }
-    db->size = 0;
-    db->p = NULL;
-    db->d = NULL;
-}
-
-void gfx_disp_buf_reset(z2_disp_buf_t *db, size_t newsize){
-    if(db->buf==NULL){
-        gfx_disp_buf_init(db,newsize);
-        return;
-    }
-    db->size = newsize;
-    db->buf = realloc(db->buf, newsize);
-    db->p = db->buf;
-    db->d = db->buf + (newsize + sizeof(*(db->buf)) - 1) / sizeof(db->buf);
-}
-
 void gfx_init(){
-    gfx_disp_buf_init(&gfx_disp,GFX_SIZE);
-    gfx_disp_buf_init(&gfx_disp_work, GFX_SIZE);
+    gfx_disp = malloc(GFX_SIZE);
+    gfx_disp_work = malloc(GFX_SIZE);
+    gfx_disp_p = gfx_disp;
+    gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
     
     kfont = malloc(sizeof(gfx_font));
     static gfx_texture f_tex;
@@ -113,21 +82,26 @@ void gfx_init(){
 }
 
 void gfx_begin(){
-    gSPDisplayList(gfx_disp.p++,&kzgfx);
+    gSPDisplayList(gfx_disp_p++,&kzgfx);
 }
 
 void gfx_finish(){
-    gSPEndDisplayList(gfx_disp.p++);
-    gSPDisplayList(z2_game.common.gfx->overlay.p++, gfx_disp.buf);
-    z2_disp_buf_t disp_w;
-    gfx_disp_buf_copy(&gfx_disp_work, &disp_w);
-    gfx_disp_buf_copy(&gfx_disp,&gfx_disp_work);
-    gfx_disp_buf_copy(&disp_w, &gfx_disp);
+    gSPEndDisplayList(gfx_disp_p++);
+    gSPDisplayList(z2_game.common.gfx->overlay.p++, gfx_disp);
+    Gfx *disp_w = gfx_disp_work;
+    gfx_disp_work = gfx_disp;
+    gfx_disp = disp_w;
+    gfx_disp_p = gfx_disp;
+    gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
+}
+
+void gfx_push(Gfx gfx){
+    *(gfx_disp_p++) = gfx;
 }
 
 void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
     if(texture->img_size == G_IM_SIZ_4b){
-        gDPLoadTextureTile_4b(gfx_disp.p++, texture->data + (texture->tile_size * tilenum),
+        gDPLoadTextureTile_4b(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
             texture->img_fmt, texture->tile_width, texture->tile_height,
             0, 0, texture->tile_width - 1, texture->tile_height-1,
             0, 
@@ -136,7 +110,7 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
             G_TX_NOMASK, G_TX_NOMASK,
             G_TX_NOLOD, G_TX_NOLOD);
     }else{
-        gDPLoadTextureTile(gfx_disp.p++, texture->data + (texture->tile_size * tilenum),
+        gDPLoadTextureTile(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
             texture->img_fmt, texture->img_size,
             texture->tile_width, texture->tile_height,
             0, 0, texture->tile_width - 1, texture->tile_height-1,
@@ -148,7 +122,7 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
     }
 }
 
-void desaturate(void *data, size_t len){
+void gfx_texture_desaturate(void *data, size_t len){
     struct rgba{
         uint8_t r;
         uint8_t g;
@@ -178,59 +152,28 @@ void desaturate(void *data, size_t len){
     }
 }
 
-gfx_texture *gfx_load_icon_item_static(){
+gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile, _Bool desaturate){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
-        texture->data = memalign(64, (0x1000 * (Z2_ITEM_BOTTLE + 1)) * 2 );
-        for(int i=0;i<=Z2_ITEM_BOTTLE;i++){
-            z2_DecodeArchiveFile(z2_icon_item_static_vrom,i,texture->data + (0x1000 * i));
-            // Copy newly decoded file and desaturate
-            memcpy(texture->data + (0x1000 * (Z2_ITEM_BOTTLE + 1)) + (0x1000 * i), texture->data + (0x1000 * i), 0x1000);
-            desaturate(texture->data + (0x1000 * (Z2_ITEM_BOTTLE + 1)) + (0x1000 * i),0x1000);
+        int tiles_cnt = end_tile - start_tile + 1;
+        texture->data = memalign(64, (0x1000 * tiles_cnt) * (desaturate?2:1));
+        int i;
+        int j;
+        for(i=0,j=start_tile;i<tiles_cnt;i++,j++){
+            z2_DecodeArchiveFile(z2_file_table[19].prom_start,j,texture->data + (0x1000 * i));
+            if(desaturate){
+                // Copy newly decoded file and desaturate
+                memcpy(texture->data + (0x1000 * tiles_cnt) + (0x1000 * i), texture->data + (0x1000 * i), 0x1000);
+                gfx_texture_desaturate(texture->data + (0x1000 * tiles_cnt) + (0x1000 * i),0x1000);
+            }
         }
         texture->img_fmt = G_IM_FMT_RGBA;
         texture->img_size = G_IM_SIZ_32b;
         texture->tile_width = 32;
         texture->tile_height = 32;
         texture->x_tiles = 1;
-        texture->y_tiles = (Z2_ITEM_BOTTLE + 1) * 2;
-        texture->tile_size = G_SIZ_BITS(G_IM_FMT_RGBA) * texture->tile_width * texture->tile_height;
-    }
-    return texture;
-}
-
-gfx_texture *gfx_load_bottle_icons(){
-    gfx_texture *texture = malloc(sizeof(*texture));
-    if(texture){
-        texture->data = memalign(64, 0x1000 * (Z2_ITEM_BOTTLE2 - Z2_ITEM_BOTTLE + 1));
-        for(int i=Z2_ITEM_BOTTLE;i<=Z2_ITEM_BOTTLE2;i++){
-            z2_DecodeArchiveFile(z2_icon_item_static_vrom,i,texture->data + (0x1000 * (i - Z2_ITEM_BOTTLE)));
-        }
-        texture->img_fmt = G_IM_FMT_RGBA;
-        texture->img_size = G_IM_SIZ_32b;
-        texture->tile_width = 32;
-        texture->tile_height = 32;
-        texture->x_tiles = 1;
-        texture->y_tiles = Z2_ITEM_BOTTLE2 - Z2_ITEM_BOTTLE + 1;
-        texture->tile_size = G_SIZ_BITS(G_IM_FMT_RGBA) * texture->tile_width * texture->tile_height;
-    }
-    return texture;
-}
-
-gfx_texture *gfx_load_trade_icons(){
-    gfx_texture *texture = malloc(sizeof(*texture));
-    if(texture){
-        texture->data = memalign(64, 0x1000 * (Z2_ITEM_PENDANT - Z2_ITEM_MOONS_TEAR + 1));
-        for(int i=Z2_ITEM_MOONS_TEAR;i<=Z2_ITEM_PENDANT;i++){
-            z2_DecodeArchiveFile(z2_icon_item_static_vrom,i,texture->data + (0x1000 * (i - Z2_ITEM_MOONS_TEAR)));
-        }
-        texture->img_fmt = G_IM_FMT_RGBA;
-        texture->img_size = G_IM_SIZ_32b;
-        texture->tile_width = 32;
-        texture->tile_height = 32;
-        texture->x_tiles = 1;
-        texture->y_tiles = Z2_ITEM_PENDANT - Z2_ITEM_MOONS_TEAR + 1;
-        texture->tile_size = G_SIZ_BITS(G_IM_FMT_RGBA) * texture->tile_width * texture->tile_height;
+        texture->y_tiles = tiles_cnt * (desaturate?2:1);
+        texture->tile_size = 0x1000;
     }
     return texture;
 }
@@ -266,16 +209,22 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t widt
 
 void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
     gfx_load_tile(texture, tile);
-    gDPSetPrimColor(gfx_disp.p++,0,0,0xFF,0xFF,0xFF,0xFF);
-    gSPScisTextureRectangle(gfx_disp.p++,
+    gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x) & ~3,
                          qs102(y) & ~3,
-                         qs102(x + texture->tile_width * 1 + 1) & ~3,
-                         qs102(y + texture->tile_height * 1 + 1) & ~3,
+                         qs102(x + texture->tile_width * ((float)width / (float)texture->tile_width) + 1) & ~3,
+                         qs102(y + texture->tile_height * ((float)height / (float)texture->tile_height) + 1) & ~3,
                          G_TX_RENDERTILE,
                          qu105(0),
                          qu105(0),
-                         qu510(1/1), qu510(1/1));
+                         qu510(1.0f / ((float)width / (float)texture->tile_width)), qu510(1.0f / ((float)width/(float)texture->tile_height)));
+}
+
+void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
+    gDPSetCombineMode(gfx_disp_p++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    gDPSetPrimColor(gfx_disp_p++,0,0,(color >> 24) & 0xFF,(color >> 16) & 0xFF,(color >> 8) & 0xFF,color & 0xFF);
+    gDPPipeSync(gfx_disp_p++);
+    gDPFillRectangle(gfx_disp_p++,x,y,x + width, y + height);
 }
 
 void gfx_destroy_texture(gfx_texture *texture){
@@ -288,7 +237,7 @@ void gfx_destroy_texture(gfx_texture *texture){
 
 void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt){
 
-    gDPSetCombineMode(gfx_disp.p++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetCombineMode(gfx_disp_p++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
     int chars_per_tile = font->cx_tile * font->cy_tile;
 
@@ -305,8 +254,8 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
             c-=33;
             if(c<tile_start || c>=tile_end) continue;
             c-=tile_start; 
-            gDPSetPrimColor(gfx_disp.p++, 0, 0, 0x00,0x00,0x00, 0xFF);
-            gSPScisTextureRectangle(gfx_disp.p++,
+            gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
+            gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x + 1 ),
                          qs102(y + char_y + 1),
                          qs102(x + char_x + font->c_width + 1),
@@ -317,8 +266,8 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
                          qu105(c / font->cx_tile *
                                font->c_height),
                          qu510(1), qu510(1));
-            gDPSetPrimColor(gfx_disp.p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
-            gSPScisTextureRectangle(gfx_disp.p++,
+            gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
+            gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x),
                          qs102(y + char_y),
                          qs102(x + char_x + font->c_width),
