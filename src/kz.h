@@ -6,23 +6,26 @@
 #include "z2.h"
 #include "menu.h"
 
+enum cheats {
+    CHEAT_STICKS,
+    CHEAT_NUTS,
+    CHEAT_ARROWS,
+    CHEAT_BOMBS,
+    CHEAT_BOMBCHUS,
+    CHEAT_POWDER_KEG,
+    CHEAT_HEALTH,
+    CHEAT_MAGIC,
+    CHEAT_RAZOR_SWORD,
+    CHEAT_BLAST_MASK,
+    CHEAT_RESTRICTION,
+    CHEAT_ISG
+};
+
 typedef struct  {
     _Bool ready;    
     struct vector watches;
     size_t watch_cnt;
-    union{
-        struct{
-            uint16_t cheat_infinite_arrows      : 1;
-            uint16_t cheat_infinite_magic       : 1;
-            uint16_t cheat_infinite_health      : 1;
-            uint16_t cheat_infinite_bombchu     : 1;
-            uint16_t cheat_infinite_bombs       : 1;
-            uint16_t cheat_infinite_powder_keg  : 1;
-            uint16_t cheat_blast_mask           : 1;
-            uint16_t cheat_isg                  : 1;
-        };
-        uint16_t cheats;
-    };
+    uint16_t cheats;
     union{
         struct{
             uint8_t col_enable : 1;
@@ -42,5 +45,6 @@ struct menu *create_warps_menu();
 struct menu *create_inventory_menu();
 struct menu *create_scene_menu();
 struct menu *create_watches_menu();
+struct menu *create_cheats_menu();
 
 #endif

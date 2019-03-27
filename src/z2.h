@@ -913,7 +913,7 @@ typedef struct{
     char                unk_0x144[0x98C];       /* 0x0144 */
     float               linear_velocity;        /* 0x0AD0 */
     uint16_t            movement_angle;         /* 0x0AD4 */
-    char                unk_0xAD6[0x02];        /* 0x0AD6 */
+    char                unk_0xAD6[0x05];        /* 0x0AD6 */
     uint8_t             sword_active;           /* 0x0ADB */
     char                unk_0xADC[0x84];        /* 0x0ADC */
     uint16_t            blast_mask_timer;       /* 0x0B60 */

@@ -86,22 +86,36 @@ static void kz_main(void) {
 
     /* activate cheats */
     {
-        if(kz.cheat_blast_mask)
+        if(kz.cheats & (1 << CHEAT_BLAST_MASK))
             z2_link.blast_mask_timer = 0x00;
-        if(kz.cheat_isg)
+        if(kz.cheats & (1 << CHEAT_ISG))
             z2_link.sword_active = 0x01;
-        if(kz.cheat_infinite_arrows)
-            z2_file.ammo[Z2_SLOT_BOW] = 0x10;
-        if(kz.cheat_infinite_bombs)
-            z2_file.ammo[Z2_SLOT_BOMB] = 0x10;
-        if(kz.cheat_infinite_bombchu)
-            z2_file.ammo[Z2_SLOT_BOMBCHU] = 0x10;
-        if(kz.cheat_infinite_powder_keg)
+        if(kz.cheats & (1 << CHEAT_ARROWS)){
+            uint8_t arrow_cap[] = { 1, 30, 40, 50, 1, 20, 30, 40 };
+            z2_file.ammo[Z2_SLOT_BOW] = arrow_cap[z2_file.quiver];
+        }
+        uint8_t bomb_cap[] = { 1, 20, 30, 40, 1, 1, 1, 1 };
+        if(kz.cheats & (1 << CHEAT_BOMBS)){
+            z2_file.ammo[Z2_SLOT_BOMB] = bomb_cap[z2_file.bomb_bag];
+        }
+        if(kz.cheats & (1 << CHEAT_BOMBCHUS)){
+            z2_file.ammo[Z2_SLOT_BOMBCHU] = bomb_cap[z2_file.bomb_bag];
+        }
+        if(kz.cheats & (1 << CHEAT_POWDER_KEG)){
             z2_file.ammo[Z2_SLOT_POWDER_KEG] = 0x01;
-        if(kz.cheat_infinite_health){
+        }
+        if(kz.cheats & (1 << CHEAT_NUTS)){
+            uint8_t nut_cap[] = { 1, 20, 30, 40, 1, 99, 1, 99};
+            z2_file.ammo[Z2_SLOT_NUT] = nut_cap[z2_file.nut_upgrade];
+        }
+        if(kz.cheats & (1 << CHEAT_STICKS)){
+            uint8_t stick_cap[] = { 1, 10, 20, 30, 1, 20, 30, 40};
+            z2_file.ammo[Z2_SLOT_STICK] = stick_cap[z2_file.stick_upgade];
+        }
+        if(kz.cheats & (1 << CHEAT_HEALTH)){
             z2_file.current_health = z2_file.max_health;
         }
-        if(kz.cheat_infinite_magic){
+        if(kz.cheats & (1 << CHEAT_MAGIC)){
             z2_file.current_magic = z2_file.magic_level * 0x30;
         }
     }
@@ -194,10 +208,11 @@ void init() {
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
 
     menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
-    menu_add_submenu(&kz.main_menu,0,2,create_scene_menu(),"scene");
-    menu_add_submenu(&kz.main_menu,0,3,create_watches_menu(),"watches");
-    menu_add_submenu(&kz.main_menu,0,4,create_inventory_menu(),"inventory");
-
+    menu_add_submenu(&kz.main_menu,0,2,create_cheats_menu(),"cheats");
+    menu_add_submenu(&kz.main_menu,0,3,create_scene_menu(),"scene");
+    menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
+    menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
+    
     kz.ready = 1;
 }
 

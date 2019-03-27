@@ -12,6 +12,7 @@ static gfx_texture *trade_quest_texture = NULL;
 static gfx_texture *owl_icon_texture = NULL;
 static gfx_texture *remains_texture = NULL;
 static gfx_texture *note_texture = NULL;
+static gfx_texture *notebook_texture = NULL;
 
 static struct menu_item *tooltip = NULL;
 
@@ -105,6 +106,10 @@ static struct switch_data remains_data_table[] = {
     { 0x0004,   "gyorg's remains" },
     { 0x0008,   "twinmold's remains" },
 };
+
+static struct switch_data bombers_notebook_table = 
+    { 0x0040000,    "bomber's notebook" }
+;
 
 static struct song_data song_data_table[] = {
     { 0x0001000, 0xFFFFFFFF, "song of time" },
@@ -422,11 +427,13 @@ static void quest_status_callback_proc(enum menu_callback callback){
     if(callback == MENU_CALLBACK_ENTER){
         remains_texture = gfx_load_icon_item_static(Z2_ITEM_ODOLWAS_REMAINS,Z2_ITEM_TWINMOLDS_REMAINS,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
         note_texture = gfx_load_icon_item_static(98,98,G_IM_FMT_IA,G_IM_SIZ_8b,16,24,0);
+        notebook_texture = gfx_load_icon_item_static(0x6C,0x6C,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
         owl_icon_texture = gfx_load_game_texture(G_IM_FMT_RGBA, G_IM_SIZ_32b,24,12,1,1,10,0x14668,1);
     }else{
         gfx_destroy_texture(remains_texture);
         gfx_destroy_texture(owl_icon_texture);
         gfx_destroy_texture(note_texture);
+        gfx_destroy_texture(notebook_texture);
     }
 }
 
@@ -534,6 +541,7 @@ struct menu *create_inventory_menu(){
             menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,remains_data_table[i].bitmask,&remains_texture,16,16,i,1,remains_data_table[i].tooltip);
             x++;
         }
+        menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,bombers_notebook_table.bitmask,&notebook_texture,16,16,0,1,bombers_notebook_table.tooltip);
         x=0;
         y++;
         for(int i=0;i<sizeof(song_data_table)/sizeof(*song_data_table);i++){
