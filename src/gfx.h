@@ -37,8 +37,9 @@ void gfx_printchars(gfx_font *, uint16_t, uint16_t, uint32_t, const char *, size
 void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height);
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color);
 void gfx_destroy_texture(gfx_texture *texture);
-gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile, _Bool desaturate);
-gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t width, uint16_t height, uint16_t x_tiles, uint16_t y_tiles, int file, uint32_t offset);
+gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile, g_ifmt_t format, g_isiz_t size, uint16_t tile_width, uint16_t tile_height, _Bool desaturate);
+gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t width, uint16_t height, uint16_t x_tiles, uint16_t y_tiles, int file, uint32_t offset, _Bool desaturate);
+void gfx_texture_desaturate(void *data, size_t len);
 
 extern gfx_font *kfont;
 

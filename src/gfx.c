@@ -152,41 +152,50 @@ void gfx_texture_desaturate(void *data, size_t len){
     }
 }
 
-gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile, _Bool desaturate){
+gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile, 
+                                       g_ifmt_t format, g_isiz_t size,
+                                       uint16_t tile_width, uint16_t tile_height, 
+                                       _Bool desaturate){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
         int tiles_cnt = end_tile - start_tile + 1;
-        texture->data = memalign(64, (0x1000 * tiles_cnt) * (desaturate?2:1));
+        size_t tile_size = ((tile_width * tile_height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+        texture->tile_size = tile_size;
+        texture->img_fmt = format;
+        texture->img_size = size;
+        texture->tile_width = tile_width;
+        texture->tile_height = tile_height;
+        texture->x_tiles = 1;
+        texture->y_tiles = tiles_cnt * (desaturate?2:1);
+
+        texture->data = memalign(64, (tile_size * tiles_cnt) * (desaturate?2:1));
         int i;
         int j;
         for(i=0,j=start_tile;i<tiles_cnt;i++,j++){
-            z2_DecodeArchiveFile(z2_file_table[19].prom_start,j,texture->data + (0x1000 * i));
+            z2_DecodeArchiveFile(z2_file_table[19].prom_start,j,texture->data + (tile_size * i));
             if(desaturate){
                 // Copy newly decoded file and desaturate
-                memcpy(texture->data + (0x1000 * tiles_cnt) + (0x1000 * i), texture->data + (0x1000 * i), 0x1000);
-                gfx_texture_desaturate(texture->data + (0x1000 * tiles_cnt) + (0x1000 * i),0x1000);
+                memcpy(texture->data + (tile_size * tiles_cnt) + (tile_size * i), texture->data + (tile_size * i), tile_size);
+                gfx_texture_desaturate(texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
             }
         }
-        texture->img_fmt = G_IM_FMT_RGBA;
-        texture->img_size = G_IM_SIZ_32b;
-        texture->tile_width = 32;
-        texture->tile_height = 32;
-        texture->x_tiles = 1;
-        texture->y_tiles = tiles_cnt * (desaturate?2:1);
-        texture->tile_size = 0x1000;
     }
     return texture;
 }
 
-gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t width, uint16_t height, uint16_t x_tiles, uint16_t y_tiles, int file, uint32_t offset){
+gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, 
+                                   uint16_t width, uint16_t height, 
+                                   uint16_t x_tiles, uint16_t y_tiles, 
+                                   int file, uint32_t offset, _Bool desaturate){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
-        texture->tile_size = ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
-        texture->data = memalign(64, texture->tile_size * x_tiles * y_tiles);
+        size_t tile_size = ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+        texture->tile_size = tile_size;
+        texture->data = memalign(64, (texture->tile_size * x_tiles * y_tiles) * (desaturate?2:1));
         texture->img_fmt = format;
         texture->img_size = size;
-        texture->tile_width = 32;
-        texture->tile_height = 32;
+        texture->tile_width = width;
+        texture->tile_height = height;
         texture->x_tiles = x_tiles;
         texture->y_tiles = y_tiles;
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
@@ -201,23 +210,32 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, uint16_t widt
         };
         z2_osSendMessage(&z2_file_msgqueue, &getfile, OS_MESG_NOBLOCK);
         z2_osRecvMessage(&queue,NULL,OS_MESG_BLOCK);
-        memcpy(texture->data,tempdata + offset,texture->tile_size * x_tiles * y_tiles);
+        memcpy(texture->data,tempdata + offset,tile_size * x_tiles * y_tiles);
         free(tempdata);
+        if(desaturate){
+            size_t tiles_cnt = x_tiles * y_tiles;
+            for(int i=0;i<tiles_cnt;i++){
+                memcpy(texture->data + (tile_size * tiles_cnt) + (tile_size * i), texture->data + (tile_size * i), tile_size);
+                gfx_texture_desaturate(texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
+            }
+        }
     }
     return texture;
 }
 
 void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
     gfx_load_tile(texture, tile);
+    float x_scale = (float)width / (float)texture->tile_width;
+    float y_scale = (float)height / (float)texture->tile_height;
     gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x) & ~3,
                          qs102(y) & ~3,
-                         qs102(x + texture->tile_width * ((float)width / (float)texture->tile_width) + 1) & ~3,
-                         qs102(y + texture->tile_height * ((float)height / (float)texture->tile_height) + 1) & ~3,
+                         qs102(x + texture->tile_width * x_scale + 1) & ~3,
+                         qs102(y + texture->tile_height * y_scale + 1) & ~3,
                          G_TX_RENDERTILE,
                          qu105(0),
                          qu105(0),
-                         qu510(1.0f / ((float)width / (float)texture->tile_width)), qu510(1.0f / ((float)width/(float)texture->tile_height)));
+                         qu510(1.0f / x_scale), qu510(1.0f / y_scale));
 }
 
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
