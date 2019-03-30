@@ -272,8 +272,8 @@ typedef struct {
             uint32_t                        : 9;    /* & 0xFF800000 >> 0x17 */
             uint32_t nut_upgrade            : 3;    /* & 0x00700000 >> 0x14 */
             uint32_t stick_upgade           : 3;    /* & 0x000E0000 >> 0x11 */
-            uint32_t                        : 2;    /* & 0x00018000 >> 0x0F */
-            uint32_t wallet_upgrade         : 3;    /* & 0x00007000 >> 0x0C */
+            uint32_t                        : 3;    /* & 0x00018000 >> 0x0F */
+            uint32_t wallet_upgrade         : 2;    /* & 0x00007000 >> 0x0C */
             uint32_t                        : 6;    /* & 0x00000FC0 >> 0x06 */
             uint32_t bomb_bag               : 3;    /* & 0x00000038 >> 0x03 */
             uint32_t quiver                 : 3;    /* & 0x00000007 >> 0x00 */

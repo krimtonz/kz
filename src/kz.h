@@ -18,7 +18,8 @@ enum cheats {
     CHEAT_RAZOR_SWORD,
     CHEAT_BLAST_MASK,
     CHEAT_RESTRICTION,
-    CHEAT_ISG
+    CHEAT_ISG,
+    CHEAT_RUPEES,
 };
 
 typedef struct  {

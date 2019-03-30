@@ -15,6 +15,7 @@ static struct cheat_item cheat_table[] = {
     { CHEAT_NUTS, "nuts" },
     { CHEAT_HEALTH, "health" },
     { CHEAT_MAGIC, "magic" },
+    { CHEAT_RUPEES, "rupees" },
     { CHEAT_BLAST_MASK, "no blast mask cooldown" },
     { CHEAT_RAZOR_SWORD, "unbreakable razor sword" },
     { CHEAT_RESTRICTION, "no item restriction" },

@@ -118,6 +118,10 @@ static void kz_main(void) {
         if(kz.cheats & (1 << CHEAT_MAGIC)){
             z2_file.current_magic = z2_file.magic_level * 0x30;
         }
+        if(kz.cheats & (1 << CHEAT_RUPEES)){
+            uint16_t rupee_cap[] = { 99, 200, 500, 500 };
+            z2_file.rupees = rupee_cap[z2_file.wallet_upgrade];
+        }
     }
 
     z2_input_t input = z2_game.common.input[0];
