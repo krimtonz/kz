@@ -201,7 +201,7 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
         OSMesgQueue queue;
         OSMesg msg;
-        z2_createOSMesgQueue(&queue,&msg,1);
+        osCreateOSMesgQueue(&queue,&msg,1);
         z2_getfile_t getfile = {
             z2_file_table[file].vrom_start, tempdata,
             z2_file_table[file].vrom_end - z2_file_table[file].vrom_start,

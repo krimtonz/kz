@@ -6,7 +6,17 @@ struct command kz_commands[COMMAND_CNT] = {
     {"levitate",    COMMAND_HOLD,   BUTTON_L,                   command_levitate},
     {"turbo",       COMMAND_HOLD,   BUTTON_D_DOWN,              command_turbo},
     {"void out",    COMMAND_PRESS,  BUTTON_D_LEFT | BUTTON_A,   command_void},
+    {"break free",  COMMAND_PRESS,  BUTTON_D_RIGHT | BUTTON_L,  command_break},
 };
+
+void command_break(){
+    z2_game.cutscene_state = 0x03;
+    z2_game.message_state_1 = 0x43;
+    z2_game.message_state_2 = 0x00;
+    z2_game.message_state_3 = 0x02;
+    z2_link.state_flags_1 = 0;
+    z2_link.state_flags_2 = 0;
+}
 
 void command_levitate(){
     z2_link.common.vel_1.y=6.0f;

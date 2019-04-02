@@ -7,3 +7,5 @@ bin/
 *.z64
 *.wad
 .vscode/
+*.sra
+*.bak

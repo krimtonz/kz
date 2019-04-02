@@ -607,7 +607,7 @@ typedef struct /* z2_camera_t */
 
     z2_xyzf_t       unk_0x80;               /* 0x0080 */
     z2_ctxt_t      *game;                   /* 0x008C */
-    z2_actor_t      *focus;                 /* 0x0090 */
+    z2_actor_t     *focus;                  /* 0x0090 */
     z2_xyzf_t       focus_pos;              /* 0x0094 */
     uint32_t        unk_0xA0;               /* 0x00A0 */
     uint32_t        unk_0xA4;               /* 0x00A4 */
@@ -898,7 +898,16 @@ typedef struct {
     char                unk_0x814[0x1C];        /* 0x00814 */
     z2_col_ctxt_t       col_ctxt;               /* 0x00830 */
     z2_actor_ctxt_t     actor_ctxt;             /* 0x01CA0 */
-    char                unk_0x1F24[0x15E64];    /* 0x01F24 */
+    char                unk_0x1F24[0x04];       /* 0x01F24 */
+    void               *cutscene_ptr;           /* 0x01F28 */
+    int8_t              cutscene_state;         /* 0x01F2C */
+    char                unk_0x1F2D[0x148FD];    /* 0x01F2D */
+    uint8_t             message_state_1;        /* 0x1682A */
+    char                unk_0x1682B[0xFD];      /* 0x1682B */
+    uint8_t             message_state_2;        /* 0x16928 */
+    char                unk_0x16829[0x02];      /* 0x16929 */
+    uint8_t             message_state_3;        /* 0x1692B */
+    char                unk_0x1692C[0x145C];    /* 0x1692C */
     z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */
     z2_room_ctxt_t      room_ctx;               /* 0x186E0 */
     uint8_t             room_cnt;               /* 0x18760 */
@@ -910,7 +919,10 @@ typedef struct {
 
 typedef struct{
     z2_actor_t          common;                 /* 0x0000 */
-    char                unk_0x144[0x98C];       /* 0x0144 */
+    char                unk_0x144[0x928];       /* 0x0144 */
+    uint32_t            state_flags_1;          /* 0x0A6C */
+    uint32_t            state_flags_2;          /* 0x0A70 */
+    char                unk_0xA74[0x5C];        /* 0x0A74 */
     float               linear_velocity;        /* 0x0AD0 */
     uint16_t            movement_angle;         /* 0x0AD4 */
     char                unk_0xAD6[0x05];        /* 0x0AD6 */
@@ -1018,19 +1030,27 @@ typedef struct
 typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
+typedef void (*osWritebackDCache_t)(void *src, size_t size);
+typedef void (*z2_setFlashStatus_t)(OSPiHandle *handle, uint32_t reg, uint32_t status);
 
 #define z2_osSendMessage_addr       0x80087B10
 #define z2_osRecvMessage_addr       0x80087ED0
+#define z2_osWritebackDCache_addr   0x8008A5E0
+#define z2_osEPiStartDma_addr       0x8008EE30
 #define z2_osCreateMesgQueue_addr   0x8008F240
+#define z2_setFlashStatus_addr      0x80093BB0
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
 #define z2_DecodeArchiveFile_addr   0x80178DAC
 
-#define z2_loadroom                 ((z2_loadroom_t)            z2_loadroom_addr)
-#define z2_unloadroom               ((z2_unloadroom_t)          z2_unloadroom_addr)
-#define z2_createOSMesgQueue        ((osCreateMesgQueue_t)      z2_osCreateMesgQueue_addr)
 #define z2_osSendMessage            ((osSendMesg_t)             z2_osSendMessage_addr)
 #define z2_osRecvMessage            ((osRecvMesg_t)             z2_osRecvMessage_addr)
+#define osWritebackDCache           ((osWritebackDCache_t)      z2_osWritebackDCache_addr)
+#define osEPiStartDma               ((osEPiStartDma_t)          z2_osEPiStartDma_addr)
+#define osCreateOSMesgQueue         ((osCreateMesgQueue_t)      z2_osCreateMesgQueue_addr)
+#define z2_setFlashStatus           ((z2_setFlashStatus_t)      z2_setFlashStatus_addr)
+#define z2_loadroom                 ((z2_loadroom_t)            z2_loadroom_addr)
+#define z2_unloadroom               ((z2_unloadroom_t)          z2_unloadroom_addr)
 #define z2_DecodeArchiveFile        ((z2_DecodeArchiveFile_t)   z2_DecodeArchiveFile_addr)
 
 extern z2_game_t                    z2_game;
@@ -1044,5 +1064,6 @@ extern z2_actor_ovl_table_t         z2_actor_ovl_table[];
 extern z2_player_ovl_table_t        z2_player_ovl_table[];
 extern z2_file_table_t              z2_file_table[];
 extern OSMesgQueue                  z2_file_msgqueue;
+extern OSPiHandle                   z2_pi_io_handle;
 
 #endif

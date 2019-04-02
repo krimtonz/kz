@@ -3,9 +3,9 @@
 #include "menu.h"
 
 struct menu_data_watch{
-    watch_t    *watch;
-    watch_type  type;
-    uint8_t     floating;
+    watch_t         *watch;
+    enum watch_type  type;
+    uint8_t          floating;
 
 };
 

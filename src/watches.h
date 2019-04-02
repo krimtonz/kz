@@ -3,7 +3,17 @@
 
 #include <stdint.h>
 
-typedef enum {
+#define WATCHES_MAX 10
+
+struct watch_info{
+    union{
+        uint8_t type        : 4;
+        uint8_t floating    : 4;
+    };
+    uint8_t wi;
+};
+
+enum watch_type{
     WATCH_TYPE_S8,
     WATCH_TYPE_U8,
     WATCH_TYPE_X8,
@@ -14,11 +24,11 @@ typedef enum {
     WATCH_TYPE_U32,
     WATCH_TYPE_X32,
     WATCH_TYPE_FLOAT
-}watch_type;
+};
 
 typedef struct {
     void *address;
-    watch_type type;
+    enum watch_type type;
     uint16_t x;
     uint16_t y;
     uint8_t floating;

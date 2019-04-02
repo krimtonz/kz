@@ -8,7 +8,11 @@ void kz_col_view(){
     static Gfx *poly_disp_p;
     static Gfx *poly_disp_d;
 
-    if(kz.col_gen){
+    if(kz.collision_view_status == COL_VIEW_GENERATE){
+
+        if(poly_disp){
+            free(poly_disp);
+        }
 
         z2_col_hdr_t *col = z2_game.col_ctxt.col_hdr;
         size_t n_poly = col->n_poly;
@@ -20,7 +24,7 @@ void kz_col_view(){
         uint32_t blc2;
         Mtx m;
         
-        if(kz.col_redux){
+        if(kz.collision_view_settings & COL_VIEW_REDUX){
             poly_idx = malloc(poly_temp);
             for(int i=0;i<poly_temp;++i){
                 z2_col_poly_t *poly = &col->poly[i];
@@ -40,10 +44,11 @@ void kz_col_view(){
         size_t poly_size = 9 * poly_temp + 0x10;
         
         poly_disp = malloc(poly_size * sizeof(*poly_disp));
+        kz.test = poly_size * sizeof(*poly_disp);
         poly_disp_p = poly_disp;
         poly_disp_d = poly_disp + (sizeof(*poly_disp) * poly_size + sizeof(*poly_disp) - 1) / sizeof(*poly_disp);
 
-        if(kz.col_opaque){
+        if(kz.collision_view_settings & COL_VIEW_OPAQUE){
             rm |= Z_UPD | ZMODE_DEC;
             alpha = 0xFF;
             blc1 = GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
@@ -109,16 +114,18 @@ void kz_col_view(){
 
         gSPEndDisplayList(poly_disp_p++);
         
-        kz.col_gen = 0;
+        kz.collision_view_status = COL_VIEW_SHOW;
         if(poly_idx) free(poly_idx);
     }
-    if(!kz.col_enable){
+    if(kz.collision_view_status == COL_VIEW_DESTROY){
         if(poly_disp){
             free(poly_disp);
+            poly_disp = NULL;
         }
+        kz.collision_view_status = COL_VIEW_NONE;
     }
-    if(poly_disp){
-        Gfx *g = kz.col_opaque?z2_game.common.gfx->poly_opa.p++:z2_game.common.gfx->poly_xlu.p++;
+    if(kz.collision_view_status == COL_VIEW_SHOW){
+        Gfx *g = (kz.collision_view_settings & COL_VIEW_OPAQUE)?z2_game.common.gfx->poly_opa.p++:z2_game.common.gfx->poly_xlu.p++;
         gSPDisplayList(g,poly_disp);
     }
 }

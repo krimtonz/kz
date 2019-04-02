@@ -5,6 +5,8 @@
 #include <vector/vector.h>
 #include "z2.h"
 #include "menu.h"
+#include "settings.h"
+#include "collision_view.h"
 
 enum cheats {
     CHEAT_STICKS,
@@ -23,21 +25,17 @@ enum cheats {
 };
 
 typedef struct  {
-    _Bool ready;    
-    struct vector watches;
-    size_t watch_cnt;
-    uint16_t cheats;
-    union{
-        struct{
-            uint8_t col_enable : 1;
-            uint8_t col_gen : 1 ;
-            uint8_t col_opaque : 1;
-            uint8_t col_redux : 1;
-        };
-        uint8_t collision_view_settings;
-    };
-    struct menu main_menu;
-    _Bool menu_active;
+    _Bool                   ready;    
+    struct vector           watches;
+    size_t                  watch_cnt;
+    uint16_t                cheats;
+    enum col_view_settings  collision_view_settings;
+    enum col_view_status    collision_view_status;
+    struct menu             main_menu;
+    struct settings        *settings;
+    _Bool                   menu_active;
+    size_t test;
+    
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;

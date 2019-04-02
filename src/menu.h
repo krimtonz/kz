@@ -62,6 +62,7 @@ struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, con
 struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watch_t *watch);
 struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, menu_number_callback callback, void *callback_data, uint8_t base, uint8_t length, int initial);
 struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y, void *addr, uint8_t addr_len, uint32_t bitmask, const char *text);
+struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, const char **text, void *values, uint8_t value_size, uint16_t options, void *list_data);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);

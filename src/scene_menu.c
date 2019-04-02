@@ -3,23 +3,23 @@
 #include "kz.h"
 
 static void collison_show(struct menu_item *item){
-    kz.col_enable = 1;
+    kz.collision_view_status = COL_VIEW_SHOW;
 }
 
 static void collison_hide(struct menu_item *item){
-    kz.col_enable = 0;
+    kz.collision_view_status = COL_VIEW_NONE;
 }
 
 static void collison_gen(struct menu_item *item){
-    kz.col_gen = 1;
+    kz.collision_view_status = COL_VIEW_GENERATE;
 }
 
 static void collision_reduced(struct menu_item *item){
-    kz.col_redux = !kz.col_redux;
+    kz.collision_view_settings ^= COL_VIEW_REDUX;
 }
 
 static void collision_opaque(struct menu_item *item){
-    kz.col_opaque = !kz.col_opaque;
+    kz.collision_view_settings ^= COL_VIEW_OPAQUE;
 }
 
 struct menu *create_scene_menu(){

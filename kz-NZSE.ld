@@ -159,3 +159,4 @@ PROVIDE(z2_actor_ovl_table  = 0x801AEFD0);
 PROVIDE(z2_player_ovl_table = 0x801D0B70);
 PROVIDE(z2_file_table       = 0x8009F8B0);
 PROVIDE(z2_file_msgqueue    = 0x8009B2C0);
+PROVIDE(z2_pi_io_handle     = 0x801FD080);

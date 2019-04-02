@@ -218,12 +218,11 @@ static void draw_item_list(struct menu_item *item){
     struct item_list_row *row = data->row;
     if(data->active){
         gfx_push(gsDPSetPrimColor(0,0,0x00,0xFF,0x00,0xFF));
-        gfx_push(gsDPPipeSync());
     }
     else if(item->owner->selected_item==item){
         gfx_push(gsDPSetPrimColor(0,0,0x00,0x00,0xFF,0xFF));
-        gfx_push(gsDPPipeSync());
     }
+    gfx_push(gsDPPipeSync());
     gfx_draw_sprite(buttons_texture,get_item_x_pos(item),get_item_y_pos(item),1,16,16);
     gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
     gfx_push(gsDPPipeSync());
@@ -459,34 +458,24 @@ struct menu *create_inventory_menu(){
         items.callback_proc = items_callback_proc;
         menu_set_cell(&items,16,16);
         menu_set_padding(&items,5,5);
-        menu_add_item_switch(&items,0,1,0,0);
-        menu_add_item_switch(&items,1,1,1,0);
-        menu_add_item_switch(&items,2,1,2,0);
-        menu_add_item_switch(&items,3,1,3,0);
-        menu_add_item_switch(&items,4,1,4,0);
-
-        menu_add_item_switch(&items,0,2,5,0);
-        menu_add_item_switch(&items,1,2,6,0);
-        menu_add_item_switch(&items,2,2,7,0);
-        menu_add_item_switch(&items,3,2,8,0);
-        menu_add_item_switch(&items,4,2,9,0);
-
-        menu_add_item_switch(&items,0,3,10,0);
-        menu_add_item_switch(&items,1,3,11,0);
-        menu_add_item_switch(&items,2,3,12,0);
-        menu_add_item_switch(&items,3,3,13,0);
-        menu_add_item_switch(&items,4,3,14,0);
+        int x = 0;
+        int y = 1;
+        for(int i=0;i<15;i++){
+            menu_add_item_switch(&items,x,y,i,0);
+            x++;
+            if(x==5){
+                x=0;
+                y++;
+            }
+        }
         
-        menu_add_item_list(&items,0,4,&bottle_options[0], &bottles_texture);
-        menu_add_item_list(&items,1,4,&bottle_options[1], &bottles_texture);
-        menu_add_item_list(&items,2,4,&bottle_options[2], &bottles_texture);
-        menu_add_item_list(&items,3,4,&bottle_options[3], &bottles_texture);
-        menu_add_item_list(&items,4,4,&bottle_options[4], &bottles_texture);
-        menu_add_item_list(&items,5,4,&bottle_options[5], &bottles_texture);
-
-        menu_add_item_list(&items,5,1,&trade_quest_options[0], &trade_quest_texture);
-        menu_add_item_list(&items,5,2,&trade_quest_options[1], &trade_quest_texture);
-        menu_add_item_list(&items,5,3,&trade_quest_options[2], &trade_quest_texture);
+        for(int i=0;i<6;i++){
+            menu_add_item_list(&items,i,4,&bottle_options[i],&bottles_texture);
+        }
+        
+        for(int i=0;i<3;i++){
+            menu_add_item_list(&items,5,i+1,&trade_quest_options[i],&trade_quest_texture);
+        }
     }
 
     // Populate masks menu
@@ -495,33 +484,16 @@ struct menu *create_inventory_menu(){
         masks.callback_proc = masks_callback_proc;
         menu_set_cell(&masks,16,16);
         menu_set_padding(&masks,5,5);
-        menu_add_item_switch(&masks,0,1,0,1);
-        menu_add_item_switch(&masks,1,1,1,1);
-        menu_add_item_switch(&masks,2,1,2,1);
-        menu_add_item_switch(&masks,3,1,3,1);
-        menu_add_item_switch(&masks,4,1,4,1);
-        menu_add_item_switch(&masks,5,1,5,1);
-
-        menu_add_item_switch(&masks,0,2,6,1);
-        menu_add_item_switch(&masks,1,2,7,1);
-        menu_add_item_switch(&masks,2,2,8,1);
-        menu_add_item_switch(&masks,3,2,9,1);
-        menu_add_item_switch(&masks,4,2,10,1);
-        menu_add_item_switch(&masks,5,2,11,1);
-
-        menu_add_item_switch(&masks,0,3,12,1);
-        menu_add_item_switch(&masks,1,3,13,1);
-        menu_add_item_switch(&masks,2,3,14,1);
-        menu_add_item_switch(&masks,3,3,15,1);
-        menu_add_item_switch(&masks,4,3,16,1);
-        menu_add_item_switch(&masks,5,3,17,1);
-
-        menu_add_item_switch(&masks,0,4,18,1);
-        menu_add_item_switch(&masks,1,4,19,1);
-        menu_add_item_switch(&masks,2,4,20,1);
-        menu_add_item_switch(&masks,3,4,21,1);
-        menu_add_item_switch(&masks,4,4,22,1);
-        menu_add_item_switch(&masks,5,4,23,1);
+        int x = 0;
+        int y = 1;
+        for(int i=0;i<24;i++){
+            menu_add_item_switch(&masks,x,y,i,1);
+            x++;
+            if(x==6){
+                x=0;
+                y++;
+            }
+        }
     }
 
     // Populate quest status menu

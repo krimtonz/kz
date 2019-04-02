@@ -5,12 +5,12 @@
 .incbin "base.z64"
 
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_SIZE, 0x40000
+.definelabel G_PAYLOAD_SIZE, 0xB0000
 .definelabel G_PAYLOAD_ADDR, (0x80780000 - G_PAYLOAD_SIZE)
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
 .orga 0x10
-.word 0xDDF7E3E7, 0x4774416C
+.word 0x5354631C, 0x03A2DEF0
 
 ; Add dmatable entry for the payload code
 .orga 0x205F0
