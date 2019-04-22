@@ -199,11 +199,10 @@ static void kz_main(void) {
             gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 20 - kfont->c_height,COLOR_GREEN,url);
             logo_time--;
         }
+
     }
 #undef MAKESTRING_
 #undef MAKESTRING
-
-    gfx_printf(100,100,"%8x %8x %8x",sbrk(0),kz.test,make_bind(2, BUTTON_A,BUTTON_D_DOWN));
 
     gfx_finish();
 }

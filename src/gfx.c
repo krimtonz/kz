@@ -152,7 +152,7 @@ void gfx_texture_desaturate(void *data, size_t len){
     }
 }
 
-gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile, 
+gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, int8_t start_tile, int8_t end_tile, 
                                        g_ifmt_t format, g_isiz_t size,
                                        uint16_t tile_width, uint16_t tile_height, 
                                        _Bool desaturate){
@@ -172,7 +172,7 @@ gfx_texture *gfx_load_icon_item_static(int8_t start_tile, int8_t end_tile,
         int i;
         int j;
         for(i=0,j=start_tile;i<tiles_cnt;i++,j++){
-            z2_DecodeArchiveFile(z2_file_table[19].prom_start,j,texture->data + (tile_size * i));
+            z2_DecodeArchiveFile(z2_file_table[file_idx].prom_start,j,texture->data + (tile_size * i));
             if(desaturate){
                 // Copy newly decoded file and desaturate
                 memcpy(texture->data + (tile_size * tiles_cnt) + (tile_size * i), texture->data + (tile_size * i), tile_size);

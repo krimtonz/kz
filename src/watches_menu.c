@@ -54,8 +54,8 @@ void watch_add(watch_t *watch, struct menu_item *item){
     menu_add_button(item->owner,x,item->y,"X",menu_watch_delete,watch);
     menu_add_button(item->owner,x+1,item->y,"V",menu_watch_anchor,watch);
     menu_add_button(item->owner,x+2,item->y,"<>",menu_watch_move,watch);
-    menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,watch,16,8,(int)watch->address);
-    menu_add_list(item->owner,x + 13,item->y,watch_type_names,watch_type_values,sizeof(*watch_type_values),sizeof(watch_type_values)/sizeof(*watch_type_values),&(watch->type));
+    menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,watch,16,8,&watch->address,sizeof(watch->address));
+    menu_add_list(item->owner,x + 13,item->y,watch_type_names,watch_type_values,sizeof(*watch_type_values),sizeof(watch_type_values)/sizeof(*watch_type_values),&(watch->type),NULL);
     struct menu_item *witem = menu_add_watch(item->owner,x + 19,item->y,watch);
     watch->x = get_item_x_pos(witem);
     watch->y = get_item_y_pos(witem);

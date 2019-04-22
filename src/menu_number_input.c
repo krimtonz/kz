@@ -2,14 +2,16 @@
 #include "menu.h"
 
 struct menu_data_number{
+    int                     value;
+    void                   *val_ptr;
+    char                   *digits;
+    void                   *callback_data;
+    menu_number_callback    callback;
     uint8_t                 base;
     uint8_t                 editing;
     uint8_t                 length;
     uint8_t                 edit_idx;
-    int                     value;
-    char                   *digits;
-    void                   *callback_data;
-    menu_number_callback    callback;
+    uint8_t                 val_len;
 };
 
 int int_to_char(int i){
@@ -24,6 +26,36 @@ int char_to_int(char c){
     return c - ('a' - 0xA);
 }
 
+static int get_val(void *value, uint8_t len){
+    switch(len){
+        case 1:
+            return *(uint8_t*)value;
+            break;
+        case 2:
+            return *(uint16_t*)value;
+            break;
+        case 4:
+        default:
+            return *(uint32_t*)value;
+            break;
+    }
+}
+
+static void set_val(void *value, uint8_t len, uint32_t new_val){
+    switch(len){
+        case 1:
+            *(uint8_t*)value = (uint8_t)new_val;
+            break;
+        case 2:
+            *(uint16_t*)value = (uint16_t)new_val;
+            break;
+        case 4:
+        default:
+            *(uint32_t*)value = (uint32_t)new_val;
+            break;
+    }
+}
+
 void menu_number_activate_callback(struct menu_item *item){
     struct menu_data_number *data = item->data;
     if(data->editing){
@@ -35,6 +67,9 @@ void menu_number_activate_callback(struct menu_item *item){
             mul *= data->base;
         }
         data->value = val;
+        if(data->value){
+            set_val(data->val_ptr,data->val_len,val);
+        }
         if(data->callback){
             data->callback(item, data->callback_data, data->value);
         }
@@ -50,6 +85,7 @@ void menu_number_draw(struct menu_item *item){
         color = MENU_SELECTED_COLOR;
     int x = get_item_x_pos(item) + (kfont->c_width * (data->length-1));
     int y = get_item_y_pos(item);
+    uint32_t val = get_val(data->val_ptr,data->val_len);
     for(int i=data->length-1;i>=0;i--){
         if(data->editing){
             if(data->edit_idx == i){ 
@@ -58,6 +94,10 @@ void menu_number_draw(struct menu_item *item){
             else{
                 color=MENU_DEFAULT_COLOR;
             }
+        }
+        else{
+            data->digits[i] = int_to_char(val % data->base);
+            val /= data->base;
         }
         gfx_printf_color(x,y,color,"%c",data->digits[i]);
         x -= kfont->c_width;
@@ -93,7 +133,10 @@ int menu_number_nav(struct menu_item *item, enum menu_nav nav){
     return 1;
 }
 
-struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, menu_number_callback callback, void *callback_data, uint8_t base, uint8_t length, int initial){
+struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, 
+                                        menu_number_callback callback, void *callback_data, 
+                                        uint8_t base, uint8_t length, void *value,
+                                        uint8_t val_len){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct menu_data_number *data = malloc(sizeof(*data));
@@ -106,16 +149,13 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
         data->edit_idx = length-1;
         data->length = length;
         data->editing = 0;
-        data->value = initial;
+        data->value = get_val(value,val_len);
         data->digits = malloc(length+1);
         data->digits[length] = 0;
+        data->val_ptr = value;
+        data->val_len = val_len;
         data->callback_data = callback_data;
         data->callback = callback;
-        uint32_t val = initial;
-        for(int i=length-1;i>=0;i--){
-            data->digits[i] = int_to_char(val % base);
-            val /= base;
-        }
     }
     return item;
 }

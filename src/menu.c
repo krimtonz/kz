@@ -4,11 +4,16 @@
 #include "kz.h"
 
 int get_item_x_pos(struct menu_item *item){
-    return item->owner->x + item->x * item->owner->cell_width + item->x * item->owner->x_padding;
+    return item->owner->x + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding);
 }
 
 int get_item_y_pos(struct menu_item *item){
     return item->owner->y + item->y * item->owner->cell_height + item->y * item->owner->y_padding;
+}
+
+void set_item_offset(struct menu_item *item, uint16_t x, uint16_t y){
+    item->x_offset = x;
+    item->y_offset = y;
 }
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y){
@@ -62,6 +67,8 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
         item->interactive = 0;
         item->x = x;
         item->y = y;
+        item->x_offset = 0;
+        item->y_offset = 0;
     }
     return item;
 }
@@ -91,7 +98,7 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
     struct menu_item *far = NULL;
 
     for(struct menu_item *item = menu->items.first;item!=NULL;item=list_next(item)){
-
+        if(!item->interactive) continue;
         int distance_x = get_item_x_pos(item) - cur_x_pos;
         int distance_y = get_item_y_pos(item) - cur_y_pos;
 

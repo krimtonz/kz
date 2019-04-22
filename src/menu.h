@@ -32,6 +32,8 @@ struct menu_item{
     uint16_t            x;
     uint16_t            y;
     uint8_t             interactive;
+    uint16_t            x_offset;
+    uint16_t            y_offset;
 };
 
 struct menu{
@@ -50,6 +52,7 @@ struct menu{
 
 typedef void (*menu_button_callback)(struct menu_item *item);
 typedef void (*menu_number_callback)(struct menu_item *item, void *data, uint32_t value);
+typedef void (*menu_list_callback)(struct menu_item *item, uint16_t selected_idx);
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y);
 void menu_draw(struct menu *menu);
@@ -60,9 +63,9 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name);
 struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *text, menu_button_callback callback, void *data);
 struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watch_t *watch);
-struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, menu_number_callback callback, void *callback_data, uint8_t base, uint8_t length, int initial);
-struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y, void *addr, uint8_t addr_len, uint32_t bitmask, const char *text);
-struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, const char **text, void *values, uint8_t value_size, uint16_t options, void *list_data);
+struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, menu_number_callback callback, void *callback_data, uint8_t base, uint8_t length, void *value, uint8_t val_len);
+struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y, void *addr, uint8_t addr_len, uint32_t bitmask, menu_button_callback callback, const char *text);
+struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, const char **text, void *values, uint8_t value_size, uint16_t options, void *list_data, menu_list_callback callback);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);
@@ -70,5 +73,6 @@ void menu_return(struct menu_item *item);
 
 int get_item_x_pos(struct menu_item *item);
 int get_item_y_pos(struct menu_item *item);
+void set_item_offset(struct menu_item *item, uint16_t x, uint16_t y);
 
 #endif
