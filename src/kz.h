@@ -34,7 +34,6 @@ typedef struct  {
     struct menu             main_menu;
     struct settings        *settings;
     _Bool                   menu_active;
-    size_t test;
     
 } kz_ctxt_t;
 

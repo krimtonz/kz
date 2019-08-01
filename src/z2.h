@@ -1032,6 +1032,7 @@ typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*osWritebackDCache_t)(void *src, size_t size);
 typedef void (*z2_setFlashStatus_t)(OSPiHandle *handle, uint32_t reg, uint32_t status);
+typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 
 #define z2_osSendMessage_addr       0x80087B10
 #define z2_osRecvMessage_addr       0x80087ED0

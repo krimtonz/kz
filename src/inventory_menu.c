@@ -1,19 +1,9 @@
 #include <stdlib.h>
 #include "menu.h"
 #include "kz.h"
+#include "resource.h"
 
 #define ITEM_SCREEN_SIZE 11
-
-static gfx_texture *items_texture = NULL;
-static gfx_texture *bottles_texture = NULL;
-static gfx_texture *buttons_texture = NULL;
-static gfx_texture *masks_texture = NULL;
-static gfx_texture *trade_quest_texture = NULL;
-static gfx_texture *owl_icon_texture = NULL;
-static gfx_texture *remains_texture = NULL;
-static gfx_texture *note_texture = NULL;
-static gfx_texture *notebook_texture = NULL;
-static gfx_texture *dungeon_items_tex = NULL;
 
 static struct menu_item *tooltip = NULL;
 
@@ -421,44 +411,6 @@ static struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint
     return item;
 }
 
-static void masks_callback_proc(enum menu_callback callback){
-    if(callback == MENU_CALLBACK_ENTER){
-        masks_texture = gfx_load_icon_item_static(19,Z2_MASK_DEKU,Z2_MASK_GIANT,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
-    }else{
-        gfx_destroy_texture(masks_texture);
-    }
-}
-
-static void items_callback_proc(enum menu_callback callback){
-    if(callback == MENU_CALLBACK_ENTER){
-        items_texture = gfx_load_icon_item_static(19,Z2_ITEM_OCARINA,Z2_ITEM_GREAT_FAIRY_SWORD,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
-        bottles_texture = gfx_load_icon_item_static(19,Z2_ITEM_BOTTLE,Z2_ITEM_BOTTLE2,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,0);
-        trade_quest_texture = gfx_load_icon_item_static(19,Z2_ITEM_MOONS_TEAR,Z2_ITEM_PENDANT,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,0);
-        buttons_texture = gfx_load_game_texture(G_IM_FMT_IA,G_IM_SIZ_8b,32,32,1,5,1126,0xF60,0);
-    }else{
-        gfx_destroy_texture(items_texture);
-        gfx_destroy_texture(bottles_texture);
-        gfx_destroy_texture(buttons_texture);
-        gfx_destroy_texture(trade_quest_texture);
-    }
-}
-
-static void quest_status_callback_proc(enum menu_callback callback){
-    if(callback == MENU_CALLBACK_ENTER){
-        remains_texture = gfx_load_icon_item_static(19,Z2_ITEM_ODOLWAS_REMAINS,Z2_ITEM_TWINMOLDS_REMAINS,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
-        note_texture = gfx_load_icon_item_static(19,98,98,G_IM_FMT_IA,G_IM_SIZ_8b,16,24,0);
-        notebook_texture = gfx_load_icon_item_static(19,Z2_ITEM_BOMBERS_NOTEBOOK,Z2_ITEM_BOMBERS_NOTEBOOK,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
-        owl_icon_texture = gfx_load_game_texture(G_IM_FMT_RGBA, G_IM_SIZ_32b,24,12,1,1,10,0x14668,1);
-        dungeon_items_tex = gfx_load_icon_item_static(20,6,8,G_IM_FMT_RGBA,G_IM_SIZ_32b,24,24,1);
-    }else{
-        gfx_destroy_texture(remains_texture);
-        gfx_destroy_texture(owl_icon_texture);
-        gfx_destroy_texture(note_texture);
-        gfx_destroy_texture(notebook_texture);
-        gfx_destroy_texture(dungeon_items_tex);
-    }
-}
-
 static void max_health_callback(struct menu_item *item, void *data, uint32_t value){
     z2_file.max_health = (uint16_t)value;
 }
@@ -515,7 +467,6 @@ struct menu *create_inventory_menu(){
     // Populate items menu
     {
         items.selected_item = menu_add_button(&items,0,0,"return",menu_return,NULL);
-        items.callback_proc = items_callback_proc;
         menu_set_cell(&items,16,16);
         menu_set_padding(&items,5,5);
         int x = 0;
@@ -541,7 +492,6 @@ struct menu *create_inventory_menu(){
     // Populate masks menu
     {
         masks.selected_item = menu_add_button(&masks,0,0,"return",menu_return,NULL);
-        masks.callback_proc = masks_callback_proc;
         menu_set_cell(&masks,16,16);
         menu_set_padding(&masks,5,5);
         int x = 0;
@@ -559,7 +509,6 @@ struct menu *create_inventory_menu(){
     // Populate quest status menu
     {
         quest_status.selected_item = menu_add_button(&quest_status,0,0,"return",menu_return,NULL);
-        quest_status.callback_proc = quest_status_callback_proc;
         //menu_set_cell(&quest_status,16,16);
         
         int x = 0;

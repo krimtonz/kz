@@ -11,9 +11,7 @@
 #include "commands.h"
 #include "settings.h"
 #include "io.h"
-
-extern void game_update_start(z2_game_t *game);
-typedef void (*game_update_start_t)(z2_game_t *game);
+#include "resource.h"
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = { 
@@ -23,44 +21,6 @@ static void kz_main(void) {
     gfx_begin();
 
     input_update();
-
-    /* :relaxed: */
-    {
-        uint16_t pressed = get_pad_pressed();
-        static uint16_t timer;
-        if(pressed){
-            static const uint16_t konami_code[] = {
-                BUTTON_D_UP,
-                BUTTON_D_UP,
-                BUTTON_D_DOWN,
-                BUTTON_D_DOWN,
-                BUTTON_D_LEFT,
-                BUTTON_D_RIGHT,
-                BUTTON_D_LEFT,
-                BUTTON_D_RIGHT,
-                BUTTON_B,
-                BUTTON_A,
-                BUTTON_START,
-            };
-            static int kc_pos = 0;
-            size_t kc_code_size = sizeof(konami_code)/sizeof(*konami_code);
-            
-            if(pressed == konami_code[kc_pos]){
-                kc_pos++;
-                if(kc_pos == kc_code_size){
-                    kc_pos = 0;
-                    timer = 0x100;
-                }
-            }else{
-                kc_pos = 0;
-            }
-        }
-        if(timer>0){
-            timer--;
-            gfx_printf_color(100,100,GPACK_RGBA8888(0xFF,0,0,0xFF),"Congratulations!");
-            gfx_printf_color(35,108,GPACK_RGBA8888(0xFF,0,0,0xFF),"You have undermined Jimmie1717");
-        }
-    }
 
     /* input display */
     {
@@ -216,7 +176,6 @@ void init() {
     do_global_ctors();
     gfx_init();
 
-    kz.test = 0;
     kz.collision_view_status = COL_VIEW_NONE;
 
     vector_init(&kz.watches, sizeof(watch_t));
@@ -237,6 +196,9 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_button(&kz.main_menu,0,6,"save settings",save_settings,NULL);
+
+    init_textures();
+
     kz.ready = 1;
 }
 
@@ -258,7 +220,7 @@ static void kz_stack(void (*kzfunc)(void)) {
 }
 
 /* Entry Point of KZ executable */
-ENTRY void _start(z2_game_t *game, game_update_start_t game_update_start) {
+ENTRY void _start(z2_game_t *game, z2_gamesate_update_t game_update_start) {
     init_gp();
     if(!kz.ready){
         kz_stack(init);

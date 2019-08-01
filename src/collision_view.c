@@ -44,7 +44,6 @@ void kz_col_view(){
         size_t poly_size = 9 * poly_temp + 0x10;
         
         poly_disp = malloc(poly_size * sizeof(*poly_disp));
-        kz.test = poly_size * sizeof(*poly_disp);
         poly_disp_p = poly_disp;
         poly_disp_d = poly_disp + (sizeof(*poly_disp) * poly_size + sizeof(*poly_disp) - 1) / sizeof(*poly_disp);
 

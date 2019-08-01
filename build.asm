@@ -6,7 +6,7 @@
 
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
 .definelabel G_PAYLOAD_SIZE, filesize("bin/kz.bin") + 0x20
-.definelabel G_PAYLOAD_ADDR, 0x80780000
+.definelabel G_PAYLOAD_ADDR, 0x80800000
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
 .orga 0x10
