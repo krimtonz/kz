@@ -5,8 +5,8 @@
 .incbin "base.z64"
 
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_SIZE, 0xB0000
-.definelabel G_PAYLOAD_ADDR, (0x80780000 - G_PAYLOAD_SIZE)
+.definelabel G_PAYLOAD_SIZE, filesize("bin/kz.bin") + 0x20
+.definelabel G_PAYLOAD_ADDR, 0x80780000
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
 .orga 0x10
@@ -21,17 +21,6 @@
 ; ==================================================================================================
 
 .headersize(0x800A5AC0 - 0xB3C000)
-
-; ==================================================================================================
-; Set the size of the main heap
-; ==================================================================================================
-
-.org 0x80174C4C
-lui     t8, hi(G_PAYLOAD_ADDR)
-addiu   t8, lo(G_PAYLOAD_ADDR)
-.org 0x80174C5C
-sw      a1, 0x1528(v1)
-
 
 ; ==================================================================================================
 ; Custom Code Payload
@@ -68,7 +57,10 @@ or      a1, r0, t9
 
 .headersize(G_PAYLOAD_ADDR - G_PAYLOAD_VROM)
 .org G_PAYLOAD_ADDR
-.include "init.asm"
+ainit:
+    lui     s0, 0x801C
+    jr		ra
+    addiu   s0, s0, 0xD910
 .org G_KZ_ADDR
 .incbin("bin/kz.bin")
 .align 8

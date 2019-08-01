@@ -11,9 +11,6 @@ static uint16_t pad_held;
 static uint16_t pad_released;
 static uint16_t reserved;
 
-static uint16_t bind_commands[COMMAND_CNT];
-static uint16_t bind_held[COMMAND_CNT];
-
 uint16_t make_bind(int len, ...){
     va_list list;
     va_start(list,len);

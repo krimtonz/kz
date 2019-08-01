@@ -4,4 +4,4 @@
 
 _raw_font: 
     .align 3
-    .incbin "res/testfont.bin"
+    .incbin "res/font.bin"

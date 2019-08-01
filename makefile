@@ -7,7 +7,7 @@ OBJCOPY     = mips64-objcopy
 ARMIPS      = armips
 BUILDFILE   = build.asm
 
-ADDRESS     = 0x806D0020
+ADDRESS     = 0x80800020
 CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks
 CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL)
 LDFLAGS     = -T kz-NZSE.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections -Wl,--defsym,start=$(ADDRESS) 
@@ -43,10 +43,6 @@ $(BIN)      : $(ELF) | $(BINDIR)
 
 patch       : $(BIN)
 	$(ARMIPS) $(BUILDFILE)
-
-compress	: patch
-	rm -rf Archive.bin
-	./Compress patched.z64
 
 clean       :
 	rm -rf $(OBJDIR) $(BINDIR)
