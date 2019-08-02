@@ -69,6 +69,9 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
         item->y = y;
         item->x_offset = 0;
         item->y_offset = 0;
+        item->draw_proc=NULL;
+        item->activate_proc=NULL;
+        item->navigate_proc=NULL;
     }
     return item;
 }

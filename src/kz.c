@@ -17,7 +17,19 @@ __attribute__((section(".data")))
 kz_ctxt_t kz = { 
     .ready = 0, 
 };
+
+static void cpu_counter(){
+    static uint32_t count = 0;
+    uint32_t new_count;
+    __asm__ volatile("mfc0 $t0, $9;"
+                     "nop;"
+                     "sw $t0, %0" : "=m"(new_count) :: "t0");
+    kz.cpu_cycle_counter += new_count - count;
+    count = new_count;
+}
+
 static void kz_main(void) {
+    cpu_counter();
     gfx_begin();
 
     input_update();
@@ -36,16 +48,22 @@ static void kz_main(void) {
 
     /* draw floating watches */
     {
-        static char watch_buf[16];
         for(int i=0;i<kz.watch_cnt;i++){
             watch_t *watch = vector_at(&kz.watches,i);
             if(watch->floating){
-                watch_printf(watch,watch_buf);
-                gfx_printf(watch->x,watch->y,"%s",watch_buf);
+                watch_printf(watch);
             }
         }
     }
+
     
+    kz.frames += z2_static_ctxt.update_rate;
+
+    if(!kz.timer_running){
+        kz.cpu_offset -= kz.cpu_cycle_counter - kz.cpu_prev;
+    }
+    kz.cpu_prev = kz.cpu_cycle_counter;
+
     /* activate cheats */
     {
         if(kz.cheats & (1 << CHEAT_BLAST_MASK))
@@ -121,8 +139,8 @@ static void kz_main(void) {
                 callback = MENU_CALLBACK_ACTIVATE;
             }
 
-            menu_callback(kz_menu,callback);
             menu_navigate(kz_menu,navdir);
+            menu_callback(kz_menu,callback);
             menu_draw(kz_menu);
         }
 
@@ -176,6 +194,16 @@ void init() {
     do_global_ctors();
     gfx_init();
 
+    kz.cpu_cycle_counter = 0;
+    cpu_counter();
+    kz.cpu_offset = -kz.cpu_cycle_counter;
+    kz.cpu_prev = kz.cpu_cycle_counter;
+    kz.timer_running = 0;
+
+    kz.frames = 0;
+    kz.frames_offset = -(int32_t)z2_vi_counter;
+    kz.lag_counter = 0;
+
     kz.collision_view_status = COL_VIEW_NONE;
 
     vector_init(&kz.watches, sizeof(watch_t));
@@ -198,7 +226,6 @@ void init() {
     menu_add_button(&kz.main_menu,0,6,"save settings",save_settings,NULL);
 
     init_textures();
-
     kz.ready = 1;
 }
 

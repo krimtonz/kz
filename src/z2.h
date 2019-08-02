@@ -1027,6 +1027,19 @@ typedef struct
                                                 /* 0x0020 */
 } z2_getfile_t;
 
+typedef struct{
+    char        unk_0x00_[0x32];    /* 0x0000 */
+    uint16_t    time_speed;         /* 0x0032 */
+    char        unk_0x34_[0x06];    /* 0x0034 */
+    int16_t     acceleration;       /* 0x003A */
+    char        unk_0x3C_[0x0E];    /* 0x003C */
+    int16_t     turn_speed;         /* 0x004A */
+    char        unk_0x4E_[0x50];    /* 0x004C */
+    int16_t     gravity;            /* 0x009C */
+    char        unk_0x9E_[0x72];    /* 0x009E */
+    uint16_t    update_rate;        /* 0x0110 */
+} z2_static_ctxt_t;
+
 typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
@@ -1066,5 +1079,7 @@ extern z2_player_ovl_table_t        z2_player_ovl_table[];
 extern z2_file_table_t              z2_file_table[];
 extern OSMesgQueue                  z2_file_msgqueue;
 extern OSPiHandle                   z2_pi_io_handle;
+#define z2_vi_counter (*(uint32_t*) 0x80096B78)
+extern z2_static_ctxt_t             z2_static_ctxt;
 
 #endif

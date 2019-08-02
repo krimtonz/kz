@@ -1,10 +1,9 @@
 #include <stdio.h>
 #include "watches.h"
+#include "gfx.h"
 
-void watch_printf(watch_t *watch, char *buf){
-    if(!buf){
-        return;
-    }
+void watch_printf(watch_t *watch){
+    char buf[16] = {0};
     switch(watch->type){
         case WATCH_TYPE_U8:
             sprintf(buf,"%u",*(uint8_t*)watch->address);
@@ -37,4 +36,5 @@ void watch_printf(watch_t *watch, char *buf){
             sprintf(buf,"%f",*(float*)watch->address);
             break;
     }
+    gfx_printf(watch->x,watch->y,"%s",buf);
 }

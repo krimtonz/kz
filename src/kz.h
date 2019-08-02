@@ -34,6 +34,13 @@ typedef struct  {
     struct menu             main_menu;
     struct settings        *settings;
     _Bool                   menu_active;
+    int64_t                 cpu_cycle_counter;
+    int64_t                 cpu_offset;
+    int64_t                 cpu_prev;
+    _Bool                   timer_running;
+    int32_t                 frames;
+    int32_t                 frames_offset;
+    _Bool                   lag_counter;
     
 } kz_ctxt_t;
 

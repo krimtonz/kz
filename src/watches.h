@@ -34,6 +34,6 @@ typedef struct {
     uint8_t floating;
 } watch_t;
 
-void watch_printf(watch_t *watch, char *buf);
+void watch_printf(watch_t *watch);
 
 #endif

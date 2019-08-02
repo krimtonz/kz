@@ -6,7 +6,7 @@
 #include <malloc.h>
 #include "gfx.h"
 
-#define     GFX_SIZE 0x7500
+#define     GFX_SIZE 0x10000
 
 static Gfx *gfx_disp;
 static Gfx *gfx_disp_p;
@@ -172,11 +172,11 @@ gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, int8_t start_tile, int
         int i;
         int j;
         for(i=0,j=start_tile;i<tiles_cnt;i++,j++){
-            z2_DecodeArchiveFile(z2_file_table[file_idx].prom_start,j,texture->data + (tile_size * i));
+            z2_DecodeArchiveFile(z2_file_table[file_idx].prom_start,j,(char*)texture->data + (tile_size * i));
             if(desaturate){
                 // Copy newly decoded file and desaturate
-                memcpy(texture->data + (tile_size * tiles_cnt) + (tile_size * i), texture->data + (tile_size * i), tile_size);
-                gfx_texture_desaturate(texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
+                memcpy((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i), (char*)texture->data + (tile_size * i), tile_size);
+                gfx_texture_desaturate((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
             }
         }
     }
@@ -210,13 +210,13 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
         };
         z2_osSendMessage(&z2_file_msgqueue, &getfile, OS_MESG_NOBLOCK);
         z2_osRecvMessage(&queue,NULL,OS_MESG_BLOCK);
-        memcpy(texture->data,tempdata + offset,tile_size * x_tiles * y_tiles);
+        memcpy(texture->data,(char*)tempdata + offset,tile_size * x_tiles * y_tiles);
         free(tempdata);
         if(desaturate){
             size_t tiles_cnt = x_tiles * y_tiles;
             for(int i=0;i<tiles_cnt;i++){
-                memcpy(texture->data + (tile_size * tiles_cnt) + (tile_size * i), texture->data + (tile_size * i), tile_size);
-                gfx_texture_desaturate(texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
+                memcpy((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i), (char*)texture->data + (tile_size * i), tile_size);
+                gfx_texture_desaturate((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
             }
         }
     }

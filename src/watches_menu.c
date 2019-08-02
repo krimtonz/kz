@@ -59,17 +59,17 @@ void watch_add(watch_t *watch, struct menu_item *item){
     struct menu_item *witem = menu_add_watch(item->owner,x + 19,item->y,watch);
     watch->x = get_item_x_pos(witem);
     watch->y = get_item_y_pos(witem);
-
     item->y++;
 }
 
 void watches_button_add(struct menu_item *item){
     watch_t *watch = vector_push_back(&kz.watches,1,NULL);
-    static void *address = (void*)0x80000000;
     static enum watch_type type = WATCH_TYPE_U8;
-    watch->address = address;
+    watch->address = (void*)0x80000000;
     watch->type = type;
     watch->floating = 0;
+    watch->x = 0;
+    watch->y = 0;
     kz.watch_cnt++;    
     watch_add(watch,item);
 }

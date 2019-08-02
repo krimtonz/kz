@@ -156,6 +156,11 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
         data->val_len = val_len;
         data->callback_data = callback_data;
         data->callback = callback;
+        int val = data->value;
+        for(int i=data->length-1;i>=0;i--){
+            data->digits[i] = int_to_char(val % data->base);
+            val /= data->base;
+        }
     }
     return item;
 }

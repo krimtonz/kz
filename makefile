@@ -9,7 +9,7 @@ BUILDFILE   = build.asm
 
 ADDRESS     = 0x80800020
 CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks
-CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL)
+CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2
 LDFLAGS     = -T kz-NZSE.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections -Wl,--defsym,start=$(ADDRESS) 
 SRCDIR      = src
 OBJDIR      = obj
