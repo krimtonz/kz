@@ -7,6 +7,13 @@
 #define Z2_SCREEN_WIDTH    320
 #define Z2_SCREEN_HEIGHT   240
 
+#ifndef Z2_VERSION
+#error no z2 version specified
+#endif
+
+#define NZSE 0x00
+#define NZSJ 0x01
+
 typedef struct
 {
     int16_t x;
@@ -28,6 +35,14 @@ typedef struct
     z2_angle_t  y;
     z2_angle_t  z;
 } z2_rot_t;
+
+#if Z2_VERSION==NZSE
+#define ICON_ITEM_STATIC 19
+#define ICON_ITEM_DUNGEON 20
+#else
+#define ICON_ITEM_STATIC 18
+#define ICON_ITEM_DUNGEON 19
+#endif
 
 typedef enum {
     Z2_ITEM_NULL = -1,
@@ -67,20 +82,62 @@ typedef enum {
     Z2_ITEM_ZORA_EGG,
     Z2_ITEM_GOLD_DUST,
     Z2_ITEM_MUSHROOM,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_BOTTLE2,
+    Z2_ITEM_BOTTLE3,
+#endif
     Z2_ITEM_SEAHORSE,
     Z2_ITEM_CHATEAU_ROMANI,
     Z2_ITEM_HYLIAN_LOACH,
+#if Z2_VERSION==NZSE
     Z2_ITEM_BOTTLE2,
-    Z2_ITEM_MOONS_TEAR,
+#else
+    Z2_ITEM_BOTTLE4,
+    Z2_ITEM_BOTTLE5,
+    Z2_ITEM_BOTTLE6,
+    Z2_ITEM_BOTTLE7,
+    Z2_ITEM_BOTTLE8,
+    Z2_ITEM_BOTTLE9,
+    Z2_ITEM_BOTTLE10,
+#endif
+    Z2_END_BOTTLES,
+    Z2_ITEM_MOONS_TEAR = Z2_END_BOTTLES,
     Z2_ITEM_LAND_DEED,
     Z2_ITEM_SWAP_DEED,
     Z2_ITEM_MOUNTAIN_DEED,
     Z2_ITEM_OCEAN_DEED,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_POACHERS_SAW,
+    Z2_ITEM_BROKEN_GORON_SWORD,
+    Z2_ITEM_PRESCRIPTION,
+    Z2_ITEM_SPEEDFROG,
+    Z2_ITEM_EYEDROPS,
+#endif
     Z2_ITEM_ROOM_KEY,
     Z2_ITEM_MAMA_LETTER,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_MOONS_TEAR2,
+    Z2_ITEM_MOONS_TEAR3,
+    Z2_ITEM_MOONS_TEAR4,
+    Z2_ITEM_MOONS_TEAR5,
+    Z2_ITEM_MOONS_TEAR6,
+    Z2_ITEM_MOONS_TEAR7,
+    Z2_ITEM_MOONS_TEAR8,
+    Z2_ITEM_MOONS_TEAR9,
+#endif
     Z2_ITEM_KAFEI_LETTER,
     Z2_ITEM_PENDANT,
-    Z2_ITEM_UNK_MAP,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_MOONS_TEAR10,
+    Z2_ITEM_MOONS_TEAR11,
+    Z2_ITEM_MOONS_TEAR12,
+    Z2_ITEM_MOONS_TEAR13,
+    Z2_ITEM_MOONS_TEAR14,
+    Z2_ITEM_MOONS_TEAR15,
+    Z2_ITEM_MOONS_TEAR16,
+#endif
+    Z2_END_TRADE,
+    Z2_ITEM_UNK_MAP = Z2_END_TRADE,
     Z2_MASK_DEKU,
     Z2_MASK_GORON,
     Z2_MASK_ZORA,
@@ -108,12 +165,20 @@ typedef enum {
     Z2_ITEM_BOW_FIRE_ARROW,
     Z2_ITEM_BOW_ICE_ARROW,
     Z2_ITEM_BOW_LIGHT_ARROW,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_DRUM,
+    Z2_ITEM_GUITAR,
+    Z2_ITEM_PIPES,
+#endif
     Z2_ITEM_KOKIRI_SWORD,
     Z2_ITEM_RAZOR_SWORD,
     Z2_ITEM_GILDED_SWORD,
     Z2_ITEM_DEITY_SWORD,
     Z2_ITEM_HERO_SHIELD,
     Z2_ITEM_MIRROR_SHIELD,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_OOT_MIRROR,
+#endif
     Z2_ITEM_QUIVER_30,
     Z2_ITEM_QUIVER_40,
     Z2_ITEM_QUIVER_50,
@@ -136,7 +201,7 @@ typedef enum {
     Z2_SLOT_BOW,
     Z2_SLOT_FIRE_ARROW,
     Z2_SLOT_ICE_ARROW,
-    Z2_SLOT_LIGHT_ARROW,
+    Z2_SLOT_LIGHT_ARROW,    
     Z2_SLOT_QUEST_1,
     Z2_SLOT_BOMB,
     Z2_SLOT_BOMBCHU,
@@ -331,9 +396,18 @@ typedef struct {
         uint32_t    unk_0x14;                       /* 0x0014 */
         uint32_t    unk_0x18;                       /* 0x0018 */
     }               scene_flags[0x78];              /* 0x00F8 */
-    char            unk_0x0E18_[0x2E88];            /* 0x0E18 */
-
-    int32_t         file_index;                     /* 0x3CA0 */
+    char            unk_0x0E18_[0x1D4];             /* 0x0E18 */
+#if Z2_VERSION==NZSJ
+    char            unk_0x0FEC_[0x384];             /* 0x0FEC */
+#endif
+    char            lottery_numbers[0x09];          /* 0x0FEC */    /* 0x1370 */
+#if Z2_VERSION==NZSE
+#define UNK_FF5 0x2CAB
+#else
+#define UNK_FF5 0x2BE0
+#endif
+    char            unk_0xFF5_[UNK_FF5];            /* 0x0FF5 */    /* 0x1379 */
+    int32_t         file_index;                     /* 0x3CA0 */    /* 0x3F50 */
     char            unk_0x3CA4[0x0C];               /* 0x3CA4 */
     int             void_flag;                      /* 0x3CB0 */
 } z2_file_t;                                        /* 0x3CB4 */
@@ -907,7 +981,12 @@ typedef struct {
     uint8_t             message_state_2;        /* 0x16928 */
     char                unk_0x16829[0x02];      /* 0x16929 */
     uint8_t             message_state_3;        /* 0x1692B */
-    char                unk_0x1692C[0x145C];    /* 0x1692C */
+#if Z2_VERSION==NZSE
+#define UNK_1692C 0x145C
+#else
+#define UNK_1692C 0x143C
+#endif
+    char                unk_0x1692C[UNK_1692C]; /* 0x1692C */
     z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */
     z2_room_ctxt_t      room_ctx;               /* 0x186E0 */
     uint8_t             room_cnt;               /* 0x18760 */
@@ -1047,15 +1126,26 @@ typedef void (*osWritebackDCache_t)(void *src, size_t size);
 typedef void (*z2_setFlashStatus_t)(OSPiHandle *handle, uint32_t reg, uint32_t status);
 typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 
+#if Z2_VERSION==NZSE
 #define z2_osSendMessage_addr       0x80087B10
 #define z2_osRecvMessage_addr       0x80087ED0
+#define z2_DecodeArchiveFile_addr   0x80178DAC
 #define z2_osWritebackDCache_addr   0x8008A5E0
 #define z2_osEPiStartDma_addr       0x8008EE30
 #define z2_osCreateMesgQueue_addr   0x8008F240
 #define z2_setFlashStatus_addr      0x80093BB0
+#else
+#define z2_osSendMessage_addr       0x80088A10
+#define z2_osRecvMessage_addr       0x80088DD0
+#define z2_osWritebackDCache_addr   0x8008B4E0
+#define z2_osEPiStartDma_addr       0x8008FD30
+#define z2_DecodeArchiveFile_addr   0x8017431C
+#define z2_osCreateMesgQueue_addr   0x80090140
+#define z2_setFlashStatus_addr      0x80094AB0
+#endif
+
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
-#define z2_DecodeArchiveFile_addr   0x80178DAC
 
 #define z2_osSendMessage            ((osSendMesg_t)             z2_osSendMessage_addr)
 #define z2_osRecvMessage            ((osRecvMesg_t)             z2_osRecvMessage_addr)
@@ -1079,7 +1169,11 @@ extern z2_player_ovl_table_t        z2_player_ovl_table[];
 extern z2_file_table_t              z2_file_table[];
 extern OSMesgQueue                  z2_file_msgqueue;
 extern OSPiHandle                   z2_pi_io_handle;
+#if Z2_VERSION==NZSE
 #define z2_vi_counter (*(uint32_t*) 0x80096B78)
+#else
+#define z2_vi_counter (*(uint32_t*) 0x80097A98)
+#endif
 extern z2_static_ctxt_t             z2_static_ctxt;
 
 #endif

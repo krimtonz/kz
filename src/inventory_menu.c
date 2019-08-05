@@ -124,7 +124,6 @@ static struct song_data song_data_table[] = {
 };
 
 static int8_t bottle_contents[] = {
-    Z2_ITEM_NULL,
     Z2_ITEM_BOTTLE,
     Z2_ITEM_RED_POTION,
     Z2_ITEM_GREEN_POTION,
@@ -143,37 +142,77 @@ static int8_t bottle_contents[] = {
     Z2_ITEM_ZORA_EGG,
     Z2_ITEM_GOLD_DUST,
     Z2_ITEM_MUSHROOM,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_BOTTLE2,
+    Z2_ITEM_BOTTLE3,
+#endif
     Z2_ITEM_SEAHORSE,
     Z2_ITEM_CHATEAU_ROMANI,
     Z2_ITEM_HYLIAN_LOACH,
+#if Z2_VERSION==NZSE
+    Z2_ITEM_BOTTLE2,
+#else
+    Z2_ITEM_BOTTLE4,
+    Z2_ITEM_BOTTLE5,
+    Z2_ITEM_BOTTLE6,
+    Z2_ITEM_BOTTLE7,
+    Z2_ITEM_BOTTLE8,
+    Z2_ITEM_BOTTLE9,
+    Z2_ITEM_BOTTLE10,
+#endif
 };
 
 static int8_t trade_quest_contents[] = {
-    Z2_ITEM_NULL,
     Z2_ITEM_MOONS_TEAR,
     Z2_ITEM_LAND_DEED,
     Z2_ITEM_SWAP_DEED,
     Z2_ITEM_MOUNTAIN_DEED,
     Z2_ITEM_OCEAN_DEED,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_POACHERS_SAW,
+    Z2_ITEM_BROKEN_GORON_SWORD,
+    Z2_ITEM_PRESCRIPTION,
+    Z2_ITEM_SPEEDFROG,
+    Z2_ITEM_EYEDROPS,
+#endif
     Z2_ITEM_ROOM_KEY,
     Z2_ITEM_MAMA_LETTER,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_MOONS_TEAR2,
+    Z2_ITEM_MOONS_TEAR3,
+    Z2_ITEM_MOONS_TEAR4,
+    Z2_ITEM_MOONS_TEAR5,
+    Z2_ITEM_MOONS_TEAR6,
+    Z2_ITEM_MOONS_TEAR7,
+    Z2_ITEM_MOONS_TEAR8,
+    Z2_ITEM_MOONS_TEAR9,
+#endif
     Z2_ITEM_KAFEI_LETTER,
     Z2_ITEM_PENDANT,
+#if Z2_VERSION==NZSJ
+    Z2_ITEM_MOONS_TEAR10,
+    Z2_ITEM_MOONS_TEAR11,
+    Z2_ITEM_MOONS_TEAR12,
+    Z2_ITEM_MOONS_TEAR13,
+    Z2_ITEM_MOONS_TEAR14,
+    Z2_ITEM_MOONS_TEAR15,
+    Z2_ITEM_MOONS_TEAR16,
+#endif
 };
 
 static struct item_list_row bottle_options[] = {
-    { &z2_file.items[Z2_SLOT_BOTTLE_1], 22, bottle_contents },
-    { &z2_file.items[Z2_SLOT_BOTTLE_2], 22, bottle_contents },
-    { &z2_file.items[Z2_SLOT_BOTTLE_3], 22, bottle_contents },
-    { &z2_file.items[Z2_SLOT_BOTTLE_4], 22, bottle_contents },
-    { &z2_file.items[Z2_SLOT_BOTTLE_5], 22, bottle_contents },
-    { &z2_file.items[Z2_SLOT_BOTTLE_6], 22, bottle_contents },
+    { &z2_file.items[Z2_SLOT_BOTTLE_1], sizeof(bottle_contents)/sizeof(int8_t)+1, bottle_contents },
+    { &z2_file.items[Z2_SLOT_BOTTLE_2], sizeof(bottle_contents)/sizeof(int8_t)+1, bottle_contents },
+    { &z2_file.items[Z2_SLOT_BOTTLE_3], sizeof(bottle_contents)/sizeof(int8_t)+1, bottle_contents },
+    { &z2_file.items[Z2_SLOT_BOTTLE_4], sizeof(bottle_contents)/sizeof(int8_t)+1, bottle_contents },
+    { &z2_file.items[Z2_SLOT_BOTTLE_5], sizeof(bottle_contents)/sizeof(int8_t)+1, bottle_contents },
+    { &z2_file.items[Z2_SLOT_BOTTLE_6], sizeof(bottle_contents)/sizeof(int8_t)+1, bottle_contents },
 };
 
 static struct item_list_row trade_quest_options[] = {
-    { &z2_file.items[Z2_SLOT_QUEST_1], 10, trade_quest_contents },
-    { &z2_file.items[Z2_SLOT_QUEST_2], 10, trade_quest_contents },
-    { &z2_file.items[Z2_SLOT_QUEST_3], 10, trade_quest_contents },
+    { &z2_file.items[Z2_SLOT_QUEST_1], sizeof(trade_quest_contents)/sizeof(int8_t)+1, trade_quest_contents },
+    { &z2_file.items[Z2_SLOT_QUEST_2], sizeof(trade_quest_contents)/sizeof(int8_t)+1, trade_quest_contents },
+    { &z2_file.items[Z2_SLOT_QUEST_3], sizeof(trade_quest_contents)/sizeof(int8_t)+1, trade_quest_contents },
 };
 
 static const char *dungeon_names[] = {

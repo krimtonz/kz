@@ -211,8 +211,8 @@ void init() {
     kz.watch_cnt = 0;
 
     kz.settings = malloc(sizeof(*kz.settings));
-    load_settings_from_flashram(kz.settings);
-    kz_apply_settings();
+    //load_settings_from_flashram(kz.settings);
+    //kz_apply_settings();
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);
@@ -226,6 +226,7 @@ void init() {
     menu_add_button(&kz.main_menu,0,6,"save settings",save_settings,NULL);
 
     init_textures();
+
     kz.ready = 1;
 }
 

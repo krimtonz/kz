@@ -152,7 +152,7 @@ void gfx_texture_desaturate(void *data, size_t len){
     }
 }
 
-gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, int8_t start_tile, int8_t end_tile, 
+gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, uint8_t start_tile, uint8_t end_tile, 
                                        g_ifmt_t format, g_isiz_t size,
                                        uint16_t tile_width, uint16_t tile_height, 
                                        _Bool desaturate){
@@ -170,7 +170,7 @@ gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, int8_t start_tile, int
 
         texture->data = memalign(64, (tile_size * tiles_cnt) * (desaturate?2:1));
         int i;
-        int j;
+        uint8_t j;
         for(i=0,j=start_tile;i<tiles_cnt;i++,j++){
             z2_DecodeArchiveFile(z2_file_table[file_idx].prom_start,j,(char*)texture->data + (tile_size * i));
             if(desaturate){
@@ -197,7 +197,7 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
         texture->tile_width = width;
         texture->tile_height = height;
         texture->x_tiles = x_tiles;
-        texture->y_tiles = y_tiles;
+        texture->y_tiles = y_tiles * (desaturate?2:1);
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
         OSMesgQueue queue;
         OSMesg msg;

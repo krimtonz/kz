@@ -1,11 +1,12 @@
 .n64
 .relativeinclude on
 
-.create "patched.z64", 0
-.incbin "base.z64"
+.create "patched.nzsj.z64", 0
+.incbin "base.nzsj.z64"
 
-.definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_SIZE, filesize("bin/kz.bin") + 0x20
+;.definelabel G_PAYLOAD_VROM, 0x02EE8000
+.definelabel G_PAYLOAD_VROM, 0x02FB2000
+.definelabel G_PAYLOAD_SIZE, filesize("bin/NZSJ/kz.bin") + 0x20
 .definelabel G_PAYLOAD_ADDR, 0x80800000
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
@@ -13,21 +14,22 @@
 .word 0x5354631C, 0x03A2DEF0
 
 ; Add dmatable entry for the payload code
-.orga 0x205F0
+.orga 0x22120
 .word G_PAYLOAD_VROM, (G_PAYLOAD_VROM + G_PAYLOAD_SIZE), G_PAYLOAD_VROM, 0
 
 ; ==================================================================================================
 ; Base game editing region
 ; ==================================================================================================
 
-.headersize(0x800A5AC0 - 0xB3C000)
-
+;.headersize(0x800A5AC0 - 0xB3C000)
+.headersize(0x800A75E0 - 0xB5F000)
 ; ==================================================================================================
 ; Custom Code Payload
 ; ==================================================================================================
 
 
-.org 0x801748A0
+;.org 0x801748A0
+.org 0x80170168
     addiu   sp, sp, -0x340
     sw      ra, 0x002C(sp)
     lui     a0, hi(G_PAYLOAD_ADDR)
@@ -47,7 +49,8 @@
 ; 801737A0
 ; Replaces jalr ra, t9
 ;          nop
-.org 0x801737A0
+;.org 0x801737A0
+.org 0x8016F0C0
 jal     G_KZ_ADDR
 or      a1, r0, t9
 
@@ -60,8 +63,9 @@ or      a1, r0, t9
 ainit:
     lui     s0, 0x801C
     jr		ra
-    addiu   s0, s0, 0xD910
+    addiu s0, s0, 0x89e0
+    ;addiu   s0, s0, 0xD910
 .org G_KZ_ADDR
-.incbin("bin/kz.bin")
+.incbin("bin/NZSJ/kz.bin")
 .align 8
 .close
