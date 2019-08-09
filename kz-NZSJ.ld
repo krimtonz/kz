@@ -154,7 +154,7 @@ PROVIDE(z2_link             = 0x80400260);
 PROVIDE(z2_static_ctxt      = 0x80382900);
 PROVIDE(z2_gamestate_table  = 0x801B89E0);
 PROVIDE(z2_actor_ovl_table  = 0x801AA0A0);
-PROVIDE(z2_player_ovl_table = 0x801CB55C);
+PROVIDE(z2_player_ovl_table = 0x801CB540);
 PROVIDE(z2_file_table       = 0x800A13F0);
 PROVIDE(z2_file_msgqueue    = 0x8009CE10);
 

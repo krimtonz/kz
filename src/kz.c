@@ -194,6 +194,8 @@ void init() {
     do_global_ctors();
     gfx_init();
 
+    init_textures();
+
     kz.cpu_cycle_counter = 0;
     cpu_counter();
     kz.cpu_offset = -kz.cpu_cycle_counter;
@@ -224,8 +226,6 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_button(&kz.main_menu,0,6,"save settings",save_settings,NULL);
-
-    init_textures();
 
     kz.ready = 1;
 }

@@ -5,8 +5,6 @@
 
 #define ITEM_SCREEN_SIZE 11
 
-static struct menu_item *tooltip = NULL;
-
 static uint8_t dungeon_idx = 0;
 static uint8_t dungeon_keys = 0x00;
 static uint8_t dungeon_items = 0x00;
@@ -15,12 +13,6 @@ static uint8_t stray_fairies = 0x00;
 struct item_map_row {
     int8_t     *slot;
     int8_t      item;
-};
-
-struct item_list_row {
-    int8_t     *slot;
-    int8_t      option_cnt;
-    int8_t     *options;
 };
 
 struct switch_data {
@@ -230,85 +222,6 @@ struct item_switch_data {
     uint8_t                 map; 
 };
 
-struct item_list_data {
-    struct item_list_row   *row;
-    uint8_t                 selected_idx;
-    gfx_texture           **texture;
-    _Bool                   active;
-};
-
-struct bit_switch_data{
-    void                   *addr;
-    uint8_t                 addr_len;
-    uint32_t                bitmask;
-    gfx_texture           **texture;
-    uint16_t                tex_width;
-    uint16_t                tex_height;
-    uint8_t                 tile;
-    _Bool                   has_off_tile;
-    uint32_t                color;
-    uint32_t                off_color;
-    const char             *tooltip;
-    menu_button_callback    callback;
-};
-
-inline uint8_t get_row_idx(struct item_list_row *row){
-    for(int i=0;i<row->option_cnt;i++){
-        if(row->options[i]==*(row->slot)) return i;
-    }
-    return 0;
-}
-
-static void draw_item_list(struct menu_item *item){
-    struct item_list_data *data = item->data;
-    struct item_list_row *row = data->row;
-    if(data->active){
-        gfx_push(gsDPSetPrimColor(0,0,0x00,0xFF,0x00,0xFF));
-    }
-    else if(item->owner->selected_item==item){
-        gfx_push(gsDPSetPrimColor(0,0,0x00,0x00,0xFF,0xFF));
-    }
-    gfx_push(gsDPPipeSync());
-    gfx_draw_sprite(buttons_texture,get_item_x_pos(item),get_item_y_pos(item),1,16,16);
-    gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-    gfx_push(gsDPPipeSync());
-    if(data->selected_idx!=0){
-        if(data->active){
-            gfx_draw_sprite(*(data->texture),get_item_x_pos(item),get_item_y_pos(item),data->selected_idx - 1, 16,16);
-        }else{
-            uint8_t tile_idx = get_row_idx(row);
-            if(tile_idx!=0){
-                gfx_draw_sprite(*(data->texture),get_item_x_pos(item),get_item_y_pos(item),tile_idx - 1,16,16);
-            }
-        }
-    }
-}
-
-static int navigate_item_list(struct menu_item *item, enum menu_nav nav){
-    struct item_list_data *data = item->data;
-    if(!data->active) return 0;
-    if(nav==MENU_NAV_DOWN){
-        data->selected_idx += data->row->option_cnt - 1;
-        data->selected_idx %= data->row->option_cnt;
-    }else if(nav==MENU_NAV_UP){
-        data->selected_idx++;
-        data->selected_idx %= data->row->option_cnt;
-    }
-    return 1;
-}
-
-static void activate_item_list(struct menu_item *item){
-    struct item_list_data *data = item->data;
-    struct item_list_row *row = data->row;
-    if(data->active){
-        *(row->slot) = row->options[data->selected_idx];
-    }else{
-        data->selected_idx = get_row_idx(row);
-    }
-    data->active = !data->active;
-
-}
-
 static void draw_item_switch(struct menu_item *item){
     struct item_switch_data *data = item->data;
     gfx_texture *texture = data->map==0?items_texture:masks_texture;
@@ -322,67 +235,6 @@ static void draw_item_switch(struct menu_item *item){
     gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
     gfx_push(gsDPPipeSync());
     gfx_draw_sprite(texture,get_item_x_pos(item),get_item_y_pos(item),tile_idx,16,16);
-}
-
-static void draw_bit_switch_proc(struct menu_item *item){
-    struct bit_switch_data *data = item->data;
-    if(item->owner->selected_item == item){
-        gfx_draw_rectangle(get_item_x_pos(item),get_item_y_pos(item),16,16,GPACK_RGBA8888(0x80,0x80,0xFF,0x80));
-        if(tooltip){
-            tooltip->text = data->tooltip;
-        }
-    }
-    gfx_push(gsDPSetCombineMode(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
-    uint32_t color = data->color;
-    gfx_push(gsDPSetPrimColor(0,0,(color >> 24) & 0xFF,(color >> 16) & 0xFF,(color >> 8) & 0xFF,color & 0xFF));
-    gfx_push(gsDPPipeSync());
-    uint8_t tile = data->tile;
-    uint32_t val = 0;
-    gfx_texture *texture = *(data->texture);
-    switch(data->addr_len){
-        case 1:
-            val = *(uint8_t*)data->addr;
-            break;
-        case 2:
-            val = *(uint16_t*)data->addr;
-            break;
-        case 4:
-        default:
-            val = *(uint32_t*)data->addr;
-            break;
-    }
-    if(!(val & data->bitmask)){
-        if(data->has_off_tile){
-            size_t tiles_cnt = texture->x_tiles * texture->y_tiles;
-            if(tiles_cnt==1) tile++;
-            else{
-                tile = tile + (texture->x_tiles * texture->y_tiles)/2;
-            }
-        }else{
-            uint32_t off_color = data->off_color;
-            gfx_push(gsDPSetPrimColor(0,0,(off_color >> 24) & 0xFF,(off_color >> 16) & 0xFF,(off_color >> 8) & 0xFF,off_color & 0xFF));
-        }
-    }
-    gfx_draw_sprite(texture,get_item_x_pos(item) + item->x_offset,get_item_y_pos(item) + item->y_offset,tile,data->tex_width,data->tex_height);
-}
-
-static void activate_bit_switch_proc(struct menu_item *item){
-    struct bit_switch_data *data = item->data;
-    switch(data->addr_len){
-        case 1:
-            *(uint8_t*)(data->addr) = *(uint8_t*)(data->addr) ^ data->bitmask;
-            break;
-        case 2:
-            *(uint16_t*)(data->addr) = *(uint16_t*)(data->addr) ^ data->bitmask;
-            break;
-        case 4:
-        default:
-            *(uint32_t*)(data->addr) = *(uint32_t*)(data->addr) ^ data->bitmask;
-            break;
-    }
-    if(data->callback){
-        data->callback(item);
-    }
 }
 
 static void activate_item_switch(struct menu_item *item){
@@ -400,50 +252,6 @@ static struct menu_item *menu_add_item_switch(struct menu *menu, uint16_t x, uin
         data->map_idx = map_idx;
         item->draw_proc = draw_item_switch;
         item->activate_proc = activate_item_switch;
-        item->interactive = 1;
-        item->data = data;
-    }
-    return item;
-}
-
-static struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, struct item_list_row *row, gfx_texture **texture){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
-    if(item){
-        struct item_list_data *data = malloc(sizeof(*data));
-        data->row = row;
-        data->selected_idx = 2;
-        data->active = 0;
-        data->texture = texture;
-        item->data = data;
-        item->draw_proc = draw_item_list;
-        item->interactive = 1;
-        item->navigate_proc = navigate_item_list;
-        item->activate_proc = activate_item_list;
-    }
-    return item;
-}
-
-static struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y, 
-                                            void *addr, uint8_t addr_len, uint32_t bitmask,  
-                                            menu_button_callback callback, gfx_texture **texture, 
-                                            uint16_t tex_width, uint16_t tex_height, int8_t tile, 
-                                            _Bool has_off_tile, const char *tooltip){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
-    if(item){
-        struct bit_switch_data *data = malloc(sizeof(*data));
-        data->addr = addr;
-        data->addr_len = addr_len;
-        data->bitmask = bitmask;
-        data->texture = texture;
-        data->tile = tile;
-        data->tex_width = tex_width;
-        data->tex_height = tex_height;
-        data->has_off_tile = has_off_tile;
-        data->color = 0xFFFFFFFF;
-        data->tooltip = tooltip;
-        data->callback = callback;
-        item->draw_proc = draw_bit_switch_proc;
-        item->activate_proc = activate_bit_switch_proc;
         item->interactive = 1;
         item->data = data;
     }
@@ -520,11 +328,11 @@ struct menu *create_inventory_menu(){
         }
         
         for(int i=0;i<6;i++){
-            menu_add_item_list(&items,i,4,&bottle_options[i],&bottles_texture);
+            menu_add_item_list(&items,i,4,&bottle_options[i],bottles_texture);
         }
         
         for(int i=0;i<3;i++){
-            menu_add_item_list(&items,5,i+1,&trade_quest_options[i],&trade_quest_texture);
+            menu_add_item_list(&items,5,i+1,&trade_quest_options[i],trade_quest_texture);
         }
     }
 
@@ -548,11 +356,13 @@ struct menu *create_inventory_menu(){
     // Populate quest status menu
     {
         quest_status.selected_item = menu_add_button(&quest_status,0,0,"return",menu_return,NULL);
-        //menu_set_cell(&quest_status,16,16);
         
         int x = 0;
         int y = 1;
+        int oy = 0;
+        int ox = 0;
 
+        struct menu_item *item;
         menu_add(&quest_status,x,y,"max health");
         menu_add_number_input(&quest_status,15,y,max_health_callback,NULL,16,4,&z2_file.max_health,sizeof(z2_file.max_health));
         y++;
@@ -571,36 +381,51 @@ struct menu *create_inventory_menu(){
         menu_add(&quest_status,0,y,"stray fairies");
         menu_add_number_input(&quest_status,15,y,update_stray_fairies,NULL,16,2,&stray_fairies,1);
         y++;
-        menu_add_bit_switch(&quest_status,0,y,&dungeon_items,1,0x01,set_dungeon_item,&dungeon_items_tex,16,16,0,1,"boss key");
-        menu_add_bit_switch(&quest_status,1,y,&dungeon_items,1,0x02,set_dungeon_item,&dungeon_items_tex,16,16,1,1,"compass");
-        menu_add_bit_switch(&quest_status,2,y,&dungeon_items,1,0x04,set_dungeon_item,&dungeon_items_tex,16,16,2,1,"map");
+        oy = 5;
+        item = menu_add_bit_switch(&quest_status,0,y,&dungeon_items,1,0x01,set_dungeon_item,dungeon_items_tex,16,16,0,1,"boss key",0xFFFFFFFF,0xFFFFFFFF);
+        set_item_offset(item,0,oy);
+        item = menu_add_bit_switch(&quest_status,1,y,&dungeon_items,1,0x02,set_dungeon_item,dungeon_items_tex,16,16,1,1,"compass",0xFFFFFFFF,0xFFFFFFFF);
+        set_item_offset(item,10,oy);
+        item = menu_add_bit_switch(&quest_status,2,y,&dungeon_items,1,0x04,set_dungeon_item,dungeon_items_tex,16,16,2,1,"map",0xFFFFFFFF,0xFFFFFFFF);
+        set_item_offset(item,20,oy);
         y++;
-        for(int i=0;i<sizeof(owl_data_table)/sizeof(*owl_data_table);i++){
-            x = i % 5;
-            if(i % 5 == 0) y++;
-            struct menu_item *item = menu_add_bit_switch(&quest_status,x,y,&z2_file.owls_hit,2,owl_data_table[i].bitmask,NULL,&owl_icon_texture,16,8,0,1,owl_data_table[i].tooltip);
-            set_item_offset(item,0,4);
-        }
-        y++;
+        oy+=10;
         for(int i=0;i<sizeof(remains_data_table)/sizeof(*remains_data_table);i++){
-            menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,remains_data_table[i].bitmask,NULL,&remains_texture,16,16,i,1,remains_data_table[i].tooltip);
+            item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,remains_data_table[i].bitmask,NULL,remains_texture,16,16,i,1,remains_data_table[i].tooltip,0xFFFFFFFF,0xFFFFFFFF);
+            set_item_offset(item,x * 10,oy);
             x++;
         }
-        menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,bombers_notebook_table.bitmask,NULL,&notebook_texture,16,16,0,1,bombers_notebook_table.tooltip);
+        item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,bombers_notebook_table.bitmask,NULL,notebook_texture,16,16,0,1,bombers_notebook_table.tooltip,0xFFFFFFFF,0xFFFFFFFF);
+        set_item_offset(item,x*10,oy);
         x=0;
         y++;
-        for(int i=0;i<sizeof(song_data_table)/sizeof(*song_data_table);i++){
+        int start_y = y;
+        int start_oy = oy;
+        int start_ox = ox;
+        for(int i=0;i<sizeof(owl_data_table)/sizeof(*owl_data_table);i++){
             x = i % 5;
-            if(i % 5 == 0) y++;
-
-            struct menu_item *item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,song_data_table[i].bitmask,NULL,&note_texture,10,16,0,0,song_data_table[i].tooltip);
-            struct bit_switch_data *data = item->data;
-            data->color = song_data_table[i].color;
-            data->off_color = 0x808080FF;
-            set_item_offset(item,3,0);
-            
+            ox = x * 6;
+            if(i % 5 == 0){
+                y++;
+                oy+=9;
+            }
+            struct menu_item *item = menu_add_bit_switch(&quest_status,x,y,&z2_file.owls_hit,2,owl_data_table[i].bitmask,NULL,owl_icon_texture,16,8,0,1,owl_data_table[i].tooltip,0xFFFFFFFF,0xFFFFFFFF);
+            set_item_offset(item,ox,oy);
         }
-        tooltip = menu_add(&quest_status,0,y+1,"");
+        y = start_y;
+        oy = start_oy;
+        ox = start_ox;
+        for(int i=0;i<sizeof(song_data_table)/sizeof(*song_data_table);i++){
+            x = i % 5 + 6;
+            ox = x * 6;
+            if(i % 5 == 0){
+                y++;
+                oy+=8;
+            }
+
+            struct menu_item *item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,song_data_table[i].bitmask,NULL,note_texture,10,16,0,0,song_data_table[i].tooltip,song_data_table[i].color,0x808080FF);
+            set_item_offset(item,ox,oy);
+        }
     }
     return &menu;
 }

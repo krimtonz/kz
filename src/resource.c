@@ -2,12 +2,15 @@
 
 #define OWL_OFFSET 0x14668
 #define OWL_FILE 10
-
 #if Z2_VERSION==NZSE
     #define DUNGEON_FILE 20
+    #define BUTTONS_FILE 1126
+    #define NOTE_INDEX 98
 #else
     #define DUNGEON_OFFSET 0x3600
     #define DUNGEON_FILE 9
+    #define BUTTONS_FILE 1125
+    #define NOTE_INDEX 130
 #endif
 
 gfx_texture *items_texture;
@@ -26,9 +29,9 @@ void init_textures(){
     items_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,Z2_ITEM_OCARINA,Z2_ITEM_GREAT_FAIRY_SWORD,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
     bottles_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,Z2_ITEM_BOTTLE,Z2_END_BOTTLES - 1,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,0);
     trade_quest_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,Z2_ITEM_MOONS_TEAR,Z2_END_TRADE-1,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,0);
-    buttons_texture = gfx_load_game_texture(G_IM_FMT_IA,G_IM_SIZ_8b,32,32,1,5,1125,0xF60,0);
+    buttons_texture = gfx_load_game_texture(G_IM_FMT_IA,G_IM_SIZ_8b,32,32,1,5,BUTTONS_FILE,0xF60,0);
     remains_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,Z2_ITEM_ODOLWAS_REMAINS,Z2_ITEM_TWINMOLDS_REMAINS,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
-    note_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,130,130,G_IM_FMT_IA,G_IM_SIZ_8b,16,24,0);
+    note_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,NOTE_INDEX,NOTE_INDEX,G_IM_FMT_IA,G_IM_SIZ_8b,16,24,0);
     notebook_texture = gfx_load_icon_item_static(ICON_ITEM_STATIC,Z2_ITEM_BOMBERS_NOTEBOOK,Z2_ITEM_BOMBERS_NOTEBOOK,G_IM_FMT_RGBA,G_IM_SIZ_32b,32,32,1);
     owl_icon_texture = gfx_load_game_texture(G_IM_FMT_RGBA, G_IM_SIZ_32b,24,12,1,1,OWL_FILE,OWL_OFFSET,1);
 #if Z2_VERSION==NZSE

@@ -50,6 +50,12 @@ struct menu{
     uint16_t            y_padding;
 };
 
+struct item_list_row {
+    int8_t     *slot;
+    int8_t      option_cnt;
+    int8_t     *options;
+};
+
 typedef void (*menu_button_callback)(struct menu_item *item);
 typedef void (*menu_number_callback)(struct menu_item *item, void *data, uint32_t value);
 typedef void (*menu_list_callback)(struct menu_item *item, uint16_t selected_idx);
@@ -63,9 +69,27 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name);
 struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *text, menu_button_callback callback, void *data);
 struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watch_t *watch);
-struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, menu_number_callback callback, void *callback_data, uint8_t base, uint8_t length, void *value, uint8_t val_len);
-struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y, void *addr, uint8_t addr_len, uint32_t bitmask, menu_button_callback callback, const char *text);
-struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, const char **text, void *values, uint8_t value_size, uint16_t options, void *list_data, menu_list_callback callback);
+
+struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, 
+                                        menu_number_callback callback, void *callback_data, 
+                                        uint8_t base, uint8_t length, void *value, uint8_t val_len);
+struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y, 
+                                  void *addr, uint8_t addr_len, uint32_t bitmask, 
+                                  menu_button_callback callback, const char *text);
+
+struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, 
+                                const char **text, void *values, uint8_t value_size, 
+                                uint16_t options, void *list_data, menu_list_callback callback);
+
+struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y, 
+                                      void *addr, uint8_t addr_len, uint32_t bitmask,  
+                                      menu_button_callback callback, gfx_texture *texture, 
+                                      uint16_t tex_width, uint16_t tex_height, int8_t tile, 
+                                      _Bool has_off_tile, const char *tooltip,
+                                      uint32_t on_color, uint32_t off_color);
+
+struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
+                                            struct item_list_row *row, gfx_texture *texture);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);

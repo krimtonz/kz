@@ -4,11 +4,11 @@
 #include "kz.h"
 
 int get_item_x_pos(struct menu_item *item){
-    return item->owner->x + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding);
+    return item->owner->x + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding) + item->x_offset;
 }
 
 int get_item_y_pos(struct menu_item *item){
-    return item->owner->y + item->y * item->owner->cell_height + item->y * item->owner->y_padding;
+    return item->owner->y + item->y * item->owner->cell_height + item->y * item->owner->y_padding + item->y_offset;
 }
 
 void set_item_offset(struct menu_item *item, uint16_t x, uint16_t y){
