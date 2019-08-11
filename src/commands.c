@@ -1,12 +1,15 @@
 #include "commands.h"
 #include "input.h"
+#include "kz.h"
 
 struct command kz_commands[COMMAND_CNT] = {
-    {"toggle menu", COMMAND_PRESS,  BUTTON_L | BUTTON_R,        NULL},
-    {"levitate",    COMMAND_HOLD,   BUTTON_L,                   command_levitate},
-    {"turbo",       COMMAND_HOLD,   BUTTON_D_DOWN,              command_turbo},
-    {"void out",    COMMAND_PRESS,  BUTTON_D_LEFT | BUTTON_A,   command_void},
-    {"break free",  COMMAND_PRESS,  BUTTON_D_RIGHT | BUTTON_L,  command_break},
+    {"toggle menu", COMMAND_PRESS,  0,        NULL},
+    {"levitate",    COMMAND_HOLD,   0,                   command_levitate},
+    {"turbo",       COMMAND_HOLD,   0,   command_turbo},
+    {"void out",    COMMAND_PRESS,  0,   command_void},
+    {"break free",  COMMAND_PRESS,  0,  command_break},
+    {"pause",       COMMAND_PRESS,  0,                command_pause},
+    {"advance",     COMMAND_PRESS,  0,              command_advance},
 };
 
 void command_break(){
@@ -36,4 +39,20 @@ void command_void(){
     z2_game.common.execute_state = 0;
     z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
     z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
+}
+
+void command_pause(){
+    if(kz.pending_frames==0){
+        kz.pending_frames=-1;
+    }else{
+        kz.pending_frames=0;
+    }
+}
+
+void command_advance(){
+    if(kz.pending_frames==0){
+        kz.pending_frames++;
+    }else{
+        command_pause();
+    }
 }

@@ -24,6 +24,18 @@ enum cheats {
     CHEAT_RUPEES,
 };
 
+struct disp_p
+{
+  uint32_t        work_p;
+  uint32_t        work_d;
+  uint32_t        poly_opa_p;
+  uint32_t        poly_opa_d;
+  uint32_t        poly_xlu_p;
+  uint32_t        poly_xlu_d;
+  uint32_t        overlay_p;
+  uint32_t        overlay_d;
+};
+
 typedef struct  {
     _Bool                   ready;    
     struct vector           watches;
@@ -41,7 +53,8 @@ typedef struct  {
     int32_t                 frames;
     int32_t                 frames_offset;
     _Bool                   lag_counter;
-    
+    int32_t                 pending_frames;
+    struct disp_p           disp_p;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;
@@ -51,5 +64,6 @@ struct menu *create_inventory_menu();
 struct menu *create_scene_menu();
 struct menu *create_watches_menu();
 struct menu *create_cheats_menu();
+struct menu *create_file_menu();
 
 #endif

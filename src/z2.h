@@ -1169,6 +1169,11 @@ extern z2_player_ovl_table_t        z2_player_ovl_table[];
 extern z2_file_table_t              z2_file_table[];
 extern OSMesgQueue                  z2_file_msgqueue;
 extern OSPiHandle                   z2_pi_io_handle;
+
+#define z2_disp 0x8020A2B0
+
+#define z2_disp_size 0x20310
+
 #if Z2_VERSION==NZSE
 #define z2_vi_counter (*(uint32_t*) 0x80096B78)
 #else

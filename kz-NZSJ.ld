@@ -157,9 +157,8 @@ PROVIDE(z2_actor_ovl_table  = 0x801AA0A0);
 PROVIDE(z2_player_ovl_table = 0x801CB540);
 PROVIDE(z2_file_table       = 0x800A13F0);
 PROVIDE(z2_file_msgqueue    = 0x8009CE10);
+PROVIDE(z2_pi_io_handle     = 0x801FD490);
 
 PROVIDE(z2_segment          = 0x801F8180);
 PROVIDE(z2_arena            = 0x8009CD20);
 PROVIDE(z2_game_arena       = 0x801F5100);
-PROVIDE(z2_pi_io_handle     = 0x801FD080);
-

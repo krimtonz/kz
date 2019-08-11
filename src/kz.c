@@ -18,6 +18,82 @@ kz_ctxt_t kz = {
     .ready = 0, 
 };
 
+void save_disp_p(struct disp_p *disp_p){
+    z2_gfx_t *gfx = z2_game.common.gfx;
+    disp_p->work_p = gfx->work.p - gfx->work.buf;
+    disp_p->work_d = gfx->work.d - gfx->work.buf;
+    disp_p->poly_opa_p = gfx->poly_opa.p - gfx->poly_opa.buf;
+    disp_p->poly_opa_d = gfx->poly_opa.d - gfx->poly_opa.buf;
+    disp_p->poly_xlu_p = gfx->poly_xlu.p - gfx->poly_xlu.buf;
+    disp_p->poly_xlu_d = gfx->poly_xlu.d - gfx->poly_xlu.buf;
+    disp_p->overlay_p = gfx->overlay.p - gfx->overlay.buf;
+    disp_p->overlay_d = gfx->overlay.d - gfx->overlay.buf;
+}
+
+void load_disp_p(struct disp_p *disp_p){
+    z2_gfx_t *gfx = z2_game.common.gfx;
+    gfx->work.p = disp_p->work_p + gfx->work.buf;
+    gfx->work.d = disp_p->work_d + gfx->work.buf;
+    gfx->poly_opa.p = disp_p->poly_opa_p + gfx->poly_opa.buf;
+    gfx->poly_opa.d = disp_p->poly_opa_d + gfx->poly_opa.buf;
+    gfx->poly_xlu.p = disp_p->poly_xlu_p + gfx->poly_xlu.buf;
+    gfx->poly_xlu.d = disp_p->poly_xlu_d + gfx->poly_xlu.buf;
+    gfx->overlay.p = disp_p->overlay_p + gfx->overlay.buf;
+    gfx->overlay.d = disp_p->overlay_d + gfx->overlay.buf;
+}
+
+#define z2_cimg_ptrs ((uint32_t*) 0x801FBF90)
+
+void gfx_reloc(int src, int cimg){
+    z2_gfx_t *gfx = z2_game.common.gfx;
+    z2_disp_buf_t *new_disp[4] = {
+        &gfx->work,
+        &gfx->poly_opa,
+        &gfx->poly_xlu,
+        &gfx->overlay
+    };
+    uint32_t src_gfx = z2_disp + src * z2_disp_size;
+    uint32_t dst_gfx = z2_disp + (gfx->frame_cnt_1 & 1) * z2_disp_size;
+    uint32_t src_cimg = z2_cimg_ptrs[cimg];
+    uint32_t dst_cimg = z2_cimg_ptrs[gfx->frame_cnt_2 & 1];
+    for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
+        z2_disp_buf_t *dbuf = new_disp[i];
+        for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
+            switch(p->hi >> 24){
+                case G_VTX: break;
+                case G_DMA_IO: break;
+                case G_MTX: break;
+                case G_MOVEWORD:
+                switch((p->hi>>16) & 0xFF){
+                    case G_MW_SEGMENT: break;
+                    default: continue;
+                }
+                case G_MOVEMEM: break;
+                case G_LOAD_UCODE: break;
+                case G_DL: break;
+                case G_RDPHALF_1: 
+                switch(p[1].hi>>24){
+                    case G_BRANCH_Z: break;
+                    case G_LOAD_UCODE: break;
+                    default: continue;
+                }
+                case G_SETTIMG: break;
+                case G_SETZIMG: break;
+                case G_SETCIMG: break;
+                case G_BG_1CYC: break;
+                case G_BG_COPY: break;
+                default: continue;
+            }
+            if(p->lo >=src_gfx && p->lo<src_gfx + z2_disp_size){
+                p->lo +=dst_gfx - src_gfx;
+            }
+            else if(p->lo>=src_cimg && p->lo<src_cimg + 0x25800){
+                p->lo += dst_cimg - src_cimg;
+            }
+        }
+    }
+}
+
 static void cpu_counter(){
     static uint32_t count = 0;
     uint32_t new_count;
@@ -113,7 +189,7 @@ static void kz_main(void) {
     {
         static _Bool skip_menu = 0;
         z2_input_t input = z2_game.common.input[0];
-        if((get_pad_pressed_unrestricted() & kz_commands[0].bind) == kz_commands[0].bind){
+        if(input_bind_pressed(0)){
             skip_menu = 1;
             kz.menu_active = !kz.menu_active;
             if(kz.menu_active){
@@ -149,14 +225,14 @@ static void kz_main(void) {
 
     /* handle command bindings */
     {
-        for(int i=0;i<COMMAND_CNT;i++){
+        for(int i=0;i<7;i++){
             _Bool activate = 0;
             switch(kz_commands[i].type){
                 case COMMAND_HOLD:
-                    activate = (get_pad_held() & kz_commands[i].bind) == kz_commands[i].bind;
+                    activate = input_bind_held(i);
                     break;
                 case COMMAND_PRESS:
-                    activate = (get_pad_pressed() & kz_commands[i].bind) == kz_commands[i].bind;
+                    activate = input_bind_pressed(i);
                     break;
             }
             if(activate && kz_commands[i].proc){
@@ -181,6 +257,8 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
+
+    save_disp_p(&kz.disp_p);
 
     gfx_finish();
 }
@@ -212,9 +290,19 @@ void init() {
     vector_reserve(&kz.watches,WATCHES_MAX);
     kz.watch_cnt = 0;
 
+    kz.pending_frames=-1;
+
     kz.settings = malloc(sizeof(*kz.settings));
-    //load_settings_from_flashram(kz.settings);
-    //kz_apply_settings();
+    load_settings_from_flashram(kz.settings);
+    kz_apply_settings();
+
+    kz_commands[0].bind = make_bind(2, BUTTON_R, BUTTON_L);
+    kz_commands[1].bind = make_bind(1, BUTTON_L);
+    kz_commands[2].bind = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
+    kz_commands[3].bind = make_bind(2, BUTTON_D_LEFT, BUTTON_A);
+    kz_commands[4].bind = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
+    kz_commands[5].bind = make_bind(1, BUTTON_D_UP);
+    kz_commands[6].bind = make_bind(1, BUTTON_D_DOWN);
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);
@@ -225,9 +313,29 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,3,create_scene_menu(),"scene");
     menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
-    menu_add_button(&kz.main_menu,0,6,"save settings",save_settings,NULL);
+    menu_add_submenu(&kz.main_menu,0,6,create_file_menu(),"file");
+    menu_add_button(&kz.main_menu,0,7,"save settings",save_settings,NULL);
 
     kz.ready = 1;
+}
+
+void game_state_main(z2_gamesate_update_t game_update_start){
+    if(kz.pending_frames!=0){
+        kz.pending_frames--;
+        game_update_start(&z2_game);
+    }else{
+        z2_gfx_t *gfx = z2_game.common.gfx;
+        if(z2_game.common.gamestate_frames!=0){
+            if(gfx->frame_cnt_1 & 1){
+                memcpy(((void*)z2_disp + z2_disp_size),(void*)z2_disp,z2_disp_size);
+            }else{
+                memcpy((void*)z2_disp,(void*)(z2_disp + z2_disp_size),z2_disp_size);
+            }
+            load_disp_p(&kz.disp_p);
+            gfx_reloc(1-(gfx->frame_cnt_1 & 1), 1-(gfx->frame_cnt_2 &1));
+        }
+        z2_game.common.gamestate_frames--;
+    }
 }
 
 // Uses kz's stack instead of graph stack. 
@@ -253,7 +361,7 @@ ENTRY void _start(z2_game_t *game, z2_gamesate_update_t game_update_start) {
     if(!kz.ready){
         kz_stack(init);
     }
-    game_update_start(game);
+    game_state_main(game_update_start);
     kz_stack(kz_main);
 }
 

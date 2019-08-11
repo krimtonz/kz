@@ -22,6 +22,8 @@ void command_void();
 void command_reloadarea();
 void command_turbo();
 void command_break();
+void command_pause();
+void command_advance();
 
 extern struct command kz_commands[COMMAND_CNT];
 
