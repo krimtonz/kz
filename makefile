@@ -14,9 +14,9 @@ KZ_VERSIONS	= NZSE NZSJ
 NAME		= kz
 
 ADDRESS     = 0x80800020
-CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks
+CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks 
 CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2
-LDFLAGS     = -nostartfiles -specs=nosys.specs -Wl,--gc-sections -Wl,--defsym,start=$(ADDRESS) 
+LDFLAGS     = -T gl-n64.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections -Wl,--defsym,start=$(ADDRESS)
 
 KZ 			= $(foreach v,$(KZ_VERSIONS),patch-kz-$(v))
 all			: $(KZ)
@@ -32,7 +32,6 @@ BINDIR-$(1)      = bin/$(2)
 NAME-$(1)        = $(1)
 BUILDFILE-$(1)   = build.$(2).asm
 CPPFLAGS-$(1)	 = -DZ2_VERSION=$(2) $(CPPFLAGS)
-LDFLAGS-$(1)	 = -T kz-$(2).ld $(LDFLAGS)
 CSRC-$(1)       := $$(foreach s,$$(CFILES),$$(wildcard $$(SRCDIR-$(1))/$$(s)))
 COBJ-$(1)        = $$(patsubst $$(SRCDIR-$(1))/%,$$(OBJDIR-$(1))/%.o,$$(CSRC-$(1)))
 SSRC-$(1)       := $$(foreach s,$$(SFILES),$$(wildcard $$(SRCDIR-$(1))/$$(s)))
@@ -51,7 +50,7 @@ $$(COBJ-$(1))     : $$(OBJDIR-$(1))/%.o: $$(SRCDIR-$(1))/% | $$(OBJDIR-$(1))
 $$(SOBJ-$(1))		: $$(OBJDIR-$(1))/%.o: $$(SRCDIR-$(1))/% | $$(OBJDIR-$(1))
 	$(AS) -c -MMD -MP $$< -o $$@
 $$(ELF-$(1))      : $$(COBJ-$(1)) $$(SOBJ-$(1)) | $$(BINDIR-$(1))
-	$(LD) $$(LDFLAGS-$(1)) $$^ -o $$@
+	$(LD) $$(LDFLAGS) $$^ -o $$@
 $$(BIN-$(1))      : $$(ELF-$(1)) | $$(BINDIR-$(1))
 	$(OBJCOPY) -S -O binary $$< $$@
 $$(OUTDIR-$(1))   : 

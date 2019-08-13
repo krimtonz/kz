@@ -42,8 +42,6 @@ void load_disp_p(struct disp_p *disp_p){
     gfx->overlay.d = disp_p->overlay_d + gfx->overlay.buf;
 }
 
-#define z2_cimg_ptrs ((uint32_t*) 0x801FBF90)
-
 void gfx_reloc(int src, int cimg){
     z2_gfx_t *gfx = z2_game.common.gfx;
     z2_disp_buf_t *new_disp[4] = {
@@ -52,10 +50,10 @@ void gfx_reloc(int src, int cimg){
         &gfx->poly_xlu,
         &gfx->overlay
     };
-    uint32_t src_gfx = z2_disp + src * z2_disp_size;
-    uint32_t dst_gfx = z2_disp + (gfx->frame_cnt_1 & 1) * z2_disp_size;
-    uint32_t src_cimg = z2_cimg_ptrs[cimg];
-    uint32_t dst_cimg = z2_cimg_ptrs[gfx->frame_cnt_2 & 1];
+    uint32_t src_gfx = z2_disp_addr + src * Z2_DISP_SIZE;
+    uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
+    uint32_t src_cimg = z2_cimg[cimg];
+    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
     for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
         z2_disp_buf_t *dbuf = new_disp[i];
         for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
@@ -84,7 +82,7 @@ void gfx_reloc(int src, int cimg){
                 case G_BG_COPY: break;
                 default: continue;
             }
-            if(p->lo >=src_gfx && p->lo<src_gfx + z2_disp_size){
+            if(p->lo >=src_gfx && p->lo<src_gfx + Z2_DISP_SIZE){
                 p->lo +=dst_gfx - src_gfx;
             }
             else if(p->lo>=src_cimg && p->lo<src_cimg + 0x25800){
@@ -327,9 +325,9 @@ void game_state_main(z2_gamesate_update_t game_update_start){
         z2_gfx_t *gfx = z2_game.common.gfx;
         if(z2_game.common.gamestate_frames!=0){
             if(gfx->frame_cnt_1 & 1){
-                memcpy(((void*)z2_disp + z2_disp_size),(void*)z2_disp,z2_disp_size);
+                memcpy(((void*)z2_disp_addr + Z2_DISP_SIZE),(void*)z2_disp_addr,Z2_DISP_SIZE);
             }else{
-                memcpy((void*)z2_disp,(void*)(z2_disp + z2_disp_size),z2_disp_size);
+                memcpy((void*)z2_disp_addr,(void*)(z2_disp_addr + Z2_DISP_SIZE),Z2_DISP_SIZE);
             }
             load_disp_p(&kz.disp_p);
             gfx_reloc(1-(gfx->frame_cnt_1 & 1), 1-(gfx->frame_cnt_2 &1));

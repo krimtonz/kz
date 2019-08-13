@@ -201,15 +201,15 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
         OSMesgQueue queue;
         OSMesg msg;
-        osCreateOSMesgQueue(&queue,&msg,1);
+        osCreateMesgQueue(&queue,&msg,1);
         z2_getfile_t getfile = {
             z2_file_table[file].vrom_start, tempdata,
             z2_file_table[file].vrom_end - z2_file_table[file].vrom_start,
             NULL, 0, 0,
             &queue, 0
         };
-        z2_osSendMessage(&z2_file_msgqueue, &getfile, OS_MESG_NOBLOCK);
-        z2_osRecvMessage(&queue,NULL,OS_MESG_BLOCK);
+        osSendMesg(&z2_file_msgqueue, &getfile, OS_MESG_NOBLOCK);
+        osRecvMesg(&queue,NULL,OS_MESG_BLOCK);
         memcpy(texture->data,(char*)tempdata + offset,tile_size * x_tiles * y_tiles);
         free(tempdata);
         if(desaturate){
