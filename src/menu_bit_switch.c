@@ -8,7 +8,7 @@ struct bit_switch_data{
     gfx_texture            *texture;
     uint16_t                tex_width;
     uint16_t                tex_height;
-    uint8_t                 tile;
+    uint16_t                tile;
     _Bool                   has_off_tile;
     uint32_t                color;
     uint32_t                off_color;
@@ -26,7 +26,7 @@ static void draw_bit_switch_proc(struct menu_item *item){
     uint32_t color = data->color;
     gfx_push(gsDPSetPrimColor(0,0,(color >> 24) & 0xFF,(color >> 16) & 0xFF,(color >> 8) & 0xFF,color & 0xFF));
     gfx_push(gsDPPipeSync());
-    uint8_t tile = data->tile;
+    uint16_t tile = data->tile;
     uint32_t val = 0;
     switch(data->addr_len){
         case 1:
@@ -77,7 +77,7 @@ static void activate_bit_switch_proc(struct menu_item *item){
 struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y, 
                                             void *addr, uint8_t addr_len, uint32_t bitmask,  
                                             menu_button_callback callback, gfx_texture *texture, 
-                                            uint16_t tex_width, uint16_t tex_height, int8_t tile, 
+                                            uint16_t tex_width, uint16_t tex_height, uint16_t tile, 
                                             _Bool has_off_tile, const char *tooltip,
                                             uint32_t on_color, uint32_t off_color){
     struct menu_item *item = menu_add(menu,x,y,NULL);

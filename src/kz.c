@@ -220,7 +220,7 @@ static void kz_main(void) {
 
         skip_menu = 0;
     }
-
+    menu_update(&kz.main_menu);
     /* handle command bindings */
     {
         for(int i=0;i<7;i++){
@@ -301,6 +301,7 @@ void init() {
     kz_commands[4].bind = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
     kz_commands[5].bind = make_bind(1, BUTTON_D_UP);
     kz_commands[6].bind = make_bind(1, BUTTON_D_DOWN);
+    kz_commands[7].bind = make_bind(1, BUTTON_L, BUTTON_D_RIGHT);
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);

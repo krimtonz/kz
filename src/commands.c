@@ -3,13 +3,14 @@
 #include "kz.h"
 
 struct command kz_commands[COMMAND_CNT] = {
-    {"toggle menu", COMMAND_PRESS,  0,        NULL},
-    {"levitate",    COMMAND_HOLD,   0,                   command_levitate},
-    {"turbo",       COMMAND_HOLD,   0,   command_turbo},
-    {"void out",    COMMAND_PRESS,  0,   command_void},
+    {"toggle menu", COMMAND_PRESS,  0,  NULL},
+    {"levitate",    COMMAND_HOLD,   0,  command_levitate},
+    {"turbo",       COMMAND_HOLD,   0,  command_turbo},
+    {"void out",    COMMAND_PRESS,  0,  command_void},
     {"break free",  COMMAND_PRESS,  0,  command_break},
-    {"pause",       COMMAND_PRESS,  0,                command_pause},
-    {"advance",     COMMAND_PRESS,  0,              command_advance},
+    {"pause",       COMMAND_PRESS,  0,  command_pause},
+    {"advance",     COMMAND_PRESS,  0,  command_advance},
+    {"return",      COMMAND_PRESS,  0,  NULL }
 };
 
 void command_break(){

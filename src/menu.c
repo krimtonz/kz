@@ -59,6 +59,18 @@ void menu_draw(struct menu *menu){
     }
 }
 
+void menu_update(struct menu *menu){
+    if(menu->child){
+        menu_update(menu->child);
+        return;
+    }
+    for(struct menu_item *item = menu->items.first;item;item=list_next(item)){
+        if(item->update_proc){
+            item->update_proc(item);
+        }
+    }
+}
+
 struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text){
     struct menu_item *item = list_push_back(&menu->items,NULL);
     if(item){
@@ -72,6 +84,7 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
         item->draw_proc=NULL;
         item->activate_proc=NULL;
         item->navigate_proc=NULL;
+        item->update_proc=NULL;
     }
     return item;
 }

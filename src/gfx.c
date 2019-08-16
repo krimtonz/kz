@@ -38,24 +38,38 @@ static Gfx kzgfx[] = {
 void gfx_printf(uint16_t left, uint16_t top, const char *format, ...){
     va_list args;
     va_start(args,format);
-    gfx_printf_va_color(left,top,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),format,args);
+    gfx_printf_va_color_scale(left,top,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),1.0f,1.0f,format,args);
+    va_end(args);
+}
+
+void gfx_printf_scale(uint16_t left, uint16_t top, float x_scale, float y_scale, const char *format, ...){
+    va_list args;
+    va_start(args,format);
+    gfx_printf_va_color_scale(left,top,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),x_scale,y_scale,format,args);
+    va_end(args);
+}
+
+void gfx_printf_color_scale(uint16_t left, uint16_t top, uint32_t color, float x_scale, float y_scale, const char *format, ...){
+    va_list args;
+    va_start(args,format);
+    gfx_printf_va_color_scale(left,top,color,x_scale,y_scale,format,args);
     va_end(args);
 }
 
 void gfx_printf_color(uint16_t left, uint16_t top, uint32_t color, const char *format, ...){
     va_list args;
     va_start(args,format);
-    gfx_printf_va_color(left,top,color,format,args);
+    gfx_printf_va_color_scale(left,top,color,1.0f,1.0f,format,args);
     va_end(args);
 }
 
-void gfx_printf_va_color(uint16_t left, uint16_t top, uint32_t color, const char *format, va_list va){
+void gfx_printf_va_color_scale(uint16_t left, uint16_t top, uint32_t color,float x_scale, float y_scale, const char *format, va_list va){
     const size_t max_len = 1024;
     char buf[max_len];
     int l = vsnprintf(buf,max_len,format,va);
     if(l>max_len-1) l=max_len-1;
 
-    gfx_printchars(kfont, left, top, color, buf, l);
+    gfx_printchars(kfont, left, top, color, buf, l, x_scale, y_scale);
 }
 
 void gfx_init(){
@@ -253,7 +267,7 @@ void gfx_destroy_texture(gfx_texture *texture){
     texture = NULL;
 }
 
-void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt){
+void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt, float x_scale, float y_scale){
 
     gDPSetCombineMode(gfx_disp_p++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
@@ -265,8 +279,7 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
 
         gfx_load_tile(font->texture,i);
         int char_x = 0;
-        int char_y = 0;
-        for(int j=0;j<charcnt;j++, char_x += font->c_width){
+        for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
             char c = chars[j];
             if(c<33) continue;
             c-=33;
@@ -275,27 +288,27 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
             gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x + 1 ),
-                         qs102(y + char_y + 1),
-                         qs102(x + char_x + font->c_width + 1),
-                         qs102(y + char_y + font->c_height + 1),
+                         qs102(y + 1),
+                         qs102(x + char_x + font->c_width*x_scale + 1),
+                         qs102(y + font->c_height*y_scale + 1),
                          G_TX_RENDERTILE,
                          qu105(c % font->cx_tile *
                                font->c_width),
                          qu105(c / font->cx_tile *
                                font->c_height),
-                         qu510(1), qu510(1));
+                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));
             gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x),
-                         qs102(y + char_y),
-                         qs102(x + char_x + font->c_width),
-                         qs102(y + char_y + font->c_height),
+                         qs102(y),
+                         qs102(x + char_x + font->c_width*x_scale),
+                         qs102(y + font->c_height*y_scale),
                          G_TX_RENDERTILE,
                          qu105(c % font->cx_tile *
                                font->c_width),
                          qu105(c / font->cx_tile *
                                font->c_height),
-                         qu510(1), qu510(1));
+                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));
         }
     }
 }

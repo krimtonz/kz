@@ -1121,72 +1121,71 @@ typedef struct{
 
 #define Z2_DISP_SIZE 0x20310
 
-typedef void (*z2_gamesate_update_t)(z2_game_t *game);
+/* Function Prototypes */
 typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
 typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
-typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*z2_loadroom)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
+typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
+typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 
 #if Z2_VERSION==NZSE
-#define z2_game_addr                0x803E6B20
-#define z2_file_addr                0x801EF670
-#define z2_link_addr                0x803FFDB0
-#define z2_static_ctxt_addr         0x803824D0
-#define z2_gamestate_table_addr     0x801BD910
-#define z2_actor_ovl_table_addr     0x801AA0A0
-#define z2_player_ovl_table_addr    0x801D0B70
-#define z2_file_table_addr          0x8009F8B0
-#define z2_file_msgqueue_addr       0x8009B2C0
-#define z2_pi_io_handle_addr        0x801FD080
-#define z2_disp_addr                0x80209EA0
-#define z2_vi_counter_addr          0x80096B78
-#define z2_segment_addr             0x801F8180
-#define z2_arena_addr               0x8009CD20
-#define z2_game_arena_addr          0x801F5100
-#define z2_cimg_addr                0x801FBB80
-/* functions */
-#define osEPiReadIo_addr            0x800920B0
-#define osEPiWriteIo_addr           0x80093BB0
-#define osWritebackDCache_addr      0x8008A5E0
-#define z2_DecodeArchiveFile_addr   0x80178DAC
-#define osEPiStartDma_addr          0x8008EE30
 #define osSendMesg_addr             0x80087B10
 #define osRecvMesg_addr             0x80087ED0
+#define osWritebackDCache_addr      0x8008A5E0
+#define osEPiStartDma_addr          0x8008EE30
 #define osCreateMesgQueue_addr      0x8008F240
+#define osEPiReadIo_addr            0x800920B0
+#define osEPiWriteIo_addr           0x80093BB0
+#define z2_vi_counter_addr          0x80096B78
+#define z2_file_msgqueue_addr       0x8009B2C0
+#define z2_arena_addr               0x8009CD20
+#define z2_file_table_addr          0x8009F8B0
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
-#else
-#define z2_game_addr                0x803E6FB0
-#define z2_file_addr                0x801EF710
-#define z2_link_addr                0x80400260
-#define z2_static_ctxt_addr         0x80382900
-#define z2_gamestate_table_addr     0x801B89E0
+#define z2_DecodeArchiveFile_addr   0x80178DAC
 #define z2_actor_ovl_table_addr     0x801AA0A0
-#define z2_player_ovl_table_addr    0x801CB540
-#define z2_file_table_addr          0x800A13F0
-#define z2_file_msgqueue_addr       0x8009CE10
-#define z2_pi_io_handle_addr        0x801FD490
-#define z2_disp_addr                0x8020A2B0
-#define z2_vi_counter_addr          0x80097A98
-#define z2_cimg_addr                0x801FBF90
-#define z2_segment_addr             0x801F85A0
-#define z2_arena_addr               0x8009E860
-#define z2_game_arena_addr          0x801F5530
-
-/* functions */
-#define osEPiReadIo_addr            0x80092FB0
-#define osEPiWriteIo_addr           0x80094AB0
-#define osWritebackDCache_addr      0x8008B4E0
-#define z2_DecodeArchiveFile_addr   0x8017431C
-#define osEPiStartDma_addr          0x8008FD30
+#define z2_gamestate_table_addr     0x801BD910
+#define z2_player_ovl_table_addr    0x801D0B70
+#define z2_file_addr                0x801EF670
+#define z2_game_arena_addr          0x801F5100
+#define z2_segment_addr             0x801F8180
+#define z2_cimg_addr                0x801FBB80
+#define z2_pi_io_handle_addr        0x801FD080
+#define z2_disp_addr                0x80209EA0
+#define z2_static_ctxt_addr         0x803824D0
+#define z2_game_addr                0x803E6B20
+#define z2_link_addr                0x803FFDB0
+#else
 #define osSendMesg_addr             0x80088A10
 #define osRecvMesg_addr             0x80088DD0
+#define osWritebackDCache_addr      0x8008B4E0
+#define osEPiStartDma_addr          0x8008FD30
 #define osCreateMesgQueue_addr      0x80090140
+#define osEPiReadIo_addr            0x80092FB0
+#define osEPiWriteIo_addr           0x80094AB0
+#define z2_vi_counter_addr          0x80097A98
+#define z2_file_msgqueue_addr       0x8009CE10
+#define z2_arena_addr               0x8009E860
+#define z2_file_table_addr          0x800A13F0
 #define z2_loadroom_addr            0x8013044C
 #define z2_unloadroom_addr          0x801306D8
+#define z2_DecodeArchiveFile_addr   0x8017431C
+#define z2_actor_ovl_table_addr     0x801AA0A0
+#define z2_gamestate_table_addr     0x801B89E0
+#define z2_player_ovl_table_addr    0x801CB540
+#define z2_file_addr                0x801EF710
+#define z2_game_arena_addr          0x801F5530
+#define z2_segment_addr             0x801F85A0
+#define z2_cimg_addr                0x801FBF90
+#define z2_pi_io_handle_addr        0x801FD490
+#define z2_disp_addr                0x8020A2B0
+#define z2_static_ctxt_addr         0x80382900
+#define z2_game_addr                0x803E6FB0
+#define z2_link_addr                0x80400260
 #endif
 
+/* Data */
 #define z2_game                 (*(z2_game_t*)              z2_game_addr)
 #define z2_file                 (*(z2_file_t*)              z2_file_addr)
 #define z2_link                 (*(z2_link_t*)              z2_link_addr)
@@ -1204,6 +1203,7 @@ typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 #define z2_vi_counter           (*(int64_t*)                z2_vi_counter_addr)
 #define z2_cimg                 (*(uint32_t**)              z2_cimg_addr)
 
+/* Functions */
 #define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
 #define osEPiWriteIo            ((osEPiWriteIo_t)           osEPiWriteIo_addr)
 #define osWritebackDCache       ((osWritebackDCache_t)      osWritebackDCache_addr)

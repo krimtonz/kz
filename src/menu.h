@@ -20,6 +20,7 @@ enum menu_callback{
     MENU_CALLBACK_ACTIVATE,
     MENU_CALLBACK_ENTER,
     MENU_CALLBACK_EXIT,
+    MENU_CALLBACK_UPDATE,
 };
 
 struct menu_item{
@@ -27,6 +28,7 @@ struct menu_item{
     void              (*draw_proc)(struct menu_item *item);
     void              (*activate_proc)(struct menu_item *item);
     int               (*navigate_proc)(struct menu_item *item, enum menu_nav nav);
+    void              (*update_proc)(struct menu_item *item);
     const char         *text;
     void               *data;
     uint16_t            x;
@@ -59,9 +61,11 @@ struct item_list_row {
 typedef void (*menu_button_callback)(struct menu_item *item);
 typedef void (*menu_number_callback)(struct menu_item *item, void *data, uint32_t value);
 typedef void (*menu_list_callback)(struct menu_item *item, uint16_t selected_idx);
+typedef void (*item_list_callback)(struct menu_item *item, void *data, enum menu_callback callback);
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y);
 void menu_draw(struct menu *menu);
+void menu_update(struct menu *menu);
 void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height);
 void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y);
 
@@ -84,12 +88,13 @@ struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
 struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y, 
                                       void *addr, uint8_t addr_len, uint32_t bitmask,  
                                       menu_button_callback callback, gfx_texture *texture, 
-                                      uint16_t tex_width, uint16_t tex_height, int8_t tile, 
+                                      uint16_t tex_width, uint16_t tex_height, uint16_t tile, 
                                       _Bool has_off_tile, const char *tooltip,
                                       uint32_t on_color, uint32_t off_color);
 
-struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
-                                            struct item_list_row *row, gfx_texture *texture);
+struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, item_list_callback callback,
+                                     void *callback_data, gfx_texture *texture, uint16_t start_tile, int8_t *options,
+                                     uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, uint8_t tiles_cnt);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);

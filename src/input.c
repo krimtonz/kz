@@ -76,7 +76,7 @@ void input_update(){
         int *cs = &bind_component_state[i];
         int j;
         uint16_t c;
-        if((reserved & bind_pad[i]) && i!=0){
+        if((reserved & bind_pad[i]) && i!=0 && i!=7){
             *cs = 0;
         }else{
             int css = *cs;
