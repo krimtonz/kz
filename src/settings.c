@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "settings.h"
 #include "io.h"
 #include "kz.h"

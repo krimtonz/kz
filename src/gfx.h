@@ -37,6 +37,7 @@ void gfx_printf_color_scale(uint16_t,uint16_t,uint32_t,float,float,const char*,.
 void gfx_printf_va_color_scale(uint16_t,uint16_t,uint32_t,float,float,const char*,va_list);
 void gfx_printchars(gfx_font *, uint16_t, uint16_t, uint32_t, const char *, size_t, float, float);
 void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height);
+void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale);
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color);
 void gfx_destroy_texture(gfx_texture *texture);
 gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, uint8_t start_tile, uint8_t end_tile, g_ifmt_t format, g_isiz_t size, uint16_t tile_width, uint16_t tile_height, _Bool desaturate);

@@ -35,17 +35,18 @@ static void watch_update_callback(struct menu_item *item, void *data, uint32_t v
     watch->address = (void*)value;
 }
 
-static void menu_watch_delete(struct menu_item *item){
-    
+static int menu_watch_delete(struct menu_item *item, void *data){
+    return 0;
 }
 
-static void menu_watch_anchor(struct menu_item *item){
+static int menu_watch_anchor(struct menu_item *item, void *data){
     watch_t *watch = item->data;
     watch->floating = !watch->floating;
+    return 1;
 }
 
-static void menu_watch_move(struct menu_item *item){
-    
+static int menu_watch_move(struct menu_item *item, void *data){
+    return 0;
 }
 
 void watch_add(watch_t *watch, struct menu_item *item){
@@ -62,7 +63,7 @@ void watch_add(watch_t *watch, struct menu_item *item){
     item->y++;
 }
 
-void watches_button_add(struct menu_item *item){
+int watches_button_add(struct menu_item *item, void *data){
     watch_t *watch = vector_push_back(&kz.watches,1,NULL);
     static enum watch_type type = WATCH_TYPE_U8;
     watch->address = (void*)0x80000000;
@@ -72,6 +73,7 @@ void watches_button_add(struct menu_item *item){
     watch->y = 0;
     kz.watch_cnt++;    
     watch_add(watch,item);
+    return 1;
 }
 
 struct menu *create_watches_menu(){

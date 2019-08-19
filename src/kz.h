@@ -36,6 +36,11 @@ struct disp_p
   uint32_t        overlay_d;
 };
 
+typedef struct{
+    z2_file_t file;
+    z2_xyzf_t link_pos;
+}memfile_t;
+
 typedef struct  {
     _Bool                   ready;    
     struct vector           watches;
@@ -55,6 +60,7 @@ typedef struct  {
     _Bool                   lag_counter;
     int32_t                 pending_frames;
     struct disp_p           disp_p;
+    memfile_t              *memfile;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;
@@ -65,5 +71,6 @@ struct menu *create_scene_menu();
 struct menu *create_watches_menu();
 struct menu *create_cheats_menu();
 struct menu *create_file_menu();
+struct menu *create_equips_menu();
 
 #endif

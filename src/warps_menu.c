@@ -3,12 +3,13 @@
 #include "scenes.h"
 #include "kz.h"
 
-static void activate_warp_proc(struct menu_item *item){
-    z2_game.entrance_index = (uint16_t)((uint32_t)item->data);
+static int activate_warp_proc(struct menu_item *item, void *data){
+    z2_game.entrance_index = (uint16_t)((uint32_t)data);
     z2_file.exit = z2_game.entrance_index;
     z2_game.common.execute_state = 0;
     z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
     z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
+    return 1;
 }
 
 struct menu *create_warps_menu(){

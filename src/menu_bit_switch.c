@@ -14,6 +14,7 @@ struct bit_switch_data{
     uint32_t                off_color;
     const char             *tooltip;
     menu_button_callback    callback;
+    void                   *callback_data;
 };
 
 static void draw_bit_switch_proc(struct menu_item *item){
@@ -57,6 +58,9 @@ static void draw_bit_switch_proc(struct menu_item *item){
 
 static void activate_bit_switch_proc(struct menu_item *item){
     struct bit_switch_data *data = item->data;
+    if(data->callback && data->callback(item,data->callback_data)){
+        return;
+    }
     switch(data->addr_len){
         case 1:
             *(uint8_t*)(data->addr) = *(uint8_t*)(data->addr) ^ data->bitmask;
@@ -69,16 +73,13 @@ static void activate_bit_switch_proc(struct menu_item *item){
             *(uint32_t*)(data->addr) = *(uint32_t*)(data->addr) ^ data->bitmask;
             break;
     }
-    if(data->callback){
-        data->callback(item);
-    }
 }
 
 struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y, 
                                             void *addr, uint8_t addr_len, uint32_t bitmask,  
-                                            menu_button_callback callback, gfx_texture *texture, 
-                                            uint16_t tex_width, uint16_t tex_height, uint16_t tile, 
-                                            _Bool has_off_tile, const char *tooltip,
+                                            menu_button_callback callback, void *callback_data, 
+                                            gfx_texture *texture, uint16_t tex_width, uint16_t tex_height, 
+                                            uint16_t tile, _Bool has_off_tile, const char *tooltip,
                                             uint32_t on_color, uint32_t off_color){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
@@ -95,6 +96,7 @@ struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
         data->off_color = off_color;
         data->tooltip = tooltip;
         data->callback = callback;
+        data->callback_data = data;
         item->draw_proc = draw_bit_switch_proc;
         item->activate_proc = activate_bit_switch_proc;
         item->interactive = 1;

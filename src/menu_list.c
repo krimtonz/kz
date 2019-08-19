@@ -53,10 +53,10 @@ void option_activate(struct menu_item *item){
 
 void option_draw(struct menu_item *item){
     struct item_data *data = item->data;
-    uint32_t color = 0xFFFFFFFF;
-    if(data->active) color = COLOR_GREEN;
+    z2_rgba32_t color = MENU_DEFAULT_COLOR;
+    if(data->active) color.color = COLOR_GREEN;
     else if(item->owner->selected_item == item) color = MENU_SELECTED_COLOR;
-    gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"%s",data->text[data->selected_idx]);
+    gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color.color,"%s",data->text[data->selected_idx]);
 }
 
 struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, 

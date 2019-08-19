@@ -2,32 +2,38 @@
 #include "menu.h"
 #include "kz.h"
 
-static void collison_show(struct menu_item *item){
+static int collison_show(struct menu_item *item, void *data){
     kz.collision_view_status = COL_VIEW_SHOW;
+    return 1;
 }
 
-static void collison_hide(struct menu_item *item){
+static int collison_hide(struct menu_item *item, void *data){
     kz.collision_view_status = COL_VIEW_NONE;
+    return 1;
 }
 
-static void collison_gen(struct menu_item *item){
+static int collison_gen(struct menu_item *item, void *data){
     kz.collision_view_status = COL_VIEW_GENERATE;
+    return 1;
 }
 
-static void collision_reduced(struct menu_item *item){
+static int collision_reduced(struct menu_item *item, void *data){
     kz.collision_view_settings ^= COL_VIEW_REDUX;
+    return 1;
 }
 
-static void collision_opaque(struct menu_item *item){
+static int collision_opaque(struct menu_item *item, void *data){
     kz.collision_view_settings ^= COL_VIEW_OPAQUE;
+    return 1;
 }
 
-static void unload_room(struct menu_item *item){
+static int unload_room(struct menu_item *item, void *data){
     z2_game.room_ctx.rooms[0].idx=-1;
     z2_game.room_ctx.rooms[0].file = NULL;
     z2_unloadroom(&z2_game,&z2_game.room_ctx);
     z2_game.room_ctx.rooms[0].idx=-1;
     z2_game.room_ctx.rooms[0].file = NULL;
+    return 1;
 }
 
 struct menu *create_scene_menu(){

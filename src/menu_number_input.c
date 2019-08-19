@@ -80,7 +80,7 @@ void menu_number_activate_callback(struct menu_item *item){
 
 void menu_number_draw(struct menu_item *item){
     struct menu_data_number *data = item->data;
-    uint32_t color = MENU_DEFAULT_COLOR;
+    z2_rgba32_t color = MENU_DEFAULT_COLOR;
     if(item->owner->selected_item == item && !data->editing)
         color = MENU_SELECTED_COLOR;
     int x = get_item_x_pos(item) + (kfont->c_width * (data->length-1));
@@ -99,7 +99,7 @@ void menu_number_draw(struct menu_item *item){
             data->digits[i] = int_to_char(val % data->base);
             val /= data->base;
         }
-        gfx_printf_color(x,y,color,"%c",data->digits[i]);
+        gfx_printf_color(x,y,color.color,"%c",data->digits[i]);
         x -= kfont->c_width;
     }
 }

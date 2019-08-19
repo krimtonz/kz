@@ -238,7 +238,7 @@ static void kz_main(void) {
             }
         }
     }
-
+    
     /* print logo */
 #define MAKESTRING(S) MAKESTRING_(S)
 #define MAKESTRING_(S) #S
@@ -261,8 +261,26 @@ static void kz_main(void) {
     gfx_finish();
 }
 
-void save_settings(struct menu_item *item){
+int save_settings(struct menu_item *item, void *data){
     save_settings_to_flashram(kz.settings);
+    return 1;
+}
+
+int save_memfile(struct menu_item *item, void *data){
+    if(!kz.memfile){
+        kz.memfile=malloc(sizeof(*kz.memfile));
+    }
+    memcpy(&kz.memfile->file,&z2_file,sizeof(kz.memfile->file));
+    memcpy(&kz.memfile->link_pos,&z2_link.common.pos_2,sizeof(kz.memfile->link_pos));
+    return 1;
+}
+
+int load_memfile(struct menu_item *item, void *data){
+    if(kz.memfile){
+        memcpy(&z2_file,&kz.memfile->file,sizeof(kz.memfile->file));
+        memcpy(&z2_link.common.pos_2,&kz.memfile->link_pos,sizeof(kz.memfile->link_pos));
+    }
+    return 1;
 }
 
 void init() {
@@ -312,9 +330,13 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,3,create_scene_menu(),"scene");
     menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
-    menu_add_submenu(&kz.main_menu,0,6,create_file_menu(),"file");
-    menu_add_button(&kz.main_menu,0,7,"save settings",save_settings,NULL);
+    menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
+    menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
+    menu_add_button(&kz.main_menu,0,8,"save settings",save_settings,NULL);
+    menu_add_button(&kz.main_menu,0,9,"memfile save test",save_memfile,NULL);
+    menu_add_button(&kz.main_menu,0,10,"memfile load test",load_memfile,NULL);
 
+    kz.memfile=NULL;
     kz.ready = 1;
 }
 

@@ -237,19 +237,23 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
     return texture;
 }
 
-void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
+void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale){
     gfx_load_tile(texture, tile);
-    float x_scale = (float)width / (float)texture->tile_width;
-    float y_scale = (float)height / (float)texture->tile_height;
+    float x_scale_calc = ((float)width / (float)texture->tile_width) * x_scale;
+    float y_scale_calc = ((float)height / (float)texture->tile_height) * y_scale;
     gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x) & ~3,
                          qs102(y) & ~3,
-                         qs102(x + texture->tile_width * x_scale + 1) & ~3,
-                         qs102(y + texture->tile_height * y_scale + 1) & ~3,
+                         qs102(x + texture->tile_width * x_scale_calc + 1) & ~3,
+                         qs102(y + texture->tile_height * y_scale_calc + 1) & ~3,
                          G_TX_RENDERTILE,
                          qu105(0),
                          qu105(0),
-                         qu510(1.0f / x_scale), qu510(1.0f / y_scale));
+                         qu510(1.0f / x_scale_calc), qu510(1.0f / y_scale_calc));
+}
+
+void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
+    gfx_draw_sprite_scale(texture,x,y,tile,width,height,1,1);
 }
 
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){

@@ -16,32 +16,13 @@ void kz_col_view(){
 
         z2_col_hdr_t *col = z2_game.col_ctxt.col_hdr;
         size_t n_poly = col->n_poly;
-        size_t poly_temp = n_poly;
-        uint8_t *poly_idx = NULL;
         uint8_t alpha = 0x80;
         uint32_t rm= Z_CMP | IM_RD | CVG_DST_CLAMP | FORCE_BL;
         uint32_t blc1; 
         uint32_t blc2;
         Mtx m;
-        
-        if(kz.collision_view_settings & COL_VIEW_REDUX){
-            poly_idx = malloc(poly_temp);
-            for(int i=0;i<poly_temp;++i){
-                z2_col_poly_t *poly = &col->poly[i];
-                z2_col_type_t *type = &col->type[poly->type];
 
-                if(type->flags_2.hookshot || type->flags_1.interaction || type->flags_1.special == 0x0C ||
-                    type->flags_1.exit!=0 || type->flags_1.special==0x05 || type->flags_1.behavior!=0 || type->flags_2.wall_damage
-                    || type->flags_2.terrain==0x01){
-                    poly_idx[i] = 1;
-                }else{
-                    poly_idx[i] = 0;
-                    poly_temp--;
-                }
-            }
-        }
-
-        size_t poly_size = 9 * poly_temp + 0x10;
+        size_t poly_size = 9 * n_poly + 0x10;
         
         poly_disp = malloc(poly_size * sizeof(*poly_disp));
         poly_disp_p = poly_disp;
@@ -74,7 +55,6 @@ void kz_col_view(){
         gSPMatrix(poly_disp_p++,gDisplayListData(&poly_disp_d,m), G_MTX_MODELVIEW | G_MTX_LOAD);
         
         for(int i=0;i<n_poly;++i){
-            if(poly_idx && !poly_idx[i]) continue;
             z2_col_poly_t *poly = &col->poly[i];
             z2_col_type_t *type = &col->type[poly->type];
             z2_xyz_t *va  = &col->vtx[poly->va];
@@ -114,7 +94,6 @@ void kz_col_view(){
         gSPEndDisplayList(poly_disp_p++);
         
         kz.collision_view_status = COL_VIEW_SHOW;
-        if(poly_idx) free(poly_idx);
     }
     if(kz.collision_view_status == COL_VIEW_DESTROY){
         if(poly_disp){

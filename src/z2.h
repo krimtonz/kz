@@ -14,6 +14,16 @@
 #define NZSE 0x00
 #define NZSJ 0x01
 
+typedef union{
+    struct{
+        uint8_t r;
+        uint8_t g;
+        uint8_t b;
+        uint8_t a;
+    };
+    uint32_t color;
+} z2_rgba32_t;
+
 typedef struct
 {
     int16_t x;
@@ -308,16 +318,16 @@ typedef struct {
     };
     char            unk_0x48_[0x04];                /* 0x0048 */
     struct {
-        uint8_t b;
-        uint8_t cleft;
-        uint8_t cdown;
-        uint8_t cright;
+        int8_t b;
+        int8_t cleft;
+        int8_t cdown;
+        int8_t cright;
     }               form_button_item[0x04];         /* 0x004C */
     struct {
-        uint8_t b;
-        uint8_t cleft;
-        uint8_t cdown;
-        uint8_t cright;
+        int8_t b;
+        int8_t cleft;
+        int8_t cdown;
+        int8_t cright;
     }               form_button_slot[0x04];         /* 0x005C */
     union {
         struct {
@@ -1128,7 +1138,9 @@ typedef void (*z2_loadroom)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t 
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*z2_gamesate_update_t)(z2_game_t *game);
+typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 
+#define update ((btnupdate) )
 #if Z2_VERSION==NZSE
 #define osSendMesg_addr             0x80087B10
 #define osRecvMesg_addr             0x80087ED0
@@ -1141,6 +1153,7 @@ typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 #define z2_file_msgqueue_addr       0x8009B2C0
 #define z2_arena_addr               0x8009CD20
 #define z2_file_table_addr          0x8009F8B0
+#define z2_btnupdate_addr           0x801146F8 // need nzse
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
 #define z2_DecodeArchiveFile_addr   0x80178DAC
@@ -1168,6 +1181,7 @@ typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 #define z2_file_msgqueue_addr       0x8009CE10
 #define z2_arena_addr               0x8009E860
 #define z2_file_table_addr          0x800A13F0
+#define z2_btnupdate_addr           0x801146F8
 #define z2_loadroom_addr            0x8013044C
 #define z2_unloadroom_addr          0x801306D8
 #define z2_DecodeArchiveFile_addr   0x8017431C
@@ -1207,6 +1221,7 @@ typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 #define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
 #define osEPiWriteIo            ((osEPiWriteIo_t)           osEPiWriteIo_addr)
 #define osWritebackDCache       ((osWritebackDCache_t)      osWritebackDCache_addr)
+#define z2_btnupdate            ((z2_btnupdate_t)           z2_btnupdate_addr)
 #define z2_DecodeArchiveFile    ((z2_DecodeArchiveFile_t)   z2_DecodeArchiveFile_addr)
 #define osEPiStartDma           ((osEPiStartDma_t)          osEPiStartDma_addr)
 #define osSendMesg              ((osSendMesg_t)             osSendMesg_addr)

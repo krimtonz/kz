@@ -3,6 +3,9 @@
 #include "input.h"
 #include "kz.h"
 
+z2_rgba32_t MENU_SELECTED_COLOR = {{0x80,0x80,0xFF,0xFF}};
+z2_rgba32_t MENU_DEFAULT_COLOR = {{0xFF,0xFF,0xFF,0xFF}};
+
 int get_item_x_pos(struct menu_item *item){
     return item->owner->x + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding) + item->x_offset;
 }
@@ -11,7 +14,7 @@ int get_item_y_pos(struct menu_item *item){
     return item->owner->y + item->y * item->owner->cell_height + item->y * item->owner->y_padding + item->y_offset;
 }
 
-void set_item_offset(struct menu_item *item, uint16_t x, uint16_t y){
+void set_item_offset(struct menu_item *item, int16_t x, int16_t y){
     item->x_offset = x;
     item->y_offset = y;
 }
@@ -51,11 +54,11 @@ void menu_draw(struct menu *menu){
             item->draw_proc(item);
             continue;
         }
-        uint32_t color = MENU_DEFAULT_COLOR;
+        z2_rgba32_t color = MENU_DEFAULT_COLOR;
         if(item == menu->selected_item){
             color = MENU_SELECTED_COLOR;
         }
-        gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"%s",item->text);
+        gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color.color,"%s",item->text);
     }
 }
 
@@ -154,7 +157,7 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
         menu->selected_item->activate_proc(menu->selected_item);
 }
 
-void menu_return(struct menu_item *item){
+int menu_return(struct menu_item *item, void *data){
     if(item->owner->parent){
         if(item->owner->callback_proc){
             item->owner->callback_proc(MENU_CALLBACK_EXIT);
@@ -164,4 +167,5 @@ void menu_return(struct menu_item *item){
         kz.menu_active = 0;
         free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
     }
+    return 1;
 }
