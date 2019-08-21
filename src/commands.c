@@ -2,16 +2,29 @@
 #include "input.h"
 #include "kz.h"
 
-struct command kz_commands[COMMAND_CNT] = {
-    {"toggle menu", COMMAND_PRESS,  0,  NULL},
-    {"levitate",    COMMAND_HOLD,   0,  command_levitate},
-    {"turbo",       COMMAND_HOLD,   0,  command_turbo},
-    {"void out",    COMMAND_PRESS,  0,  command_void},
-    {"break free",  COMMAND_PRESS,  0,  command_break},
-    {"pause",       COMMAND_PRESS,  0,  command_pause},
-    {"advance",     COMMAND_PRESS,  0,  command_advance},
-    {"return",      COMMAND_PRESS,  0,  NULL }
+struct command kz_commands[Z2_CMD_MAX] = {
+    {"toggle menu",         COMMAND_PRESS,  0,  NULL},
+    {"levitate",            COMMAND_HOLD,   0,  command_levitate},
+    {"turbo",               COMMAND_HOLD,   0,  command_turbo},
+    {"void out",            COMMAND_PRESS,  0,  command_void},
+    {"break free",          COMMAND_PRESS,  0,  command_break},
+    {"pause",               COMMAND_PRESS,  0,  command_pause},
+    {"advance",             COMMAND_PRESS,  0,  command_advance},
+    {"return",              COMMAND_PRESS,  0,  NULL },
+    {"reset lag counter",   COMMAND_PRESS,  0,  command_lag_reset}
 };
+
+void init_commands(){
+    kz_commands[Z2_CMD_TOGGLE_MENU].bind = make_bind(2, BUTTON_R, BUTTON_L);
+    kz_commands[Z2_CMD_LEVITATE].bind = make_bind(1, BUTTON_L);
+    kz_commands[Z2_CMD_TURBO].bind = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
+    kz_commands[Z2_CMD_VOID].bind = make_bind(2, BUTTON_D_LEFT, BUTTON_A);
+    kz_commands[Z2_CMD_BREAK].bind = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
+    kz_commands[Z2_CMD_PAUSE].bind = make_bind(1, BUTTON_D_UP);
+    kz_commands[Z2_CMD_ADVANCE].bind = make_bind(1, BUTTON_D_DOWN);
+    kz_commands[Z2_CMD_RETURN].bind = make_bind(2, BUTTON_L, BUTTON_D_RIGHT);
+    kz_commands[Z2_CMD_RESET_LAG].bind = make_bind(1,BUTTON_D_RIGHT);
+}
 
 void command_break(){
     z2_game.cutscene_state = 0x03;
@@ -56,4 +69,9 @@ void command_advance(){
     }else{
         command_pause();
     }
+}
+
+void command_lag_reset(){
+    kz.frames_offset = -z2_vi_counter;
+    kz.frames = 0;
 }

@@ -83,10 +83,7 @@ void gfx_reloc(int src, int cimg){
                 default: continue;
             }
             if(p->lo >=src_gfx && p->lo<src_gfx + Z2_DISP_SIZE){
-                p->lo +=dst_gfx - src_gfx;
-            }
-            else if(p->lo>=src_cimg && p->lo<src_cimg + 0x25800){
-                p->lo += dst_cimg - src_cimg;
+                p->lo += dst_gfx - src_gfx;
             }
         }
     }
@@ -107,6 +104,8 @@ static void kz_main(void) {
     gfx_begin();
 
     input_update();
+
+    save_disp_p(&kz.disp_p);
 
     /* input display */
     {
@@ -130,7 +129,11 @@ static void kz_main(void) {
         }
     }
 
-    
+    if(kz.lag_counter){
+        int32_t lag_frames = z2_vi_counter + kz.frames_offset - kz.frames;
+        gfx_printf(100,100,"%d",lag_frames);
+    }
+
     kz.frames += z2_static_ctxt.update_rate;
 
     if(!kz.timer_running){
@@ -223,7 +226,7 @@ static void kz_main(void) {
     menu_update(&kz.main_menu);
     /* handle command bindings */
     {
-        for(int i=0;i<7;i++){
+        for(int i=0;i<Z2_CMD_MAX;i++){
             _Bool activate = 0;
             switch(kz_commands[i].type){
                 case COMMAND_HOLD:
@@ -255,8 +258,6 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
-
-    save_disp_p(&kz.disp_p);
 
     gfx_finish();
 }
@@ -298,7 +299,7 @@ void init() {
 
     kz.frames = 0;
     kz.frames_offset = -(int32_t)z2_vi_counter;
-    kz.lag_counter = 0;
+    kz.lag_counter = 1;
 
     kz.collision_view_status = COL_VIEW_NONE;
 
@@ -312,14 +313,7 @@ void init() {
     load_settings_from_flashram(kz.settings);
     kz_apply_settings();
 
-    kz_commands[0].bind = make_bind(2, BUTTON_R, BUTTON_L);
-    kz_commands[1].bind = make_bind(1, BUTTON_L);
-    kz_commands[2].bind = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
-    kz_commands[3].bind = make_bind(2, BUTTON_D_LEFT, BUTTON_A);
-    kz_commands[4].bind = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
-    kz_commands[5].bind = make_bind(1, BUTTON_D_UP);
-    kz_commands[6].bind = make_bind(1, BUTTON_D_DOWN);
-    kz_commands[7].bind = make_bind(1, BUTTON_L, BUTTON_D_RIGHT);
+    init_commands();
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);

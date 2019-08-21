@@ -1214,7 +1214,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_pi_io_handle         (*(OSPiHandle*)             z2_pi_io_handle_addr)
 #define z2_static_ctxt          (*(z2_static_ctxt_t*)       z2_static_ctxt_addr)
 #define z2_pi_io_handle         (*(OSPiHandle*)             z2_pi_io_handle_addr)
-#define z2_vi_counter           (*(int64_t*)                z2_vi_counter_addr)
+#define z2_vi_counter           (*(int32_t*)                z2_vi_counter_addr)
 #define z2_cimg                 (*(uint32_t**)              z2_cimg_addr)
 
 /* Functions */

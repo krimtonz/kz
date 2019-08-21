@@ -12,10 +12,10 @@ static uint16_t pad_pressed;
 static uint16_t pad_released;
 static uint16_t pad;
 static uint16_t reserved;
-static int bind_component_state[COMMAND_CNT];
-static int bind_time[COMMAND_CNT];
-static _Bool bind_pressed_raw[COMMAND_CNT];
-static _Bool bind_pressed[COMMAND_CNT];
+static int bind_component_state[Z2_CMD_MAX];
+static int bind_time[Z2_CMD_MAX];
+static _Bool bind_pressed_raw[Z2_CMD_MAX];
+static _Bool bind_pressed[Z2_CMD_MAX];
 
 static int bind_get_component(uint16_t bind, int index){
     return (bind >> (4 * index)) & 0xF;
@@ -68,15 +68,15 @@ void input_update(){
             pad_pressed |= p;
         }
     }
-    uint16_t bind_pad[7];
-    _Bool bind_state[7];
-    for(int i=0;i<7;i++){
+    uint16_t bind_pad[Z2_CMD_MAX];
+    _Bool bind_state[Z2_CMD_MAX];
+    for(int i=0;i<Z2_CMD_MAX;i++){
         uint16_t *b = &kz_commands[i].bind;
         bind_pad[i] = bind_get_bitmask(*b);
         int *cs = &bind_component_state[i];
         int j;
         uint16_t c;
-        if((reserved & bind_pad[i]) && i!=0 && i!=7){
+        if((reserved & bind_pad[i]) && i!=0 && i!=Z2_CMD_RETURN){
             *cs = 0;
         }else{
             int css = *cs;
@@ -109,9 +109,9 @@ void input_update(){
         }
         bind_state[i] = (*cs && (j==4 || c == BIND_END));
     }
-    for(int i=0;i<7;i++){
+    for(int i=0;i<Z2_CMD_MAX;i++){
         uint16_t pi = bind_pad[i];
-        for(int j = 0;bind_state[i] && j < 7;j++){
+        for(int j = 0;bind_state[i] && j < Z2_CMD_MAX;j++){
             if(!bind_state[j]) continue;
             uint16_t pj = bind_pad[j];
             if(pi!=pj && (pi & pj) == pi){
