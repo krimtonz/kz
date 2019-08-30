@@ -179,6 +179,10 @@ static void kz_main(void) {
             uint16_t rupee_cap[] = { 99, 200, 500, 500 };
             z2_file.rupees = rupee_cap[z2_file.wallet_upgrade];
         }
+        if(kz.cheats & (1 << CHEAT_TURBO)){
+            z2_link.linear_velocity=18.0f;
+            gfx_printf_color(Z2_SCREEN_WIDTH-60, Z2_SCREEN_HEIGHT-60,0x00FF00FF,"t");
+        }
     }
 
     /* collision view */
@@ -262,11 +266,6 @@ static void kz_main(void) {
     gfx_finish();
 }
 
-int save_settings(struct menu_item *item, void *data){
-    save_settings_to_flashram(kz.settings);
-    return 1;
-}
-
 int save_memfile(struct menu_item *item, void *data){
     if(!kz.memfile){
         kz.memfile=malloc(sizeof(*kz.memfile));
@@ -309,8 +308,8 @@ void init() {
 
     kz.pending_frames=-1;
 
-    kz.settings = malloc(sizeof(*kz.settings));
-    load_settings_from_flashram(kz.settings);
+    kz.settings_profile = 0;
+    load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
 
     init_commands();
@@ -326,9 +325,7 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
     menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
-    menu_add_button(&kz.main_menu,0,8,"save settings",save_settings,NULL);
-    menu_add_button(&kz.main_menu,0,9,"memfile save test",save_memfile,NULL);
-    menu_add_button(&kz.main_menu,0,10,"memfile load test",load_memfile,NULL);
+    menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
 
     kz.memfile=NULL;
     kz.ready = 1;

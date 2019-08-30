@@ -22,6 +22,8 @@ enum cheats {
     CHEAT_RESTRICTION,
     CHEAT_ISG,
     CHEAT_RUPEES,
+    CHEAT_TURBO,
+    CHEAT_MAX
 };
 
 struct disp_p
@@ -45,11 +47,11 @@ typedef struct  {
     _Bool                   ready;    
     struct vector           watches;
     size_t                  watch_cnt;
-    uint16_t                cheats;
+    uint32_t                cheats;
     enum col_view_settings  collision_view_settings;
     enum col_view_status    collision_view_status;
     struct menu             main_menu;
-    struct settings        *settings;
+    uint8_t                 settings_profile;
     _Bool                   menu_active;
     int64_t                 cpu_cycle_counter;
     int64_t                 cpu_offset;
@@ -72,5 +74,6 @@ struct menu *create_watches_menu();
 struct menu *create_cheats_menu();
 struct menu *create_file_menu();
 struct menu *create_equips_menu();
+struct menu *create_settings_menu();
 
 #endif

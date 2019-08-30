@@ -40,7 +40,7 @@ static int menu_watch_delete(struct menu_item *item, void *data){
 }
 
 static int menu_watch_anchor(struct menu_item *item, void *data){
-    watch_t *watch = item->data;
+    watch_t *watch = data;
     watch->floating = !watch->floating;
     return 1;
 }

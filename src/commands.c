@@ -5,7 +5,7 @@
 struct command kz_commands[Z2_CMD_MAX] = {
     {"toggle menu",         COMMAND_PRESS,  0,  NULL},
     {"levitate",            COMMAND_HOLD,   0,  command_levitate},
-    {"turbo",               COMMAND_HOLD,   0,  command_turbo},
+    {"turbo",               COMMAND_PRESS,  0,  command_turbo},
     {"void out",            COMMAND_PRESS,  0,  command_void},
     {"break free",          COMMAND_PRESS,  0,  command_break},
     {"pause",               COMMAND_PRESS,  0,  command_pause},
@@ -17,7 +17,7 @@ struct command kz_commands[Z2_CMD_MAX] = {
 void init_commands(){
     kz_commands[Z2_CMD_TOGGLE_MENU].bind = make_bind(2, BUTTON_R, BUTTON_L);
     kz_commands[Z2_CMD_LEVITATE].bind = make_bind(1, BUTTON_L);
-    kz_commands[Z2_CMD_TURBO].bind = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
+    kz_commands[Z2_CMD_TURBO].bind = make_bind(1, BUTTON_D_LEFT);
     kz_commands[Z2_CMD_VOID].bind = make_bind(2, BUTTON_D_LEFT, BUTTON_A);
     kz_commands[Z2_CMD_BREAK].bind = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
     kz_commands[Z2_CMD_PAUSE].bind = make_bind(1, BUTTON_D_UP);
@@ -40,7 +40,7 @@ void command_levitate(){
 }
 
 void command_turbo(){
-    z2_link.linear_velocity=18.0f;
+    kz.cheats ^= (1 << CHEAT_TURBO);
 }
 
 void command_fall(){

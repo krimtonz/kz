@@ -20,6 +20,6 @@
 #define ioCmdExe()           osEPiWriteIo(&z2_pi_io_handle,FLASH_ADDR | 0x00010000,(IO_FLASH_CMD_EXE << 24))
 #define ioCmdSetBlock2(x)    osEPiWriteIo(&z2_pi_io_handle,FLASH_ADDR | 0x00010000,((IO_FLASH_CMD_BLOCK2 << 24) | (x)))
 
-void kz_io(void *dram, uint16_t block, size_t size, uint8_t direction);
+void kz_io(void *dram, uint32_t dev_addr, size_t size, uint8_t direction);
 
 #endif

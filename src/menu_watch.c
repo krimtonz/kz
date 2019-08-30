@@ -13,6 +13,8 @@ void menu_draw_watch(struct menu_item *item){
     struct menu_data_watch *watch_data = (struct menu_data_watch*)item->data;
     watch_t *watch = watch_data->watch;
     if(watch->floating) return;
+    watch->x = get_item_x_pos(item);
+    watch->y = get_item_y_pos(item);
     watch_printf(watch);
 }
 

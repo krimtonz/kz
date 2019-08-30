@@ -1,6 +1,6 @@
 #include "io.h"
 
-static void kz_io_read(void *dram, uint16_t block, size_t size, OSIoMesg *iomb, OSMesg *msg, uint32_t *status){
+static void kz_io_read(void *dram, uint32_t block, size_t size, OSIoMesg *iomb, OSMesg *msg, uint32_t *status){
     for(int i=0;i<=size/IO_BLOCK_SIZE;i++){
         iomb->devAddr = ((block * IO_BLOCK_SIZE) + (IO_BLOCK_SIZE * i)) >> 1;
         ioCmdRead();
@@ -10,7 +10,7 @@ static void kz_io_read(void *dram, uint16_t block, size_t size, OSIoMesg *iomb, 
     }
 }
 
-static void kz_io_write(void *dram, uint16_t block, size_t size, OSIoMesg *iomb, OSMesg *msg, uint32_t *status){
+static void kz_io_write(void *dram, uint32_t block, size_t size, OSIoMesg *iomb, OSMesg *msg, uint32_t *status){
     ioCmdRead();
     ioCmdSetBlock2(KZ_START_BLOCK);
     ioCmdExe();
@@ -24,7 +24,8 @@ static void kz_io_write(void *dram, uint16_t block, size_t size, OSIoMesg *iomb,
     }
 }
 
-void kz_io(void *dram, uint16_t block, size_t size, uint8_t direction){
+void kz_io(void *dram, uint32_t dev_addr, size_t size, uint8_t direction){
+    uint32_t block = (dev_addr + IO_BLOCK_SIZE - 1)/IO_BLOCK_SIZE;
     OSIoMesg ioMesg = {0};
     OSMesgQueue queue;
     OSMesg mesg;
