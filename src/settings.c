@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "io.h"
 #include "kz.h"
+#include "input.h"
 
 static _Alignas(128) struct settings settings_info;
 struct settings_data *settings = &settings_info.data;
@@ -14,6 +15,24 @@ void load_default_settings(){
     settings_info.header.version = SETTINGS_VER;
     list_destroy(&kz.watches);
     list_init(&kz.watches,sizeof(watch_t));
+    settings->binds[Z2_CMD_TOGGLE_MENU] = make_bind(2, BUTTON_R, BUTTON_L);
+    settings->binds[Z2_CMD_LEVITATE] = make_bind(1, BUTTON_L);
+    settings->binds[Z2_CMD_TURBO] = make_bind(1, BUTTON_D_LEFT);
+    settings->binds[Z2_CMD_VOID] = make_bind(2, BUTTON_D_LEFT, BUTTON_A);
+    settings->binds[Z2_CMD_BREAK] = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
+    settings->binds[Z2_CMD_PAUSE] = make_bind(1, BUTTON_D_UP);
+    settings->binds[Z2_CMD_ADVANCE] = make_bind(1, BUTTON_D_DOWN);
+    settings->binds[Z2_CMD_RETURN] = make_bind(2, BUTTON_L, BUTTON_D_RIGHT);
+    settings->binds[Z2_CMD_RESET_LAG] = make_bind(1,BUTTON_D_RIGHT);
+    settings->input_display = 1;
+    settings->id_x = 16;
+    settings->id_y = Z2_SCREEN_HEIGHT - 16;
+    settings->lag_counter = 0;
+    settings->lag_x = Z2_SCREEN_WIDTH - 38;
+    settings->lag_y = 20;
+    settings->timer = 0;
+    settings->timer_x = Z2_SCREEN_WIDTH - 100;
+    settings->timer_y = 30;
 }
 
 void save_settings_to_flashram(int profile){

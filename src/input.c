@@ -3,6 +3,7 @@
 #include "input.h"
 #include "z2.h"
 #include "commands.h"
+#include "settings.h"
 
 #define BIND_END 6
 
@@ -71,7 +72,7 @@ void input_update(){
     uint16_t bind_pad[Z2_CMD_MAX];
     _Bool bind_state[Z2_CMD_MAX];
     for(int i=0;i<Z2_CMD_MAX;i++){
-        uint16_t *b = &kz_commands[i].bind;
+        uint16_t *b =  &settings->binds[i];
         bind_pad[i] = bind_get_bitmask(*b);
         int *cs = &bind_component_state[i];
         int j;

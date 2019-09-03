@@ -1,7 +1,7 @@
 #include "io.h"
 
 static void kz_io_read(void *dram, uint32_t block, size_t size, OSIoMesg *iomb, OSMesg *msg, uint32_t *status){
-    for(int i=0;i<=size/IO_BLOCK_SIZE;i++){
+    for(int i=0;i<size/IO_BLOCK_SIZE;i++){
         iomb->devAddr = ((block * IO_BLOCK_SIZE) + (IO_BLOCK_SIZE * i)) >> 1;
         ioCmdRead();
         osEPiStartDma(&z2_pi_io_handle,iomb,OS_READ);
@@ -34,7 +34,7 @@ void kz_io(void *dram, uint32_t dev_addr, size_t size, uint8_t direction){
     ioMesg.hdr.pri = OS_MESG_PRI_NORMAL;
     ioMesg.hdr.retQueue = &queue;
     ioMesg.dramAddr = dram;
-    ioMesg.size = size;
+    ioMesg.size = IO_BLOCK_SIZE;
     ioMesg.devAddr = 0;
     switch(direction){
         case OS_READ:

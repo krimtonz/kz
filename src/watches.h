@@ -5,12 +5,9 @@
 
 #define WATCHES_MAX 10
 
-union watch_info{
-    struct{
-        uint8_t type        : 4;
-        uint8_t floating    : 4;
-    };
-    uint8_t wi;
+struct watch_info{
+    uint8_t type        : 4;
+    uint8_t floating    : 4;
 };
 
 enum watch_type{

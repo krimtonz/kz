@@ -24,11 +24,9 @@ enum command_type{
 struct command {
     const char         *text;
     enum command_type   type;
-    uint16_t            bind;
     void              (*proc)();
 };
 
-void init_commands();
 void command_levitate();
 void command_void();
 void command_reloadarea();

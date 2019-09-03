@@ -107,14 +107,16 @@ static void kz_main(void) {
 
     /* input display */
     {
+        int x = settings->id_x;
+        int y = settings->id_y;
         z2_controller_t inp = z2_game.common.input[0].raw;
-        gfx_printf(16,240-16,"%4i %4i",inp.x,inp.y);
-        gfx_printf_color(106,240-16,GPACK_RGBA8888(0x00,0x00,0xFF,0xFF),"%s", inp.a?"A":" ");
-        gfx_printf_color(116,240-16,GPACK_RGBA8888(0x00,0xFF,0x00,0xFF),"%s", inp.b?"B":" ");
-        gfx_printf_color(126,240-16,GPACK_RGBA8888(0xFF,0x00,0x00,0xFF),"%s", inp.s?"S":" ");
-        gfx_printf_color(136,240-16,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s", inp.z?"Z":" ",inp.l?"L":" ",inp.r?"R":" ");
-        gfx_printf_color(166,240-16,GPACK_RGBA8888(0xFF,0xFF,0x00,0xFF),"%s%s%s%s", inp.cl?"<":" ",inp.cu?"^":" ", inp.cr?">":" ",inp.cd?"v":" ");
-        gfx_printf_color(206,240-16,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s%s", inp.dl?"<":" ",inp.du?"^":" ", inp.dr?">":" ",inp.dd?"v":" ");
+        gfx_printf(x,y,"%4i %4i",inp.x,inp.y);
+        gfx_printf_color(x+90,y,GPACK_RGBA8888(0x00,0x00,0xFF,0xFF),"%s", inp.a?"A":" ");
+        gfx_printf_color(x+100,y,GPACK_RGBA8888(0x00,0xFF,0x00,0xFF),"%s", inp.b?"B":" ");
+        gfx_printf_color(x+110,y,GPACK_RGBA8888(0xFF,0x00,0x00,0xFF),"%s", inp.s?"S":" ");
+        gfx_printf_color(x+120,y,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s", inp.z?"Z":" ",inp.l?"L":" ",inp.r?"R":" ");
+        gfx_printf_color(x+150,y,GPACK_RGBA8888(0xFF,0xFF,0x00,0xFF),"%s%s%s%s", inp.cl?"<":" ",inp.cu?"^":" ", inp.cr?">":" ",inp.cd?"v":" ");
+        gfx_printf_color(x+190,y,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s%s", inp.dl?"<":" ",inp.du?"^":" ", inp.dr?">":" ",inp.dd?"v":" ");
     }
 
     /* draw floating watches */
@@ -126,9 +128,9 @@ static void kz_main(void) {
         }
     }
 
-    if(kz.lag_counter){
+    if(settings->lag_counter){
         int32_t lag_frames = z2_vi_counter + kz.frames_offset - kz.frames;
-        gfx_printf(100,100,"%d",lag_frames);
+        gfx_printf(settings->lag_x,settings->lag_y,"%d",lag_frames);
     }
 
     kz.frames += z2_static_ctxt.update_rate;
@@ -137,6 +139,17 @@ static void kz_main(void) {
         kz.cpu_offset -= kz.cpu_cycle_counter - kz.cpu_prev;
     }
     kz.cpu_prev = kz.cpu_cycle_counter;
+    if(settings->timer){
+        int64_t count = kz.cpu_cycle_counter + kz.cpu_offset;
+        int tenths = count / 4677750;
+        int seconds = tenths / 10;
+        int minutes = seconds / 60;
+        int hours = minutes / 60;
+        tenths %= 10;
+        seconds %= 60;
+        minutes %= 60;
+        gfx_printf(settings->timer_x,settings->timer_y,"%d:%02d:%02d.%d",hours,minutes,seconds,tenths);
+    }
 
     /* activate cheats */
     {
@@ -306,8 +319,6 @@ void init() {
     kz.settings_profile = 0;
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
-
-    init_commands();
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, 10, 10);
