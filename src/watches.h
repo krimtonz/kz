@@ -5,8 +5,8 @@
 
 #define WATCHES_MAX 10
 
-struct watch_info{
-    union{
+union watch_info{
+    struct{
         uint8_t type        : 4;
         uint8_t floating    : 4;
     };

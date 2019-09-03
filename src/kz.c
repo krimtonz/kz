@@ -42,7 +42,7 @@ void load_disp_p(struct disp_p *disp_p){
     gfx->overlay.d = disp_p->overlay_d + gfx->overlay.buf;
 }
 
-void gfx_reloc(int src, int cimg){
+void gfx_reloc(int src){
     z2_gfx_t *gfx = z2_game.common.gfx;
     z2_disp_buf_t *new_disp[4] = {
         &gfx->work,
@@ -52,8 +52,6 @@ void gfx_reloc(int src, int cimg){
     };
     uint32_t src_gfx = z2_disp_addr + src * Z2_DISP_SIZE;
     uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
-    uint32_t src_cimg = z2_cimg[cimg];
-    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
     for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
         z2_disp_buf_t *dbuf = new_disp[i];
         for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
@@ -121,8 +119,7 @@ static void kz_main(void) {
 
     /* draw floating watches */
     {
-        for(int i=0;i<kz.watch_cnt;i++){
-            watch_t *watch = vector_at(&kz.watches,i);
+        for(watch_t *watch=kz.watches.first;watch;watch = list_next(watch)){
             if(watch->floating){
                 watch_printf(watch);
             }
@@ -302,9 +299,7 @@ void init() {
 
     kz.collision_view_status = COL_VIEW_NONE;
 
-    vector_init(&kz.watches, sizeof(watch_t));
-    vector_reserve(&kz.watches,WATCHES_MAX);
-    kz.watch_cnt = 0;
+    list_init(&kz.watches,sizeof(watch_t));
 
     kz.pending_frames=-1;
 
@@ -344,7 +339,7 @@ void game_state_main(z2_gamesate_update_t game_update_start){
                 memcpy((void*)z2_disp_addr,(void*)(z2_disp_addr + Z2_DISP_SIZE),Z2_DISP_SIZE);
             }
             load_disp_p(&kz.disp_p);
-            gfx_reloc(1-(gfx->frame_cnt_1 & 1), 1-(gfx->frame_cnt_2 &1));
+            gfx_reloc(1-(gfx->frame_cnt_1 & 1));
         }
         z2_game.common.gamestate_frames--;
     }

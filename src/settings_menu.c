@@ -39,7 +39,7 @@ struct menu *create_settings_menu(){
     profile_watch.address = &kz.settings_profile;
     profile_watch.type=WATCH_TYPE_U8;
     profile_watch.floating = 0;
-    menu_add_watch(&settings,13,1,&profile_watch);
+    menu_add_watch(&settings,13,1,&profile_watch,1);
     menu_add_button(&settings,14,1,"+",profile_inc,NULL);
     menu_add_button(&settings,0,2,"save settings",save_profile,NULL);
     menu_add_button(&settings,0,3,"load settings",load_profile,NULL);

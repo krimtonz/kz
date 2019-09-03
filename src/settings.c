@@ -12,18 +12,20 @@ void load_default_settings(){
     settings_info.header.magic[2] = 'k';
     settings_info.header.magic[3] = 'z';
     settings_info.header.version = SETTINGS_VER;
-    settings->watch_cnt = 0;
+    list_destroy(&kz.watches);
+    list_init(&kz.watches,sizeof(watch_t));
 }
 
 void save_settings_to_flashram(int profile){
-    settings->watch_cnt = kz.watch_cnt;
-    for(int i=0;i<kz.watch_cnt;i++){
-        watch_t *watch = vector_at(&kz.watches,i);
-        settings->watch_addresses[i] = watch->address;
+    settings->watch_cnt = kz.watches.size;
+    int i=0;
+    for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
+        settings->watch_addresses[i] = (uint32_t)watch->address;
         settings->watch_x[i] = watch->x;
         settings->watch_y[i] = watch->y;
         settings->watch_info[i].floating = watch->floating;
         settings->watch_info[i].type = watch->type;
+        i++;
     }
     kz_io(&settings_info,SETTINGS_ADDR + (profile * sizeof(settings_info)),sizeof(*settings),OS_WRITE);
 }
@@ -39,9 +41,8 @@ void load_settings_from_flashram(int profile){
 }
 
 void kz_apply_settings(){
-    kz.watch_cnt = settings->watch_cnt;
-    for(int i=0;i<kz.watch_cnt;i++){
-        watch_t *watch = vector_push_back(&kz.watches,1,NULL);
+    for(int i=0;i<settings->watch_cnt;i++){
+        watch_t *watch = list_push_back(&kz.watches,NULL);
         watch->address = (void*)settings->watch_addresses[i];
         watch->x = settings->watch_x[i];
         watch->y = settings->watch_y[i];

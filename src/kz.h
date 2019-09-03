@@ -45,8 +45,7 @@ typedef struct{
 
 typedef struct  {
     _Bool                   ready;    
-    struct vector           watches;
-    size_t                  watch_cnt;
+    struct list             watches;
     uint32_t                cheats;
     enum col_view_settings  collision_view_settings;
     enum col_view_status    collision_view_status;

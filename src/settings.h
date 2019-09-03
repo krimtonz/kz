@@ -20,7 +20,7 @@ struct settings_data{
     uint32_t            watch_addresses[WATCHES_MAX];
     uint16_t            watch_x[WATCHES_MAX];
     uint16_t            watch_y[WATCHES_MAX];
-    struct watch_info   watch_info[WATCHES_MAX];
+    union watch_info    watch_info[WATCHES_MAX];
     size_t              watch_cnt;
 };
 

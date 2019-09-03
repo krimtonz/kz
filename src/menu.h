@@ -94,7 +94,7 @@ void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y);
 struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text);
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name);
 struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *text, menu_button_callback callback, void *data);
-struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watch_t *watch);
+struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watch_t *watch, _Bool setpos);
 
 struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, 
                                         menu_number_callback callback, void *callback_data, 
