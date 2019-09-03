@@ -107,16 +107,18 @@ static void kz_main(void) {
 
     /* input display */
     {
-        int x = settings->id_x;
-        int y = settings->id_y;
-        z2_controller_t inp = z2_game.common.input[0].raw;
-        gfx_printf(x,y,"%4i %4i",inp.x,inp.y);
-        gfx_printf_color(x+90,y,GPACK_RGBA8888(0x00,0x00,0xFF,0xFF),"%s", inp.a?"A":" ");
-        gfx_printf_color(x+100,y,GPACK_RGBA8888(0x00,0xFF,0x00,0xFF),"%s", inp.b?"B":" ");
-        gfx_printf_color(x+110,y,GPACK_RGBA8888(0xFF,0x00,0x00,0xFF),"%s", inp.s?"S":" ");
-        gfx_printf_color(x+120,y,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s", inp.z?"Z":" ",inp.l?"L":" ",inp.r?"R":" ");
-        gfx_printf_color(x+150,y,GPACK_RGBA8888(0xFF,0xFF,0x00,0xFF),"%s%s%s%s", inp.cl?"<":" ",inp.cu?"^":" ", inp.cr?">":" ",inp.cd?"v":" ");
-        gfx_printf_color(x+190,y,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s%s", inp.dl?"<":" ",inp.du?"^":" ", inp.dr?">":" ",inp.dd?"v":" ");
+        if(settings->input_display){
+            int x = settings->id_x;
+            int y = settings->id_y;
+            z2_controller_t inp = z2_game.common.input[0].raw;
+            gfx_printf(x,y,"%4i %4i",inp.x,inp.y);
+            gfx_printf_color(x+90,y,GPACK_RGBA8888(0x00,0x00,0xFF,0xFF),"%s", inp.a?"A":" ");
+            gfx_printf_color(x+100,y,GPACK_RGBA8888(0x00,0xFF,0x00,0xFF),"%s", inp.b?"B":" ");
+            gfx_printf_color(x+110,y,GPACK_RGBA8888(0xFF,0x00,0x00,0xFF),"%s", inp.s?"S":" ");
+            gfx_printf_color(x+120,y,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s", inp.z?"Z":" ",inp.l?"L":" ",inp.r?"R":" ");
+            gfx_printf_color(x+150,y,GPACK_RGBA8888(0xFF,0xFF,0x00,0xFF),"%s%s%s%s", inp.cl?"<":" ",inp.cu?"^":" ", inp.cr?">":" ",inp.cd?"v":" ");
+            gfx_printf_color(x+190,y,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),"%s%s%s%s", inp.dl?"<":" ",inp.du?"^":" ", inp.dr?">":" ",inp.dd?"v":" ");
+        }
     }
 
     /* draw floating watches */
