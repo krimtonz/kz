@@ -283,13 +283,14 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
 
         gfx_load_tile(font->texture,i);
         int char_x = 0;
+        gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
         for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
             char c = chars[j];
             if(c<33) continue;
             c-=33;
             if(c<tile_start || c>=tile_end) continue;
             c-=tile_start; 
-            gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
+            /*gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x + 1 ),
                          qs102(y + 1),
@@ -300,8 +301,8 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
                                font->c_width),
                          qu105(c / font->cx_tile *
                                font->c_height),
-                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));
-            gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
+                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));*/
+            
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x),
                          qs102(y),

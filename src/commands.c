@@ -12,8 +12,19 @@ struct command kz_commands[Z2_CMD_MAX] = {
     {"pause",               COMMAND_PRESS,  command_pause},
     {"advance",             COMMAND_PRESS,  command_advance},
     {"return",              COMMAND_PRESS,  NULL },
-    {"reset lag counter",   COMMAND_PRESS,  command_lag_reset}
+    {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
+    {"start/stop timer",    COMMAND_PRESS,  command_timer},
+    {"reset timer",         COMMAND_PRESS,  command_timer_reset},
 };
+
+void command_timer(){
+    kz.timer_running=!kz.timer_running;
+}
+
+void command_timer_reset(){
+    kz.cpu_offset = -kz.cpu_cycle_counter;
+    kz.cpu_prev = kz.cpu_cycle_counter;
+}
 
 void command_break(){
     z2_game.cutscene_state = 0x03;

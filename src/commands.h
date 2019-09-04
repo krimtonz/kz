@@ -13,6 +13,8 @@ enum{
     Z2_CMD_ADVANCE,
     Z2_CMD_RETURN,
     Z2_CMD_RESET_LAG,
+    Z2_CMD_TIMER,
+    Z2_CMD_TIMER_RESET,
     Z2_CMD_MAX
 };
 
@@ -36,6 +38,8 @@ void command_pause();
 void command_advance();
 void command_return();
 void command_lag_reset();
+void command_timer();
+void command_timer_reset();
 
 extern struct command kz_commands[Z2_CMD_MAX];
 
