@@ -1134,7 +1134,7 @@ typedef struct{
 /* Function Prototypes */
 typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
 typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
-typedef void (*z2_loadroom)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
+typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
 typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*z2_gamesate_update_t)(z2_game_t *game);
