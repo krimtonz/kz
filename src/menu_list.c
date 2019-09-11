@@ -59,9 +59,9 @@ void option_draw(struct menu_item *item){
     gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color.color,"%s",data->text[data->selected_idx]);
 }
 
-struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y, 
-                                const char **text, void *values, 
-                                uint8_t value_size, uint16_t options, 
+struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
+                                const char **text, void *values,
+                                uint8_t value_size, uint16_t options,
                                 void *list_data, menu_list_callback callback){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){

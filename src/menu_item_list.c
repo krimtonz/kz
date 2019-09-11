@@ -92,7 +92,7 @@ int navigate_item_list(struct menu_item *item, enum menu_nav nav){
 }
 
 static void activate_item_list(struct menu_item *item){
-    struct item_list_data *data = item->data;   
+    struct item_list_data *data = item->data;
     if(data->active){
         int8_t val;
         if(data->options)
@@ -119,7 +119,7 @@ static void update_item_list(struct menu_item *item){
     }
 }
 
-struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, item_list_callback callback, 
+struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, item_list_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
                                      uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, uint8_t tiles_cnt,
                                      draw_info_t *drawinfo, struct tilebg_info *null_item){

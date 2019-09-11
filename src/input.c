@@ -6,6 +6,7 @@
 #include "settings.h"
 
 #define BIND_END 6
+#define INPUT_REPEAT 8
 
 static int button_time[16];
 static uint16_t pad_pressed_raw;
@@ -65,7 +66,7 @@ void input_update(){
         }else{
             button_time[i] = 0;
         }
-        if((pad_pressed_raw & p) || button_time[i] >= 8){
+        if((pad_pressed_raw & p) || button_time[i] >= INPUT_REPEAT){
             pad_pressed |= p;
         }
     }
@@ -126,7 +127,7 @@ void input_update(){
         else{
             bind_time[i]++;
         }
-        bind_pressed[i] = (bind_pressed_raw[i] || bind_time[i] >= 8);
+        bind_pressed[i] = (bind_pressed_raw[i] || bind_time[i] >= INPUT_REPEAT);
     }
 }
 
@@ -148,4 +149,8 @@ void reserve_buttons(uint16_t button_bitmask){
 
 void free_buttons(uint16_t button_bitmask){
     reserved ^= button_bitmask;
+}
+
+uint16_t input_pressed(){
+    return pad_pressed;
 }

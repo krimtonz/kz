@@ -2,7 +2,7 @@
 
 struct kz_scene scenes[] = {
     {                                                   /* 0000 */
-        0, 3, 
+        0, 3,
         "mayor's residence",
         (const char*[]){
             "east clock town",
@@ -41,7 +41,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0005 */
-        10, 2, 
+        10, 2,
         "beneath graveyard",
         (const char*[]){
             "day 2 start",
@@ -83,7 +83,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0009 */
-        20, 17, 
+        20, 17,
         "grottos",
         (const char*[]){
             "ocean gossip stones",
@@ -164,7 +164,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0013 */
-        36, 1, 
+        36, 1,
         "milk bar",
         (const char*[]){
             "east clock town",
@@ -233,7 +233,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0021 */
-        52, 7, 
+        52, 7,
         "ikana castle",
         (const char*[]){
             "beneath the well",
@@ -290,7 +290,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0027 */
-        64, 16, 
+        64, 16,
         "pirates fortress interior",
         (const char*[]){
             "unknown",
@@ -568,7 +568,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0051 */
-        116, 1, 
+        116, 1,
         "goron shop",
         (const char*[]){
             "goron shrine",
@@ -798,14 +798,14 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0075 */
-        164, 1, 
+        164, 1,
         "music box house",
         (const char*[]){
             "ikana canyon",
         },
     },
     {                                                   /* 0076 */
-        166, 1, 
+        166, 1,
         "igos du ikana",
         (const char*[]){
             "ikana castle",
@@ -978,7 +978,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0095 */
-        204, 1, 
+        204, 1,
         "giants chamber",
         (const char*[]){
             "oath to order",
@@ -997,7 +997,7 @@ struct kz_scene scenes[] = {
         },
     },
     {                                                   /* 0097 */
-        208, 3, 
+        208, 3,
         "goron racetrack",
         (const char*[]){
             "path to mountain village",
@@ -1084,10 +1084,92 @@ struct kz_scene scenes[] = {
 
 struct kz_scene_category scene_categories[] = {
     {
+        "clock town",
+        18, (uint8_t[]){
+            101,100,99,98,102,22,94,7,43,38,48,0,4,13,15,24,74,87
+        }
+    },
+    {
+        "swamp",
+        14, (uint8_t[]){
+            54,28,59,6,77,2,90,31,35,52,72,60,19,23
+        }
+    },
+    {
+        "snowhead",
+        16, (uint8_t[]){
+            20,70,80,36,68,83,84,97,67,62,41,51,81,82,25,58
+        }
+    },
+    {
+        "great bay",
+        14, (uint8_t[]){
+            46,39,32,50,29,12,49,27,47,64,42,66,63,85
+        }
+    },
+    {
+        "ikana",
+        17, (uint8_t[]){
+            73,57,5,40,11,69,86,71,75,65,21,76,78,79,14,16,45
+        }
+    },
+    {
+        "overworld",
+        4, (uint8_t[]){
+            37,33,9,30
+        }
+    },
+    {
+        "milk road",
+        6, (uint8_t[]){
+            26,96,44,3,55,56
+        }
+    },
+    {
+        "moon",
+        6, (uint8_t[]){
+            93,34,53,61,92,1
+        }
+    },
+    {
+        "other",
+        6, (uint8_t[]){
+            91,18,17,89,95,88
+        }
+    },
+    {
+        "beta",
+        2, (uint8_t[]){
+            10,8
+        }
+    },
+};
+
+/*
+struct kz_scene_category scene_categories[] = {
+    {
+        "south",
+        13, (uint8_t[]){
+            2, 6, 19, 22, 23, 28, 35, 52, 54,59,60, 72, 77,
+        },
+    },
+    {
+        "west",
+        15, (uint8_t[]){
+            5,11,14,16,21,40,45,57,65,69,71,75,78,79,86
+        }
+    },
+    {
+        "east",
+        1, (uint8_t[]){
+
+        }
+    },
+    {
         "dungeons",
         6, (uint8_t[]){
             19, 25, 63, 14, 16,
-            21, 
+            21,
         },
     },
     {
@@ -1109,14 +1191,14 @@ struct kz_scene_category scene_categories[] = {
             37, 54, 06, 59, 60,
             20, 83, 84, 81, 82,
             46, 47, 73, 11, 26,
-            29, 49, 78, 79, 
+            29, 49, 78, 79,
         },
     },
     {
         "towns",
         17, (uint8_t[]){
-            101, 100, 98, 99, 102, 
-            44, 35, 52, 70, 80, 
+            101, 100, 98, 99, 102,
+            44, 35, 52, 70, 80,
             67, 62, 41, 42, 12,
             27, 57,
         },
@@ -1124,14 +1206,14 @@ struct kz_scene_category scene_categories[] = {
     {
         "shops",
         7, (uint8_t[]){
-            2, 7, 13, 43, 48, 
+            2, 7, 13, 43, 48,
             51, 94
         },
     },
     {
         "minigames",
         11, (uint8_t[]){
-            4, 22, 24, 28, 38, 
+            4, 22, 24, 28, 38,
             55, 56, 74, 86, 71,
             72, 15,
         },
@@ -1141,7 +1223,7 @@ struct kz_scene_category scene_categories[] = {
         12, (uint8_t[]){
             0, 3, 39, 40, 50,
             69, 75, 77, 87, 36,
-            33, 66, 
+            33, 66,
         },
     },
     {
@@ -1160,3 +1242,4 @@ struct kz_scene_category scene_categories[] = {
         },
     }
 };
+*/

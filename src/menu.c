@@ -138,13 +138,13 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
             fdist_pe = pe;
         }
     }
-    
+
     if(near){
         menu->selected_item = near;
     }else if(far){
         menu->selected_item = far;
     }
-    
+
 }
 
 void menu_callback(struct menu *menu, enum menu_callback callback){

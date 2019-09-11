@@ -3,6 +3,7 @@
 #include "menu.h"
 #include "watches.h"
 #include "kz.h"
+#include "resource.h"
 
 struct item_data{
     menu_button_callback    callback;
@@ -41,7 +42,7 @@ static enum watch_type watch_type_values[] = {
 };
 
 static uint8_t watch_data_sizes[] = {
-    1, 1, 1, 
+    1, 1, 1,
     2, 2, 2,
     4, 4, 4,
     4,
@@ -119,13 +120,18 @@ void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
     /* Add New Watch Row */
     int x = item->x;
     struct watch_row *row = malloc(sizeof(*row));
-    row->delete_button = menu_add_button(item->owner,x,item->y,"X",menu_watch_delete,row);
-    menu_add_button(item->owner,x+1,item->y,"V",menu_watch_anchor,row);
+    draw_info_t draw = {
+        resource_get(R_KZ_ICON), 0, -1, 1.f, 1.f, 8, 8, {{0xFF,0xFF,0xFF,0xFF}},{{0xFF,0xFF,0xFF,0xFF}},1,NULL
+    };
+    row->delete_button = menu_add_gfx_button(item->owner,x,item->y,menu_watch_delete,row,&draw);
+    draw.on_tile = 1;
+    menu_add_gfx_button(item->owner,x+1,item->y,menu_watch_anchor,row,&draw);
     struct move_data *mdata = malloc(sizeof(*mdata));
     mdata->moving = 0;
     mdata->watch = watch;
     row->mdata = mdata;
-    struct menu_item *witem = menu_add_button(item->owner,x+2,item->y,"<>",menu_watch_move,row);
+    draw.on_tile = 2;
+    struct menu_item *witem = menu_add_gfx_button(item->owner,x+2,item->y,menu_watch_move,row,&draw);
     row->move_button = witem;
     witem->navigate_proc = menu_watch_move_nav;
     row->addr_input = menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,row,16,8,&watch->address,sizeof(watch->address));

@@ -1,0 +1,14 @@
+{
+  "checkbox.png": {
+    "type": "texture",
+    "name": "checkbox",
+    "format": "rgba16",
+    "tile_height": 10
+  },
+  "icons.png": {
+    "type": "texture",
+    "name": "icons",
+    "format": "rgba16",
+    "tile_height":  10
+  }
+}

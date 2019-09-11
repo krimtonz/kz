@@ -88,7 +88,7 @@ void menu_number_draw(struct menu_item *item){
     uint32_t val = get_val(data->val_ptr,data->val_len);
     for(int i=data->length-1;i>=0;i--){
         if(data->editing){
-            if(data->edit_idx == i){ 
+            if(data->edit_idx == i){
                 color=MENU_SELECTED_COLOR;
             }
             else{
@@ -129,12 +129,12 @@ int menu_number_nav(struct menu_item *item, enum menu_nav nav){
         default:
             break;
     }
-    
+
     return 1;
 }
 
-struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y, 
-                                        menu_number_callback callback, void *callback_data, 
+struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y,
+                                        menu_number_callback callback, void *callback_data,
                                         uint8_t base, uint8_t length, void *value,
                                         uint8_t val_len){
     struct menu_item *item = menu_add(menu,x,y,NULL);

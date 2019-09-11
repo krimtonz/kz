@@ -20,6 +20,6 @@ typedef union {
               zx, zy, zz, zw,
               wx, wy, wz, ww;
     };
-}MtxF;  
+}MtxF;
 
 #endif

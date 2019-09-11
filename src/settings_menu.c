@@ -1,5 +1,6 @@
 #include "kz.h"
 #include "settings.h"
+#include "resource.h"
 
 struct item_data{
     menu_button_callback    callback;
@@ -110,14 +111,23 @@ struct menu *create_settings_menu(){
     menu_add_button(&settingsm,0,2,"save settings",save_profile,NULL);
     menu_add_button(&settingsm,0,3,"load settings",load_profile,NULL);
     menu_add_button(&settingsm,0,4,"load default settings",default_settings,NULL);
-    menu_add_switch(&settingsm,0,5,&settings->input_display,1,0x01,NULL,"input display");
-    struct menu_item *item = menu_add_button(&settingsm,14,5,"<>",move_item,(void *)INPUT_DISPLAY);
+    draw_info_t draw_info = {
+        resource_get(R_KZ_CHECKBOX), 1,-1, 1.f, 1.f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}},0,checkbox_bg
+    };
+    menu_add_gfx_switch(&settingsm,0,5,&settings->input_display,1,0x01,NULL,NULL,&draw_info);
+    menu_add(&settingsm,2,5,"input display");
+    draw_info_t draw = {
+        resource_get(R_KZ_ICON), 2, -1, 1.f, 1.f, 8, 8, {{0xFF,0xFF,0xFF,0xFF}},{{0xFF,0xFF,0xFF,0xFF}},1,NULL
+    };
+    struct menu_item *item = menu_add_gfx_button(&settingsm,16,5,move_item,(void*)INPUT_DISPLAY,&draw);
     item->navigate_proc = nav_item;
-    menu_add_switch(&settingsm,0,6,&settings->timer,1,0x01,NULL,"timer");
-    item = menu_add_button(&settingsm,14,6,"<>",move_item,(void *)TIMER);
+    menu_add_gfx_switch(&settingsm,0,6,&settings->timer,1,0x01,NULL,NULL,&draw_info);
+    menu_add(&settingsm,2,6,"timer");
+    item = menu_add_gfx_button(&settingsm,16,6,move_item,(void*)TIMER,&draw);
     item->navigate_proc = nav_item;
-    menu_add_switch(&settingsm,0,7,&settings->lag_counter,1,0x01,NULL,"lag counter");
-    item = menu_add_button(&settingsm,14,7,"<>",move_item,(void *)LAG_COUNTER);
+    menu_add_gfx_switch(&settingsm,0,7,&settings->lag_counter,1,0x01,NULL,NULL,&draw_info);
+    menu_add(&settingsm,2,7,"lag counter");
+    item = menu_add_gfx_button(&settingsm,16,7,move_item,(void*)LAG_COUNTER,&draw);
     item->navigate_proc = nav_item;
     return &settingsm;
 }

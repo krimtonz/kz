@@ -14,8 +14,8 @@
 #include "resource.h"
 
 __attribute__((section(".data")))
-kz_ctxt_t kz = { 
-    .ready = 0, 
+kz_ctxt_t kz = {
+    .ready = 0,
 };
 
 void save_disp_p(struct disp_p *disp_p){
@@ -67,7 +67,7 @@ void gfx_reloc(int src){
                 case G_MOVEMEM: break;
                 case G_LOAD_UCODE: break;
                 case G_DL: break;
-                case G_RDPHALF_1: 
+                case G_RDPHALF_1:
                 switch(p[1].hi>>24){
                     case G_BRANCH_Z: break;
                     case G_LOAD_UCODE: break;
@@ -200,44 +200,38 @@ static void kz_main(void) {
     /* collision view */
     {
         kz_col_view();
-    }   
+    }
 
     /* handle menu */
     {
-        static _Bool skip_menu = 0;
-        z2_input_t input = z2_game.common.input[0];
-        if(input_bind_pressed(0)){
-            skip_menu = 1;
-            kz.menu_active = !kz.menu_active;
-            if(kz.menu_active){
-                reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
-            }else{
+        if(kz.menu_active){
+            if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
+                kz.menu_active=0;
                 free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
             }
-        }
-
-        if(kz.menu_active && !skip_menu){
             struct menu *kz_menu = &kz.main_menu;
-            enum menu_nav navdir = MENU_NAV_NONE;
-            enum menu_callback callback = MENU_CALLBACK_NONE;
-            if(input.pad_pressed & BUTTON_D_DOWN){
-                navdir=MENU_NAV_DOWN;
-            }else if(input.pad_pressed & BUTTON_D_UP){
-                navdir=MENU_NAV_UP;
-            }else if(input.pad_pressed & BUTTON_D_LEFT){
-                navdir=MENU_NAV_LEFT;
-            }else if(input.pad_pressed & BUTTON_D_RIGHT){
-                navdir=MENU_NAV_RIGHT;
-            }else if(input.pad_pressed & BUTTON_L){
-                callback = MENU_CALLBACK_ACTIVATE;
+            uint16_t pressed = input_pressed();
+            if(pressed & BUTTON_D_DOWN){
+                menu_navigate(kz_menu,MENU_NAV_DOWN);
+            }
+            if(pressed & BUTTON_D_UP){
+                menu_navigate(kz_menu,MENU_NAV_UP);
+            }
+            if(pressed & BUTTON_D_LEFT){
+                menu_navigate(kz_menu,MENU_NAV_LEFT);
+            }
+            if(pressed & BUTTON_D_RIGHT){
+                menu_navigate(kz_menu,MENU_NAV_RIGHT);
+            }
+            if(pressed & BUTTON_L){
+                menu_callback(kz_menu,MENU_CALLBACK_ACTIVATE);
             }
 
-            menu_navigate(kz_menu,navdir);
-            menu_callback(kz_menu,callback);
             menu_draw(kz_menu);
+        }else if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
+            kz.menu_active=1;
+            reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
         }
-
-        skip_menu = 0;
     }
     menu_update(&kz.main_menu);
     /* handle command bindings */
@@ -257,7 +251,7 @@ static void kz_main(void) {
             }
         }
     }
-    
+
     /* print logo */
 #define MAKESTRING(S) MAKESTRING_(S)
 #define MAKESTRING_(S) #S
@@ -274,6 +268,7 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
+
 
     gfx_finish();
 }
@@ -300,7 +295,7 @@ void init() {
     do_global_ctors();
     gfx_init();
 
-    init_textures();
+    init_resources();
 
     kz.cpu_cycle_counter = 0;
     cpu_counter();
@@ -358,9 +353,9 @@ void game_state_main(z2_gamesate_update_t game_update_start){
     }
 }
 
-// Uses kz's stack instead of graph stack. 
+// Uses kz's stack instead of graph stack.
 static void kz_stack(void (*kzfunc)(void)) {
-    static _Alignas(8) __attribute__((section(".stack"))) 
+    static _Alignas(8) __attribute__((section(".stack")))
     char stack[0x2000];
     __asm__ volatile(   "la     $t0, %1;"
                         "sw     $sp, -0x04($t0);"

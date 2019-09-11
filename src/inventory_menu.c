@@ -133,7 +133,7 @@ static struct switch_data remains_data_table[] = {
     { 0x0008,   "twinmold's remains" },
 };
 
-static struct switch_data bombers_notebook_table = 
+static struct switch_data bombers_notebook_table =
     { 0x0040000,    "bomber's notebook" }
 ;
 
@@ -244,12 +244,12 @@ static uint8_t dungeon_name_values[] = {
 
 struct item_switch_data {
     uint8_t                 map_idx;
-    uint8_t                 map; 
+    uint8_t                 map;
 };
 
 static void draw_item_switch(struct menu_item *item){
     struct item_switch_data *data = item->data;
-    gfx_texture *texture = items_texture;
+    gfx_texture *texture = resource_get(R_Z2_ITEMS);
     struct item_map_row map = data->map==0?item_map_table[data->map_idx]:mask_map_table[data->map_idx];
     int tile_idx = map.item;
     if(*map.slot == Z2_ITEM_NULL) tile_idx += (texture->y_tiles/2);
@@ -349,7 +349,7 @@ struct menu *create_inventory_menu(){
     static struct menu quest_status;
 
     static struct tilebg_info list_bg;
-    list_bg.texture = buttons_texture;
+    list_bg.texture = resource_get(R_Z2_BUTTONS);
     list_bg.off_color.color=0xFFFFFFFF;
     list_bg.on_color.color = 0x00FF00FF;
     list_bg.tile = 1;
@@ -378,9 +378,9 @@ struct menu *create_inventory_menu(){
                 y++;
             }
         }
-        
+
         static draw_info_t list_draw_info;
-        list_draw_info.texture = items_texture;
+        list_draw_info.texture = resource_get(R_Z2_ITEMS);
         list_draw_info.enabled_color = MENU_DEFAULT_COLOR;
         list_draw_info.x_scale=1.0f;
         list_draw_info.y_scale=1.0f;
@@ -391,9 +391,9 @@ struct menu *create_inventory_menu(){
                                Z2_ITEM_BOTTLE,bottle_contents,
                                sizeof(bottle_contents),
                                &z2_file.items[Z2_SLOT_BOTTLE_1 + i],NULL,sizeof(bottle_contents),&list_draw_info, NULL);
-            
+
         }
-        
+
         for(int i=0;i<3;i++){
             menu_add_item_list(&items,6,i+1,NULL,NULL,
                                Z2_ITEM_MOONS_TEAR,trade_quest_contents,
@@ -435,7 +435,7 @@ struct menu *create_inventory_menu(){
     // Populate quest status menu
     {
         quest_status.selected_item = menu_add_button(&quest_status,0,0,"return",menu_return,NULL);
-        
+
         int x = 0;
         int y = 1;
         int oy = 0;
@@ -454,6 +454,9 @@ struct menu *create_inventory_menu(){
         menu_add(&quest_status,0,y,"stray fairies");
         menu_add_number_input(&quest_status,15,y++,update_stray_fairies,NULL,16,2,&stray_fairies,1);
         oy = 5;
+
+        gfx_texture *dungeon_items_tex = resource_get(R_Z2_DUNGEON);
+
         item = menu_add_bit_switch(&quest_status,0,y,&dungeon_items,1,0x01,set_dungeon_item,NULL,dungeon_items_tex,16,16,0,1,"boss key",0xFFFFFFFF,0xFFFFFFFF);
         set_item_offset(item,0,oy);
         item = menu_add_bit_switch(&quest_status,1,y,&dungeon_items,1,0x02,set_dungeon_item,NULL,dungeon_items_tex,16,16,1,1,"compass",0xFFFFFFFF,0xFFFFFFFF);
@@ -461,6 +464,7 @@ struct menu *create_inventory_menu(){
         item = menu_add_bit_switch(&quest_status,2,y++,&dungeon_items,1,0x04,set_dungeon_item,NULL,dungeon_items_tex,16,16,2,1,"map",0xFFFFFFFF,0xFFFFFFFF);
         set_item_offset(item,20,oy);
         oy+=10;
+        gfx_texture *items_texture = resource_get(R_Z2_ITEMS);
         for(int i=0;i<sizeof(remains_data_table)/sizeof(*remains_data_table);i++){
             item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,
                                         remains_data_table[i].bitmask,NULL,NULL,items_texture,
@@ -474,6 +478,7 @@ struct menu *create_inventory_menu(){
         int start_y = y;
         int start_oy = oy;
         int start_ox = ox;
+        gfx_texture *owl_icon_texture = resource_get(R_Z2_OWL);
         for(int i=0;i<sizeof(owl_data_table)/sizeof(*owl_data_table);i++){
             x = i % 5;
             ox = x * 6;
@@ -487,6 +492,7 @@ struct menu *create_inventory_menu(){
         y = start_y;
         oy = start_oy;
         ox = start_ox;
+        gfx_texture *note_texture = resource_get(R_Z2_NOTE);
         for(int i=0;i<sizeof(song_data_table)/sizeof(*song_data_table);i++){
             x = i % 5 + 6;
             ox = x * 6;

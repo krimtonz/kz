@@ -23,15 +23,9 @@ static Gfx kzgfx[] = {
     gsDPSetScissor(G_SC_NON_INTERLACE,
               0, 0, Z2_SCREEN_WIDTH, Z2_SCREEN_HEIGHT),
 
-    gsDPSetOtherMode(G_AD_DISABLE | G_CD_DISABLE |
-        G_CK_NONE | G_TC_FILT |
-        G_TD_CLAMP | G_TP_NONE |
-        G_TL_TILE | G_TT_NONE |
-        G_PM_NPRIMITIVE | G_CYC_1CYCLE |
-        G_TF_BILERP, // HI
-        G_AC_NONE | G_ZS_PRIM |
-        G_RM_XLU_SURF | G_RM_XLU_SURF2), // LO
-    
+    gsDPSetOtherMode(G_CYC_1CYCLE | G_AD_DISABLE | G_CD_DISABLE | G_CK_NONE | G_TC_FILT | G_TD_CLAMP | G_TP_NONE | G_TL_TILE | G_TT_NONE | G_PM_NPRIMITIVE | G_TF_POINT,
+                    G_ZS_PRIM | G_AC_NONE | G_RM_XLU_SURF | G_RM_XLU_SURF2),
+    gsDPSetCombine(G_CC_MODE(G_CC_MODULATEIA_PRIM,G_CC_MODULATEIA_PRIM)),
     gsSPEndDisplayList()
 };
 
@@ -77,7 +71,7 @@ void gfx_init(){
     gfx_disp_work = malloc(GFX_SIZE);
     gfx_disp_p = gfx_disp;
     gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
-    
+
     kfont = malloc(sizeof(gfx_font));
     static gfx_texture f_tex;
     f_tex.data = _raw_font;
@@ -87,7 +81,7 @@ void gfx_init(){
     f_tex.tile_height = 128;
     f_tex.tile_size = ((f_tex.tile_width * f_tex.tile_height * G_SIZ_BITS(f_tex.img_size) + 7) / 8 + 63) / 64 * 64;
     f_tex.x_tiles = 1;
-    f_tex.y_tiles = 3; 
+    f_tex.y_tiles = 3;
     kfont->texture = &f_tex;
     kfont->c_width = 8;
     kfont->c_height = 8;
@@ -118,7 +112,7 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
         gDPLoadTextureTile_4b(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
             texture->img_fmt, texture->tile_width, texture->tile_height,
             0, 0, texture->tile_width - 1, texture->tile_height-1,
-            0, 
+            0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK,
@@ -128,7 +122,7 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
             texture->img_fmt, texture->img_size,
             texture->tile_width, texture->tile_height,
             0, 0, texture->tile_width - 1, texture->tile_height-1,
-            0, 
+            0,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMIRROR | G_TX_WRAP,
             G_TX_NOMASK, G_TX_NOMASK,
@@ -166,28 +160,29 @@ void gfx_texture_desaturate(void *data, size_t len){
     }
 }
 
-gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, uint8_t start_tile, uint8_t end_tile, 
-                                       g_ifmt_t format, g_isiz_t size,
-                                       uint16_t tile_width, uint16_t tile_height, 
-                                       _Bool desaturate){
+inline size_t calc_tile_size(int width, int height, g_isiz_t size){
+    return ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+}
+
+static gfx_texture *gfx_load_archive(texture_loader *loader){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
-        int tiles_cnt = end_tile - start_tile + 1;
-        size_t tile_size = ((tile_width * tile_height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+        int tiles_cnt = loader->end_item - loader->start_item + 1;
+        size_t tile_size = calc_tile_size(loader->width,loader->height,loader->size);
         texture->tile_size = tile_size;
-        texture->img_fmt = format;
-        texture->img_size = size;
-        texture->tile_width = tile_width;
-        texture->tile_height = tile_height;
+        texture->img_fmt = loader->format;
+        texture->img_size = loader->size;
+        texture->tile_width = loader->width;
+        texture->tile_height = loader->height;
         texture->x_tiles = 1;
-        texture->y_tiles = tiles_cnt * (desaturate?2:1);
+        texture->y_tiles = tiles_cnt * (loader->desaturate?2:1);
 
-        texture->data = memalign(64, (tile_size * tiles_cnt) * (desaturate?2:1));
+        texture->data = memalign(64, (tile_size * tiles_cnt) * (loader->desaturate?2:1));
         int i;
         uint8_t j;
-        for(i=0,j=start_tile;i<tiles_cnt;i++,j++){
-            z2_DecodeArchiveFile(z2_file_table[file_idx].prom_start,j,(char*)texture->data + (tile_size * i));
-            if(desaturate){
+        for(i=0,j=loader->start_item;i<tiles_cnt;i++,j++){
+            z2_DecodeArchiveFile(z2_file_table[loader->file].prom_start,j,(char*)texture->data + (tile_size * i));
+            if(loader->desaturate){
                 // Copy newly decoded file and desaturate
                 memcpy((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i), (char*)texture->data + (tile_size * i), tile_size);
                 gfx_texture_desaturate((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
@@ -197,21 +192,19 @@ gfx_texture *gfx_load_icon_item_static(uint16_t file_idx, uint8_t start_tile, ui
     return texture;
 }
 
-gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size, 
-                                   uint16_t width, uint16_t height, 
-                                   uint16_t x_tiles, uint16_t y_tiles, 
-                                   int file, uint32_t offset, _Bool desaturate){
+static gfx_texture *gfx_load_from_rom(texture_loader *loader){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
-        size_t tile_size = ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+        size_t tile_size = calc_tile_size(loader->width,loader->height,loader->size);
         texture->tile_size = tile_size;
-        texture->data = memalign(64, (texture->tile_size * x_tiles * y_tiles) * (desaturate?2:1));
-        texture->img_fmt = format;
-        texture->img_size = size;
-        texture->tile_width = width;
-        texture->tile_height = height;
-        texture->x_tiles = x_tiles;
-        texture->y_tiles = y_tiles * (desaturate?2:1);
+        texture->data = memalign(64, (texture->tile_size * loader->num_tiles) * (loader->desaturate?2:1));
+        texture->img_fmt = loader->format;
+        texture->img_size = loader->size;
+        texture->tile_width = loader->width;
+        texture->tile_height = loader->height;
+        texture->x_tiles = 1;
+        texture->y_tiles = loader->num_tiles * (loader->desaturate?2:1);
+        uint16_t file = loader->file;
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
         OSMesgQueue queue;
         OSMesg msg;
@@ -224,10 +217,10 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
         };
         osSendMesg(&z2_file_msgqueue, &getfile, OS_MESG_NOBLOCK);
         osRecvMesg(&queue,NULL,OS_MESG_BLOCK);
-        memcpy(texture->data,(char*)tempdata + offset,tile_size * x_tiles * y_tiles);
+        memcpy(texture->data,(char*)tempdata + loader->offset,tile_size * loader->num_tiles);
         free(tempdata);
-        if(desaturate){
-            size_t tiles_cnt = x_tiles * y_tiles;
+        if(loader->desaturate){
+            int tiles_cnt = loader->num_tiles;
             for(int i=0;i<tiles_cnt;i++){
                 memcpy((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i), (char*)texture->data + (tile_size * i), tile_size);
                 gfx_texture_desaturate((char*)texture->data + (tile_size * tiles_cnt) + (tile_size * i),tile_size);
@@ -235,6 +228,17 @@ gfx_texture *gfx_load_game_texture(g_ifmt_t format, g_isiz_t size,
         }
     }
     return texture;
+}
+
+gfx_texture *gfx_load(texture_loader *loader){
+    switch(loader->source){
+        case SOURCE_ARCHIVE:
+            return gfx_load_archive(loader);
+        case SOURCE_FILE:
+            return gfx_load_from_rom(loader);
+        default:
+            return NULL;
+    }
 }
 
 void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale){
@@ -273,8 +277,6 @@ void gfx_destroy_texture(gfx_texture *texture){
 
 void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt, float x_scale, float y_scale){
 
-    gDPSetCombineMode(gfx_disp_p++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-
     int chars_per_tile = font->cx_tile * font->cy_tile;
 
     for(int i=0;i<font->texture->x_tiles * font->texture->y_tiles;i++){
@@ -283,14 +285,15 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
 
         gfx_load_tile(font->texture,i);
         int char_x = 0;
-        gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
+
+        gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
         for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
             char c = chars[j];
             if(c<33) continue;
             c-=33;
             if(c<tile_start || c>=tile_end) continue;
-            c-=tile_start; 
-            /*gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
+            c-=tile_start;
+
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x + 1 ),
                          qs102(y + 1),
@@ -301,8 +304,16 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
                                font->c_width),
                          qu105(c / font->cx_tile *
                                font->c_height),
-                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));*/
-            
+                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));
+        }
+        char_x=0;
+        gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
+        for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
+            char c = chars[j];
+            if(c<33) continue;
+            c-=33;
+            if(c<tile_start || c>=tile_end) continue;
+            c-=tile_start;
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x),
                          qs102(y),

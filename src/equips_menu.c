@@ -25,6 +25,7 @@ struct menu *create_equips_menu(){
     static struct menu equips;
 
     static struct tilebg_info b_bg;
+    gfx_texture *buttons_texture = resource_get(R_Z2_BUTTONS);
     b_bg.texture = buttons_texture;
     b_bg.tile=0;
     b_bg.on_color.color=0xFF0000FF;
@@ -36,6 +37,7 @@ struct menu *create_equips_menu(){
     c_bg.on_color.color=0xFF0000FF;
     c_bg.off_color.color=0xFFF000FF;
 
+    gfx_texture *items_texture = resource_get(R_Z2_ITEMS);
     static draw_info_t b_draw_info;
     b_draw_info.x_scale=1.4f;
     b_draw_info.y_scale=1.4f;
@@ -76,7 +78,7 @@ struct menu *create_equips_menu(){
     struct menu_item *item = menu_add_item_list(&equips,1,1,c_button_callback,(void*)1,0,NULL,
                         Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cleft,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_left);
     set_item_offset(item,6,8);
-    
+
     item = menu_add_item_list(&equips,2,1,c_button_callback,(void*)2,0,NULL,
                         Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cdown,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_down);
     set_item_offset(item,4,18);
@@ -84,6 +86,6 @@ struct menu *create_equips_menu(){
     item = menu_add_item_list(&equips,3,1,c_button_callback,(void*)3,0,NULL,
                         Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cright,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_right);
     set_item_offset(item,2,8);
-    
+
     return &equips;
 }

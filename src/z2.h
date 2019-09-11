@@ -211,7 +211,7 @@ typedef enum {
     Z2_SLOT_BOW,
     Z2_SLOT_FIRE_ARROW,
     Z2_SLOT_ICE_ARROW,
-    Z2_SLOT_LIGHT_ARROW,    
+    Z2_SLOT_LIGHT_ARROW,
     Z2_SLOT_QUEST_1,
     Z2_SLOT_BOMB,
     Z2_SLOT_BOMBCHU,
@@ -626,7 +626,7 @@ typedef struct {
     int32_t         unk_0xA0;               /* 0x00A0 */
 } z2_ctxt_t;                                /* 0x00A4 */
 
-typedef struct 
+typedef struct
 {
     char            view_magic[4];          /* 0x0000 */
     z2_gfx_t        *gfx;                   /* 0x0004 */
@@ -831,7 +831,7 @@ typedef struct
     z2_xyz_t          max;
     uint16_t          n_vtx;
     z2_xyz_t         *vtx;
-    uint16_t          n_poly;                   
+    uint16_t          n_poly;
     z2_col_poly_t    *poly;
     z2_col_type_t    *type;
     z2_camera_t      *camera;
@@ -1053,7 +1053,7 @@ struct z2_arena_node {
 struct z2_arena {
     z2_arena_node_t    *first;                  /* 0x0000 */
     void               *start;                  /* 0x0004 */
-    void               *unk_0x08_;              /* 0x0008 */    
+    void               *unk_0x08_;              /* 0x0008 */
     void               *unk_0x0C_;              /* 00000C */
 };                                              /* 0x0010 */
 
@@ -1062,7 +1062,7 @@ typedef struct {
     uint32_t            vrom_start;             /* 0x0004 */
     uint32_t            vrom_end;               /* 0x0008 */
     uint32_t            vram_start;             /* 0x000C */
-    uint32_t            vram_end;               /* 0x0010 */   
+    uint32_t            vram_end;               /* 0x0010 */
     char                unk_0x14[0x04];         /* 0x0014 */
     void               *vram_ctor;              /* 0x0018 */
     void               *vram_dtor;              /* 0x001C */

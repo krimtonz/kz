@@ -44,7 +44,7 @@ typedef struct{
 }memfile_t;
 
 typedef struct  {
-    _Bool                   ready;    
+    _Bool                   ready;
     struct list             watches;
     uint32_t                cheats;
     enum col_view_settings  collision_view_settings;

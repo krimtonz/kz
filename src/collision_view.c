@@ -18,12 +18,12 @@ void kz_col_view(){
         size_t n_poly = col->n_poly;
         uint8_t alpha = 0x80;
         uint32_t rm= Z_CMP | IM_RD | CVG_DST_CLAMP | FORCE_BL;
-        uint32_t blc1; 
+        uint32_t blc1;
         uint32_t blc2;
         Mtx m;
 
         size_t poly_size = 9 * n_poly + 0x10;
-        
+
         poly_disp = malloc(poly_size * sizeof(*poly_disp));
         poly_disp_p = poly_disp;
         poly_disp_d = poly_disp + (sizeof(*poly_disp) * poly_size + sizeof(*poly_disp) - 1) / sizeof(*poly_disp);
@@ -53,14 +53,14 @@ void kz_col_view(){
                     0, 0, 0, 1);
 
         gSPMatrix(poly_disp_p++,gDisplayListData(&poly_disp_d,m), G_MTX_MODELVIEW | G_MTX_LOAD);
-        
+
         for(int i=0;i<n_poly;++i){
             z2_col_poly_t *poly = &col->poly[i];
             z2_col_type_t *type = &col->type[poly->type];
             z2_xyz_t *va  = &col->vtx[poly->va];
             z2_xyz_t *vb = &col->vtx[poly->vb];
             z2_xyz_t *vc = &col->vtx[poly->vc];
-            
+
             if(type->flags_2.hookshot){
                 gDPSetPrimColor(poly_disp_p++,0,0,0x00,0x00,0xFF,alpha);
             }
@@ -92,7 +92,7 @@ void kz_col_view(){
         }
 
         gSPEndDisplayList(poly_disp_p++);
-        
+
         kz.collision_view_status = COL_VIEW_SHOW;
     }
     if(kz.collision_view_status == COL_VIEW_DESTROY){
