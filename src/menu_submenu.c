@@ -1,6 +1,6 @@
 #include "menu.h"
 
-void menu_submenu_activate(struct menu_item *item){
+static void menu_submenu_activate(struct menu_item *item){
     item->owner->child = (struct menu*)item->data;
     ((struct menu*)item->data)->parent = item->owner;
     if(item->owner->child->callback_proc){

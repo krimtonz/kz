@@ -6,7 +6,8 @@ static uint8_t cur_form;
 const char *form_options_text[] = {
     "fierce diety","goron","zora","deku","human"
 };
-uint8_t form_options_values[] = {
+
+static uint8_t form_options_values[] = {
     0,1,2,3,4
 };
 

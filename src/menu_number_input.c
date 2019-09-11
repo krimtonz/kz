@@ -14,13 +14,13 @@ struct menu_data_number{
     uint8_t                 val_len;
 };
 
-int int_to_char(int i){
+static char int_to_char(int i){
     if(i>=0 && i<=9)
         return i + '0';
     return i + ('a' - 0xA);
 }
 
-int char_to_int(char c){
+static int char_to_int(char c){
     if(c>='0' && c<='9')
         return c - '0';
     return c - ('a' - 0xA);
@@ -56,7 +56,7 @@ static void set_val(void *value, uint8_t len, uint32_t new_val){
     }
 }
 
-void menu_number_activate_callback(struct menu_item *item){
+static void menu_number_activate_callback(struct menu_item *item){
     struct menu_data_number *data = item->data;
     if(data->editing){
         data->editing = 0;
@@ -78,7 +78,7 @@ void menu_number_activate_callback(struct menu_item *item){
     }
 }
 
-void menu_number_draw(struct menu_item *item){
+static void menu_number_draw(struct menu_item *item){
     struct menu_data_number *data = item->data;
     z2_rgba32_t color = MENU_DEFAULT_COLOR;
     if(item->owner->selected_item == item && !data->editing)
@@ -104,7 +104,7 @@ void menu_number_draw(struct menu_item *item){
     }
 }
 
-int menu_number_nav(struct menu_item *item, enum menu_nav nav){
+static int menu_number_nav(struct menu_item *item, enum menu_nav nav){
     struct menu_data_number *data = item->data;
     if(!data->editing) return 0;
     switch(nav){

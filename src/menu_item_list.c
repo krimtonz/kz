@@ -78,7 +78,7 @@ static void draw_item_list(struct menu_item *item){
     }
 }
 
-int navigate_item_list(struct menu_item *item, enum menu_nav nav){
+static int navigate_item_list(struct menu_item *item, enum menu_nav nav){
     struct item_list_data *data = item->data;
     if(!data->active) return 0;
     if(nav==MENU_NAV_DOWN){

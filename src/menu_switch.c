@@ -10,7 +10,7 @@ struct item_data{
     draw_info_t             draw_info;
 };
 
-void draw_menu_switch(struct menu_item *item){
+static void draw_menu_switch(struct menu_item *item){
     struct item_data *data = item->data;
     uint32_t val = 0;
     switch(data->addr_len){

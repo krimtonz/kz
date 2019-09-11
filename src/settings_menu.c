@@ -46,7 +46,7 @@ static int default_settings(struct menu_item *item, void *data){
     return 1;
 }
 
-int move_item(struct menu_item *item, void *data){
+static int move_item(struct menu_item *item, void *data){
     if(moving == NONE){
         moving = (enum moving_element)data;
     }else{
@@ -55,7 +55,7 @@ int move_item(struct menu_item *item, void *data){
     return 1;
 }
 
-int nav_item(struct menu_item *item, enum menu_nav nav){
+static int nav_item(struct menu_item *item, enum menu_nav nav){
     struct item_data *data = item->data;
     int16_t *x = NULL;
     int16_t *y = NULL;

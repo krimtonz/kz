@@ -27,7 +27,7 @@ static int option_nav(struct menu_item *item, enum menu_nav nav){
     return 0;
 }
 
-void option_activate(struct menu_item *item){
+static void option_activate(struct menu_item *item){
     struct item_data *data = item->data;
     if(data->active){
         if(data->data){
@@ -51,7 +51,7 @@ void option_activate(struct menu_item *item){
     data->active = !data->active;
 }
 
-void option_draw(struct menu_item *item){
+static void option_draw(struct menu_item *item){
     struct item_data *data = item->data;
     z2_rgba32_t color = MENU_DEFAULT_COLOR;
     if(data->active) color.color = COLOR_GREEN;

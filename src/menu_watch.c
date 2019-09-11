@@ -8,7 +8,7 @@ struct menu_data_watch{
     uint8_t          floating;
 };
 
-void menu_draw_watch(struct menu_item *item){
+static void menu_draw_watch(struct menu_item *item){
     struct menu_data_watch *watch_data = (struct menu_data_watch*)item->data;
     watch_t *watch = watch_data->watch;
     if(watch->floating) return;
