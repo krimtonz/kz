@@ -22,7 +22,7 @@ void load_default_settings(){
     settings->binds[Z2_CMD_BREAK] = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
     settings->binds[Z2_CMD_PAUSE] = make_bind(1, BUTTON_D_UP);
     settings->binds[Z2_CMD_ADVANCE] = make_bind(1, BUTTON_D_DOWN);
-    settings->binds[Z2_CMD_RETURN] = make_bind(2, BUTTON_L, BUTTON_D_RIGHT);
+    settings->binds[Z2_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
     settings->binds[Z2_CMD_RESET_LAG] = make_bind(1,BUTTON_D_RIGHT);
     settings->binds[Z2_CMD_TIMER] = make_bind(2,BUTTON_A, BUTTON_D_DOWN);
     settings->binds[Z2_CMD_TIMER_RESET] = make_bind(2,BUTTON_A, BUTTON_D_UP);

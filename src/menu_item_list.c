@@ -5,7 +5,7 @@
 struct item_list_data {
     uint8_t                 selected_idx;
     _Bool                   active;
-    item_list_callback      callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
     int8_t                 *options;
     uint8_t                 option_cnt;
@@ -101,7 +101,7 @@ static void activate_item_list(struct menu_item *item){
             val = data->selected_idx - 1;
         *(data->value_ptr) = val;
         if(data->callback){
-            data->callback(item,data->callback_data,MENU_CALLBACK_ACTIVATE);
+            data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data);
         }
     }else{
         int8_t idx = get_option_idx(data) + (data->options?0:1);
@@ -114,12 +114,12 @@ static void update_item_list(struct menu_item *item){
     struct item_list_data *data = item->data;
     if(!data->active){
         if(data->callback){
-            data->callback(item,data->callback_data,MENU_CALLBACK_UPDATE);
+            data->callback(item,MENU_CALLBACK_UPDATE,data->callback_data);
         }
     }
 }
 
-struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, item_list_callback callback,
+struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
                                      uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, uint8_t tiles_cnt,
                                      draw_info_t *drawinfo, struct tilebg_info *null_item){

@@ -4,32 +4,32 @@
 
 static int room_idx;
 
-static int collison_show(struct menu_item *item, void *data){
+static int collison_show(struct menu_item *item, enum menu_callback callback, void *data){
     kz.collision_view_status = COL_VIEW_SHOW;
     return 1;
 }
 
-static int collison_hide(struct menu_item *item, void *data){
+static int collison_hide(struct menu_item *item, enum menu_callback callback, void *data){
     kz.collision_view_status = COL_VIEW_NONE;
     return 1;
 }
 
-static int collison_gen(struct menu_item *item, void *data){
+static int collison_gen(struct menu_item *item, enum menu_callback callback, void *data){
     kz.collision_view_status = COL_VIEW_GENERATE;
     return 1;
 }
 
-static int collision_reduced(struct menu_item *item, void *data){
+static int collision_reduced(struct menu_item *item, enum menu_callback callback, void *data){
     kz.collision_view_settings ^= COL_VIEW_REDUX;
     return 1;
 }
 
-static int collision_opaque(struct menu_item *item, void *data){
+static int collision_opaque(struct menu_item *item, enum menu_callback callback, void *data){
     kz.collision_view_settings ^= COL_VIEW_OPAQUE;
     return 1;
 }
 
-static int unload_room(struct menu_item *item, void *data){
+static int unload_room(struct menu_item *item, enum menu_callback callback, void *data){
     z2_game.room_ctx.rooms[0].idx=-1;
     z2_game.room_ctx.rooms[0].file = NULL;
     z2_unloadroom(&z2_game,&z2_game.room_ctx);
@@ -38,7 +38,7 @@ static int unload_room(struct menu_item *item, void *data){
     return 1;
 }
 
-static int load_room(struct menu_item *item, void *data){
+static int load_room(struct menu_item *item, enum menu_callback callback, void *data){
     z2_game.room_ctx.rooms[0].idx = room_idx;
     z2_game.room_ctx.rooms[0].file = NULL;
     z2_unloadroom(&z2_game,&z2_game.room_ctx);
@@ -48,13 +48,13 @@ static int load_room(struct menu_item *item, void *data){
     return 1;
 }
 
-static int room_dec(struct menu_item *item, void *data){
+static int room_dec(struct menu_item *item, enum menu_callback callback, void *data){
     room_idx += z2_game.room_cnt - 1;
     room_idx %= z2_game.room_cnt;
     return 1;
 }
 
-static int room_inc(struct menu_item *item, void *data){
+static int room_inc(struct menu_item *item, enum menu_callback callback, void *data){
     room_idx++;
     room_idx %= z2_game.room_cnt;
     return 1;

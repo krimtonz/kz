@@ -3,7 +3,7 @@
 #include "scenes.h"
 #include "kz.h"
 
-static int activate_warp_proc(struct menu_item *item, void *data){
+static int activate_warp_proc(struct menu_item *item, enum menu_callback callback, void *data){
     z2_game.entrance_index = (uint16_t)((uint32_t)data);
     z2_file.exit = z2_game.entrance_index;
     z2_game.common.execute_state = 0;

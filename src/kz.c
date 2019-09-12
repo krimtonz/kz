@@ -205,28 +205,30 @@ static void kz_main(void) {
     /* handle menu */
     {
         if(kz.menu_active){
+            struct menu *kz_menu = &kz.main_menu;
             if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
                 kz.menu_active=0;
                 free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+            }else if(input_bind_pressed(Z2_CMD_RETURN)){
+                menu_callback(kz_menu,MENU_CALLBACK_RETURN);
+            }else{
+                uint16_t pressed = input_pressed();
+                if(pressed & BUTTON_D_DOWN){
+                    menu_navigate(kz_menu,MENU_NAV_DOWN);
+                }
+                if(pressed & BUTTON_D_UP){
+                    menu_navigate(kz_menu,MENU_NAV_UP);
+                }
+                if(pressed & BUTTON_D_LEFT){
+                    menu_navigate(kz_menu,MENU_NAV_LEFT);
+                }
+                if(pressed & BUTTON_D_RIGHT){
+                    menu_navigate(kz_menu,MENU_NAV_RIGHT);
+                }
+                if(pressed & BUTTON_L){
+                    menu_callback(kz_menu,MENU_CALLBACK_ACTIVATE);
+                }
             }
-            struct menu *kz_menu = &kz.main_menu;
-            uint16_t pressed = input_pressed();
-            if(pressed & BUTTON_D_DOWN){
-                menu_navigate(kz_menu,MENU_NAV_DOWN);
-            }
-            if(pressed & BUTTON_D_UP){
-                menu_navigate(kz_menu,MENU_NAV_UP);
-            }
-            if(pressed & BUTTON_D_LEFT){
-                menu_navigate(kz_menu,MENU_NAV_LEFT);
-            }
-            if(pressed & BUTTON_D_RIGHT){
-                menu_navigate(kz_menu,MENU_NAV_RIGHT);
-            }
-            if(pressed & BUTTON_L){
-                menu_callback(kz_menu,MENU_CALLBACK_ACTIVATE);
-            }
-
             menu_draw(kz_menu);
         }else if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
             kz.menu_active=1;
@@ -268,7 +270,6 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
-
 
     gfx_finish();
 }

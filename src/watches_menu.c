@@ -6,7 +6,7 @@
 #include "resource.h"
 
 struct item_data{
-    menu_button_callback    callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
 };
 
@@ -48,46 +48,56 @@ static uint8_t watch_data_sizes[] = {
     4,
 };
 
-static void watch_update_callback(struct menu_item *item, void *data, uint32_t value){
+static int watch_update_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
     struct watch_row *row = data;
     watch_t *watch = row->watch;
     value -= value % watch_data_sizes[watch->type];
     watch->address = (void*)value;
-}
-
-int menu_watch_delete(struct menu_item *item, void *data){
-    struct watch_row *row = data;
-    for(struct menu_item *next = list_next(row->watch_item);next;next = list_next(next)){
-        next->y--;
-    }
-    struct list *list = &item->owner->items;
-    void *next = item;
-    void *cur = NULL;
-    for(int i=0;i<6;i++){
-        cur = next;
-        next = list_next(cur);
-        list_erase(list,cur);
-    }
-    list_erase(&kz.watches,row->watch);
-    free(row);
-    ((struct menu_item*)list_next(list->first))->y--;
     return 1;
 }
 
-static int menu_watch_anchor(struct menu_item *item, void *data){
-    struct watch_row *row = data;
-    row->watch->floating=!row->watch->floating;
-    if(!row->watch->floating){
-        row->watch->x = get_item_x_pos(row->watch_item);
-        row->watch->y = get_item_y_pos(row->watch_item);
+int menu_watch_delete(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        struct watch_row *row = data;
+        for(struct menu_item *next = list_next(row->watch_item);next;next = list_next(next)){
+            next->y--;
+        }
+        struct list *list = &item->owner->items;
+        void *next = item;
+        void *cur = NULL;
+        for(int i=0;i<6;i++){
+            cur = next;
+            next = list_next(cur);
+            list_erase(list,cur);
+        }
+        list_erase(&kz.watches,row->watch);
+        free(row);
+        ((struct menu_item*)list_next(list->first))->y--;
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
-static int menu_watch_move(struct menu_item *item, void *data){
-    struct watch_row *row = data;
-    row->mdata->moving = !row->mdata->moving;
-    return 1;
+static int menu_watch_anchor(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        struct watch_row *row = data;
+        row->watch->floating=!row->watch->floating;
+        if(!row->watch->floating){
+            row->watch->x = get_item_x_pos(row->watch_item);
+            row->watch->y = get_item_y_pos(row->watch_item);
+        }
+        return 1;
+    }
+    return 0;
+}
+
+static int menu_watch_move(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        struct watch_row *row = data;
+        row->mdata->moving = !row->mdata->moving;
+        return 1;
+    }
+    return 0;
 }
 
 static int menu_watch_move_nav(struct menu_item *item, enum menu_nav nav){
@@ -146,7 +156,7 @@ void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
     item->y++;
 }
 
-int watches_button_add(struct menu_item *item, void *data){
+static int watches_button_add(struct menu_item *item, enum menu_callback callback, void *data){
     watch_t *watch = list_push_back(&kz.watches,NULL);
     static enum watch_type type = WATCH_TYPE_U8;
     watch->address = (void*)0x80000000;

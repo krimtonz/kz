@@ -153,19 +153,25 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
         menu_callback(menu->child,callback);
         return;
     }
-    if(menu->selected_item->activate_proc)
+    if(callback == MENU_CALLBACK_RETURN){
+        if(menu->parent){
+            if(menu->callback_proc){
+                menu->callback_proc(MENU_CALLBACK_EXIT);
+            }
+            menu->parent->child = NULL;
+        }else{
+            kz.menu_active = 0;
+            free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+        }
+    }
+    else if(menu->selected_item->activate_proc)
         menu->selected_item->activate_proc(menu->selected_item);
 }
 
-int menu_return(struct menu_item *item, void *data){
-    if(item->owner->parent){
-        if(item->owner->callback_proc){
-            item->owner->callback_proc(MENU_CALLBACK_EXIT);
-        }
-        item->owner->parent->child = NULL;
-    }else{
-        kz.menu_active = 0;
-        free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+int menu_return(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        menu_callback(item->owner,MENU_CALLBACK_RETURN);
+        return 1;
     }
-    return 1;
+    return 0;
 }

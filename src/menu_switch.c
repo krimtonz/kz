@@ -5,7 +5,7 @@ struct item_data{
     void                   *addr;
     uint8_t                 addr_len;
     uint32_t                bitmask;
-    menu_switch_callback    callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
     draw_info_t             draw_info;
 };
@@ -54,7 +54,7 @@ static void draw_menu_switch(struct menu_item *item){
 
 void activate_menu_switch(struct menu_item *item){
     struct item_data *data = item->data;
-    if(data->callback && data->callback(item,NULL,MENU_CALLBACK_ACTIVATE)){
+    if(data->callback && data->callback(item,MENU_CALLBACK_ACTIVATE,NULL)){
         return;
     }
     switch(data->addr_len){
@@ -74,13 +74,13 @@ void activate_menu_switch(struct menu_item *item){
 static void update_menu_switch(struct menu_item *item){
     struct item_data *data = item->data;
     if(data->callback){
-        data->callback(item,data->callback_data,MENU_CALLBACK_UPDATE);
+        data->callback(item,MENU_CALLBACK_UPDATE,data->callback_data);
     }
 }
 
 struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
                                   void *addr, uint8_t addr_len,
-                                  uint32_t bitmask, menu_switch_callback callback,
+                                  uint32_t bitmask, menu_generic_callback callback,
                                   const char *text){
     struct menu_item *item = menu_add(menu,x,y,text);
     if(item){
@@ -103,7 +103,7 @@ struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
 
 struct menu_item *menu_add_gfx_switch(struct menu *menu, uint16_t x, uint16_t y,
                                   void *addr, uint8_t addr_len,
-                                  uint32_t bitmask, menu_switch_callback callback,
+                                  uint32_t bitmask, menu_generic_callback callback,
                                   void *callback_data, draw_info_t *drawinfo){
 
     struct menu_item *item = menu_add(menu,x,y,NULL);

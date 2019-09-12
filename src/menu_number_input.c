@@ -67,11 +67,11 @@ static void menu_number_activate_callback(struct menu_item *item){
             mul *= data->base;
         }
         data->value = val;
-        if(data->value){
+        if(data->val_ptr){
             set_val(data->val_ptr,data->val_len,val);
         }
         if(data->callback){
-            data->callback(item, data->callback_data, data->value);
+            data->callback(item, MENU_CALLBACK_ACTIVATE, data->callback_data, data->value);
         }
     }else{
         data->editing = 1;

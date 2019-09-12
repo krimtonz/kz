@@ -11,8 +11,10 @@ static uint8_t form_options_values[] = {
     0,1,2,3,4
 };
 
-static void change_selected_form(struct menu_item *item, uint16_t selected_idx){
+static int change_selected_form(struct menu_item *item, enum menu_callback callback, void *data){
+    int selected_idx = (int)selected_idx;
     z2_file.current_form = form_options_values[selected_idx];
+    return 1;
 }
 
 struct menu *create_file_menu(){

@@ -5,20 +5,25 @@
 
 static int8_t b_val = Z2_ITEM_NULL;
 
-static void b_button_callback(struct menu_item *item, void *data, enum menu_callback callback){
+static int b_button_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
         z2_file.form_button_item[z2_file.current_form==4?0:z2_file.current_form].b = b_val;
         z2_btnupdate(&z2_game,0);
+        return 1;
     }
     if(callback == MENU_CALLBACK_UPDATE){
         b_val = z2_file.form_button_item[z2_file.current_form==4?0:z2_file.current_form].b;
+        return 1;
     }
+    return 0;
 }
 
-static void c_button_callback(struct menu_item *item, void *data, enum menu_callback callback){
+static int c_button_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
         z2_btnupdate(&z2_game,(uint32_t)data);
+        return 1;
     }
+    return 0;
 }
 
 struct menu *create_equips_menu(){
@@ -86,6 +91,5 @@ struct menu *create_equips_menu(){
     item = menu_add_item_list(&equips,3,1,c_button_callback,(void*)3,0,NULL,
                         Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cright,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_right);
     set_item_offset(item,2,8);
-
     return &equips;
 }

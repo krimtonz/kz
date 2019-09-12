@@ -2,14 +2,14 @@
 #include "menu.h"
 
 struct item_data {
-    const char        **text;
-    void               *values;
-    uint8_t             value_size;
-    uint16_t            option_cnt;
-    uint16_t            selected_idx;
-    _Bool               active;
-    void               *data;
-    menu_list_callback  callback;
+    const char            **text;
+    void                   *values;
+    uint8_t                 value_size;
+    uint16_t                option_cnt;
+    int                     selected_idx;
+    _Bool                   active;
+    void                   *data;
+    menu_generic_callback   callback;
 };
 
 static int option_nav(struct menu_item *item, enum menu_nav nav){
@@ -45,7 +45,7 @@ static void option_activate(struct menu_item *item){
             }
         }
         if(data->callback){
-            data->callback(item, data->selected_idx);
+            data->callback(item,MENU_CALLBACK_ACTIVATE,(void*)data->selected_idx);
         }
     }
     data->active = !data->active;
@@ -62,7 +62,7 @@ static void option_draw(struct menu_item *item){
 struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
                                 const char **text, void *values,
                                 uint8_t value_size, uint16_t options,
-                                void *list_data, menu_list_callback callback){
+                                void *list_data, menu_generic_callback callback){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct item_data *data = malloc(sizeof(*data));

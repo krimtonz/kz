@@ -3,7 +3,7 @@
 #include "resource.h"
 
 struct item_data{
-    menu_button_callback    callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
 };
 
@@ -17,36 +17,36 @@ enum moving_element{
 
 static enum moving_element moving = NONE;
 
-static int profile_dec(struct menu_item *item, void *data){
+static int profile_dec(struct menu_item *item, enum menu_callback callback, void *data){
     kz.settings_profile += SETTINGS_MAX - 1;
     kz.settings_profile %= SETTINGS_MAX;
     return 1;
 }
 
-static int profile_inc(struct menu_item *item, void *data){
+static int profile_inc(struct menu_item *item, enum menu_callback callback, void *data){
     kz.settings_profile++;
     kz.settings_profile %= SETTINGS_MAX;
     return 1;
 }
 
-static int save_profile(struct menu_item *item,void *data){
+static int save_profile(struct menu_item *item, enum menu_callback callback, void *data){
     save_settings_to_flashram(kz.settings_profile);
     return 1;
 }
 
-static int load_profile(struct menu_item *item, void *data){
+static int load_profile(struct menu_item *item, enum menu_callback callback, void *data){
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
     return 1;
 }
 
-static int default_settings(struct menu_item *item, void *data){
+static int default_settings(struct menu_item *item, enum menu_callback callback, void *data){
     load_default_settings();
     kz_apply_settings();
     return 1;
 }
 
-static int move_item(struct menu_item *item, void *data){
+static int move_item(struct menu_item *item, enum menu_callback callback, void *data){
     if(moving == NONE){
         moving = (enum moving_element)data;
     }else{

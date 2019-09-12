@@ -13,7 +13,7 @@ struct bit_switch_data{
     uint32_t                color;
     uint32_t                off_color;
     const char             *tooltip;
-    menu_button_callback    callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
 };
 
@@ -58,7 +58,7 @@ static void draw_bit_switch_proc(struct menu_item *item){
 
 static void activate_bit_switch_proc(struct menu_item *item){
     struct bit_switch_data *data = item->data;
-    if(data->callback && data->callback(item,data->callback_data)){
+    if(data->callback && data->callback(item, MENU_CALLBACK_ACTIVATE, data->callback_data)){
         return;
     }
     switch(data->addr_len){
@@ -77,7 +77,7 @@ static void activate_bit_switch_proc(struct menu_item *item){
 
 struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
                                             void *addr, uint8_t addr_len, uint32_t bitmask,
-                                            menu_button_callback callback, void *callback_data,
+                                            menu_generic_callback callback, void *callback_data,
                                             gfx_texture *texture, uint16_t tex_width, uint16_t tex_height,
                                             uint16_t tile, _Bool has_off_tile, const char *tooltip,
                                             uint32_t on_color, uint32_t off_color){

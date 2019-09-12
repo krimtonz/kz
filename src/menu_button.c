@@ -3,12 +3,12 @@
 #include "menu.h"
 
 struct item_data{
-    menu_button_callback    callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
 };
 
 struct gfx_item_data{
-    menu_button_callback    callback;
+    menu_generic_callback   callback;
     void                   *callback_data;
     draw_info_t             draw_info;
 };
@@ -16,7 +16,7 @@ struct gfx_item_data{
 static void button_activate(struct menu_item *item){
     struct item_data *data = item->data;
     if(data->callback){
-        data->callback(item,data->callback_data);
+        data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data);
     }
 }
 
@@ -30,7 +30,7 @@ static void draw_gfx_button(struct menu_item *item){
     gfx_draw_sprite(data->draw_info.texture,get_item_x_pos(item),get_item_y_pos(item),data->draw_info.on_tile,data->draw_info.width,data->draw_info.height);
 }
 
-struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *name, menu_button_callback callback, void *data){
+struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *name, menu_generic_callback callback, void *data){
     struct menu_item *item = menu_add(menu,x,y,name);
     if(item){
         struct item_data *idata = malloc(sizeof(*idata));
@@ -42,7 +42,7 @@ struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, con
     }
     return item;
 }
-struct menu_item *menu_add_gfx_button(struct menu *menu, uint16_t x, uint16_t y, menu_button_callback callback, void *data, draw_info_t *drawinfo){
+struct menu_item *menu_add_gfx_button(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback, void *data, draw_info_t *drawinfo){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct gfx_item_data *idata = malloc(sizeof(*idata));
