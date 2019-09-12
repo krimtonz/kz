@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <malloc.h>
 #include "gfx.h"
+#include "resource.h"
 
 #define     GFX_SIZE 0x10000
 
@@ -13,7 +14,6 @@ static Gfx *gfx_disp_p;
 static Gfx *gfx_disp_d;
 static Gfx *gfx_disp_work;
 
-extern char _raw_font[];
 gfx_font *kfont;
 
 static Gfx kzgfx[] = {
@@ -73,16 +73,7 @@ void gfx_init(){
     gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
 
     kfont = malloc(sizeof(gfx_font));
-    static gfx_texture f_tex;
-    f_tex.data = _raw_font;
-    f_tex.img_fmt = G_IM_FMT_I;
-    f_tex.img_size = G_IM_SIZ_4b;
-    f_tex.tile_width = 16;
-    f_tex.tile_height = 128;
-    f_tex.tile_size = ((f_tex.tile_width * f_tex.tile_height * G_SIZ_BITS(f_tex.img_size) + 7) / 8 + 63) / 64 * 64;
-    f_tex.x_tiles = 1;
-    f_tex.y_tiles = 3;
-    kfont->texture = &f_tex;
+    kfont->texture = resource_get(R_KZ_FONT);
     kfont->c_width = 8;
     kfont->c_height = 8;
     kfont->cx_tile = 2;

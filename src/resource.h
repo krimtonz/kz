@@ -11,6 +11,7 @@ enum resource{
     R_Z2_DUNGEON,
     R_KZ_CHECKBOX,
     R_KZ_ICON,
+    R_KZ_FONT,
     R_END
 };
 

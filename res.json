@@ -10,5 +10,11 @@
     "name": "icons",
     "format": "rgba16",
     "tile_height":  10
+  },
+  "font.png": {
+      "type": "texture",
+      "name": "font",
+      "format": "i4",
+      "tile_height": 128
   }
 }
