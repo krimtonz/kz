@@ -1,12 +1,11 @@
 .n64
 .relativeinclude on
 
-.create "patched.nzsj.z64", 0
-.incbin "base.nzsj.z64"
+.create "patched.nzsj10.z64", 0
+.incbin "base.nzsj10.z64"
 
-;.definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_VROM, 0x02FB2000
-.definelabel G_PAYLOAD_SIZE, filesize("bin/NZSJ/kz.bin") + 0x20
+.definelabel G_PAYLOAD_VROM, 0x02FB1040
+.definelabel G_PAYLOAD_SIZE, filesize("bin/NZSJ10/kz.bin") + 0x20
 .definelabel G_PAYLOAD_ADDR, 0x80800000
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
 
@@ -21,12 +20,12 @@
 ; Base game editing region
 ; ==================================================================================================
 
-.headersize(0x800A75E0 - 0xB5F000)
+.headersize(0x800A76A0 - 0x00B5F000)
 ; ==================================================================================================
 ; Custom Code Payload
 ; ==================================================================================================
 
-.org 0x80170168
+.org 0x80170078
     addiu   sp, sp, -0x340
     sw      ra, 0x002C(sp)
     lui     a0, hi(G_PAYLOAD_ADDR)
@@ -34,7 +33,7 @@
     lui     a1, hi(G_PAYLOAD_VROM)
     addiu   a1, lo(G_PAYLOAD_VROM)
     lui     a2, hi(G_PAYLOAD_SIZE)
-    jal     0x80080C90
+    jal     0x80080C84
     addiu   a2, lo(G_PAYLOAD_SIZE)
     jal     ainit
     lui     a0, 0x0004
@@ -46,14 +45,13 @@
 ; 801737A0
 ; Replaces jalr ra, t9
 ;          nop
-;.org 0x801737A0
-.org 0x8016F0C0
+.org 0x8016EFD0
 jal     G_KZ_ADDR
 or      a1, r0, t9
 
 ; Disables D-Pad Movement in pause menu
-.orga 0xCBD530
-    nop
+;.orga 0xCBD530
+;    nop
 
 ; ==================================================================================================
 ; New code region
@@ -64,9 +62,8 @@ or      a1, r0, t9
 ainit:
     lui     s0, 0x801C
     jr		ra
-    addiu s0, s0, 0x89e0
-    ;addiu   s0, s0, 0xD910
+    addiu s0, s0, 0x87a0
 .org G_KZ_ADDR
-.incbin("bin/NZSJ/kz.bin")
+.incbin("bin/NZSJ10/kz.bin")
 .align 8
 .close

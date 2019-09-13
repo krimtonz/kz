@@ -11,8 +11,9 @@
 #error no z2 version specified
 #endif
 
-#define NZSE 0x00
-#define NZSJ 0x01
+#define NZSE    0x00
+#define NZSJ    0x01
+#define NZSJ10  0x02
 
 typedef union{
     struct{
@@ -92,7 +93,7 @@ typedef enum {
     Z2_ITEM_ZORA_EGG,
     Z2_ITEM_GOLD_DUST,
     Z2_ITEM_MUSHROOM,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_BOTTLE2,
     Z2_ITEM_BOTTLE3,
 #endif
@@ -116,7 +117,7 @@ typedef enum {
     Z2_ITEM_SWAP_DEED,
     Z2_ITEM_MOUNTAIN_DEED,
     Z2_ITEM_OCEAN_DEED,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_POACHERS_SAW,
     Z2_ITEM_BROKEN_GORON_SWORD,
     Z2_ITEM_PRESCRIPTION,
@@ -125,7 +126,7 @@ typedef enum {
 #endif
     Z2_ITEM_ROOM_KEY,
     Z2_ITEM_MAMA_LETTER,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_MOONS_TEAR2,
     Z2_ITEM_MOONS_TEAR3,
     Z2_ITEM_MOONS_TEAR4,
@@ -137,7 +138,7 @@ typedef enum {
 #endif
     Z2_ITEM_KAFEI_LETTER,
     Z2_ITEM_PENDANT,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_MOONS_TEAR10,
     Z2_ITEM_MOONS_TEAR11,
     Z2_ITEM_MOONS_TEAR12,
@@ -175,7 +176,7 @@ typedef enum {
     Z2_ITEM_BOW_FIRE_ARROW,
     Z2_ITEM_BOW_ICE_ARROW,
     Z2_ITEM_BOW_LIGHT_ARROW,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_DRUM,
     Z2_ITEM_GUITAR,
     Z2_ITEM_PIPES,
@@ -186,7 +187,7 @@ typedef enum {
     Z2_ITEM_DEITY_SWORD,
     Z2_ITEM_HERO_SHIELD,
     Z2_ITEM_MIRROR_SHIELD,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_OOT_MIRROR,
 #endif
     Z2_ITEM_QUIVER_30,
@@ -407,7 +408,7 @@ typedef struct {
         uint32_t    unk_0x18;                       /* 0x0018 */
     }               scene_flags[0x78];              /* 0x00F8 */
     char            unk_0x0E18_[0x1D4];             /* 0x0E18 */
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     char            unk_0x0FEC_[0x384];             /* 0x0FEC */
 #endif
     char            lottery_numbers[0x09];          /* 0x0FEC */    /* 0x1370 */
@@ -1169,7 +1170,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_static_ctxt_addr         0x803824D0
 #define z2_game_addr                0x803E6B20
 #define z2_link_addr                0x803FFDB0
-#else
+#elif Z2_VERSION==NZSJ
 #define osSendMesg_addr             0x80088A10
 #define osRecvMesg_addr             0x80088DD0
 #define osWritebackDCache_addr      0x8008B4E0
@@ -1197,6 +1198,34 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_static_ctxt_addr         0x80382900
 #define z2_game_addr                0x803E6FB0
 #define z2_link_addr                0x80400260
+#elif Z2_VERSION==NZSJ10
+#define osSendMesg_addr             0x80088AB0
+#define osRecvMesg_addr             0x80088E70
+#define osWritebackDCache_addr      0x8008B580
+#define osEPiStartDma_addr          0x8008FDD0
+#define osCreateMesgQueue_addr      0x800901E0
+#define osEPiReadIo_addr            0x80093050
+#define osEPiWriteIo_addr           0x80094B70
+#define z2_vi_counter_addr          0x80097B58
+#define z2_file_msgqueue_addr       0x8009CED0
+#define z2_arena_addr               0x8009E920
+#define z2_file_table_addr          0x800A14B0
+#define z2_btnupdate_addr           0x801146B8
+#define z2_loadroom_addr            0x801303EC
+#define z2_unloadroom_addr          0x80130678
+#define z2_DecodeArchiveFile_addr   0x801740EC
+#define z2_actor_ovl_table_addr     0x801A9E60
+#define z2_gamestate_table_addr     0x801B87A0
+#define z2_player_ovl_table_addr    0x801CB330
+#define z2_file_addr                0x801EF460
+#define z2_game_arena_addr          0x801F5280
+#define z2_segment_addr             0x801F82F0
+#define z2_cimg_addr                0x801FBCD0
+#define z2_pi_io_handle_addr        0x801FD1D0
+#define z2_disp_addr                0x80209FF0
+#define z2_static_ctxt_addr         0x80382640
+#define z2_game_addr                0x803E6CF0
+#define z2_link_addr                0x803FFFA0
 #endif
 
 /* Data */

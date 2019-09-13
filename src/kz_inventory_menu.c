@@ -173,7 +173,7 @@ static int8_t bottle_contents[] = {
     Z2_ITEM_ZORA_EGG,
     Z2_ITEM_GOLD_DUST,
     Z2_ITEM_MUSHROOM,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_BOTTLE2,
     Z2_ITEM_BOTTLE3,
 #endif
@@ -200,7 +200,7 @@ static int8_t trade_quest_contents[] = {
     Z2_ITEM_SWAP_DEED,
     Z2_ITEM_MOUNTAIN_DEED,
     Z2_ITEM_OCEAN_DEED,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_POACHERS_SAW,
     Z2_ITEM_BROKEN_GORON_SWORD,
     Z2_ITEM_PRESCRIPTION,
@@ -209,7 +209,7 @@ static int8_t trade_quest_contents[] = {
 #endif
     Z2_ITEM_ROOM_KEY,
     Z2_ITEM_MAMA_LETTER,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_MOONS_TEAR2,
     Z2_ITEM_MOONS_TEAR3,
     Z2_ITEM_MOONS_TEAR4,
@@ -221,7 +221,7 @@ static int8_t trade_quest_contents[] = {
 #endif
     Z2_ITEM_KAFEI_LETTER,
     Z2_ITEM_PENDANT,
-#if Z2_VERSION==NZSJ
+#if Z2_VERSION!=NZSE
     Z2_ITEM_MOONS_TEAR10,
     Z2_ITEM_MOONS_TEAR11,
     Z2_ITEM_MOONS_TEAR12,

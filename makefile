@@ -13,7 +13,7 @@ SRCDIR		= src
 OBJDIR 		= obj
 RESDIR		= res
 BINDIR		= bin
-KZ_VERSIONS	= NZSE NZSJ
+KZ_VERSIONS	= NZSE NZSJ NZSJ10
 NAME		= kz
 RESDESC		= res.json
 
