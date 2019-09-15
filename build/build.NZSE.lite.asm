@@ -1,13 +1,13 @@
 .n64
 .relativeinclude on
 
-.create "patched.nzse.z64", 0
-.incbin "base.nzse.z64"
+.create "../patched.nzse.lite.z64", 0
+.incbin "../base.nzse.z64"
 
 .definelabel G_PAYLOAD_VROM, 0x02EE8000
-.definelabel G_PAYLOAD_SIZE, filesize("bin/NZSE/kz.bin") + 0x20
-.definelabel G_PAYLOAD_ADDR, 0x80800000
-.definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x20
+.definelabel G_PAYLOAD_SIZE, filesize("../bin/kz-lite-NZSE/kz.bin") + 0x60
+.definelabel G_PAYLOAD_ADDR, 0x80690000
+.definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x60
 
 .orga 0x10
 .word 0x5354631C, 0x03A2DEF0
@@ -66,6 +66,6 @@ ainit:
     jr		ra
     addiu   s0, s0, 0xD910
 .org G_KZ_ADDR
-.incbin("bin/NZSE/kz.bin")
+.incbin("../bin/kz-lite-NZSE/kz.bin")
 .align 8
 .close
