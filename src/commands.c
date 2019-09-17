@@ -15,6 +15,8 @@ struct command kz_commands[Z2_CMD_MAX] = {
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
+    {"save memfile",        COMMAND_PRESS,  command_save_memfile},
+    {"load memfile",        COMMAND_PRESS,  command_load_memfile},
 };
 
 void command_timer(){
@@ -74,4 +76,18 @@ void command_advance(){
 void command_lag_reset(){
     kz.frames_offset = -z2_vi_counter;
     kz.frames = 0;
+}
+
+void command_save_memfile(){
+    if(!kz.memfile[kz.memfile_slot]){
+        memfile_t *newmemfile = malloc(sizeof(*newmemfile));
+        memcpy(&newmemfile->file,&z2_file,sizeof(newmemfile->file));
+        kz.memfile[kz.memfile_slot] = newmemfile;
+    }
+}
+
+void command_load_memfile(){
+    if(kz.memfile[kz.memfile_slot]){
+        memcpy(&z2_file,&kz.memfile[kz.memfile_slot]->file,sizeof(z2_file));
+    }
 }

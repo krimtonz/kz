@@ -1,12 +1,12 @@
 #include "kz.h"
 #include "settings.h"
 #include "resource.h"
+#include "input.h"
 
 struct item_data{
     menu_generic_callback   callback;
     void                   *callback_data;
 };
-
 
 enum moving_element{
     INPUT_DISPLAY,
@@ -96,6 +96,14 @@ static int nav_item(struct menu_item *item, enum menu_nav nav){
     return 1;
 }
 
+static int run_command(struct menu_item *item, enum menu_callback callback, void *data){
+    int cmd = (int)data;
+    if(kz_commands[cmd].proc){
+        kz_commands[cmd].proc();
+    }
+    return 1;
+}
+
 struct menu *create_settings_menu(){
     static struct menu settingsm;
     menu_init(&settingsm,0,0);
@@ -129,5 +137,20 @@ struct menu *create_settings_menu(){
     menu_add(&settingsm,2,7,"lag counter");
     item = menu_add_gfx_button(&settingsm,16,7,move_item,(void*)LAG_COUNTER,&draw);
     item->navigate_proc = nav_item;
+
+    static struct menu commands;
+    menu_init(&commands,settingsm.x,settingsm.y);
+
+    commands.selected_item = menu_add_button(&commands,0,0,"return",menu_return,NULL);
+    menu_add(&commands,0,1,"command");
+    menu_add(&commands,20,1,"bind");
+    int y = 2;
+    for(int i=0;i<Z2_CMD_MAX;i++){
+        menu_add_button(&commands,0,y,kz_commands[i].text,run_command,(void*)i);
+        menu_add_bind(&commands,20,y++,i);
+    }
+
+    menu_add_submenu(&settingsm,0,8,&commands,"commands");
+
     return &settingsm;
 }

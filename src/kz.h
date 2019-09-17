@@ -8,6 +8,8 @@
 #include "settings.h"
 #include "collision_view.h"
 
+#define KZ_MEMFILE_MAX 3
+
 enum cheats {
     CHEAT_STICKS,
     CHEAT_NUTS,
@@ -61,7 +63,8 @@ typedef struct  {
     _Bool                   lag_counter;
     int32_t                 pending_frames;
     struct disp_p           disp_p;
-    memfile_t              *memfile;
+    uint8_t                 memfile_slot;
+    memfile_t             **memfile;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;

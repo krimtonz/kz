@@ -27,6 +27,7 @@ static const char *resource_names[R_END] = {
     "checkbox",
     "icons",
     "font",
+    "buttons",
 };
 
 static gfx_texture *resource_load_kz_texture(enum resource resource){
@@ -109,6 +110,7 @@ static gfx_texture *(*resource_ctors[R_END])(enum resource) = {
     resource_load_owl,
     resource_load_note,
     resource_load_dungeon_items,
+    resource_load_kz_texture,
     resource_load_kz_texture,
     resource_load_kz_texture,
     resource_load_kz_texture,

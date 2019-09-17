@@ -4,9 +4,42 @@
 #include "z2.h"
 #include "commands.h"
 #include "settings.h"
+#include "menu.h"
+#include "resource.h"
 
-#define BIND_END 6
 #define INPUT_REPEAT 8
+#define BIND_END 6
+
+uint32_t button_colors[16] = {
+    0xFFF000FF,
+    0xFFF000FF,
+    0xFFF000FF,
+    0xFFF000FF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0,
+    0,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFFFFFFFF,
+    0xFF823CFF,
+    0xFFFFFFFF,
+    0x64FF78FF,
+    0x64C8FFFF,
+};
+
+enum bind_state{
+    BIND_STATE_NONE,
+    BIND_STATE_ACTION,
+    BIND_STATE_BEGIN,
+    BIND_STATE_LISTENING,
+};
+
+struct bind_item_data{
+    int             cmd;
+    enum bind_state state;
+};
 
 static int button_time[16];
 static uint16_t pad_pressed_raw;
@@ -14,10 +47,13 @@ static uint16_t pad_pressed;
 static uint16_t pad_released;
 static uint16_t pad;
 static uint16_t reserved;
+static int8_t stick_x;
+static int8_t stick_y;
 static int bind_component_state[Z2_CMD_MAX];
 static int bind_time[Z2_CMD_MAX];
 static _Bool bind_pressed_raw[Z2_CMD_MAX];
 static _Bool bind_pressed[Z2_CMD_MAX];
+static _Bool input_enabled = 1;
 
 static int bind_get_component(uint16_t bind, int index){
     return (bind >> (4 * index)) & 0xF;
@@ -31,6 +67,13 @@ static uint16_t bind_get_bitmask(uint16_t bind){
         p|= 1 << c;
     }
     return p;
+}
+
+static int button_get_index(uint16_t button_mask){
+    for(int i=0;i<16;i++){
+        if((1 << i) & button_mask) return i;
+    }
+    return 0;
 }
 
 uint16_t make_bind(int len, ...){
@@ -54,7 +97,9 @@ uint16_t make_bind(int len, ...){
 }
 
 void input_update(){
-    uint16_t z_pad = z2_game.common.input[0].raw.pad;
+    uint16_t z_pad = z2_input_direct.raw.pad;
+    stick_x = z2_input_direct.raw.x;
+    stick_y = z2_input_direct.raw.y;
     pad_pressed_raw = (pad ^ z_pad) & z_pad;
     pad_released = (pad ^ z_pad) & ~z_pad;
     pad = z_pad;
@@ -78,7 +123,7 @@ void input_update(){
         int *cs = &bind_component_state[i];
         int j;
         uint16_t c;
-        if((reserved & bind_pad[i]) && i!=0 && i!=Z2_CMD_RETURN){
+        if(((reserved & bind_pad[i]) && i!=0 && i!=Z2_CMD_RETURN) || !input_enabled){
             *cs = 0;
         }else{
             int css = *cs;
@@ -152,5 +197,108 @@ void free_buttons(uint16_t button_bitmask){
 }
 
 uint16_t input_pressed(){
+    if(!input_enabled) return 0;
     return pad_pressed;
+}
+
+uint16_t input_pressed_raw(){
+    return pad;
+}
+
+int8_t input_x(){
+    return stick_x;
+}
+
+int8_t input_y(){
+    return stick_y;
+}
+
+void draw_bind(struct menu_item *item){
+    struct bind_item_data *data = item->data;
+    uint16_t bind = settings->binds[data->cmd];
+    if(bind==0){
+        gfx_printf(get_item_x_pos(item),get_item_y_pos(item),"none");
+        return;
+    }
+    int i = 0;
+    int b;
+    uint32_t color = 0;
+    if(data->state!=BIND_STATE_NONE){
+        color= 0x00FF00FF;
+    }else if(item->owner->selected_item == item){
+        color = MENU_SELECTED_COLOR.color;
+    }
+    gfx_texture *t_button = resource_get(R_KZ_BUTTONS);
+    while((b=bind_get_component(bind,i))!=BIND_END){
+        z2_rgba32_t bcolor;
+        if(color==0)
+            bcolor.color = button_colors[b];
+        else
+            bcolor.color = color;
+        gfx_push(gsDPSetPrimColor(0,0,bcolor.r,bcolor.g,bcolor.b,bcolor.a));
+        gfx_draw_sprite(t_button,get_item_x_pos(item) + (i++ * 10),get_item_y_pos(item),b,8,8);
+    }
+}
+
+static void bind_activate(struct menu_item *item){
+    struct bind_item_data *data = item->data;
+    data->state = BIND_STATE_BEGIN;
+}
+
+static void bind_update(struct menu_item *item){
+    struct bind_item_data *data = item->data;
+    uint16_t *bind = &settings->binds[data->cmd];
+    if(data->state==BIND_STATE_BEGIN){
+        if(!pad){
+            data->state = BIND_STATE_ACTION;
+            input_enabled = 0;
+        }
+        else if(button_time[button_get_index(BUTTON_L)]>=INPUT_REPEAT){
+            input_enabled = 1;
+            *bind = make_bind(0);
+            data->state = BIND_STATE_NONE;
+        }
+    }
+    else if (data->state == BIND_STATE_ACTION){
+        if(pad){
+            *bind = make_bind(0);
+            data->state = BIND_STATE_LISTENING;
+        }
+    }
+    if(data->state == BIND_STATE_LISTENING){
+        if(!pad){
+            data->state = BIND_STATE_NONE;
+            input_enabled = 1;
+        }else{
+            uint16_t p = bind_get_bitmask(*bind);
+            uint16_t pressed = pad_pressed_raw & ~p;
+            for(int i=0;pressed && i<4;++i){
+                int btn = bind_get_component(*bind,i);
+                if(btn != BIND_END){
+                    continue;
+                }
+                btn = button_get_index(pressed);
+                *bind = (*bind & ~(0x000F << (i*4))) | (btn << (i*4));
+                if(i<3){
+                    *bind = (*bind & ~(0x000F << ((i+1)*4))) | (BIND_END << ((i+1)*4));
+                }
+                pressed &= ~(1 << btn);
+            }
+        }
+    }
+}
+
+struct menu_item *menu_add_bind(struct menu *menu, int x, int y, int cmd){
+    struct menu_item *item = menu_add(menu,x,y,NULL);
+    if(item){
+        struct bind_item_data *data = malloc(sizeof(*data));
+        data->cmd = cmd;
+        data->state = BIND_STATE_NONE;
+        item->data = data;
+        item->interactive = 1;
+        item->draw_proc = draw_bind;
+        item->activate_proc = bind_activate;
+        item->update_proc = bind_update;
+    }
+    return item;
 }

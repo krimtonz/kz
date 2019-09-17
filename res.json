@@ -14,7 +14,13 @@
   "font.png": {
       "type": "texture",
       "name": "font",
-      "format": "ia8",
+      "format": "i8",
       "tile_height": 128
+  },
+  "buttons.png": {
+    "type": "texture",
+    "name": "buttons",
+    "format": "ia8",
+    "tile_height": 16
   }
 }

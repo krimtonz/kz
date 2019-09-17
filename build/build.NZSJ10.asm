@@ -5,7 +5,7 @@
 .incbin "../base.nzsj10.z64"
 
 .definelabel G_PAYLOAD_VROM, 0x02FB1040
-.definelabel G_PAYLOAD_SIZE, filesize("../bin/NZSJ10/kz.bin") + 0x60
+.definelabel G_PAYLOAD_SIZE, filesize("../bin/kz-NZSJ10/kz.bin") + 0x60
 .definelabel G_PAYLOAD_ADDR, 0x80800000
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x60
 
@@ -24,8 +24,9 @@
 ; ==================================================================================================
 ; Custom Code Payload
 ; ==================================================================================================
+.include "kz-NZSJ10.asm"
 
-.org 0x80170078
+.org DMA_HOOK_ADDR
     addiu   sp, sp, -0x340
     sw      ra, 0x002C(sp)
     lui     a0, hi(G_PAYLOAD_ADDR)
@@ -41,11 +42,14 @@
 ; ==================================================================================================
 ; Game Class Frame Start Hook 
 ; ==================================================================================================
+.org INPUT_HOOK_ADDR
+jal INPUT_HOOK_REPLACE
+nop
 
 ; 801737A0
 ; Replaces jalr ra, t9
 ;          nop
-.org 0x8016EFD0
+.org MAIN_HOOK_ADDR
 jal     G_KZ_ADDR
 or      a1, r0, t9
 
@@ -64,6 +68,6 @@ ainit:
     jr		ra
     addiu s0, s0, 0x87a0
 .org G_KZ_ADDR
-.incbin("../bin/NZSJ10/kz.bin")
+.incbin("../bin/kz-NZSJ10/kz.bin")
 .align 8
 .close

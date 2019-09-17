@@ -9,3 +9,4 @@ bin/
 .vscode/
 *.sra
 *.bak
+build/kz-*.asm

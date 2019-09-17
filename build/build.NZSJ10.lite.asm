@@ -24,8 +24,15 @@
 ; ==================================================================================================
 ; Custom Code Payload
 ; ==================================================================================================
+.include "kz-lite-NZSJ10.asm"
 
-.org 0x80170078
+.org HEAP_SIZE_ADDR
+lui     t8, hi(G_PAYLOAD_ADDR)
+addiu   t8, lo(G_PAYLOAD_ADDR)
+.skip 4
+sw      a1, 0xBCD8(v0)
+
+.org DMA_HOOK_ADDR
     addiu   sp, sp, -0x340
     sw      ra, 0x002C(sp)
     lui     a0, hi(G_PAYLOAD_ADDR)
@@ -41,11 +48,14 @@
 ; ==================================================================================================
 ; Game Class Frame Start Hook 
 ; ==================================================================================================
+.org INPUT_HOOK_ADDR
+jal INPUT_HOOK_REPLACE
+nop
 
 ; 801737A0
 ; Replaces jalr ra, t9
 ;          nop
-.org 0x8016EFD0
+.org MAIN_HOOK_ADDR
 jal     G_KZ_ADDR
 or      a1, r0, t9
 
@@ -64,6 +74,6 @@ ainit:
     jr		ra
     addiu s0, s0, 0x87a0
 .org G_KZ_ADDR
-.incbin("../bin/NZSJ10/kz.bin")
+.incbin("../bin/kz-lite-NZSJ10/kz.bin")
 .align 8
 .close

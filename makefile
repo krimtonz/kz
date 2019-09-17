@@ -6,6 +6,7 @@ AS			= mips64-gcc
 OBJCOPY     = mips64-objcopy
 GRC			= grc
 ARMIPS      = armips
+GENASM		= CPPFLAGS='$(subst ','\'',$(CPPFLAGS))' ./genasm
 CFILES      = *.c
 SFILES		= *.S
 RESFILES	= *.png
@@ -26,13 +27,13 @@ ALL_LDFLAGS     = -T gl-n64.ld -nostartfiles -specs=nosys.specs $(LDFLAGS)
 KZ 			= $(foreach v,$(KZ_VERSIONS),patch-kz-$(v))
 KZ_LITE		= $(foreach v,$(KZ_VERSIONS),patch-kz-lite-$(v))
 
-KZ-LITE-NZSE	= $(OBJ-kz-lite-NZSE) $(ELF-kz-lite-NZSE)
-KZ-LITE-NZSJ	= $(OBJ-kz-lite-NZSJ) $(ELF-kz-lite-NZSJ)
-KZ-LITE-NZSJ10	= $(OBJ-kz-lite-NZSJ10) $(ELF-kz-lite-NZSJ10)
+KZ-LITE-NZSE	= $(OBJ-kz-lite-NZSE) $(ELF-kz-lite-NZSE) $(HOOKSASM-kz-lite-NZSE)
+KZ-LITE-NZSJ	= $(OBJ-kz-lite-NZSJ) $(ELF-kz-lite-NZSJ) $(HOOKSASM-kz-lite-NZSJ)
+KZ-LITE-NZSJ10	= $(OBJ-kz-lite-NZSJ10) $(ELF-kz-lite-NZSJ10) $(HOOKSASM-kz-lite-NZSJ10)
 KZ-LITE			= $(KZ-LITE-NZSE) $(KZ-LITE-NZSJ) $(KZ-LITE-NZSJ10)
-KZ-NZSE		= $(OBJ-kz-NZSE) $(ELF-kz-NZSE) $(KZ-LITE-NZSE)
-KZ-NZSJ		= $(OBJ-kz-NZSJ) $(ELF-kz-NZSJ) $(KZ-LITE-NZSJ)
-KZ-NZSJ10	= $(OBJ-kz-NZSJ10) $(ELF-kz-NZSJ10) $(KZ-LITE-NZSJ10)
+KZ-NZSE		= $(OBJ-kz-NZSE) $(ELF-kz-NZSE) $(HOOKSASM-kz-NZSE) $(KZ-LITE-NZSE)
+KZ-NZSJ		= $(OBJ-kz-NZSJ) $(ELF-kz-NZSJ) $(HOOKSASM-kz-NZSJ) $(KZ-LITE-NZSJ)
+KZ-NZSJ10	= $(OBJ-kz-NZSJ10) $(ELF-kz-NZSJ10) $(HOOKSASM-kz-NZSJ10) $(KZ-LITE-NZSJ10)
 
 all			: $(KZ) $(KZ_LITE)
 clean       :
@@ -58,6 +59,7 @@ OBJ-$(1)		 = $$(COBJ-$(1)) $$(SOBJ-$(1)) $$(RESOBJ-$(1))
 ELF-$(1)         = $$(BINDIR-$(1))/$(3).elf
 BIN-$(1)         = $$(BINDIR-$(1))/$(3).bin
 OUTDIR-$(1)      = $$(OBJDIR-$(1)) $$(BINDIR-$(1))
+HOOKSASM-$(1)	 = build/$(1).asm
 BUILD-$(1)		 = $(1)
 CLEAN-$(1)		 = clean-$(1)
 $$(ELF-$(1))		 : LDFLAGS += -Wl,--defsym,start=$$(ADDRESS-$(1))
@@ -77,7 +79,9 @@ $$(BIN-$(1))      : $$(ELF-$(1)) | $$(BINDIR-$(1))
 	$(OBJCOPY) -S -O binary $$< $$@
 $$(OUTDIR-$(1))   :
 	mkdir -p $$@
-patch-$(1)        : $$(BIN-$(1))
+$$(HOOKSASM-$(1))	: $$(ELF-$(1)) | $$(SRCDIR-$(1))/z2.h
+	$$(GENASM) $$< >$$@  
+patch-$(1)        : $$(BIN-$(1)) $$(HOOKSASM-$(1))
 	$(ARMIPS) $$(BUILDFILE-$(1))
 endef
 

@@ -1141,7 +1141,6 @@ typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 
-#define update ((btnupdate) )
 #if Z2_VERSION==NZSE
 #define osSendMesg_addr             0x80087B10
 #define osRecvMesg_addr             0x80087ED0
@@ -1154,9 +1153,14 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_file_msgqueue_addr       0x8009B2C0
 #define z2_arena_addr               0x8009CD20
 #define z2_file_table_addr          0x8009F8B0
-#define z2_btnupdate_addr           0x801146F8 // need nzse
+#define z2_btnupdate_addr           0x80112B40
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
+#define z2_input_update_addr        0x80173754
+#define z2_main_hook_addr           0x801737A0
+#define z2_input_hook_addr          0x801744B8
+#define z2_kz_dma_addr              0x801748A0
+#define z2_set_heap_addr            0x80174C4C
 #define z2_DecodeArchiveFile_addr   0x80178DAC
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801BD910
@@ -1165,6 +1169,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_game_arena_addr          0x801F5100
 #define z2_segment_addr             0x801F8180
 #define z2_cimg_addr                0x801FBB80
+#define z2_input_direct_addr        0x801FB870
 #define z2_pi_io_handle_addr        0x801FD080
 #define z2_disp_addr                0x80209EA0
 #define z2_static_ctxt_addr         0x803824D0
@@ -1185,6 +1190,11 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_btnupdate_addr           0x801146F8
 #define z2_loadroom_addr            0x8013044C
 #define z2_unloadroom_addr          0x801306D8
+#define z2_input_update_addr        0x8016F074
+#define z2_main_hook_addr           0x8016F0C0
+#define z2_input_hook_addr          0x8016FD40
+#define z2_kz_dma_addr              0x80170168
+#define z2_set_heap_addr            0x80170500
 #define z2_DecodeArchiveFile_addr   0x8017431C
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801B89E0
@@ -1193,6 +1203,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_game_arena_addr          0x801F5530
 #define z2_segment_addr             0x801F85A0
 #define z2_cimg_addr                0x801FBF90
+#define z2_input_direct_addr        0x801FBC90
 #define z2_pi_io_handle_addr        0x801FD490
 #define z2_disp_addr                0x8020A2B0
 #define z2_static_ctxt_addr         0x80382900
@@ -1213,6 +1224,11 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_btnupdate_addr           0x801146B8
 #define z2_loadroom_addr            0x801303EC
 #define z2_unloadroom_addr          0x80130678
+#define z2_input_update_addr        0x8016EF84
+#define z2_main_hook_addr           0x8016EFD0
+#define z2_input_hook_addr          0x8016FC50
+#define z2_kz_dma_addr              0x80170078
+#define z2_set_heap_addr            0x80170410
 #define z2_DecodeArchiveFile_addr   0x801740EC
 #define z2_actor_ovl_table_addr     0x801A9E60
 #define z2_gamestate_table_addr     0x801B87A0
@@ -1220,6 +1236,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_file_addr                0x801EF460
 #define z2_game_arena_addr          0x801F5280
 #define z2_segment_addr             0x801F82F0
+#define z2_input_direct_addr        0x801FB9E0
 #define z2_cimg_addr                0x801FBCD0
 #define z2_pi_io_handle_addr        0x801FD1D0
 #define z2_disp_addr                0x80209FF0
@@ -1244,6 +1261,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_static_ctxt          (*(z2_static_ctxt_t*)       z2_static_ctxt_addr)
 #define z2_pi_io_handle         (*(OSPiHandle*)             z2_pi_io_handle_addr)
 #define z2_vi_counter           (*(int32_t*)                z2_vi_counter_addr)
+#define z2_input_direct         (*(z2_input_t*)             z2_input_direct_addr)
 #define z2_cimg                 (*(uint32_t**)              z2_cimg_addr)
 
 /* Functions */

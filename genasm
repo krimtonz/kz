@@ -1,0 +1,32 @@
+#!/usr/bin/env sh
+
+elf="$1"
+if [ -z "$elf" ]; then
+	echo usage: \`genasm \<elf\>\`
+	exit
+fi
+
+z2addr()
+{
+    printf "#include \"src/z2.h\"\n$1" | mips64-cpp - $CPPFLAGS | tail -n 1 | sed -e s/^M//g
+}
+
+kzsym()
+{
+    echo "0x`mips64-nm "$elf" | sed -e s/^M//g | grep " $1\$" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
+}
+
+printhook()
+{
+    printf ".definelabel %s_ADDR, %s\n.definelabel %s_REPLACE, %s\n" "$1" "$2" "$1" "$3" 
+}
+
+printdma()
+{
+    printf ".definelabel %s_ADDR, %s\n" "$1" "$2"
+}
+
+printhook "INPUT_HOOK" "$(z2addr z2_input_hook_addr)" "$(kzsym input_hook)"
+printhook "MAIN_HOOK" "$(z2addr z2_main_hook_addr)" "$(kzsym _start)"
+printdma "DMA_HOOK" "$(z2addr z2_kz_dma_addr)"
+printdma "HEAP_SIZE" "$(z2addr z2_kz_dma_addr)"
