@@ -1,5 +1,4 @@
-#include <stdint.h>
-#include <stdarg.h>
+#include <stdlib.h>
 #include "input.h"
 #include "z2.h"
 #include "commands.h"

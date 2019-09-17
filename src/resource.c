@@ -2,20 +2,6 @@
 #include <stdlib.h>
 #include "resource.h"
 
-#define OWL_OFFSET 0x14668
-#define OWL_FILE 10
-
-#if Z2_VERSION==NZSE
-    #define DUNGEON_FILE 20
-    #define BUTTONS_FILE 1126
-    #define NOTE_INDEX 98
-#else
-    #define DUNGEON_OFFSET 0x0
-    #define DUNGEON_FILE 9
-    #define BUTTONS_FILE 1125
-    #define NOTE_INDEX 130
-#endif
-
 struct tilebg_info *checkbox_bg;
 
 static const char *resource_names[R_END] = {
@@ -30,7 +16,7 @@ static const char *resource_names[R_END] = {
     "buttons",
 };
 
-static gfx_texture *resource_load_kz_texture(enum resource resource){
+static void *resource_load_kz_texture(enum resource resource){
     if(resource_names[resource]){
         gfx_texture *kztext = malloc(sizeof(*kztext));
         if(!kztext) return kztext;
@@ -53,16 +39,13 @@ static gfx_texture *resource_load_kz_texture(enum resource resource){
     return NULL;
 }
 
-gfx_texture *resource_load_items(enum resource resource){
-    texture_loader loader = {
-        32, 32, ICON_ITEM_STATIC, G_IM_FMT_RGBA, G_IM_SIZ_32b,
-        Z2_ITEM_OCARINA, Z2_ITEM_BOMBERS_NOTEBOOK, 1, SOURCE_ARCHIVE,
-        0, 0
-    };
-    return gfx_load(&loader);
+static void *resource_load_items(enum resource resource){
+    struct item_texture *textures = malloc(sizeof(*textures) * Z2_ITEM_END);
+    memset(textures,0,sizeof(*textures) * Z2_ITEM_END);
+    return textures;
 }
 
-static gfx_texture *resource_load_buttons(enum resource resource){
+static void *resource_load_buttons(enum resource resource){
     texture_loader loader = {
         32, 32, BUTTONS_FILE, G_IM_FMT_IA, G_IM_SIZ_8b,
         0, 0, 1, SOURCE_FILE,
@@ -71,7 +54,7 @@ static gfx_texture *resource_load_buttons(enum resource resource){
     return gfx_load(&loader);
 }
 
-static gfx_texture *resource_load_note(enum resource resource){
+static void *resource_load_note(enum resource resource){
     texture_loader loader = {
         16, 24, ICON_ITEM_STATIC, G_IM_FMT_IA, G_IM_SIZ_8b,
         NOTE_INDEX, NOTE_INDEX, 0, SOURCE_ARCHIVE,
@@ -80,7 +63,7 @@ static gfx_texture *resource_load_note(enum resource resource){
     return gfx_load(&loader);
 }
 
-static gfx_texture *resource_load_owl(enum resource resource){
+static void *resource_load_owl(enum resource resource){
     texture_loader loader = {
         24, 12, OWL_FILE, G_IM_FMT_RGBA, G_IM_SIZ_32b,
         0, 0, 1, SOURCE_FILE,
@@ -89,7 +72,7 @@ static gfx_texture *resource_load_owl(enum resource resource){
     return gfx_load(&loader);
 }
 
-static gfx_texture *resource_load_dungeon_items(enum resource resource){
+static void *resource_load_dungeon_items(enum resource resource){
     texture_loader loader = {
         24, 24, DUNGEON_FILE, G_IM_FMT_RGBA, G_IM_SIZ_32b,
 #if Z2_VERSION==NZSE
@@ -103,8 +86,8 @@ static gfx_texture *resource_load_dungeon_items(enum resource resource){
     return gfx_load(&loader);
 }
 
-static gfx_texture *resource_table[R_END] = {NULL};
-static gfx_texture *(*resource_ctors[R_END])(enum resource) = {
+static void *resource_table[R_END] = {NULL};
+static void *(*resource_ctors[R_END])(enum resource) = {
     resource_load_items,
     resource_load_buttons,
     resource_load_owl,
@@ -116,13 +99,21 @@ static gfx_texture *(*resource_ctors[R_END])(enum resource) = {
     resource_load_kz_texture,
 };
 
-gfx_texture *resource_get(enum resource resource){
+void *resource_get(enum resource resource){
     if(!resource_table[resource]){
         if(resource_ctors[resource]){
             resource_table[resource] = resource_ctors[resource](resource);
         }
     }
     return resource_table[resource];
+}
+
+gfx_texture *get_item_texture(uint8_t item_id){
+    struct item_texture *item = (struct item_texture*)resource_get(R_Z2_ITEMS) + item_id;
+    item->last_access_counter = 0;
+    if(item->texture) return item->texture;
+    item->texture = gfx_load_item_texture(item_id);
+    return item->texture;
 }
 
 void init_resources(){

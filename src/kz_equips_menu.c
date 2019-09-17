@@ -42,17 +42,16 @@ struct menu *create_equips_menu(){
     c_bg.on_color.color=0xFF0000FF;
     c_bg.off_color.color=0xFFF000FF;
 
-    gfx_texture *items_texture = resource_get(R_Z2_ITEMS);
     static draw_info_t b_draw_info;
     b_draw_info.x_scale=1.4f;
     b_draw_info.y_scale=1.4f;
-    b_draw_info.texture = items_texture;
+    b_draw_info.texture = NULL;
     b_draw_info.background = &b_bg;
 
     static draw_info_t c_draw_info;
     c_draw_info.x_scale=1.0f;
     c_draw_info.y_scale=1.0f;
-    c_draw_info.texture = items_texture;
+    c_draw_info.texture = NULL;
     c_draw_info.background = &c_bg;
 
     static struct tilebg_info c_left;

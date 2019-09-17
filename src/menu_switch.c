@@ -89,6 +89,7 @@ struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
         data->addr_len = addr_len;
         data->bitmask = bitmask;
         data->callback = callback;
+        memset(&data->draw_info,0,sizeof(data->draw_info));
         data->draw_info.texture=NULL;
         data->draw_info.enabled_color.color = COLOR_GREEN;
         data->draw_info.disabled_color = MENU_DEFAULT_COLOR;

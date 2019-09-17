@@ -3,6 +3,20 @@
 #include "gfx.h"
 #include "menu.h"
 
+#define OWL_OFFSET 0x14668
+#define OWL_FILE 10
+
+#if Z2_VERSION==NZSE
+    #define DUNGEON_FILE 20
+    #define BUTTONS_FILE 1126
+    #define NOTE_INDEX 98
+#else
+    #define DUNGEON_OFFSET 0x0
+    #define DUNGEON_FILE 9
+    #define BUTTONS_FILE 1125
+    #define NOTE_INDEX 130
+#endif
+
 enum resource{
     R_Z2_ITEMS,
     R_Z2_BUTTONS,
@@ -16,9 +30,15 @@ enum resource{
     R_END
 };
 
+struct item_texture{
+    gfx_texture *texture;
+    int last_access_counter;
+};
+
 extern struct tilebg_info *checkbox_bg;
 
 void init_resources();
-gfx_texture *resource_get(enum resource resource);
+void *resource_get(enum resource resource);
+gfx_texture *get_item_texture(uint8_t item_id);
 void resource_destroy(enum resource resource);
 #endif

@@ -29,4 +29,4 @@ printdma()
 printhook "INPUT_HOOK" "$(z2addr z2_input_hook_addr)" "$(kzsym input_hook)"
 printhook "MAIN_HOOK" "$(z2addr z2_main_hook_addr)" "$(kzsym _start)"
 printdma "DMA_HOOK" "$(z2addr z2_kz_dma_addr)"
-printdma "HEAP_SIZE" "$(z2addr z2_kz_dma_addr)"
+printdma "HEAP_SIZE" "$(z2addr z2_set_heap_addr)"

@@ -91,7 +91,7 @@ void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height);
 void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y);
 
 struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text);
-struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y, draw_info_t *drawinfo);
+struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y, draw_info_t *drawinfo, _Bool load_item);
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name);
 struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, const char *text, menu_generic_callback callback, void *data);
 struct menu_item *menu_add_gfx_button(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback, void *data, draw_info_t *drawinfo);
@@ -118,7 +118,7 @@ struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
                                       menu_generic_callback callback,  void *callback_data,
                                       gfx_texture *texture, uint16_t tex_width, uint16_t tex_height,
                                       uint16_t tile, _Bool has_off_tile, const char *tooltip,
-                                      uint32_t on_color, uint32_t off_color);
+                                      uint32_t on_color, uint32_t off_color, _Bool load_item);
 
 struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,

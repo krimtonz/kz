@@ -59,7 +59,8 @@ static void draw_item_list(struct menu_item *item){
     if(val!=Z2_ITEM_NULL){
         int tile_idx = idx;
         tile_idx = tile_idx + data->start_tile - 1;
-        gfx_draw_sprite_scale(draw->texture,get_item_x_pos(item),get_item_y_pos(item),tile_idx, 16,16,draw->x_scale,draw->y_scale);
+        gfx_texture *texture = get_item_texture(tile_idx);
+        gfx_draw_sprite_scale(texture,get_item_x_pos(item),get_item_y_pos(item),0, 16,16,draw->x_scale,draw->y_scale);
         if(data->ovl_values){
             gfx_printf_scale(get_item_x_pos(item)+8,get_item_y_pos(item)+11,0.5f,0.5f,"%d",data->ovl_values[idx]);
         }

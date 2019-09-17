@@ -61,6 +61,7 @@ void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color);
 void gfx_destroy_texture(gfx_texture *texture);
 gfx_texture *gfx_load(texture_loader *loader);
 void gfx_texture_desaturate(void *data, size_t len);
+gfx_texture *gfx_load_item_texture(uint8_t item_id);
 
 extern gfx_font *kfont;
 

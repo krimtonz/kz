@@ -280,6 +280,16 @@ static void kz_main(void) {
 #undef MAKESTRING_
 #undef MAKESTRING
 
+    struct item_texture *textures = resource_get(R_Z2_ITEMS);
+    for(int i=0;i<Z2_ITEM_END;i++){
+        if(!textures[i].texture) continue;
+        textures[i].last_access_counter++;
+        if(textures[i].last_access_counter>=60){
+            gfx_destroy_texture(textures[i].texture);
+            textures[i].texture = NULL;
+        }
+    }
+
     gfx_finish();
 }
 
@@ -318,10 +328,9 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,2,create_cheats_menu(),"cheats");
     menu_add_submenu(&kz.main_menu,0,3,create_scene_menu(),"scene");
     menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
-#ifndef LITE
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
-#endif
+
     menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
     menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
 

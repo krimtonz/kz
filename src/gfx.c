@@ -155,6 +155,25 @@ inline size_t calc_tile_size(int width, int height, g_isiz_t size){
     return ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
 }
 
+gfx_texture *gfx_load_item_texture(uint8_t item_id){
+    size_t size = calc_tile_size(32,32,G_IM_SIZ_32b);
+    gfx_texture *texture = malloc(sizeof(*texture));
+    if(texture){
+        texture->tile_size = size;
+        texture->x_tiles = 1;
+        texture->y_tiles = 2;
+        texture->tile_width = 32;
+        texture->tile_height = 32;
+        texture->img_fmt = G_IM_FMT_RGBA;
+        texture->img_size = G_IM_SIZ_32b;
+        texture->data = memalign(64,size * 2);
+        z2_DecodeArchiveFile(z2_file_table[ICON_ITEM_STATIC].prom_start,item_id,texture->data);
+        memcpy((char*)texture->data + size,(char*)texture->data,size);
+        gfx_texture_desaturate((char*)texture->data + size, size);
+    }
+    return texture;
+}
+
 static gfx_texture *gfx_load_archive(texture_loader *loader){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
@@ -263,7 +282,6 @@ void gfx_destroy_texture(gfx_texture *texture){
         if(texture->data) free(texture->data);
         free(texture);
     }
-    texture = NULL;
 }
 
 void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt, float x_scale, float y_scale){

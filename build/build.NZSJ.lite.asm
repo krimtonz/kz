@@ -7,7 +7,7 @@
 ;.definelabel G_PAYLOAD_VROM, 0x02EE8000
 .definelabel G_PAYLOAD_VROM, 0x02FB2000
 .definelabel G_PAYLOAD_SIZE, filesize("../bin/kz-lite-NZSJ/kz.bin") + 0x60
-.definelabel G_PAYLOAD_ADDR, 0x80690000
+.definelabel G_PAYLOAD_ADDR, 0x806B0000
 .definelabel G_KZ_ADDR, G_PAYLOAD_ADDR + 0x60
 
 .orga 0x10
@@ -30,7 +30,7 @@
 .org HEAP_SIZE_ADDR
 lui     t8, hi(G_PAYLOAD_ADDR)
 addiu   t8, lo(G_PAYLOAD_ADDR)
-.skip 4
+.skip 8
 sw      a1, 0xBEE8(v0)
 
 
