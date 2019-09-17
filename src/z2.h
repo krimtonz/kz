@@ -1175,6 +1175,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_static_ctxt_addr         0x803824D0
 #define z2_game_addr                0x803E6B20
 #define z2_link_addr                0x803FFDB0
+#define z2_dpad_disable_offset      0x2F44
 #elif Z2_VERSION==NZSJ
 #define osSendMesg_addr             0x80088A10
 #define osRecvMesg_addr             0x80088DD0
@@ -1209,6 +1210,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_static_ctxt_addr         0x80382900
 #define z2_game_addr                0x803E6FB0
 #define z2_link_addr                0x80400260
+#define z2_dpad_disable_offset      0x2F44
 #elif Z2_VERSION==NZSJ10
 #define osSendMesg_addr             0x80088AB0
 #define osRecvMesg_addr             0x80088E70
@@ -1243,6 +1245,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_static_ctxt_addr         0x80382640
 #define z2_game_addr                0x803E6CF0
 #define z2_link_addr                0x803FFFA0
+#define z2_dpad_disable_offset      0x2F20
 #endif
 
 /* Data */

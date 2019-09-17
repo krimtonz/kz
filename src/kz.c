@@ -104,6 +104,11 @@ static void kz_main(void) {
     input_update();
 
     save_disp_p(&kz.disp_p);
+    
+    /* Disable DPad on Pause Screen */
+    if(z2_player_ovl_table[0].ram!=NULL){
+        *((uint32_t*)z2_player_ovl_table[0].ram + z2_dpad_disable_offset) = 0x00001025; // or v0, r0, r0
+    }
 
     /* input display */
     {
