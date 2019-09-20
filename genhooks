@@ -1,0 +1,48 @@
+#!/bin/bash
+
+elf="$1"
+if [ -z "$elf" ]; then
+	echo usage: \`genhooks \<elf\>\`
+	exit
+fi
+
+z2addr()
+{
+    printf "#include \"src/z2.h\"\n$1" | mips64-cpp - $CPPFLAGS | tail -n 1 | sed -e s/^M//g
+}
+
+kzsym()
+{
+    echo "0x`mips64-nm "$elf" | sed -e s/^M//g | grep " $1\$" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
+}
+
+gsc16()
+{
+    addr="$(printf "%d" "$1")"
+    addr="$(expr "$addr" % 16777216 + 2164260864)" # addr = addr & 0x00FFFFFF | 0x81000000
+    val="$(printf "%d" "$2")"
+    val="$(expr "$val" % 65536)" # val = val & 0xFFFF
+    printf "%08X %04X\n" "$addr" "$val"
+}
+
+genhook()
+{
+    addr="$(printf "%d" "$1")"
+    tmp="$(mktemp)"
+    echo ".set noreorder;.set noat;$2" | mips64-as - -o "$tmp"
+    mips64-readelf -x .text "$tmp" | grep "0x[0-9A-Fa-f]\{8\}" | grep -o " [0-9A-Fa-f]\{8\}" |
+    while read -r line; do
+        gsc16 "$addr" "0x`echo "$line" | sed -e "s/\(....\)..../\1/"`"
+        addr="$(expr "$addr" + 2)"
+        gsc16 "$addr" "0x`echo "$line" | sed -e "s/....\(....\)/\1/"`"
+        addr="$(expr "$addr" + 2)"
+    done
+    rm -f "$tmp"
+}
+
+genhook "$(z2addr z2_input_hook_addr)" "jal $(kzsym input_hook);"
+genhook "$(z2addr z2_main_hook_addr)" "jal $(kzsym _start); addiu \$a1, \$t9, 0;"
+
+if [ "$2" == "lite" ]; then
+	genhook "$(z2addr z2_set_heap_addr)" "la \$t8, 0x806B0000;"
+fi
