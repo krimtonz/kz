@@ -45,3 +45,4 @@ patched_rom:write(payload_rom + 0x60,kz)
 patched_rom:crc_update()
 print("Saving build/" .. kz_version .. ".z64")
 patched_rom:save("build/" .. kz_version .. ".z64")
+return kz_version, patched_rom, rom_info.wad_patch, rom_info.title_id, rom_info.title
