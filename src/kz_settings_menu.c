@@ -106,7 +106,7 @@ static int run_command(struct menu_item *item, enum menu_callback callback, void
 
 struct menu *create_settings_menu(){
     static struct menu settingsm;
-    menu_init(&settingsm,0,0);
+    menu_init(&settingsm,kz.main_menu.x,kz.main_menu.y);
     settingsm.selected_item = menu_add_button(&settingsm,0,0,"return",menu_return,NULL);
     menu_add(&settingsm,0,1,"profile");
     menu_add_button(&settingsm,12,1,"-",profile_dec,NULL);
@@ -139,7 +139,7 @@ struct menu *create_settings_menu(){
     item->navigate_proc = nav_item;
 
     static struct menu commands;
-    menu_init(&commands,settingsm.x,settingsm.y);
+    menu_init(&commands,0,0);
 
     commands.selected_item = menu_add_button(&commands,0,0,"return",menu_return,NULL);
     menu_add(&commands,0,1,"command");

@@ -41,7 +41,8 @@ genhook()
 }
 
 genhook "$(z2addr z2_input_hook_addr)" "jal $(kzsym input_hook);"
-genhook "$(z2addr z2_main_hook_addr)" "jal $(kzsym _start); addiu \$a1, \$t9, 0;"
+genhook "$(z2addr z2_main_hook_addr)" "jal $(kzsym _start);"
+#genhook "$(z2addr z2_blur_hook_addr)" "jal $(kzsym blur_hook);";
 
 if [ "$2" == "lite" ]; then
 	genhook "$(z2addr z2_set_heap_addr)" "la \$t8, 0x806B0000;"

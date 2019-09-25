@@ -43,7 +43,7 @@ void command_levitate(){
 }
 
 void command_turbo(){
-    kz.cheats ^= (1 << CHEAT_TURBO);
+    settings->cheats ^= (1 << CHEAT_TURBO);
 }
 
 void command_fall(){

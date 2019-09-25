@@ -18,6 +18,8 @@
 #define BUTTON_B              0x4000
 #define BUTTON_A              0x8000
 
+#define BIND_END 6
+
 uint16_t make_bind(int len, ...);
 void input_update();
 _Bool input_bind_held(int index);

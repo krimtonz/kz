@@ -319,17 +319,23 @@ typedef struct {
         uint16_t    owls_hit;                       /* 0x0046 */
     };
     char            unk_0x48_[0x04];                /* 0x0048 */
-    struct {
-        int8_t b;
-        int8_t cleft;
-        int8_t cdown;
-        int8_t cright;
+    union {
+        struct{
+            int8_t b;
+            int8_t cleft;
+            int8_t cdown;
+            int8_t cright;
+        };
+        int8_t button_item[4];
     }               form_button_item[0x04];         /* 0x004C */
-    struct {
-        int8_t b;
-        int8_t cleft;
-        int8_t cdown;
-        int8_t cright;
+    union {
+        struct {
+            int8_t b;
+            int8_t cleft;
+            int8_t cdown;
+            int8_t cright;
+        };
+        int8_t button_slot[4];
     }               form_button_slot[0x04];         /* 0x005C */
     union {
         struct {
@@ -410,19 +416,16 @@ typedef struct {
     }               scene_flags[0x78];              /* 0x00F8 */
     char            unk_0x0E18_[0x1D4];             /* 0x0E18 */
 #if Z2_VERSION!=NZSE
-    char            unk_0x0FEC_[0x384];             /* 0x0FEC */
-#endif
-    char            lottery_numbers[0x09];          /* 0x0FEC */    /* 0x1370 */
-#if Z2_VERSION==NZSE
-#define UNK_FF5 0x2CAB
+    char            unk_0x0FEC_[0x2F64];                            /* 0x0FEC */
 #else
-#define UNK_FF5 0x2BE0
+    char            unk_0x0FEC_[0x2CB4];            /* 0x0FEC */
 #endif
-    char            unk_0xFF5_[UNK_FF5];            /* 0x0FF5 */    /* 0x1379 */
     int32_t         file_index;                     /* 0x3CA0 */    /* 0x3F50 */
-    char            unk_0x3CA4[0x0C];               /* 0x3CA4 */
-    int             void_flag;                      /* 0x3CB0 */
-} z2_file_t;                                        /* 0x3CB4 */
+    char            unk_0x3CA4[0x0C];               /* 0x3CA4 */    /* 0x3F54 */
+    int             void_flag;                      /* 0x3CB0 */    /* 0x3F60 */
+    char            unk_0x03CB4[0x338];             /* 0x3CB4 */    /* 0x3F64 */
+    uint8_t         restriction_flags[0x4];         /* 0x3FEC */    /* 0x429C */
+} z2_file_t;                                        /* 0x3FF0 */    /* 0x42A0 */
 
 typedef struct
 {
@@ -610,9 +613,12 @@ typedef struct {
     uint32_t        frame_cnt_2;            /* 0x02D8 */
 } z2_gfx_t;                                 /* 0x02DC */
 
-typedef struct {
+typedef struct z2_ctxt z2_ctxt_t;
+typedef void (*game_update_t)(z2_ctxt_t* ctxt);
+
+struct z2_ctxt{
     z2_gfx_t        *gfx;                   /* 0x0000 */
-    void            *gamestate_update;      /* 0x0004 */
+    game_update_t   gamestate_update;       /* 0x0004 */
     void            *gamestate_dtor;        /* 0x0008 */
     void            *gamestate_ctor;        /* 0x000C */
     uint32_t         ctxt_size;             /* 0x0010 */
@@ -626,7 +632,7 @@ typedef struct {
     int32_t         execute_state;          /* 0x0098 */
     int32_t         gamestate_frames;       /* 0x009C */
     int32_t         unk_0xA0;               /* 0x00A0 */
-} z2_ctxt_t;                                /* 0x00A4 */
+};                                          /* 0x00A4 */
 
 typedef struct
 {
@@ -969,7 +975,71 @@ typedef struct{
     void               *transition_list;        /* 0x007C */
 } z2_room_ctxt_t;                               /* 0x0080 */
 
-typedef struct {
+typedef struct{
+    char        unk_0x00[0x168];    /* 0x0000 */
+    void       *icon_item_static;   /* 0x0168 */
+    void       *icon_item_24;       /* 0x016C */
+    void       *icon_item_map;      /* 0x0170 */
+    void       *icon_text;          /* 0x0174 */
+    void       *unk_text_0x178;     /* 0x0178 */
+    Gfx        *bg_dlist;           /* 0x017C */
+    char        unk_0x180[0x6C];    /* 0x0180 */
+    uint16_t    state;              /* 0x01EC */
+    char        unk_0x1EE[0x12];    /* 0x01EE */
+    uint16_t    switching_screen;   /* 0x0200 */
+    uint16_t    unk_0x202;          /* 0x0202 */
+    uint16_t    screen_idx;         /* 0x0204 */
+    char        unk_0x206[0x3C];    /* 0x0206 */
+    uint16_t    item_x;             /* 0x0242 */
+    char        unk_0x244[0x4];     /* 0x0244 */
+    uint16_t    mask_x;             /* 0x0248 */
+    char        unk_0x24A[0x2];     /* 0x024A */
+    uint16_t    item_y;             /* 0x024C */
+    char        unk_0x24E[0x4];     /* 0x024E */
+    uint16_t    mask_y;             /* 0x0252 */
+    char        unk_0x254[0x8];     /* 0x0254 */
+    uint16_t    selected_item;      /* 0x025C */
+    uint16_t    item_item;          /* 0x025E */
+    uint16_t    map_item;           /* 0x0260 */
+    uint16_t    quest_item;         /* 0x0262 */
+    uint16_t    mask_item;          /* 0x0264 */
+    uint16_t    unk_0x266;          /* 0x0266 */
+    uint16_t    item_cell;          /* 0x0268 */
+    uint16_t    map_cell;           /* 0x026A */
+    uint16_t    quest_cell;         /* 0x026C */
+    uint16_t    mask_cell;          /* 0x026E */
+} z2_pause_ctxt_t;                  /* 0x0270 */
+
+typedef struct{
+    char        unk_0x00[0x170];        /* 0x0000 */
+    void       *parameter_static;       /* 0x0170 */
+    void       *do_action_static;       /* 0x0174 */
+    void       *icon_item_static;       /* 0x0178 */
+    void       *minimap_texture;        /* 0x017C */
+    char        unk_0x180[0x04];        /* 0x0180 */
+    uint32_t    action_rom_addr;        /* 0x0184 */
+    void       *action_ram;             /* 0x0188 */
+    uint32_t    action_size;            /* 0x018C */
+    char        unk_0x190[0xD4];        /* 0x0190 */
+    union{
+        struct{
+            uint16_t    fadeout_alpha;          /* 0x0264 */
+            uint16_t    a_alpha;                /* 0x0266 */
+            uint16_t    b_alpha;                /* 0x0268 */
+            uint16_t    c_left_alpha;           /* 0x026A */
+            uint16_t    c_down_alpha;           /* 0x026C */
+            uint16_t    c_right_alpha;          /* 0x026E */
+            uint16_t    hearts_alpha;           /* 0x0270 */
+            uint16_t    rupees_alpha;           /* 0x0272 */
+        };
+        uint16_t        alphas[0x08];           /* 0x0264 */
+    };               
+    char        unk_0x0274[0x9A];       /* 0x0274 */
+    uint8_t     restriction_flags[0xC]; /* 0x030E */
+    char        unk_0x031A[0x2E];       /* 0x031A */
+} z2_hud_ctxt_t;                        /* 0x0348 */
+
+typedef struct {                                /*   NZSE  */   /*  NZSJ  */
     z2_ctxt_t           common;                 /* 0x00000 */
     uint16_t            scene_index;            /* 0x000A4 */
     uint8_t             scene_draw_id;          /* 0x000A6 */
@@ -993,20 +1063,21 @@ typedef struct {
     uint8_t             message_state_2;        /* 0x16928 */
     char                unk_0x16829[0x02];      /* 0x16929 */
     uint8_t             message_state_3;        /* 0x1692B */
+    char                unk_0x1692C[0x9C];      /* 0x1692C */
 #if Z2_VERSION==NZSE
-#define UNK_1692C 0x145C
-#else
-#define UNK_1692C 0x143C
+    char                unk_0x169C8[0x20];      /* 0x169C8 */
 #endif
-    char                unk_0x1692C[UNK_1692C]; /* 0x1692C */
-    z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */
-    z2_room_ctxt_t      room_ctx;               /* 0x186E0 */
-    uint8_t             room_cnt;               /* 0x18760 */
-    char                unk_0x18761[0x114];     /* 0x18761 */
-    uint8_t             scene_load_flag;        /* 0x18875 */
-    char                unk_0x18876[0x04];      /* 0x18876 */
-    uint16_t            entrance_index;         /* 0x18878 */
-} z2_game_t;                                    /* 0x1887A */
+    z2_hud_ctxt_t       hud_ctx;                /* 0x169E8 */   /* 0x169C8 */
+    z2_pause_ctxt_t     pause_ctx;              /* 0x16D30 */   /* 0x16D10 */
+    char                unk_0x16F30[0xDE8];     /* 0x16FA0 */   /* 0x16F80 */
+    z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */   /* 0x17D68 */
+    z2_room_ctxt_t      room_ctx;               /* 0x186E0 */   /* 0x186C0 */
+    uint8_t             room_cnt;               /* 0x18760 */   /* 0x18740 */
+    char                unk_0x18761[0x114];     /* 0x18761 */   /* 0x18741 */
+    uint8_t             scene_load_flag;        /* 0x18875 */   /* 0x18855 */
+    char                unk_0x18876[0x04];      /* 0x18876 */   /* 0x18856 */
+    uint16_t            entrance_index;         /* 0x18878 */   /* 0x18858 */
+} z2_game_t;                                    /* 0x1887A */   /* 0x1885A */
 
 typedef struct{
     z2_actor_t          common;                 /* 0x0000 */
@@ -1132,15 +1203,7 @@ typedef struct{
 } z2_static_ctxt_t;
 
 #define Z2_DISP_SIZE 0x20310
-
-/* Function Prototypes */
-typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
-typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
-typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
-typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
-typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
-typedef void (*z2_gamesate_update_t)(z2_game_t *game);
-typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
+#define Z2_CIMG_SIZE 0x25800
 
 #if Z2_VERSION==NZSE
 #define osSendMesg_addr             0x80087B10
@@ -1174,7 +1237,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_pi_io_handle_addr        0x801FD080
 #define z2_disp_addr                0x80209EA0
 #define z2_static_ctxt_addr         0x803824D0
-#define z2_game_addr                0x803E6B20
+#define z2_ctxt_addr                0x803E6B20
 #define z2_link_addr                0x803FFDB0
 #define z2_dpad_disable_offset      0x2F44
 #elif Z2_VERSION==NZSJ
@@ -1192,6 +1255,8 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_btnupdate_addr           0x801146F8
 #define z2_loadroom_addr            0x8013044C
 #define z2_unloadroom_addr          0x801306D8
+//#define z2_blur_addr                0x80161010
+//#define z2_blur_hook_addr           0x80164ED8
 #define z2_input_update_addr        0x8016F074
 #define z2_main_hook_addr           0x8016F0C0
 #define z2_input_hook_addr          0x8016FD40
@@ -1209,7 +1274,7 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_pi_io_handle_addr        0x801FD490
 #define z2_disp_addr                0x8020A2B0
 #define z2_static_ctxt_addr         0x80382900
-#define z2_game_addr                0x803E6FB0
+#define z2_ctxt_addr                0x803E6FB0
 #define z2_link_addr                0x80400260
 #define z2_dpad_disable_offset      0x2F44
 #elif Z2_VERSION==NZSJ10
@@ -1244,13 +1309,24 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define z2_pi_io_handle_addr        0x801FD1D0
 #define z2_disp_addr                0x80209FF0
 #define z2_static_ctxt_addr         0x80382640
-#define z2_game_addr                0x803E6CF0
+#define z2_ctxt_addr                0x803E6CF0
 #define z2_link_addr                0x803FFFA0
 #define z2_dpad_disable_offset      0x2F20
 #endif
 
+/* Function Prototypes */
+typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
+typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
+typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
+typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
+typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
+typedef void (*z2_gamesate_update_t)(z2_game_t *game);
+typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
+typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
+
 /* Data */
-#define z2_game                 (*(z2_game_t*)              z2_game_addr)
+#define z2_game                 (*(z2_game_t*)              z2_ctxt_addr)
+#define z2_ctxt                 (*(z2_ctxt_t*)              z2_ctxt_addr)
 #define z2_file                 (*(z2_file_t*)              z2_file_addr)
 #define z2_link                 (*(z2_link_t*)              z2_link_addr)
 #define z2_segment              (*(z2_segment_t*)           z2_segment_addr)
@@ -1280,5 +1356,6 @@ typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 #define osCreateMesgQueue       ((osCreateMesgQueue_t)      osCreateMesgQueue_addr)
 #define z2_loadroom             ((z2_loadroom_t)            z2_loadroom_addr)
 #define z2_unloadroom           ((z2_unloadroom_t)          z2_unloadroom_addr)
+//#define z2_blur                 ((z2_blur_t)                z2_blur_addr)
 
 #endif

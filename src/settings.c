@@ -26,6 +26,8 @@ void load_default_settings(){
     settings->binds[Z2_CMD_RESET_LAG] = make_bind(1,BUTTON_D_RIGHT);
     settings->binds[Z2_CMD_TIMER] = make_bind(2,BUTTON_A, BUTTON_D_DOWN);
     settings->binds[Z2_CMD_TIMER_RESET] = make_bind(2,BUTTON_A, BUTTON_D_UP);
+    settings->binds[Z2_CMD_LOAD_MEMFILE] = BIND_END;
+    settings->binds[Z2_CMD_SAVE_MEMFILE] = BIND_END;
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 16;
@@ -35,6 +37,9 @@ void load_default_settings(){
     settings->timer = 0;
     settings->timer_x = Z2_SCREEN_WIDTH - 100;
     settings->timer_y = 30;
+    settings->menu_x = 20;
+    settings->menu_y = 30;
+    settings->cheats = 0;
 }
 
 void save_settings_to_flashram(int profile){

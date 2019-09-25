@@ -18,7 +18,6 @@ static struct cheat_item cheat_table[] = {
     { CHEAT_MAGIC, "magic" },
     { CHEAT_RUPEES, "rupees" },
     { CHEAT_BLAST_MASK, "no blast mask cooldown" },
-    { CHEAT_RAZOR_SWORD, "unbreakable razor sword" },
     { CHEAT_RESTRICTION, "no item restriction" },
     { CHEAT_ISG, "isg" }
 };
@@ -31,7 +30,7 @@ struct menu *create_cheats_menu(){
         resource_get(R_KZ_CHECKBOX), 1,-1, 1.f, 1.f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}},0,checkbox_bg
     };
     for(int i=0;i<sizeof(cheat_table)/sizeof(*cheat_table);i++){
-        menu_add_gfx_switch(&cheats,0,i+1,&kz.cheats,4,(1 << cheat_table[i].mask),NULL,NULL,&draw_info);
+        menu_add_gfx_switch(&cheats,0,i+1,&settings->cheats,4,(1 << cheat_table[i].mask),NULL,NULL,&draw_info);
         menu_add(&cheats,2,i+1,cheat_table[i].name);
     }
     return &cheats;

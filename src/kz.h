@@ -19,7 +19,6 @@ enum cheats {
     CHEAT_POWDER_KEG,
     CHEAT_HEALTH,
     CHEAT_MAGIC,
-    CHEAT_RAZOR_SWORD,
     CHEAT_BLAST_MASK,
     CHEAT_RESTRICTION,
     CHEAT_ISG,
@@ -48,7 +47,6 @@ typedef struct{
 typedef struct  {
     _Bool                   ready;
     struct list             watches;
-    uint32_t                cheats;
     enum col_view_settings  collision_view_settings;
     enum col_view_status    collision_view_status;
     struct menu             main_menu;

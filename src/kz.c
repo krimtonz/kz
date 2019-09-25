@@ -42,7 +42,7 @@ void load_disp_p(struct disp_p *disp_p){
     gfx->overlay.d = disp_p->overlay_d + gfx->overlay.buf;
 }
 
-void gfx_reloc(int src){
+void gfx_reloc(int src_disp_idx, int src_cimg_idx){
     z2_gfx_t *gfx = z2_game.common.gfx;
     z2_disp_buf_t *new_disp[4] = {
         &gfx->work,
@@ -50,8 +50,10 @@ void gfx_reloc(int src){
         &gfx->poly_xlu,
         &gfx->overlay
     };
-    uint32_t src_gfx = z2_disp_addr + src * Z2_DISP_SIZE;
+    uint32_t src_gfx = z2_disp_addr + src_disp_idx * Z2_DISP_SIZE;
     uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
+    uint32_t src_cimg = z2_cimg[src_disp_idx];
+    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
     for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
         z2_disp_buf_t *dbuf = new_disp[i];
         for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
@@ -76,12 +78,18 @@ void gfx_reloc(int src){
                 case G_SETTIMG: break;
                 case G_SETZIMG: break;
                 case G_SETCIMG: break;
-                case G_BG_1CYC: break;
-                case G_BG_COPY: break;
+                case G_BG_1CYC: 
+                    p->lo = 0;
+                    p->hi = 0;
+                    continue;
+                case G_BG_COPY: continue;
                 default: continue;
             }
             if(p->lo >=src_gfx && p->lo<src_gfx + Z2_DISP_SIZE){
                 p->lo += dst_gfx - src_gfx;
+            }
+            if(p->lo >=src_cimg && p->lo<src_cimg + Z2_CIMG_SIZE){
+                p->lo = dst_cimg;
             }
         }
     }
@@ -102,7 +110,6 @@ static void kz_main(void) {
     gfx_begin();
 
     input_update();
-
     save_disp_p(&kz.disp_p);
     
     /* Disable DPad on Pause Screen */
@@ -164,51 +171,64 @@ static void kz_main(void) {
 
     /* activate cheats */
     {
-        if(kz.cheats & (1 << CHEAT_BLAST_MASK))
+        if(settings->cheats & (1 << CHEAT_BLAST_MASK))
             z2_link.blast_mask_timer = 0x00;
-        if(kz.cheats & (1 << CHEAT_ISG))
+        if(settings->cheats & (1 << CHEAT_ISG))
             z2_link.sword_active = 0x01;
-        if(kz.cheats & (1 << CHEAT_ARROWS)){
+        if(settings->cheats & (1 << CHEAT_ARROWS)){
             uint8_t arrow_cap[] = { 1, 30, 40, 50, 1, 20, 30, 40 };
             z2_file.ammo[Z2_SLOT_BOW] = arrow_cap[z2_file.quiver];
         }
         uint8_t bomb_cap[] = { 1, 20, 30, 40, 1, 1, 1, 1 };
-        if(kz.cheats & (1 << CHEAT_BOMBS)){
+        if(settings->cheats & (1 << CHEAT_BOMBS)){
             z2_file.ammo[Z2_SLOT_BOMB] = bomb_cap[z2_file.bomb_bag];
         }
-        if(kz.cheats & (1 << CHEAT_BOMBCHUS)){
+        if(settings->cheats & (1 << CHEAT_BOMBCHUS)){
             z2_file.ammo[Z2_SLOT_BOMBCHU] = bomb_cap[z2_file.bomb_bag];
         }
-        if(kz.cheats & (1 << CHEAT_POWDER_KEG)){
+        if(settings->cheats & (1 << CHEAT_POWDER_KEG)){
             z2_file.ammo[Z2_SLOT_POWDER_KEG] = 0x01;
         }
-        if(kz.cheats & (1 << CHEAT_NUTS)){
+        if(settings->cheats & (1 << CHEAT_NUTS)){
             uint8_t nut_cap[] = { 1, 20, 30, 40, 1, 99, 1, 99};
             z2_file.ammo[Z2_SLOT_NUT] = nut_cap[z2_file.nut_upgrade];
         }
-        if(kz.cheats & (1 << CHEAT_STICKS)){
+        if(settings->cheats & (1 << CHEAT_STICKS)){
             uint8_t stick_cap[] = { 1, 10, 20, 30, 1, 20, 30, 40};
             z2_file.ammo[Z2_SLOT_STICK] = stick_cap[z2_file.stick_upgade];
         }
-        if(kz.cheats & (1 << CHEAT_HEALTH)){
+        if(settings->cheats & (1 << CHEAT_HEALTH)){
             z2_file.current_health = z2_file.max_health;
         }
-        if(kz.cheats & (1 << CHEAT_MAGIC)){
+        if(settings->cheats & (1 << CHEAT_MAGIC)){
             z2_file.current_magic = z2_file.magic_level * 0x30;
         }
-        if(kz.cheats & (1 << CHEAT_RUPEES)){
+        if(settings->cheats & (1 << CHEAT_RUPEES)){
             uint16_t rupee_cap[] = { 99, 200, 500, 500 };
             z2_file.rupees = rupee_cap[z2_file.wallet_upgrade];
         }
-        if(kz.cheats & (1 << CHEAT_TURBO)){
+        if(settings->cheats & (1 << CHEAT_TURBO)){
             z2_link.linear_velocity=18.0f;
             gfx_printf_color(Z2_SCREEN_WIDTH-60, Z2_SCREEN_HEIGHT-60,0x00FF00FF,"t");
+        }
+        if(settings->cheats & (1 << CHEAT_RESTRICTION)){
+            memset(&z2_game.hud_ctx.restriction_flags,0,0xC);
+            for(int i=0;i<4;i++){
+                for(int j=0;j<4;j++){
+                    if(z2_file.form_button_item[i].button_item[j] == Z2_MASK_FIERCE_DEITY){
+                        z2_file.restriction_flags[j] = 0;
+                        //z2_game.hud_ctx.alphas[2 + j] = 0xFF;
+                    }
+                }
+            }
         }
     }
 
     /* collision view */
     {
-        kz_col_view();
+        if(z2_game.pause_ctx.state==0){
+            kz_col_view();
+        }
     }
 
     /* handle menu */
@@ -321,7 +341,7 @@ void init() {
     kz_apply_settings();
 
     kz.menu_active = 0;
-    menu_init(&kz.main_menu, 10, 10);
+    menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
 
     menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
@@ -349,11 +369,17 @@ void input_hook(void){
     }
 }
 
-void game_state_main(z2_gamesate_update_t game_update_start){
+void blur_hook(void){
+    if(kz.pending_frames!=0){
+        //z2_blur(&z2_ctxt);
+    }
+}
+
+void game_state_main(){
     if(kz.pending_frames!=0){
         if(kz.pending_frames>0)
             kz.pending_frames--;
-        game_update_start(&z2_game);
+        z2_ctxt.gamestate_update(&z2_ctxt);
     }else{
         z2_gfx_t *gfx = z2_game.common.gfx;
         if(z2_game.common.gamestate_frames!=0){
@@ -363,7 +389,7 @@ void game_state_main(z2_gamesate_update_t game_update_start){
                 memcpy((void*)z2_disp_addr,(void*)(z2_disp_addr + Z2_DISP_SIZE),Z2_DISP_SIZE);
             }
             load_disp_p(&kz.disp_p);
-            gfx_reloc(1-(gfx->frame_cnt_1 & 1));
+            gfx_reloc(1-(gfx->frame_cnt_1 & 1),1-(gfx->frame_cnt_2 & 1));
         }
         z2_game.common.gamestate_frames--;
     }
@@ -387,12 +413,12 @@ static void kz_stack(void (*kzfunc)(void)) {
 }
 
 /* Entry Point of KZ executable */
-ENTRY void _start(z2_game_t *game, z2_gamesate_update_t game_update_start) {
+ENTRY void _start() {
     init_gp();
     if(!kz.ready){
         kz_stack(init);
     }
-    game_state_main(game_update_start);
+    game_state_main();
     kz_stack(kz_main);
 }
 

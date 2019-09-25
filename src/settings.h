@@ -33,6 +33,9 @@ struct settings_data{
     uint8_t             input_display;
     int16_t             id_x;
     int16_t             id_y;
+    int16_t             menu_x;
+    int16_t             menu_y;
+    uint32_t            cheats;
     uint16_t            binds[Z2_CMD_MAX];
 };
 

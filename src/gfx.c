@@ -7,7 +7,7 @@
 #include "gfx.h"
 #include "resource.h"
 
-#define     GFX_SIZE 0x10000
+#define     GFX_SIZE 0x7500
 
 static Gfx *gfx_disp;
 static Gfx *gfx_disp_p;
@@ -67,8 +67,8 @@ void gfx_printf_va_color_scale(uint16_t left, uint16_t top, uint32_t color,float
 }
 
 void gfx_init(){
-    gfx_disp = malloc(GFX_SIZE);
-    gfx_disp_work = malloc(GFX_SIZE);
+    gfx_disp = malloc(GFX_SIZE * sizeof(*gfx_disp));
+    gfx_disp_work = malloc(GFX_SIZE * sizeof(*gfx_disp));
     gfx_disp_p = gfx_disp;
     gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
 

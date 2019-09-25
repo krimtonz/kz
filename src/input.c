@@ -7,7 +7,6 @@
 #include "resource.h"
 
 #define INPUT_REPEAT 8
-#define BIND_END 6
 
 uint32_t button_colors[16] = {
     0xFFF000FF,
@@ -215,22 +214,22 @@ int8_t input_y(){
 void draw_bind(struct menu_item *item){
     struct bind_item_data *data = item->data;
     uint16_t bind = settings->binds[data->cmd];
-    if(bind==0){
-        gfx_printf(get_item_x_pos(item),get_item_y_pos(item),"none");
-        return;
-    }
-    int i = 0;
-    int b;
-    uint32_t color = 0;
+    uint32_t color = 0xFFFFFFFF;
     if(data->state!=BIND_STATE_NONE){
         color= 0x00FF00FF;
     }else if(item->owner->selected_item == item){
         color = MENU_SELECTED_COLOR.color;
     }
+    if(bind==BIND_END){
+        gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"none");
+        return;
+    }
+    int i = 0;
+    int b;
     gfx_texture *t_button = resource_get(R_KZ_BUTTONS);
     while((b=bind_get_component(bind,i))!=BIND_END){
         z2_rgba32_t bcolor;
-        if(color==0)
+        if(color==0xFFFFFFFF)
             bcolor.color = button_colors[b];
         else
             bcolor.color = color;
