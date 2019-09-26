@@ -291,8 +291,8 @@ static void kz_main(void) {
         if(logo_time>0){
             const char *name = MAKESTRING(PACKAGE);
             const char *url = MAKESTRING(URL);
-            gfx_printf_color(10, Z2_SCREEN_HEIGHT - 20 - kfont->c_height, COLOR_GREEN, name);
-            gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 20 - kfont->c_height,COLOR_GREEN,url);
+            gfx_printf_color(10, Z2_SCREEN_HEIGHT - 32 - kfont->c_height, COLOR_GREEN, name);
+            gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 32 - kfont->c_height,COLOR_GREEN,url);
             logo_time--;
         }
 

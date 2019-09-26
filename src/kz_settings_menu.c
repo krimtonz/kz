@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "resource.h"
 #include "input.h"
+#include "commands.h"
 
 struct item_data{
     menu_generic_callback   callback;
@@ -26,6 +27,16 @@ static int profile_dec(struct menu_item *item, enum menu_callback callback, void
 static int profile_inc(struct menu_item *item, enum menu_callback callback, void *data){
     kz.settings_profile++;
     kz.settings_profile %= SETTINGS_MAX;
+    return 1;
+}
+
+static int memfile_dec(struct menu_item *item, enum menu_callback callback, void *data){
+    command_prev_memfile();
+    return 1;
+}
+
+static int memfile_inc(struct menu_item *item, enum menu_callback callback, void *data){
+    command_next_memfile();
     return 1;
 }
 
@@ -138,6 +149,15 @@ struct menu *create_settings_menu(){
     item = menu_add_gfx_button(&settingsm,16,7,move_item,(void*)LAG_COUNTER,&draw);
     item->navigate_proc = nav_item;
 
+    menu_add(&settingsm,0,8,"memfile");
+    menu_add_button(&settingsm,12,8,"-",memfile_dec,NULL);
+    static watch_t memfile_watch;
+    memfile_watch.address = &kz.memfile_slot;
+    memfile_watch.type=WATCH_TYPE_U8;
+    memfile_watch.floating = 0;
+    menu_add_watch(&settingsm,13,8,&memfile_watch,1);
+    menu_add_button(&settingsm,14,8,"+",memfile_inc,NULL);
+
     static struct menu commands;
     menu_init(&commands,0,0);
 
@@ -150,7 +170,7 @@ struct menu *create_settings_menu(){
         menu_add_bind(&commands,20,y++,i);
     }
 
-    menu_add_submenu(&settingsm,0,8,&commands,"commands");
+    menu_add_submenu(&settingsm,0,9,&commands,"commands");
 
     return &settingsm;
 }

@@ -28,9 +28,11 @@ void load_default_settings(){
     settings->binds[Z2_CMD_TIMER_RESET] = make_bind(2,BUTTON_A, BUTTON_D_UP);
     settings->binds[Z2_CMD_LOAD_MEMFILE] = BIND_END;
     settings->binds[Z2_CMD_SAVE_MEMFILE] = BIND_END;
+    settings->binds[Z2_CMD_NEXT_MEMFILE] = BIND_END;
+    settings->binds[Z2_CMD_PREV_MEMFILE] = BIND_END;
     settings->input_display = 1;
     settings->id_x = 16;
-    settings->id_y = Z2_SCREEN_HEIGHT - 16;
+    settings->id_y = Z2_SCREEN_HEIGHT - 20;
     settings->lag_counter = 0;
     settings->lag_x = Z2_SCREEN_WIDTH - 38;
     settings->lag_y = 20;
@@ -59,9 +61,17 @@ void save_settings_to_flashram(int profile){
 void load_settings_from_flashram(int profile){
     struct settings settings_temp;
     kz_io(&settings_temp,SETTINGS_ADDR + (profile * sizeof(settings_temp)),sizeof(settings_temp),OS_READ);
-    if(settings_temp.header.magic[0] == 'k' && settings_temp.header.magic[1]=='z' && settings_temp.header.magic[2] == 'k' && settings_temp.header.magic[3] == 'z'){
-        memcpy((void*)&settings_info,(void*)&settings_temp,sizeof(settings_temp));
+    if(settings_temp.header.version == SETTINGS_VER){
+        if(settings_temp.header.magic[0] == 'k' && settings_temp.header.magic[1]=='z' && settings_temp.header.magic[2] == 'k' && settings_temp.header.magic[3] == 'z'){
+            memcpy((void*)&settings_info,(void*)&settings_temp,sizeof(settings_temp));
+        }else{
+            load_default_settings();
+        }
     }else{
+        // if settings version is not the same as the current version, delete the profile from the save file, and load default settings
+        // in the future might provide an update path? 
+        memset(&settings_temp,0,sizeof(settings_temp));
+        save_settings_to_flashram(profile);
         load_default_settings();
     }
 }

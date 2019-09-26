@@ -40,9 +40,11 @@ struct disp_p
 };
 
 typedef struct{
-    z2_file_t file;
-    z2_xyzf_t link_pos;
-}memfile_t;
+    z2_file_t   file;
+    uint16_t    timer_boundaries[3];
+    uint32_t    scene_flags[5];
+    uint16_t    scene;
+} memfile_t;
 
 typedef struct  {
     _Bool                   ready;

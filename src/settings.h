@@ -7,7 +7,7 @@
 #include "io.h"
 #include "commands.h"
 
-#define SETTINGS_VER    1
+#define SETTINGS_VER    2
 #define SETTINGS_ADDR   0x1C200
 #define SETTINGS_SIZE   (sizeof(struct settings_header) + sizeof(struct settings_data))
 #define SETTINGS_PAD    ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))

@@ -17,6 +17,8 @@ enum{
     Z2_CMD_TIMER_RESET,
     Z2_CMD_SAVE_MEMFILE,
     Z2_CMD_LOAD_MEMFILE,
+    Z2_CMD_NEXT_MEMFILE,
+    Z2_CMD_PREV_MEMFILE,
     Z2_CMD_MAX
 };
 
@@ -44,6 +46,8 @@ void command_timer();
 void command_timer_reset();
 void command_save_memfile();
 void command_load_memfile();
+void command_next_memfile();
+void command_prev_memfile();
 
 extern struct command kz_commands[Z2_CMD_MAX];
 

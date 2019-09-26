@@ -413,7 +413,7 @@ typedef struct {
         uint32_t    collect;                        /* 0x0010 */
         uint32_t    unk_0x14;                       /* 0x0014 */
         uint32_t    unk_0x18;                       /* 0x0018 */
-    }               scene_flags[0x78];              /* 0x00F8 */
+    }               save_scene_flags[0x78];         /* 0x00F8 */
     char            unk_0x0E18_[0x1D4];             /* 0x0E18 */
 #if Z2_VERSION!=NZSE
     char            unk_0x0FEC_[0x2F64];                            /* 0x0FEC */
@@ -423,9 +423,25 @@ typedef struct {
     int32_t         file_index;                     /* 0x3CA0 */    /* 0x3F50 */
     char            unk_0x3CA4[0x0C];               /* 0x3CA4 */    /* 0x3F54 */
     int             void_flag;                      /* 0x3CB0 */    /* 0x3F60 */
-    char            unk_0x03CB4[0x338];             /* 0x3CB4 */    /* 0x3F64 */
-    uint8_t         restriction_flags[0x4];         /* 0x3FEC */    /* 0x429C */
-} z2_file_t;                                        /* 0x3FF0 */    /* 0x42A0 */
+#if Z2_VERSION==NZSE
+    char            unk_0x03CB4[0x264];             /* 0x3CB4 */
+#else
+    char            unk_0x03F64[0x338];                             /* 0x3F64 */
+#endif
+    uint8_t         restriction_flags[0x4];         /* 0x3F18 */    /* 0x429C */
+#if Z2_VERSION==NZSE
+    char            unk_0x3F1C[0x4C];               /* 0x3F1C */
+#else
+    char            unk_0x42A0[0x54];                               /* 0x42A0 */
+#endif
+    struct {                                        /* 0x3F68 */    /* 0x42F4 */
+                    uint32_t    chest;          /* 0x0000 */
+                    uint32_t    switch1;        /* 0x0004 */
+                    uint32_t    switch2;        /* 0x0008 */
+                    uint32_t    clear;          /* 0x000C */
+                    uint32_t    collectible;    /* 0x0010 */
+    }               scene_flags[0x78];          /* 0x0014 */
+} z2_file_t;                                        /* 0x48C8 */    /* 0x4C54 */
 
 typedef struct
 {
@@ -1092,6 +1108,12 @@ typedef struct{
     char                unk_0xADC[0x84];        /* 0x0ADC */
     uint16_t            blast_mask_timer;       /* 0x0B60 */
 } z2_link_t;                                    /* 0x0B62 */
+
+typedef struct{
+    z2_actor_t          common;                 /* 0x0000 */
+    char                unk_0x144[2];           /* 0x0144 */
+    uint16_t            timer_boundaries[3];    /* 0x0146 */
+} z2_timer_t;
 
 typedef struct{
     uint32_t    direct_reference;               /* 0x0000 */

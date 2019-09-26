@@ -18,6 +18,8 @@ struct command kz_commands[Z2_CMD_MAX] = {
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
     {"save memfile",        COMMAND_PRESS,  command_save_memfile},
     {"load memfile",        COMMAND_PRESS,  command_load_memfile},
+    {"next memfile",        COMMAND_PRESS,  command_next_memfile},
+    {"prev memfile",        COMMAND_PRESS,  command_prev_memfile},
 };
 
 void command_timer(){
@@ -82,13 +84,56 @@ void command_lag_reset(){
 void command_save_memfile(){
     if(!kz.memfile[kz.memfile_slot]){
         memfile_t *newmemfile = malloc(sizeof(*newmemfile));
+        // Save 3 day clock day switching boundaries to prevent day/night advancing when loading outside current day/night
+        for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+            if(actor->id == 0x15A){
+                z2_timer_t *timer = (z2_timer_t*)actor;
+                memcpy(&newmemfile->timer_boundaries,&timer->timer_boundaries,sizeof(newmemfile->timer_boundaries));
+                break;
+            }
+        }
+        newmemfile->scene_flags[0] = z2_game.actor_ctxt.chest;
+        newmemfile->scene_flags[1] = z2_game.actor_ctxt.switch_1;
+        newmemfile->scene_flags[2] = z2_game.actor_ctxt.switch_2;
+        newmemfile->scene_flags[3] = z2_game.actor_ctxt.clear;
+        newmemfile->scene_flags[4] = z2_game.actor_ctxt.collectible_1;
+        newmemfile->scene = z2_game.scene_index;
         memcpy(&newmemfile->file,&z2_file,sizeof(newmemfile->file));
         kz.memfile[kz.memfile_slot] = newmemfile;
     }
 }
 
 void command_load_memfile(){
-    if(kz.memfile[kz.memfile_slot]){
-        memcpy(&z2_file,&kz.memfile[kz.memfile_slot]->file,sizeof(z2_file));
+    memfile_t *memfile = kz.memfile[kz.memfile_slot];
+    if(memfile){
+        for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+            if(actor->id == 0x15A){
+                z2_timer_t *timer = (z2_timer_t*)actor;
+                memcpy(&timer->timer_boundaries,&memfile->timer_boundaries,sizeof(timer->timer_boundaries));
+            }
+        }
+        if(memfile->scene==z2_game.scene_index){
+            z2_game.actor_ctxt.chest = memfile->scene_flags[0];
+            z2_game.actor_ctxt.switch_1 = memfile->scene_flags[1];
+            z2_game.actor_ctxt.switch_2 = memfile->scene_flags[2];
+            z2_game.actor_ctxt.clear = memfile->scene_flags[3];
+            z2_game.actor_ctxt.collectible_1 = memfile->scene_flags[4];
+        }
+        _Bool dovoid = 0;
+        if(z2_file.exit != memfile->file.exit){
+            dovoid=1;
+        }
+        memcpy(&z2_file,&memfile->file,sizeof(z2_file));
+        if(dovoid) command_void();
     }
+}
+
+void command_next_memfile(){
+    kz.memfile_slot++;
+    kz.memfile_slot %= KZ_MEMFILE_MAX;
+}
+
+void command_prev_memfile(){
+    kz.memfile_slot += KZ_MEMFILE_MAX;
+    kz.memfile_slot %= KZ_MEMFILE_MAX;
 }
