@@ -7,7 +7,11 @@
 #include "gfx.h"
 #include "resource.h"
 
-#define     GFX_SIZE 0x7500
+#ifdef LITE
+#define     GFX_SIZE 0x1500
+#else
+#define     GFX_SIZE 0x6500
+#endif
 
 static Gfx *gfx_disp;
 static Gfx *gfx_disp_p;

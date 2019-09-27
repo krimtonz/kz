@@ -12,14 +12,14 @@ struct equip_option {
 };
 
 static struct equip_option sword_options[] = {
-    { 0, 1, Z2_ITEM_KOKIRI_SWORD},    // Kokiri
-    { 0, 2, Z2_ITEM_RAZOR_SWORD},    // Razor
-    { 0, 3, Z2_ITEM_GILDED_SWORD}     // Gilded
+    { 0, 1, Z2_ITEM_KOKIRI_SWORD},
+    { 0, 2, Z2_ITEM_RAZOR_SWORD},
+    { 0, 3, Z2_ITEM_GILDED_SWORD}
 };
 
 static struct equip_option shield_options[] = {
-    {4, 1, Z2_ITEM_HERO_SHIELD},     // Hylian
-    {4, 2, Z2_ITEM_MIRROR_SHIELD}      // Mirror
+    {4, 1, Z2_ITEM_HERO_SHIELD},
+    {4, 2, Z2_ITEM_MIRROR_SHIELD}
 };
 
 static int8_t get_equip_value(struct equip_option *data){
@@ -149,11 +149,11 @@ struct menu *create_equips_menu(){
     set_item_offset(item,0,8);
 
     item = menu_add_item_list(&equips,1,3,c_button_callback,(void*)1,0,NULL,
-                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cleft,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_left);
+                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cleft,NULL,-1,&c_draw_info,&c_left);
     set_item_offset(item,6,11);
 
     item = menu_add_item_list(&equips,2,3,c_button_callback,(void*)2,0,NULL,
-                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cdown,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_down);
+                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cdown,NULL,-1,&c_draw_info,&c_down);
     set_item_offset(item,4,21);
 
     item = menu_add_item_list(&equips,3,3,c_button_callback,(void*)3,0,NULL,

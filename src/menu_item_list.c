@@ -3,6 +3,7 @@
 #include "resource.h"
 #include "menu.h"
 
+#ifndef LITE
 static Gfx wheel_state[] = {
     gsDPPipeSync(),
     gsSPLoadGeometryMode(0),
@@ -32,6 +33,7 @@ static Gfx wheel_state[] = {
     gsDPPipelineMode(G_PM_NPRIMITIVE),
     gsSPEndDisplayList(),
 };
+#endif
 
 struct item_list_data {
     uint8_t                 selected_idx;
@@ -43,14 +45,16 @@ struct item_list_data {
     int8_t                 *value_ptr;
     uint16_t                start_tile;
     uint8_t                *ovl_values;
-    uint8_t                 tiles_cnt;
+    int                     tiles_cnt;
     draw_info_t            *draw_info;
     struct tilebg_info     *null_item;
+#ifndef LITE
     float                   wheel_rotation;
     struct menu_item       *wheel;
+#endif
 };
 
-inline int8_t get_option_idx(struct item_list_data *data){
+static int8_t get_option_idx(struct item_list_data *data){
     if(data->options){
         for(int i=0;i<data->option_cnt;i++){
             if(data->options[i]==*(data->value_ptr)) return i;
@@ -61,12 +65,24 @@ inline int8_t get_option_idx(struct item_list_data *data){
     return 0;
 }
 
-inline int8_t get_item_id(struct item_list_data *data, int idx){
+#ifndef LITE
+static int8_t get_item_id(struct item_list_data *data, int idx){
     if(data->options){
         return data->options[idx];
     }else{
         return idx - 1;
     }
+}
+
+static _Bool has_null(struct item_list_data *data){
+    if(data->options){
+        for(int i=0;i<data->option_cnt;i++){
+            if(data->options[i] == Z2_ITEM_NULL) return 1;
+        }
+    }else{
+        return data->start_tile == Z2_ITEM_NULL;
+    }
+    return 0;
 }
 
 static void wheel_scroll(struct item_list_data *data, float speed){
@@ -81,12 +97,16 @@ static void wheel_scroll(struct item_list_data *data, float speed){
     }
 }
 
-static void draw_item(struct item_list_data *data, int index, float rot){
+static void draw_item(struct item_list_data *data, int item, float rot){
     static Vtx mesh[] = {
         gdSPDefVtx(-1,1,0,0,0),
         gdSPDefVtx(1,1,0,62,0),
         gdSPDefVtx(-1,-1,0,0,62),
         gdSPDefVtx(1,-1,0,62,62),
+        gdSPDefVtx(0,0,0,0,0),
+        gdSPDefVtx(1,0,0,31,0),
+        gdSPDefVtx(0,-1,0,0,31),
+        gdSPDefVtx(1,-1,0,31,31),
     };
 
     Mtx m;
@@ -103,33 +123,26 @@ static void draw_item(struct item_list_data *data, int index, float rot){
 
     Mtx *p_mtx = gfx_data_push(&m,sizeof(m));
     gfx_push(gsSPMatrix(p_mtx,G_MTX_MODELVIEW | G_MTX_LOAD));
-    gfx_push(gsSPVertex(&mesh,4,0));
+    gfx_push(gsSPVertex(&mesh,8,0));
     gfx_texture *texture;
-    Vtx test[] = {
-        gdSPDefVtx(0,0,0,0,0),
-        gdSPDefVtx(1,0,0,31,0),
-        gdSPDefVtx(0,-1,0,0,31),
-        gdSPDefVtx(1,-1,0,31,31),
-    };
-    if(index>=0){
-        int ovl_idx = index + 1;
-        if(data->tiles_cnt < index + 1) index = 0;
-        texture = get_item_texture(index + data->start_tile);
+    if(item>=0){
+        int ovl_idx = item;
+        if(has_null(data)) ovl_idx++;
+        if(item<data->start_tile) item = item + data->start_tile;
+        if(data->tiles_cnt>0 && item>data->tiles_cnt) item = data->start_tile;
+        texture = get_item_texture(item);
         gfx_load_tile(texture,0);
         gfx_push(gsSP2Triangles(0,1,2,0,2,1,3,0));
         if(data->ovl_values){
-            void *vtx = gfx_data_push(&test, sizeof(test));
             gfx_load_tile(resource_get(R_KZ_AMOUNTS),data->ovl_values[ovl_idx]);
-            gfx_push(gsSPVertex(vtx,4,4));
             gfx_push(gsSP2Triangles(4,5,6,4,6,5,7,4));
-        }
+        } 
     }
 }
 
 static void draw_wheel(struct menu_item *item){
     struct item_list_data *data = item->data;
     if(!data->active) return;
-    
     gfx_push(gsDisplayList(&wheel_state,0));
 
     Mtx m;
@@ -158,6 +171,42 @@ static void draw_wheel(struct menu_item *item){
 
     gfx_begin();
 }
+
+static int nav_wheel(struct menu_item *item, enum menu_nav nav){
+    struct item_list_data *data = item->data;
+    int n = 0;
+    switch(nav){
+        case MENU_NAV_DOWN:     n = -3; break;
+        case MENU_NAV_UP:       n = 3;  break;
+        case MENU_NAV_LEFT:     n = -1; break;
+        case MENU_NAV_RIGHT:    n = 1;  break;
+        case MENU_NAV_NONE:     return 0;
+    }
+
+    data->selected_idx += n;
+    while(data->selected_idx>=data->option_cnt){
+        data->selected_idx -= data->option_cnt;
+        data->wheel_rotation += M_PI * 2.f;
+    }
+    while(data->selected_idx<0){
+        data->selected_idx += data->option_cnt;
+        data->wheel_rotation -= M_PI * 2.f;
+    }
+    return 1;
+}
+
+static void create_wheel(struct menu *menu, struct item_list_data *data){
+    if(data->wheel == NULL){
+        struct menu_item *item = menu_add(menu,0,0,NULL);
+        item->data = data;
+        item->draw_proc = draw_wheel;
+        item->navigate_proc = nav_wheel;
+        data->wheel = item;
+        data->wheel_rotation = 0.f;
+    }
+    wheel_scroll(data,1.f);
+}
+#endif
 
 static void draw_item_list(struct menu_item *item){
     struct item_list_data *data = item->data;
@@ -190,12 +239,12 @@ static void draw_item_list(struct menu_item *item){
     }
     if(val!=Z2_ITEM_NULL){
         int tile_idx = idx;
+        if(data->tiles_cnt>0 && tile_idx>=data->tiles_cnt-1) tile_idx = 1;
         tile_idx = tile_idx + data->start_tile - 1;
         gfx_texture *texture = get_item_texture(tile_idx);
         gfx_draw_sprite_scale(texture,get_item_x_pos(item),get_item_y_pos(item),0, 16,16,draw->x_scale,draw->y_scale);
         if(data->ovl_values){
             gfx_draw_sprite_scale(resource_get(R_KZ_AMOUNTS),get_item_x_pos(item)+8,get_item_y_pos(item)+11,data->ovl_values[idx],16,8,0.5f,0.5f);
-            //gfx_printf_scale(get_item_x_pos(item)+8,get_item_y_pos(item)+11,0.5f,0.5f,"%d",data->ovl_values[idx]);
         }
     }else if(data->null_item!=NULL){
         struct tilebg_info *null_item = data->null_item;
@@ -212,46 +261,23 @@ static void draw_item_list(struct menu_item *item){
     }
 }
 
-static int nav_wheel(struct menu_item *item, enum menu_nav nav){
-    struct item_list_data *data = item->data;
-    int n = 0;
-    switch(nav){
-        case MENU_NAV_DOWN:     n = -3; break;
-        case MENU_NAV_UP:       n = 3;  break;
-        case MENU_NAV_LEFT:     n = -1; break;
-        case MENU_NAV_RIGHT:    n = 1;  break;
-        case MENU_NAV_NONE:     return 0;
-    }
-
-    data->selected_idx += n;
-    while(data->selected_idx>=data->option_cnt){
-        data->selected_idx -= data->option_cnt;
-        data->wheel_rotation += M_PI * 2.f;
-    }
-    while(data->selected_idx<0){
-        data->selected_idx += data->option_cnt;
-        data->wheel_rotation -= M_PI * 2.f;
-    }
-    return 1;
-}
-
 static int navigate_item_list(struct menu_item *item, enum menu_nav nav){
     struct item_list_data *data = item->data;
     if(!data->active) return 0;
+#ifdef LITE
+    if(nav==MENU_NAV_DOWN || nav == MENU_NAV_LEFT){
+        data->selected_idx += data->option_cnt - 1;
+        data->selected_idx %= data->option_cnt;
+    }else if(nav==MENU_NAV_UP || nav == MENU_NAV_RIGHT){
+        data->selected_idx++;
+        data->selected_idx %= data->option_cnt;
+    }
+    return 1;
+#else
     return nav_wheel(data->wheel,nav);
+#endif
 }
 
-void create_wheel(struct menu *menu, struct item_list_data *data){
-    if(data->wheel == NULL){
-        struct menu_item *item = menu_add(menu,0,0,NULL);
-        item->data = data;
-        item->draw_proc = draw_wheel;
-        item->navigate_proc = nav_wheel;
-        data->wheel = item;
-        data->wheel_rotation = 0.f;
-    }
-    wheel_scroll(data,1.f);
-}
 static void activate_item_list(struct menu_item *item){
     struct item_list_data *data = item->data;
     if(data->active){
@@ -267,7 +293,9 @@ static void activate_item_list(struct menu_item *item){
     }else{
         int8_t idx = get_option_idx(data) + (data->options?0:1);
         data->selected_idx = idx;
+#ifndef LITE
         create_wheel(item->owner,data);
+#endif
     }
     data->active = !data->active;
 }
@@ -283,7 +311,7 @@ static void update_item_list(struct menu_item *item){
 
 struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
-                                     uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, uint8_t tiles_cnt,
+                                     uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
                                      draw_info_t *drawinfo, struct tilebg_info *null_item){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
@@ -300,8 +328,10 @@ struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
         data->tiles_cnt = tiles_cnt;
         data->draw_info = drawinfo;
         data->null_item = null_item;
+#ifndef LITE
         data->wheel = NULL;
         data->wheel_rotation = 0.f;
+#endif
         item->data = data;
         item->draw_proc = draw_item_list;
         item->interactive = 1;

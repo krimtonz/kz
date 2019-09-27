@@ -16,40 +16,40 @@ struct item_map_row {
 };
 
 struct switch_data {
-    uint32_t bitmask;
+    uint32_t    bitmask;
     const char *tooltip;
 };
 
 struct song_data {
-    uint32_t bitmask;
-    uint32_t color;
-    const char *tooltip;
+    uint32_t        bitmask;
+    uint32_t        color;
+    const char     *tooltip;
 };
 
 struct capacity_upgrade_option{
-    uint8_t shift;
-    uint16_t item_tile;
-    _Bool tile_per_option;
-    uint8_t cap_vals[8];
-    uint8_t tiles_cnt;
+    uint8_t     shift;
+    uint16_t    item_tile;
+    _Bool       tile_per_option;
+    uint8_t     cap_vals[8];
+    int         tiles_cnt;
     const char *tooltip;
 };
 
 struct capacity_upgrade_data{
-    uint8_t shift;
-    _Bool tile_per_option;
-    int8_t value;
+    uint8_t     shift;
+    _Bool       tile_per_option;
+    int8_t      value;
 };
 
 static struct capacity_upgrade_option capacity_options[] = {
     {
         3, Z2_ITEM_BOMB_BAG_20,1,
-        { 0, 2, 3, 4, 0, 0, 0, 0 }, 3,
+        { 0, 2, 3, 4, 0, 0, 0, 0 }, -1,
         "bomb bag"
     },
     {
         0, Z2_ITEM_QUIVER_30,1,
-        { 0, 3, 4, 5, 6, 2, 3, 4 }, 3,
+        { 0, 3, 4, 5, 6, 2, 3, 4 }, -1,
         "quiver"
     },
     {
@@ -297,13 +297,23 @@ static int double_defense_callback(struct menu_item *item, enum menu_callback ca
 
 static int magic_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback==MENU_CALLBACK_ACTIVATE){
-        z2_file.magic_level=0;
-        if(z2_file.has_magic){
-            z2_file.current_magic = 0x30;
+        z2_file.magic_level = 0;
+        if((int)data == 0){
+            z2_file.has_magic = !z2_file.has_magic;
+            if(z2_file.has_magic){
+                z2_file.current_magic = 0x30;
+            }else{
+                z2_file.has_double_magic = 0;
+            }
         }
-        if(z2_file.has_double_magic){
-            z2_file.has_magic = 1;
-            z2_file.current_magic = 0x60;
+        else if((int)data == 1){
+            z2_file.has_double_magic = !z2_file.has_double_magic;
+            if(z2_file.has_double_magic){
+                z2_file.has_magic = 1;
+                z2_file.current_magic = 0x60;
+            }else{
+                z2_file.has_magic = 0;
+            }
         }
         return 1;
     }
@@ -400,7 +410,7 @@ struct menu *create_inventory_menu(){
             menu_add_item_list(&items,i+1,4,NULL,NULL,
                                Z2_ITEM_BOTTLE,bottle_contents,
                                sizeof(bottle_contents),
-                               &z2_file.items[Z2_SLOT_BOTTLE_1 + i],NULL,sizeof(bottle_contents),&list_draw_info, NULL);
+                               &z2_file.items[Z2_SLOT_BOTTLE_1 + i],NULL,-1,&list_draw_info, NULL);
 
         }
 
@@ -408,7 +418,7 @@ struct menu *create_inventory_menu(){
             menu_add_item_list(&items,6,i+1,NULL,NULL,
                                Z2_ITEM_MOONS_TEAR,trade_quest_contents,
                                sizeof(trade_quest_contents),
-                               &z2_file.items[Z2_SLOT_QUEST_1 + i*6],NULL,sizeof(trade_quest_contents),&list_draw_info, NULL);
+                               &z2_file.items[Z2_SLOT_QUEST_1 + i*6],NULL,-1,&list_draw_info, NULL);
         }
 
         int nopt = sizeof(capacity_options)/sizeof(*capacity_options);
@@ -454,9 +464,9 @@ struct menu *create_inventory_menu(){
         struct menu_item *item;
         menu_add(&quest_status,x,y,"max health");
         menu_add_number_input(&quest_status,15,y++,max_health_callback,NULL,16,4,&z2_file.max_health,sizeof(z2_file.max_health));
-        menu_add_switch(&quest_status,0,y++,&z2_file.has_double_defense,2,0x01,double_defense_callback,"double defense");
-        menu_add_switch(&quest_status,0,y++,&z2_file.has_magic,1,0x01,magic_callback,"magic");
-        menu_add_switch(&quest_status,0,y++,&z2_file.has_double_magic,1,0x01,magic_callback,"double magic");
+        menu_add_switch(&quest_status,0,y++,&z2_file.has_double_defense,2,0x01,double_defense_callback,NULL,"double defense");
+        menu_add_switch(&quest_status,0,y++,&z2_file.has_magic,1,0x01,magic_callback,(void*)0,"magic");
+        menu_add_switch(&quest_status,0,y++,&z2_file.has_double_magic,1,0x01,magic_callback,(void*)1,"double magic");
         menu_add(&quest_status,0,y++,"dungeon");
         menu_add_list(&quest_status,15,y++,dungeon_names,dungeon_name_values,1,4,&dungeon_idx,change_selected_dungeon);
         menu_add(&quest_status,0,y,"small keys");

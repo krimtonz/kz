@@ -43,6 +43,11 @@ static void *resource_load_kz_texture(enum resource resource){
 static void *resource_load_items(enum resource resource){
     struct item_texture *textures = malloc(sizeof(*textures) * Z2_ITEM_END);
     memset(textures,0,sizeof(*textures) * Z2_ITEM_END);
+#ifndef LITE
+    for(int i=0;i<Z2_ITEM_END;i++){
+        textures[i].texture = gfx_load_item_texture(i);
+    }
+#endif
     return textures;
 }
 
@@ -119,6 +124,9 @@ gfx_texture *get_item_texture(uint8_t item_id){
 }
 
 void init_resources(){
+#ifndef LITE
+    resource_get(R_Z2_ITEMS);
+#endif
     checkbox_bg = malloc(sizeof(*checkbox_bg));
     checkbox_bg->texture = resource_get(R_KZ_CHECKBOX);
     checkbox_bg->tile = 0;

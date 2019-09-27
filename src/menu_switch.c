@@ -54,7 +54,7 @@ static void draw_menu_switch(struct menu_item *item){
 
 void activate_menu_switch(struct menu_item *item){
     struct item_data *data = item->data;
-    if(data->callback && data->callback(item,MENU_CALLBACK_ACTIVATE,NULL)){
+    if(data->callback && data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data)){
         return;
     }
     switch(data->addr_len){
@@ -79,8 +79,8 @@ static void update_menu_switch(struct menu_item *item){
 }
 
 struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
-                                  void *addr, uint8_t addr_len,
-                                  uint32_t bitmask, menu_generic_callback callback,
+                                  void *addr, uint8_t addr_len, uint32_t bitmask, 
+                                  menu_generic_callback callback, void *callback_data,
                                   const char *text){
     struct menu_item *item = menu_add(menu,x,y,text);
     if(item){
@@ -89,6 +89,7 @@ struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
         data->addr_len = addr_len;
         data->bitmask = bitmask;
         data->callback = callback;
+        data->callback_data = callback_data;
         memset(&data->draw_info,0,sizeof(data->draw_info));
         data->draw_info.texture=NULL;
         data->draw_info.enabled_color.color = COLOR_GREEN;

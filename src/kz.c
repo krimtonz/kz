@@ -303,6 +303,7 @@ static void kz_main(void) {
 #undef MAKESTRING_
 #undef MAKESTRING
 
+#ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);
     for(int i=0;i<Z2_ITEM_END;i++){
         if(!textures[i].texture) continue;
@@ -312,7 +313,8 @@ static void kz_main(void) {
             textures[i].texture = NULL;
         }
     }
-    
+#endif
+
     gfx_finish();
 }
 
@@ -380,8 +382,11 @@ void blur_hook(void){
 
 void game_state_main(){
     if(kz.pending_frames!=0){
-        if(kz.pending_frames>0)
+        if(kz.pending_frames>0){
             kz.pending_frames--;
+            gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
+            gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,4,20,20);
+        }
         z2_ctxt.gamestate_update(&z2_ctxt);
     }else{
         z2_gfx_t *gfx = z2_game.common.gfx;
@@ -395,6 +400,8 @@ void game_state_main(){
             gfx_reloc(1-(gfx->frame_cnt_1 & 1),1-(gfx->frame_cnt_2 & 1));
         }
         z2_game.common.gamestate_frames--;
+        gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
+        gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,3,20,20);
     }
 }
 

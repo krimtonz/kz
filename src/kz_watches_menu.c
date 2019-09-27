@@ -131,7 +131,7 @@ void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
     int x = item->x;
     struct watch_row *row = malloc(sizeof(*row));
     draw_info_t draw = {
-        resource_get(R_KZ_ICON), 0, -1, 1.f, 1.f, 8, 8, {{0xFF,0xFF,0xFF,0xFF}},{{0xFF,0xFF,0xFF,0xFF}},1,NULL
+        resource_get(R_KZ_ICON), 0, -1, 0.8f, 0.8f, 10, 10, {{0xFF,0xFF,0xFF,0xFF}},{{0xFF,0xFF,0xFF,0xFF}},1,NULL
     };
     row->delete_button = menu_add_gfx_button(item->owner,x,item->y,menu_watch_delete,row,&draw);
     draw.on_tile = 1;

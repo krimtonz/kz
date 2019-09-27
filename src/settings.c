@@ -23,11 +23,11 @@ void load_default_settings(){
     settings->binds[Z2_CMD_PAUSE] = make_bind(1, BUTTON_D_UP);
     settings->binds[Z2_CMD_ADVANCE] = make_bind(1, BUTTON_D_DOWN);
     settings->binds[Z2_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
-    settings->binds[Z2_CMD_RESET_LAG] = make_bind(1,BUTTON_D_RIGHT);
-    settings->binds[Z2_CMD_TIMER] = make_bind(2,BUTTON_A, BUTTON_D_DOWN);
-    settings->binds[Z2_CMD_TIMER_RESET] = make_bind(2,BUTTON_A, BUTTON_D_UP);
-    settings->binds[Z2_CMD_LOAD_MEMFILE] = BIND_END;
-    settings->binds[Z2_CMD_SAVE_MEMFILE] = BIND_END;
+    settings->binds[Z2_CMD_RESET_LAG] = BIND_END;
+    settings->binds[Z2_CMD_TIMER] = BIND_END;
+    settings->binds[Z2_CMD_TIMER_RESET] = BIND_END;
+    settings->binds[Z2_CMD_LOAD_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_LEFT);
+    settings->binds[Z2_CMD_SAVE_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_RIGHT);
     settings->binds[Z2_CMD_NEXT_MEMFILE] = BIND_END;
     settings->binds[Z2_CMD_PREV_MEMFILE] = BIND_END;
     settings->input_display = 1;

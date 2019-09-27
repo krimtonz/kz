@@ -69,8 +69,8 @@ struct tilebg_info{
 
 typedef struct{
     gfx_texture        *texture;
-    uint16_t            on_tile;
-    uint16_t            off_tile;
+    int16_t             on_tile;
+    int16_t             off_tile;
     float               x_scale;
     float               y_scale;
     uint16_t            width;
@@ -101,8 +101,9 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
                                         menu_number_callback callback, void *callback_data,
                                         uint8_t base, uint8_t length, void *value, uint8_t val_len);
 struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
-                                  void *addr, uint8_t addr_len, uint32_t bitmask,
-                                  menu_generic_callback callback, const char *text);
+                                  void *addr, uint8_t addr_len, uint32_t bitmask, 
+                                  menu_generic_callback callback, void *callback_data,
+                                  const char *text);
 
 struct menu_item *menu_add_gfx_switch(struct menu *menu, uint16_t x, uint16_t y,
                                   void *addr, uint8_t addr_len,
@@ -122,7 +123,7 @@ struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
 
 struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
-                                     uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, uint8_t tiles_cnt,
+                                     uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
                                      draw_info_t *drawinfo, struct tilebg_info *null_item);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
