@@ -14,6 +14,7 @@ static const char *resource_names[R_END] = {
     "icons",
     "font",
     "buttons",
+    "amounts",
 };
 
 static void *resource_load_kz_texture(enum resource resource){
@@ -93,6 +94,7 @@ static void *(*resource_ctors[R_END])(enum resource) = {
     resource_load_owl,
     resource_load_note,
     resource_load_dungeon_items,
+    resource_load_kz_texture,
     resource_load_kz_texture,
     resource_load_kz_texture,
     resource_load_kz_texture,

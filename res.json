@@ -22,5 +22,11 @@
     "name": "buttons",
     "format": "ia8",
     "tile_height": 16
+  },
+  "amounts.png": {
+    "type": "texture",
+    "name": "amounts",
+    "format": "i8",
+    "tile_height": 8
   }
 }

@@ -44,22 +44,22 @@ struct capacity_upgrade_data{
 static struct capacity_upgrade_option capacity_options[] = {
     {
         3, Z2_ITEM_BOMB_BAG_20,1,
-        { 0, 20, 30, 40, 0, 0, 0, 0 }, 3,
+        { 0, 2, 3, 4, 0, 0, 0, 0 }, 3,
         "bomb bag"
     },
     {
         0, Z2_ITEM_QUIVER_30,1,
-        { 0, 30, 40, 50, 1, 20, 30, 40 }, 3,
+        { 0, 3, 4, 5, 6, 2, 3, 4 }, 3,
         "quiver"
     },
     {
         17, Z2_ITEM_STICK,0,
-        { 0, 10, 20, 30, 0, 20, 30, 40}, 1,
+        { 0, 1, 2, 3, 0, 2, 3, 4}, 1,
         "stick upgrade"
     },
     {
         20, Z2_ITEM_NUT,0,
-        { 0, 20, 30, 40, 0, 99, 0, 99}, 1,
+        { 0, 2, 3, 4, 0, 7, 0, 7}, 1,
         "nut upgrade"
     },
 };

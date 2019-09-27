@@ -124,6 +124,9 @@ void command_load_memfile(){
             dovoid=1;
         }
         memcpy(&z2_file,&memfile->file,sizeof(z2_file));
+        for(int i=0;i<4;i++){
+            z2_btnupdate(&z2_game,i);
+        }
         if(dovoid) command_void();
     }
 }

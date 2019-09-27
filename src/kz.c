@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <startup.h>
 #include <inttypes.h>
+#include <math.h>
 #include "kz.h"
 #include "gfx.h"
 #include "watches.h"
@@ -12,6 +13,8 @@
 #include "settings.h"
 #include "io.h"
 #include "resource.h"
+#include "gu.h"
+
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = {
@@ -309,7 +312,7 @@ static void kz_main(void) {
             textures[i].texture = NULL;
         }
     }
-
+    
     gfx_finish();
 }
 

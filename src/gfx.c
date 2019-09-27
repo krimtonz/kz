@@ -98,6 +98,12 @@ void gfx_push(Gfx gfx){
     *(gfx_disp_p++) = gfx;
 }
 
+void *gfx_data_push(void *data, size_t size){
+    gfx_disp_d -= (size + sizeof(*gfx_disp_d) - 1) / sizeof(*gfx_disp_d);
+    memcpy(gfx_disp_d, data, size);
+    return gfx_disp_d;
+}
+
 void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
     if(texture->img_size == G_IM_SIZ_4b){
         gDPLoadTextureTile_4b(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
@@ -119,6 +125,18 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
             G_TX_NOMASK, G_TX_NOMASK,
             G_TX_NOLOD, G_TX_NOLOD);
     }
+}
+
+void gfx_load_tile_coords(gfx_texture *texture, uint16_t tilenum, int x, int y, int width, int height){
+    gDPLoadTextureTile(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
+            texture->img_fmt, texture->img_size,
+            texture->tile_width, texture->tile_height,
+            x, y, width - 1, height - 1,
+            0,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMIRROR | G_TX_WRAP,
+            G_TX_NOMASK, G_TX_NOMASK,
+            G_TX_NOLOD, G_TX_NOLOD);
 }
 
 void gfx_texture_desaturate(void *data, size_t len){
