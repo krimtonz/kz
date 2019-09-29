@@ -13,7 +13,6 @@ struct bit_switch_data{
     _Bool                   has_off_tile;
     uint32_t                color;
     uint32_t                off_color;
-    const char             *tooltip;
     menu_generic_callback   callback;
     void                   *callback_data;
     _Bool                   load_item;
@@ -101,12 +100,12 @@ struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
         data->has_off_tile = has_off_tile;
         data->color = on_color;
         data->off_color = off_color;
-        data->tooltip = tooltip;
         data->callback = callback;
-        data->callback_data = data;
+        data->callback_data = callback_data;
         data->load_item = load_item;
         item->draw_proc = draw_bit_switch_proc;
         item->activate_proc = activate_bit_switch_proc;
+        item->tooltip = tooltip;
         item->interactive = 1;
         item->data = data;
     }

@@ -31,6 +31,8 @@ struct menu_item{
     void              (*activate_proc)(struct menu_item *item);
     int               (*navigate_proc)(struct menu_item *item, enum menu_nav nav);
     void              (*update_proc)(struct menu_item *item);
+    void              (*enter_proc)(struct menu_item *item);
+    void              (*exit_proc)(struct menu_item *item);
     const char         *text;
     void               *data;
     uint16_t            x;
@@ -38,6 +40,7 @@ struct menu_item{
     uint8_t             interactive;
     int16_t             x_offset;
     int16_t             y_offset;
+    const char         *tooltip;
 };
 
 struct menu{

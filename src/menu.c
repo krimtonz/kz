@@ -6,6 +6,14 @@
 z2_rgba32_t MENU_SELECTED_COLOR = {{0x80,0x80,0xFF,0xFF}};
 z2_rgba32_t MENU_DEFAULT_COLOR = {{0xFF,0xFF,0xFF,0xFF}};
 
+static void item_enter(struct menu_item *item){
+    kz.tooltip = item->tooltip;
+}
+
+static void item_exit(struct menu_item *item){
+    kz.tooltip = NULL;
+}
+
 int get_item_x_pos(struct menu_item *item){
     return item->owner->x + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding) + item->x_offset;
 }
@@ -88,6 +96,9 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char
         item->activate_proc=NULL;
         item->navigate_proc=NULL;
         item->update_proc=NULL;
+        item->tooltip=NULL;
+        item->enter_proc=item_enter;
+        item->exit_proc=item_exit;
     }
     return item;
 }
@@ -139,9 +150,19 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
         }
     }
 
+    if((near || far) && menu->selected_item && menu->selected_item->exit_proc){
+        menu->selected_item->exit_proc(menu->selected_item);
+    }
+
     if(near){
+        if(near->enter_proc){
+            near->enter_proc(near);
+        }
         menu->selected_item = near;
     }else if(far){
+        if(far->enter_proc){
+            far->enter_proc(far);
+        }
         menu->selected_item = far;
     }
 

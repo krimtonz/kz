@@ -65,6 +65,7 @@ typedef struct  {
     struct disp_p           disp_p;
     uint8_t                 memfile_slot;
     memfile_t             **memfile;
+    const char             *tooltip;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;

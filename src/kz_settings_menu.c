@@ -88,18 +88,19 @@ static int nav_item(struct menu_item *item, enum menu_nav nav){
         default:
             return 0;
     }
+    int amt = input_pressed_raw() & BUTTON_Z?5:3;
     switch(nav){
         case MENU_NAV_DOWN:
-            (*y)++;
+            (*y)+=amt;
             break;
         case MENU_NAV_LEFT:
-            (*x)--;
+            (*x)-=amt;
             break;
         case MENU_NAV_RIGHT:
-            (*x)++;
+            (*x)+=amt;
             break;
         case MENU_NAV_UP:
-            (*y)--;
+            (*y)-=amt;
             break;
         default:
             return 0;

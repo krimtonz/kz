@@ -302,6 +302,10 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
+    gfx_printf(100,100,"%8x",sbrk(0));
+    if(kz.tooltip){
+        gfx_printf(10, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
+    }
 
 #ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);

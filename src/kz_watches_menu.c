@@ -4,6 +4,7 @@
 #include "watches.h"
 #include "kz.h"
 #include "resource.h"
+#include "input.h"
 
 struct item_data{
     menu_generic_callback   callback;
@@ -73,6 +74,7 @@ int menu_watch_delete(struct menu_item *item, enum menu_callback callback, void 
         list_erase(&kz.watches,row->watch);
         free(row);
         ((struct menu_item*)list_next(list->first))->y--;
+        menu_navigate(item->owner,MENU_NAV_UP);
         return 1;
     }
     return 0;
@@ -107,18 +109,19 @@ static int menu_watch_move_nav(struct menu_item *item, enum menu_nav nav){
     if(!mdata) return 0;
     if(!mdata->moving) return 0;
     if(!mdata->watch->floating) return 0;
+    int amt = input_pressed_raw() & BUTTON_Z?5:3;
     switch(nav){
         case MENU_NAV_DOWN:
-            mdata->watch->y++;
+            mdata->watch->y+=amt;
             break;
         case MENU_NAV_UP:
-            mdata->watch->y--;
+            mdata->watch->y-=amt;
             break;
         case MENU_NAV_LEFT:
-            mdata->watch->x--;
+            mdata->watch->x-=amt;
             break;
         case MENU_NAV_RIGHT:
-            mdata->watch->x++;
+            mdata->watch->x+=amt;
             break;
         default:
             break;

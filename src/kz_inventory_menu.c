@@ -284,12 +284,17 @@ static struct menu_item *menu_add_item_switch(struct menu *menu, uint16_t x, uin
 
 static int max_health_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
     z2_file.max_health = (uint16_t)value;
+    if(z2_file.defense_hearts>0) z2_file.defense_hearts = value;
     return 1;
 }
 
 static int double_defense_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback==MENU_CALLBACK_ACTIVATE){
-        z2_file.defense_hearts = 0x14;
+        if(z2_file.defense_hearts==0){
+            z2_file.defense_hearts = z2_file.max_health;
+        }else{
+            z2_file.defense_hearts = 0;
+        }
         return 1;
     }
     return 0;
@@ -311,8 +316,8 @@ static int magic_callback(struct menu_item *item, enum menu_callback callback, v
             if(z2_file.has_double_magic){
                 z2_file.has_magic = 1;
                 z2_file.current_magic = 0x60;
-            }else{
-                z2_file.has_magic = 0;
+            }else if(z2_file.has_magic && z2_file.current_magic>0x30){
+                z2_file.current_magic=0x30;
             }
         }
         return 1;
@@ -339,8 +344,12 @@ static int update_stray_fairies(struct menu_item *item, enum menu_callback callb
 }
 
 static int set_dungeon_item(struct menu_item *item, enum menu_callback callback, void *data){
-    z2_file.dungeon_items[dungeon_idx].dungeon_item = dungeon_items;
-    return 1;
+    if(callback==MENU_CALLBACK_ACTIVATE){
+        dungeon_items = dungeon_items ^ (uint8_t)((int)data);
+        z2_file.dungeon_items[dungeon_idx].dungeon_item = dungeon_items;
+        return 1;
+    }
+    return 0;
 }
 
 static int cap_callback(struct menu_item *item, enum menu_callback callback, void *data){
@@ -478,15 +487,15 @@ struct menu *create_inventory_menu(){
         gfx_texture *dungeon_items_tex = resource_get(R_Z2_DUNGEON);
 
         item = menu_add_bit_switch(&quest_status,0,y,&dungeon_items,1,
-                                   0x01,set_dungeon_item,NULL,dungeon_items_tex,
+                                   0x01,set_dungeon_item,(void*)1,dungeon_items_tex,
                                    16,16,6,1,"boss key",0xFFFFFFFF,0xFFFFFFFF,0);
         set_item_offset(item,0,oy);
         item = menu_add_bit_switch(&quest_status,1,y,&dungeon_items,1,
-                                   0x02,set_dungeon_item,NULL,dungeon_items_tex,
+                                   0x02,set_dungeon_item,(void*)2,dungeon_items_tex,
                                    16,16,7,1,"compass",0xFFFFFFFF,0xFFFFFFFF,0);
         set_item_offset(item,10,oy);
         item = menu_add_bit_switch(&quest_status,2,y++,&dungeon_items,1,0x04,
-                                   set_dungeon_item,NULL,dungeon_items_tex,
+                                   set_dungeon_item,(void*)4,dungeon_items_tex,
                                    16,16,8,1,"map",0xFFFFFFFF,0xFFFFFFFF,0);
         set_item_offset(item,20,oy);
         oy+=10;
