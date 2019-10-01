@@ -127,7 +127,7 @@ struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
 struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
                                      uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
-                                     draw_info_t *drawinfo, struct tilebg_info *null_item);
+                                     draw_info_t *drawinfo, struct tilebg_info *null_item, const char *tooltip);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);

@@ -141,19 +141,19 @@ struct menu *create_equips_menu(){
     c_right.tile=4;
 
     struct menu_item *item = menu_add_item_list(&equips,0,3,b_button_callback,&b_val,0,NULL,
-                        Z2_ITEM_ODOLWAS_REMAINS-1,&b_val,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&b_draw_info,NULL);
+                        Z2_ITEM_ODOLWAS_REMAINS-1,&b_val,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&b_draw_info,NULL,NULL);
     set_item_offset(item,0,8);
 
     item = menu_add_item_list(&equips,1,3,c_button_callback,(void*)1,0,NULL,
-                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cleft,NULL,-1,&c_draw_info,&c_left);
+                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cleft,NULL,-1,&c_draw_info,&c_left,NULL);
     set_item_offset(item,6,11);
 
     item = menu_add_item_list(&equips,2,3,c_button_callback,(void*)2,0,NULL,
-                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cdown,NULL,-1,&c_draw_info,&c_down);
+                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cdown,NULL,-1,&c_draw_info,&c_down, NULL);
     set_item_offset(item,4,21);
 
     item = menu_add_item_list(&equips,3,3,c_button_callback,(void*)3,0,NULL,
-                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cright,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_right);
+                        Z2_ITEM_ODOLWAS_REMAINS-1,&z2_file.form_button_item[0].cright,NULL,Z2_ITEM_ODOLWAS_REMAINS-1,&c_draw_info,&c_right, NULL);
     set_item_offset(item,2,11);
     return &equips;
 }

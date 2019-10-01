@@ -390,8 +390,10 @@ void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, in
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
     rdp_mode_set_apply(RDP_MODE_COLOR,color);
     rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_PRIMITIVE,G_CC_PRIMITIVE));
-    gSPScisTextureRectangle(gfx_disp_p++,qs102(x),qs102(y),qs102(x + width), qs102(y + height),0,0,0,0,0);
-    gDPFillRectangle(gfx_disp_p++,x,y,x + width, y + height);
+    gSPScisTextureRectangle(gfx_disp_p++,
+                            qs102(x),qs102(y),
+                            qs102(x + width), qs102(y + height),
+                            0,0,0,0,0);
     rdp_mode_pop(RDP_MODE_COMBINE);
 }
 

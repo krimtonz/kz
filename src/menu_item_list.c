@@ -222,7 +222,11 @@ static void draw_item_list(struct menu_item *item){
         }else{
             color = bg->off_color.color;
         }
-        gfx_draw_sprite_scale_color(bg->texture,get_item_x_pos(item),get_item_y_pos(item),bg->tile,16,16,draw->x_scale,draw->y_scale,color);
+        gfx_draw_sprite_scale_color(bg->texture,get_item_x_pos(item),get_item_y_pos(item),
+                                    bg->tile,
+                                    16,16,
+                                    draw->x_scale,draw->y_scale,
+                                    color);
     }
     rdp_mode_set_apply(RDP_MODE_COLOR,0xFFFFFFFF);
     int idx = data->active?data->selected_idx:get_option_idx(data);
@@ -254,8 +258,9 @@ static void draw_item_list(struct menu_item *item){
         }else{
             color = null_item->off_color.color;
         }
-        rdp_mode_set_apply(RDP_MODE_COLOR,color);
-        gfx_draw_sprite_scale(data->null_item->texture,get_item_x_pos(item),get_item_y_pos(item),data->null_item->tile, 16,16, draw->x_scale, draw->y_scale);
+        gfx_draw_sprite_scale_color(data->null_item->texture,get_item_x_pos(item),get_item_y_pos(item),data->null_item->tile,
+                                    16,16, draw->x_scale, draw->y_scale,
+                                    color);
     }
 }
 
@@ -310,7 +315,7 @@ static void update_item_list(struct menu_item *item){
 struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
                                      uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
-                                     draw_info_t *drawinfo, struct tilebg_info *null_item){
+                                     draw_info_t *drawinfo, struct tilebg_info *null_item, const char *tooltip){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct item_list_data *data = malloc(sizeof(*data));
@@ -336,6 +341,7 @@ struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
         item->navigate_proc = navigate_item_list;
         item->activate_proc = activate_item_list;
         item->update_proc = update_item_list;
+        item->tooltip = tooltip;
     }
     return item;
 }

@@ -416,7 +416,7 @@ struct menu *create_inventory_menu(){
             menu_add_item_list(&items,i+1,4,NULL,NULL,
                                Z2_ITEM_BOTTLE,bottle_contents,
                                sizeof(bottle_contents),
-                               &z2_file.items[Z2_SLOT_BOTTLE_1 + i],NULL,-1,&list_draw_info, NULL);
+                               &z2_file.items[Z2_SLOT_BOTTLE_1 + i],NULL,-1,&list_draw_info, NULL, "bottle");
 
         }
 
@@ -424,7 +424,7 @@ struct menu *create_inventory_menu(){
             menu_add_item_list(&items,6,i+1,NULL,NULL,
                                Z2_ITEM_MOONS_TEAR,trade_quest_contents,
                                sizeof(trade_quest_contents),
-                               &z2_file.items[Z2_SLOT_QUEST_1 + i*6],NULL,-1,&list_draw_info, NULL);
+                               &z2_file.items[Z2_SLOT_QUEST_1 + i*6],NULL,-1,&list_draw_info, NULL, "trade quest");
         }
 
         int nopt = sizeof(capacity_options)/sizeof(*capacity_options);
@@ -438,7 +438,7 @@ struct menu *create_inventory_menu(){
             capdata->tile_per_option = capacity_options[i].tile_per_option;
             menu_add_item_list(&items,0,y++,cap_callback,capdata,capacity_options[i].item_tile,
                                 peropt?options_pertile:options,7,&capdata->value,capacity_options[i].cap_vals,
-                                capacity_options[i].tiles_cnt,&list_draw_info,NULL);
+                                capacity_options[i].tiles_cnt,&list_draw_info,NULL,capacity_options[i].tooltip);
         }
     }
     
