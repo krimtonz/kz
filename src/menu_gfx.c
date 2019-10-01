@@ -19,9 +19,6 @@ static void draw_menu_gfx(struct menu_item *item){
         texture = get_item_texture(tile);
         tile = 0;
     }
-    gfx_push(gsDPSetCombine(G_CC_MODE(G_CC_MODULATEIA_PRIM,G_CC_MODULATEIA_PRIM)));
-    gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-    gfx_push(gsDPPipeSync());
     gfx_draw_sprite(texture,get_item_x_pos(item),get_item_y_pos(item),tile,data->width,data->height);
 }
 

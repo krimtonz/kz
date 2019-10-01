@@ -619,14 +619,16 @@ typedef struct {
     char            unk_0xD0_[0xD0];        /* 0x00D0 */
     Gfx             *work_d_start;          /* 0x01A0 */
     z2_disp_buf_t   work;                   /* 0x01A4 */
-    char            unk_0x1C4_[0xE4];       /* 0x01B4 */
+    char            unk_0x1B4_[0x04];       /* 0x01B4 */
+    z2_disp_buf_t   unk_0x1B8_buf;          /* 0x01B8 */
+    char            unk_0x1C8[0xD0];        /* 0x01C8 */
     z2_disp_buf_t   overlay;                /* 0x0298 */
     z2_disp_buf_t   poly_opa;               /* 0x02A8 */
     z2_disp_buf_t   poly_xlu;               /* 0x02B8 */
     uint32_t        frame_cnt_1;            /* 0x02C8 */
     void            *frame_buffer;          /* 0x02CC */
-    char            unk_0x2E0_[0x08];       /* 0x02D0 */
-    uint32_t        frame_cnt_2;            /* 0x02D8 */
+    char            unk_0x2E0_[0x0B];       /* 0x02D0 */
+    uint8_t         frame_cnt_2;            /* 0x02DB */
 } z2_gfx_t;                                 /* 0x02DC */
 
 typedef struct z2_ctxt z2_ctxt_t;
@@ -1242,6 +1244,8 @@ typedef struct{
 #define z2_btnupdate_addr           0x80112B40
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
+#define z2_blur_addr                0x80165460
+#define z2_blur_hook_addr           0x80168B68
 #define z2_input_update_addr        0x80173754
 #define z2_main_hook_addr           0x801737A0
 #define z2_input_hook_addr          0x801744B8
@@ -1277,8 +1281,8 @@ typedef struct{
 #define z2_btnupdate_addr           0x801146F8
 #define z2_loadroom_addr            0x8013044C
 #define z2_unloadroom_addr          0x801306D8
-//#define z2_blur_addr                0x80161010
-//#define z2_blur_hook_addr           0x80164ED8
+#define z2_blur_addr                0x80161010
+#define z2_blur_hook_addr           0x80164ED8
 #define z2_input_update_addr        0x8016F074
 #define z2_main_hook_addr           0x8016F0C0
 #define z2_input_hook_addr          0x8016FD40
@@ -1314,6 +1318,8 @@ typedef struct{
 #define z2_btnupdate_addr           0x801146B8
 #define z2_loadroom_addr            0x801303EC
 #define z2_unloadroom_addr          0x80130678
+#define z2_blur_addr                0x80160F20
+#define z2_blur_hook_addr           0x80164DE8
 #define z2_input_update_addr        0x8016EF84
 #define z2_main_hook_addr           0x8016EFD0
 #define z2_input_hook_addr          0x8016FC50
@@ -1364,7 +1370,7 @@ typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
 #define z2_pi_io_handle         (*(OSPiHandle*)             z2_pi_io_handle_addr)
 #define z2_vi_counter           (*(int32_t*)                z2_vi_counter_addr)
 #define z2_input_direct         (*(z2_input_t*)             z2_input_direct_addr)
-#define z2_cimg                 (*(uint32_t**)              z2_cimg_addr)
+#define z2_cimg                 ((uint32_t*)                z2_cimg_addr)
 
 /* Functions */
 #define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
@@ -1378,6 +1384,6 @@ typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
 #define osCreateMesgQueue       ((osCreateMesgQueue_t)      osCreateMesgQueue_addr)
 #define z2_loadroom             ((z2_loadroom_t)            z2_loadroom_addr)
 #define z2_unloadroom           ((z2_unloadroom_t)          z2_unloadroom_addr)
-//#define z2_blur                 ((z2_blur_t)                z2_blur_addr)
+#define z2_blur                 ((z2_blur_t)                z2_blur_addr)
 
 #endif

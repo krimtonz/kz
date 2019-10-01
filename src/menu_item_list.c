@@ -122,8 +122,8 @@ static void draw_item(struct item_list_data *data, int item, float rot){
     guMtxF2L(&mf,&m);
 
     Mtx *p_mtx = gfx_data_push(&m,sizeof(m));
-    gfx_push(gsSPMatrix(p_mtx,G_MTX_MODELVIEW | G_MTX_LOAD));
-    gfx_push(gsSPVertex(&mesh,8,0));
+    gfx_push(gsSPMatrix(p_mtx,G_MTX_MODELVIEW | G_MTX_LOAD),
+             gsSPVertex(&mesh,8,0));
     gfx_texture *texture;
     if(item>=0){
         int ovl_idx = item;
@@ -136,7 +136,7 @@ static void draw_item(struct item_list_data *data, int item, float rot){
         if(data->ovl_values){
             gfx_load_tile(resource_get(R_KZ_AMOUNTS),data->ovl_values[ovl_idx]);
             gfx_push(gsSP2Triangles(4,5,6,4,6,5,7,4));
-        } 
+        }
     }
 }
 
@@ -212,22 +212,19 @@ static void draw_item_list(struct menu_item *item){
     struct item_list_data *data = item->data;
     draw_info_t *draw = data->draw_info;
     struct tilebg_info *bg = draw->background;
+    uint32_t color;
     if(bg){
         if(data->active){
-            gfx_push(gsDPSetPrimColor(0,0,bg->on_color.r,bg->on_color.g,bg->on_color.b,bg->on_color.a));
+            color = bg->on_color.color;
         }
         else if(item->owner->selected_item==item){
-            gfx_push(gsDPSetPrimColor(0,0,0x00,0x00,0xFF,0xFF));
+            color = 0x0000FFFF;
         }else{
-
-            gfx_push(gsDPSetPrimColor(0,0,bg->off_color.r,bg->off_color.g,bg->off_color.b,bg->off_color.a));
+            color = bg->off_color.color;
         }
-        gfx_push(gsDPPipeSync());
-        gfx_draw_sprite_scale(bg->texture,get_item_x_pos(item),get_item_y_pos(item),bg->tile,16,16,draw->x_scale,draw->y_scale);
+        gfx_draw_sprite_scale_color(bg->texture,get_item_x_pos(item),get_item_y_pos(item),bg->tile,16,16,draw->x_scale,draw->y_scale,color);
     }
-    
-    gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-    gfx_push(gsDPPipeSync());
+    rdp_mode_set_apply(RDP_MODE_COLOR,0xFFFFFFFF);
     int idx = data->active?data->selected_idx:get_option_idx(data);
     int val;
     if(data->options){
@@ -248,15 +245,16 @@ static void draw_item_list(struct menu_item *item){
         }
     }else if(data->null_item!=NULL){
         struct tilebg_info *null_item = data->null_item;
+        uint32_t color;
         if(data->active){
-            gfx_push(gsDPSetPrimColor(0,0,null_item->on_color.r,null_item->on_color.g,null_item->on_color.b,null_item->on_color.a));
+            color = null_item->on_color.color;
         }
         else if(item->owner->selected_item==item){
-            gfx_push(gsDPSetPrimColor(0,0,0x00,0x00,0xFF,0xFF));
+            color = 0x0000FFFF;
         }else{
-
-            gfx_push(gsDPSetPrimColor(0,0,null_item->off_color.r,null_item->off_color.g,null_item->off_color.b,null_item->off_color.a));
+            color = null_item->off_color.color;
         }
+        rdp_mode_set_apply(RDP_MODE_COLOR,color);
         gfx_draw_sprite_scale(data->null_item->texture,get_item_x_pos(item),get_item_y_pos(item),data->null_item->tile, 16,16, draw->x_scale, draw->y_scale);
     }
 }

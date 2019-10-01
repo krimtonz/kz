@@ -35,7 +35,7 @@ static void draw_menu_switch(struct menu_item *item){
     }
     tile = val?data->draw_info.on_tile:data->draw_info.off_tile;
     if(data->draw_info.background){
-        gfx_push(gsDPSetPrimColor(0,0,color.r,color.g,color.b,color.a));
+        rdp_mode_set_apply(RDP_MODE_COLOR,color.color);
         gfx_draw_sprite_scale(data->draw_info.background->texture,get_item_x_pos(item),get_item_y_pos(item),0,data->draw_info.width,data->draw_info.height,data->draw_info.x_scale,data->draw_info.y_scale);
     }
 
@@ -46,7 +46,7 @@ static void draw_menu_switch(struct menu_item *item){
         if(!data->draw_info.use_selected_color){
             color = val?data->draw_info.enabled_color : data->draw_info.disabled_color;
         }
-        gfx_push(gsDPSetPrimColor(0,0,color.r,color.g,color.b,color.a));
+        rdp_mode_set_apply(RDP_MODE_COLOR,color.color);
         gfx_draw_sprite_scale(data->draw_info.texture,get_item_x_pos(item),get_item_y_pos(item),tile,data->draw_info.width,data->draw_info.height,data->draw_info.x_scale,data->draw_info.y_scale);
     }
 

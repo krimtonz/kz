@@ -255,9 +255,6 @@ static void draw_item_switch(struct menu_item *item){
     if(item->owner->selected_item == item){
         gfx_draw_rectangle(get_item_x_pos(item),get_item_y_pos(item),16,16,GPACK_RGBA8888(0x80,0x80,0xFF,0x80));
     }
-    gfx_push(gsDPSetCombineMode(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
-    gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-    gfx_push(gsDPPipeSync());
     gfx_draw_sprite(texture,get_item_x_pos(item),get_item_y_pos(item),tile_idx,16,16);
 }
 

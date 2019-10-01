@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "commands.h"
 #include "input.h"
 #include "kz.h"
@@ -101,6 +102,9 @@ void command_save_memfile(){
         memcpy(&newmemfile->file,&z2_file,sizeof(newmemfile->file));
         kz.memfile[kz.memfile_slot] = newmemfile;
     }
+    char mesg[100];
+    snprintf(mesg,100,"memfile %d saved",kz.memfile_slot);
+    kz_log(mesg);
 }
 
 void command_load_memfile(){
@@ -128,7 +132,16 @@ void command_load_memfile(){
             z2_btnupdate(&z2_game,i);
         }
         if(dovoid) command_void();
+        char mesg[100];
+        snprintf(mesg,100,"memfile %d loaded",kz.memfile_slot);
+        kz_log(mesg);
     }
+    else{
+        char mesg[100];
+        snprintf(mesg,100,"no memfile %d",kz.memfile_slot);
+        kz_log(mesg);
+    }
+    
 }
 
 void command_next_memfile(){

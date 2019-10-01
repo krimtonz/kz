@@ -229,12 +229,13 @@ void draw_bind(struct menu_item *item){
     gfx_texture *t_button = resource_get(R_KZ_BUTTONS);
     while((b=bind_get_component(bind,i))!=BIND_END){
         z2_rgba32_t bcolor;
-        if(color==0xFFFFFFFF)
+        if(color==0xFFFFFFFF){
             bcolor.color = button_colors[b];
-        else
+        }
+        else{
             bcolor.color = color;
-        gfx_push(gsDPSetPrimColor(0,0,bcolor.r,bcolor.g,bcolor.b,bcolor.a));
-        gfx_draw_sprite(t_button,get_item_x_pos(item) + (i++ * 10),get_item_y_pos(item),b,8,8);
+        }
+        gfx_draw_sprite_color(t_button,get_item_x_pos(item) + (i++ * 10),get_item_y_pos(item),b,8,8,bcolor.color);
     }
 }
 

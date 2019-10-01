@@ -5,6 +5,7 @@ enum col_view_status {
     COL_VIEW_NONE = -1,
     COL_VIEW_SHOW,
     COL_VIEW_DESTROY,
+    COL_VIEW_KILL,
     COL_VIEW_GENERATE,
 };
 

@@ -3,6 +3,28 @@
 #include "gfx.h"
 #include "kz.h"
 
+inline uint32_t poly_color(z2_col_type_t *type){
+    if(type->flags_2.hookshot){
+        return 0x0000FF00;
+    }
+    else if(type->flags_1.interaction > 1){
+        return 0xFF00FF00;
+    }
+    else if(type->flags_1.special == 0x0C){
+        return 0xFF000000;
+    }
+    else if(type->flags_1.exit!=0 || type->flags_1.special==0x05){
+        return 0x00FFFF00;
+    }
+    else if(type->flags_1.behavior!=0 || type->flags_2.wall_damage){
+        return 0x00FF0000;
+    }
+    else if(type->flags_2.terrain==0x01){
+        return 0xFFFF0000;
+    }
+    return 0xFFFFFF00;
+}
+
 void kz_col_view(){
     static Gfx *poly_disp;
     static Gfx *poly_disp_p;
@@ -10,31 +32,35 @@ void kz_col_view(){
 
     if(kz.collision_view_status == COL_VIEW_GENERATE){
 
-        if(poly_disp){
-            free(poly_disp);
-        }
-
         z2_col_hdr_t *col = z2_game.col_ctxt.col_hdr;
         size_t n_poly = col->n_poly;
         uint8_t alpha = 0x80;
-        uint32_t rm= Z_CMP | IM_RD | CVG_DST_CLAMP | FORCE_BL;
+        uint32_t rm = Z_CMP | IM_RD | FORCE_BL | ZMODE_DEC;
         uint32_t blc1;
         uint32_t blc2;
         Mtx m;
+        if(kz.collision_view_settings & COL_VIEW_REDUX){
+            for(int i=0;i<col->n_poly;i++){
+                z2_col_poly_t *poly = &col->poly[i];
+                z2_col_type_t *type = &col->type[poly->type];
+                uint32_t color = poly_color(type);
+                if(color==0xFFFFFF00) n_poly--;
+            }
+        }
 
         size_t poly_size = 9 * n_poly + 0x10;
 
         poly_disp = malloc(poly_size * sizeof(*poly_disp));
         poly_disp_p = poly_disp;
-        poly_disp_d = poly_disp + (sizeof(*poly_disp) * poly_size + sizeof(*poly_disp) - 1) / sizeof(*poly_disp);
+        poly_disp_d = poly_disp + poly_size;
 
         if(kz.collision_view_settings & COL_VIEW_OPAQUE){
-            rm |= Z_UPD | ZMODE_DEC;
+            rm |= Z_UPD | CVG_DST_CLAMP;
             alpha = 0xFF;
             blc1 = GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
             blc2 = GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
         }else{
-            rm |= ZMODE_XLU;
+            rm |= ZMODE_XLU | CVG_DST_FULL;
             blc1 = GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
             blc2 = GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
         }
@@ -51,37 +77,22 @@ void kz_col_view(){
                     0, 1, 0, 0,
                     0, 0, 1, 0,
                     0, 0, 0, 1);
-
+        
         gSPMatrix(poly_disp_p++,gDisplayListData(&poly_disp_d,m), G_MTX_MODELVIEW | G_MTX_LOAD);
 
-        for(int i=0;i<n_poly;++i){
+        for(int i=0;i<col->n_poly;i++){
             z2_col_poly_t *poly = &col->poly[i];
             z2_col_type_t *type = &col->type[poly->type];
             z2_xyz_t *va  = &col->vtx[poly->va];
             z2_xyz_t *vb = &col->vtx[poly->vb];
             z2_xyz_t *vc = &col->vtx[poly->vc];
 
-            if(type->flags_2.hookshot){
-                gDPSetPrimColor(poly_disp_p++,0,0,0x00,0x00,0xFF,alpha);
+            uint32_t color = poly_color(type) | alpha;
+            if(kz.collision_view_settings & COL_VIEW_REDUX && color == (0xFFFFFF00 | alpha)){
+                continue;
             }
-            else if(type->flags_1.interaction > 1){
-                gDPSetPrimColor(poly_disp_p++,0,0,0xFF,0x00,0xFF,alpha);
-            }
-            else if(type->flags_1.special == 0x0C){
-                gDPSetPrimColor(poly_disp_p++,0,0,0xFF,0x00,0x00,alpha);
-            }
-            else if(type->flags_1.exit!=0 || type->flags_1.special==0x05){
-                gDPSetPrimColor(poly_disp_p++,0,0,0x00,0xFF,0xFF,alpha);
-            }
-            else if(type->flags_1.behavior!=0 || type->flags_2.wall_damage){
-                gDPSetPrimColor(poly_disp_p++,0,0,0x00,0xFF,0x00,alpha);
-            }
-            else if(type->flags_2.terrain==0x01){
-                gDPSetPrimColor(poly_disp_p++,0,0,0xFF,0xFF,0x00,alpha);
-            }else{
-                gDPSetPrimColor(poly_disp_p++,0,0,0xFF,0xFF,0xFF,alpha);
-            }
-
+            gDPSetPrimColor(poly_disp_p++,0,0,color >> 24, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+            
             Vtx vt[3] = {
                 gdSPDefVtxN(va->x,va->y,va->z,0,0,poly->norm.x/0x100,poly->norm.y/0x100,poly->norm.z/0x100,0xFF),
                 gdSPDefVtxN(vb->x,vb->y,vb->z,0,0,poly->norm.x/0x100,poly->norm.y/0x100,poly->norm.z/0x100,0xFF),
@@ -95,16 +106,19 @@ void kz_col_view(){
 
         kz.collision_view_status = COL_VIEW_SHOW;
     }
-    if(kz.collision_view_status == COL_VIEW_DESTROY){
+    else if(kz.collision_view_status == COL_VIEW_SHOW){
+        Gfx *g = (kz.collision_view_settings & COL_VIEW_OPAQUE)?z2_game.common.gfx->poly_opa.p++:z2_game.common.gfx->poly_xlu.p++;
+        gSPDisplayList(g,poly_disp);
+    }
+    else if(kz.collision_view_status == COL_VIEW_DESTROY){
+        kz.collision_view_status = COL_VIEW_KILL;
+    }
+    else if(kz.collision_view_status == COL_VIEW_KILL){
         if(poly_disp){
             free(poly_disp);
             poly_disp = NULL;
         }
         kz.collision_view_status = COL_VIEW_NONE;
-    }
-    if(kz.collision_view_status == COL_VIEW_SHOW){
-        Gfx *g = (kz.collision_view_settings & COL_VIEW_OPAQUE)?z2_game.common.gfx->poly_opa.p++:z2_game.common.gfx->poly_xlu.p++;
-        gSPDisplayList(g,poly_disp);
     }
 }
 

@@ -29,14 +29,14 @@ enum cheats {
 
 struct disp_p
 {
-  uint32_t        work_p;
-  uint32_t        work_d;
-  uint32_t        poly_opa_p;
-  uint32_t        poly_opa_d;
-  uint32_t        poly_xlu_p;
-  uint32_t        poly_xlu_d;
-  uint32_t        overlay_p;
-  uint32_t        overlay_d;
+    uint32_t    work_p;
+    uint32_t    work_d;
+    uint32_t    poly_opa_p;
+    uint32_t    poly_opa_d;
+    uint32_t    poly_xlu_p;
+    uint32_t    poly_xlu_d;
+    uint32_t    overlay_p;
+    uint32_t    overlay_d;
 };
 
 typedef struct{
@@ -45,6 +45,11 @@ typedef struct{
     uint32_t    scene_flags[5];
     uint16_t    scene;
 } memfile_t;
+
+struct log {
+    char   *mesg;
+    int     time;
+};
 
 typedef struct  {
     _Bool                   ready;
@@ -66,6 +71,7 @@ typedef struct  {
     uint8_t                 memfile_slot;
     memfile_t             **memfile;
     const char             *tooltip;
+    struct log              log[10];
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;
@@ -78,5 +84,6 @@ struct menu *create_cheats_menu();
 struct menu *create_file_menu();
 struct menu *create_equips_menu();
 struct menu *create_settings_menu();
+void kz_log(const char *format, ...);
 
 #endif

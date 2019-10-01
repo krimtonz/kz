@@ -13,25 +13,111 @@
 #define     GFX_SIZE 0x6500
 #endif
 
+#define RDP_STACK_LEN 5
+
 static Gfx *gfx_disp;
 static Gfx *gfx_disp_p;
 static Gfx *gfx_disp_d;
 static Gfx *gfx_disp_work;
 
+static _Bool rdp_synced;
+
+static uint64_t rdp_modes[RDP_MODE_ALL];
+static uint64_t rdp_mode_stack[RDP_MODE_ALL][RDP_STACK_LEN];
+static int rdp_stack_pos[RDP_MODE_ALL];
+
 gfx_font *kfont;
 
 static Gfx kzgfx[] = {
-    gsDPPipeSync(),
-
     gsSPLoadGeometryMode(0),
     gsDPSetScissor(G_SC_NON_INTERLACE,
               0, 0, Z2_SCREEN_WIDTH, Z2_SCREEN_HEIGHT),
 
     gsDPSetOtherMode(G_CYC_1CYCLE | G_AD_DISABLE | G_CD_DISABLE | G_CK_NONE | G_TC_FILT | G_TD_CLAMP | G_TP_NONE | G_TL_TILE | G_TT_NONE | G_PM_NPRIMITIVE | G_TF_POINT,
                     G_ZS_PRIM | G_AC_NONE | G_RM_XLU_SURF | G_RM_XLU_SURF2),
-    gsDPSetCombine(G_CC_MODE(G_CC_MODULATEIA_PRIM,G_CC_MODULATEIA_PRIM)),
     gsSPEndDisplayList()
 };
+
+static inline void rdp_sync(){
+    if(!rdp_synced){
+        gDPPipeSync(gfx_disp_p++);
+        rdp_synced = 1;
+    }
+}
+
+static void rdp_mode_apply(enum rdp_mode mode){
+    Gfx append_dl[RDP_MODE_ALL];
+    Gfx *append_ptr = append_dl;
+    switch(mode){
+        case RDP_MODE_ALL:
+        case RDP_MODE_COLOR:
+        {
+            uint32_t color = rdp_modes[RDP_MODE_COLOR];
+            gDPSetPrimColor(append_ptr++,0,0,(color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF);
+            if(mode!=RDP_MODE_ALL) break;
+        }
+        case RDP_MODE_COMBINE:{
+            gDPSetCombine(append_ptr++,rdp_modes[RDP_MODE_COMBINE]);
+            if(mode!=RDP_MODE_ALL) break;
+        }
+        case RDP_MODE_FILTER:{
+            gDPSetTextureFilter(append_ptr++,rdp_modes[RDP_MODE_FILTER]);
+            if(mode!=RDP_MODE_ALL) break;
+        }
+        default:
+            break;
+    }
+    size_t size = append_ptr - append_dl;
+    if(size>0){
+        rdp_sync();
+        memcpy(gfx_disp_p,append_dl,size * sizeof(*append_dl));
+        gfx_disp_p += size;
+    }
+}
+
+void rdp_mode_set(enum rdp_mode mode, uint64_t val){
+    rdp_modes[mode] = val;
+}
+
+void rdp_mode_set_apply(enum rdp_mode mode, uint64_t val){
+    rdp_mode_set(mode,val);
+    rdp_mode_apply(mode);
+}
+
+static void rdp_mode_push(enum rdp_mode mode){
+    if(mode == RDP_MODE_ALL){
+        for(int i = 0;i<RDP_MODE_ALL;i++){
+            int *p = &rdp_stack_pos[i];
+            rdp_mode_stack[i][*p] = rdp_modes[i];
+            *p = (*p + 1) % RDP_STACK_LEN;
+        }
+    }else{
+        int *p = &rdp_stack_pos[mode];
+        rdp_mode_stack[mode][*p] = rdp_modes[mode];
+        *p = (*p + 1) % RDP_STACK_LEN;
+    }
+}
+
+void rdp_mode_pop(enum rdp_mode mode){
+    if(mode == RDP_MODE_ALL){
+        for(int i =0;i<RDP_MODE_ALL;i++){
+            int *p = &rdp_stack_pos[i];
+            *p = (*p + RDP_STACK_LEN - 1) % RDP_STACK_LEN;
+            rdp_mode_set(mode,rdp_mode_stack[i][*p]);
+        }
+    }else{
+        int *p = &rdp_stack_pos[mode];
+        *p = (*p + RDP_STACK_LEN - 1) % RDP_STACK_LEN;
+        rdp_mode_set(mode,rdp_mode_stack[mode][*p]);
+    }
+    rdp_mode_apply(mode);
+}
+
+void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
+    rdp_mode_push(mode);
+    rdp_mode_set(mode,val);
+    rdp_mode_apply(mode);
+}
 
 void gfx_printf(uint16_t left, uint16_t top, const char *format, ...){
     va_list args;
@@ -85,7 +171,9 @@ void gfx_init(){
 }
 
 void gfx_begin(){
+    rdp_sync();
     gSPDisplayList(gfx_disp_p++,&kzgfx);
+    rdp_mode_apply(RDP_MODE_ALL);
 }
 
 void gfx_finish(){
@@ -98,8 +186,9 @@ void gfx_finish(){
     gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
 }
 
-void gfx_push(Gfx gfx){
-    *(gfx_disp_p++) = gfx;
+void gfx_append(Gfx *gfx, size_t size){
+    memcpy(gfx_disp_p,gfx,size);
+    gfx_disp_p += (size + sizeof(*gfx_disp_p) - 1) / sizeof(*gfx_disp_p);
 }
 
 void *gfx_data_push(void *data, size_t size){
@@ -129,18 +218,7 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
             G_TX_NOMASK, G_TX_NOMASK,
             G_TX_NOLOD, G_TX_NOLOD);
     }
-}
-
-void gfx_load_tile_coords(gfx_texture *texture, uint16_t tilenum, int x, int y, int width, int height){
-    gDPLoadTextureTile(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
-            texture->img_fmt, texture->img_size,
-            texture->tile_width, texture->tile_height,
-            x, y, width - 1, height - 1,
-            0,
-            G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMIRROR | G_TX_WRAP,
-            G_TX_NOMASK, G_TX_NOMASK,
-            G_TX_NOLOD, G_TX_NOLOD);
+    rdp_synced = 1;
 }
 
 void gfx_texture_desaturate(void *data, size_t len){
@@ -273,10 +351,17 @@ gfx_texture *gfx_load(texture_loader *loader){
     }
 }
 
-void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale){
+void gfx_draw_sprite_scale_color(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale, uint32_t color){
     gfx_load_tile(texture, tile);
+    rdp_mode_set_apply(RDP_MODE_COLOR,color);
+    rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
     float x_scale_calc = ((float)width / (float)texture->tile_width) * x_scale;
     float y_scale_calc = ((float)height / (float)texture->tile_height) * y_scale;
+    if(x_scale_calc != 1.f || y_scale_calc != 1.f){
+        rdp_mode_replace(RDP_MODE_FILTER,G_TF_BILERP);
+    }else{
+        rdp_mode_replace(RDP_MODE_FILTER,G_TF_POINT);
+    }
     gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x) & ~3,
                          qs102(y) & ~3,
@@ -286,17 +371,28 @@ void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int wid
                          qu105(0),
                          qu105(0),
                          qu510(1.0f / x_scale_calc), qu510(1.0f / y_scale_calc));
+    rdp_mode_pop(RDP_MODE_COMBINE);
+    rdp_synced = 0;
+}
+
+void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale){
+    gfx_draw_sprite_scale_color(texture,x,y,tile,width,height,x_scale,y_scale,0xFFFFFFFF);
+}
+
+void gfx_draw_sprite_color(gfx_texture *texture, int x, int y, int tile, int width, int height, uint32_t color){
+    gfx_draw_sprite_scale_color(texture,x,y,tile,width,height,1.f,1.f,color);
 }
 
 void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
-    gfx_draw_sprite_scale(texture,x,y,tile,width,height,1,1);
+    gfx_draw_sprite_scale(texture,x,y,tile,width,height,1.f,1.f);
 }
 
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
-    gDPSetCombineMode(gfx_disp_p++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
-    gDPSetPrimColor(gfx_disp_p++,0,0,(color >> 24) & 0xFF,(color >> 16) & 0xFF,(color >> 8) & 0xFF,color & 0xFF);
-    gDPPipeSync(gfx_disp_p++);
+    rdp_mode_set_apply(RDP_MODE_COLOR,color);
+    rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_PRIMITIVE,G_CC_PRIMITIVE));
+    gSPScisTextureRectangle(gfx_disp_p++,qs102(x),qs102(y),qs102(x + width), qs102(y + height),0,0,0,0,0);
     gDPFillRectangle(gfx_disp_p++,x,y,x + width, y + height);
+    rdp_mode_pop(RDP_MODE_COMBINE);
 }
 
 void gfx_destroy_texture(gfx_texture *texture){
@@ -307,17 +403,16 @@ void gfx_destroy_texture(gfx_texture *texture){
 }
 
 void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt, float x_scale, float y_scale){
-
+    rdp_mode_set_apply(RDP_MODE_COLOR,color);
+    rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_MODULATEIA_PRIM,G_CC_MODULATEIA_PRIM));
     int chars_per_tile = font->cx_tile * font->cy_tile;
 
     for(int i=0;i<font->texture->x_tiles * font->texture->y_tiles;i++){
         int tile_start = chars_per_tile*i;
         int tile_end = tile_start + chars_per_tile;
-
         gfx_load_tile(font->texture,i);
         int char_x = 0;
-
-        gDPSetPrimColor(gfx_disp_p++, 0, 0, 0x00,0x00,0x00, 0xFF);
+        rdp_mode_replace(RDP_MODE_COLOR,GPACK_RGB24A8(0x000000,color & 0xFF));
         for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
             char c = chars[j];
             if(c<33) continue;
@@ -337,8 +432,9 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
                                font->c_height),
                          qu510(1.0f/x_scale), qu510(1.0f/y_scale));
         }
+        rdp_mode_pop(RDP_MODE_COLOR);
+        rdp_sync();
         char_x=0;
-        gDPSetPrimColor(gfx_disp_p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF, (color >> 8) & 0xFF, 0xFF);
         for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
             char c = chars[j];
             if(c<33) continue;
@@ -357,5 +453,6 @@ void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, cons
                                font->c_height),
                          qu510(1.0f/x_scale), qu510(1.0f/y_scale));
         }
+        rdp_synced = 0;
     }
 }

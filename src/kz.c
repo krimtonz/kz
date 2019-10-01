@@ -47,16 +47,27 @@ void load_disp_p(struct disp_p *disp_p){
 
 void gfx_reloc(int src_disp_idx, int src_cimg_idx){
     z2_gfx_t *gfx = z2_game.common.gfx;
-    z2_disp_buf_t *new_disp[4] = {
+    uint32_t src_gfx = z2_disp_addr + src_disp_idx * Z2_DISP_SIZE;
+    uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
+    uint32_t src_cimg = z2_cimg[src_cimg_idx];
+    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
+    
+    z2_disp_buf_t segment_setup;
+    segment_setup.buf = (Gfx*)(dst_gfx + 0x140);
+    segment_setup.p = segment_setup.buf + 21;
+
+    z2_disp_buf_t primary;
+    primary.buf = (Gfx*)(dst_gfx + 0x02A8);
+    primary.p = primary.buf + 12;
+    
+    z2_disp_buf_t *new_disp[6] = {
         &gfx->work,
         &gfx->poly_opa,
         &gfx->poly_xlu,
-        &gfx->overlay
+        &gfx->overlay,
+        &primary,
+        &segment_setup,
     };
-    uint32_t src_gfx = z2_disp_addr + src_disp_idx * Z2_DISP_SIZE;
-    uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
-    uint32_t src_cimg = z2_cimg[src_disp_idx];
-    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
     for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
         z2_disp_buf_t *dbuf = new_disp[i];
         for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
@@ -81,11 +92,12 @@ void gfx_reloc(int src_disp_idx, int src_cimg_idx){
                 case G_SETTIMG: break;
                 case G_SETZIMG: break;
                 case G_SETCIMG: break;
-                case G_BG_1CYC: 
+                case G_BG_1CYC: {
                     p->lo = 0;
                     p->hi = 0;
                     continue;
-                case G_BG_COPY: continue;
+                }
+                case G_BG_COPY: break;
                 default: continue;
             }
             if(p->lo >=src_gfx && p->lo<src_gfx + Z2_DISP_SIZE){
@@ -132,10 +144,7 @@ static void kz_main(void) {
             for(int i = 0;i<sizeof(btns)/sizeof(*btns);i++){
                 int8_t btn = btns[i];
                 if(!(pad & (1 << btn))) continue;
-                z2_rgba32_t color;
-                color.color = button_colors[btn];
-                gfx_push(gsDPSetPrimColor(0,0,color.r,color.g,color.b,color.a));
-                gfx_draw_sprite(t_btn,x + 80 + (i*10), y, btn,8,8);
+                gfx_draw_sprite_color(t_btn,x + 80 + (i*10), y, btn,8,8,button_colors[btn]);
             }
         }
     }
@@ -286,6 +295,13 @@ static void kz_main(void) {
         }
     }
 
+    /* print frame advance status */
+    if(kz.pending_frames == 0){
+        gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,3,20,20);
+    }else if(kz.pending_frames>0){
+        gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,4,20,20);
+    }
+
     /* print logo */
 #define MAKESTRING(S) MAKESTRING_(S)
 #define MAKESTRING_(S) #S
@@ -302,10 +318,33 @@ static void kz_main(void) {
     }
 #undef MAKESTRING_
 #undef MAKESTRING
-    gfx_printf(100,100,"%8x",sbrk(0));
-    if(kz.tooltip){
+
+    if(kz.tooltip && kz.menu_active){
         gfx_printf(10, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
     }
+
+    for(int i = 9;i>=0;i--){
+        const int fade_start = 20;
+        const int fade_len = 20;
+        struct log *log_entry = &kz.log[i];
+        uint8_t alpha;
+        if(!log_entry->mesg) continue;
+        log_entry->time++;
+        if(log_entry->time > (fade_start + fade_len)){
+            free(log_entry->mesg);
+            log_entry->mesg=NULL;
+            continue;
+        }
+        else if(log_entry->time > fade_start){
+            alpha = 0xFF - (log_entry->time - fade_start) * 0xFF / fade_len;
+        }else{
+            alpha = 0xFF;
+        }
+        int x = Z2_SCREEN_WIDTH - 10 - strlen(log_entry->mesg) * 8;
+        int y = Z2_SCREEN_HEIGHT - 40;
+        gfx_printf_color(x,y,GPACK_RGB24A8(0xFFFFFF,alpha),"%s",log_entry->mesg);
+    }
+    
 
 #ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);
@@ -349,6 +388,8 @@ void init() {
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
 
+    memset(&kz.log,0,sizeof(kz.log));
+
     kz.menu_active = 0;
     menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
@@ -380,21 +421,41 @@ void input_hook(void){
 
 void blur_hook(void){
     if(kz.pending_frames!=0){
-        //z2_blur(&z2_ctxt);
+        z2_blur(&z2_ctxt);
     }
+}
+
+void kz_log(const char *format, ...){
+    struct log *log_entry = &kz.log[9];
+    if(log_entry->mesg){
+        free(log_entry->mesg);
+    }
+    for(int i=9;i>0;i--){
+        kz.log[i] = kz.log[i-1];
+    }
+    va_list va;
+    va_start(va,format);
+    int l = vsnprintf(NULL,0,format,va);
+    va_end(va);
+
+    log_entry = &kz.log[0];
+    log_entry->mesg = malloc(l + 1);
+    if(!log_entry->mesg) return;
+    va_start(va,format);
+    vsprintf(log_entry->mesg,format,va);
+    va_end(va);
+    log_entry->time = 0;
 }
 
 void game_state_main(){
     if(kz.pending_frames!=0){
         if(kz.pending_frames>0){
             kz.pending_frames--;
-            gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-            gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,4,20,20);
         }
         z2_ctxt.gamestate_update(&z2_ctxt);
     }else{
         z2_gfx_t *gfx = z2_game.common.gfx;
-        if(z2_game.common.gamestate_frames!=0){
+        if(z2_ctxt.gamestate_frames!=0){
             if(gfx->frame_cnt_1 & 1){
                 memcpy(((void*)z2_disp_addr + Z2_DISP_SIZE),(void*)z2_disp_addr,Z2_DISP_SIZE);
             }else{
@@ -404,8 +465,6 @@ void game_state_main(){
             gfx_reloc(1-(gfx->frame_cnt_1 & 1),1-(gfx->frame_cnt_2 & 1));
         }
         z2_game.common.gamestate_frames--;
-        gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-        gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,3,20,20);
     }
 }
 

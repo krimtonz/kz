@@ -29,11 +29,7 @@ static void draw_bit_switch_proc(struct menu_item *item){
     if(item->owner->selected_item == item){
         gfx_draw_rectangle(get_item_x_pos(item),get_item_y_pos(item),data->tex_width,data->tex_height,GPACK_RGBA8888(0x80,0x80,0xFF,0x80));
     }
-    gfx_push(gsDPSetCombineMode(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
-    uint32_t color = data->color;
-    gfx_push(gsDPSetPrimColor(0,0,(color >> 24) & 0xFF,(color >> 16) & 0xFF,(color >> 8) & 0xFF,color & 0xFF));
-    gfx_push(gsDPPipeSync());
-    
+
     uint32_t val = 0;
     switch(data->addr_len){
         case 1:
@@ -47,6 +43,7 @@ static void draw_bit_switch_proc(struct menu_item *item){
             val = *(uint32_t*)data->addr;
             break;
     }
+    uint32_t color = data->color;
     if(!(val & data->bitmask)){
         if(data->has_off_tile){
             size_t tiles_cnt = texture->x_tiles * texture->y_tiles;
@@ -55,11 +52,13 @@ static void draw_bit_switch_proc(struct menu_item *item){
                 tile = tile + (texture->x_tiles * texture->y_tiles)/2;
             }
         }else{
-            uint32_t off_color = data->off_color;
-            gfx_push(gsDPSetPrimColor(0,0,(off_color >> 24) & 0xFF,(off_color >> 16) & 0xFF,(off_color >> 8) & 0xFF,off_color & 0xFF));
+            color = data->off_color;
         }
     }
+    rdp_mode_set_apply(RDP_MODE_COLOR,color);
+    rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
     gfx_draw_sprite(texture,get_item_x_pos(item),get_item_y_pos(item),tile,data->tex_width,data->tex_height);
+    rdp_mode_pop(RDP_MODE_COMBINE);
 }
 
 static void activate_bit_switch_proc(struct menu_item *item){

@@ -52,11 +52,7 @@ static void draw_equip_option(struct menu_item *item){
     if(item->owner->selected_item == item){
         gfx_draw_rectangle(get_item_x_pos(item),get_item_y_pos(item),16,16,MENU_SELECTED_COLOR.color);
     }
-    gfx_push(gsDPSetCombineMode(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
-    gfx_push(gsDPSetPrimColor(0,0,0xFF,0xFF,0xFF,0xFF));
-    gfx_push(gsDPPipeSync());
     gfx_draw_sprite(get_item_texture(data->item_id),get_item_x_pos(item),get_item_y_pos(item),get_equip_value(data) == data->val?0:1,16,16);
-    gfx_begin();
 }
 
 static void equip_option_activate(struct menu_item *item){
