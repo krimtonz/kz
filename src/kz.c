@@ -125,6 +125,30 @@ static void kz_main(void) {
     gfx_begin();
 
     input_update();
+
+    // Emergency settings reset, konami code
+    {
+        static uint16_t settings_reset[] = {
+            BUTTON_D_UP, BUTTON_D_UP,
+            BUTTON_D_DOWN, BUTTON_D_DOWN,
+            BUTTON_D_LEFT, BUTTON_D_RIGHT,
+            BUTTON_D_LEFT, BUTTON_D_RIGHT,
+            BUTTON_B, BUTTON_A
+        };
+        static int reset_pos = 0;
+        uint16_t pressed = input_pressed();
+        if(pressed){
+            if(pressed & settings_reset[reset_pos]) reset_pos++;
+            else reset_pos = 0;
+        }
+        if(reset_pos == sizeof(settings_reset)/sizeof(*settings_reset)){
+            kz_log("settings reset");
+            load_default_settings();
+            kz_apply_settings();
+            reset_pos = 0;
+        }
+    }
+
     save_disp_p(&kz.disp_p);
     
     /* Disable DPad on Pause Screen */
