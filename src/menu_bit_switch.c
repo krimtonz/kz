@@ -55,10 +55,7 @@ static void draw_bit_switch_proc(struct menu_item *item){
             color = data->off_color;
         }
     }
-    rdp_mode_set_apply(RDP_MODE_COLOR,color);
-    rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
-    gfx_draw_sprite(texture,get_item_x_pos(item),get_item_y_pos(item),tile,data->tex_width,data->tex_height);
-    rdp_mode_pop(RDP_MODE_COMBINE);
+    gfx_draw_sprite_color(texture,get_item_x_pos(item),get_item_y_pos(item),tile,data->tex_width,data->tex_height,color);
 }
 
 static void activate_bit_switch_proc(struct menu_item *item){
