@@ -53,6 +53,9 @@ void save_settings_to_flashram(int profile){
         settings->watch_y[i] = watch->y;
         settings->watch_info[i].floating = watch->floating;
         settings->watch_info[i].type = watch->type;
+        if(watch->label){
+            memcpy(settings->watch_labels[i],watch->label,20);
+        }
         i++;
     }
     kz_io(&settings_info,SETTINGS_ADDR + (profile * sizeof(settings_info)),sizeof(*settings),OS_WRITE);
@@ -84,5 +87,8 @@ void kz_apply_settings(){
         watch->y = settings->watch_y[i];
         watch->floating = settings->watch_info[i].floating;
         watch->type = settings->watch_info[i].type;
+        watch->label = malloc(21);
+        memcpy(watch->label,settings->watch_labels[i],20);
+        watch->label[20] = 0;
     }
 }

@@ -29,6 +29,7 @@ typedef struct {
     uint16_t x;
     uint16_t y;
     uint8_t floating;
+    char *label;
 } watch_t;
 
 void watch_printf(watch_t *watch);

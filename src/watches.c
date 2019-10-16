@@ -37,4 +37,7 @@ void watch_printf(watch_t *watch){
             break;
     }
     gfx_printf(watch->x,watch->y,"%s",buf);
+    if(watch->label && watch->floating){
+        gfx_printf(watch->x + ((strlen(buf) + 1) * 8),watch->y,"%s",watch->label);
+    }
 }

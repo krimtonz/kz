@@ -179,6 +179,9 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
             if(menu->callback_proc){
                 menu->callback_proc(MENU_CALLBACK_EXIT);
             }
+            if(menu->parent->callback_proc){
+                menu->parent->callback_proc(MENU_CALLBACK_ENTER);
+            }
             menu->parent->child = NULL;
         }else{
             kz.menu_active = 0;

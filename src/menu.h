@@ -129,6 +129,9 @@ struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
                                      uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
                                      draw_info_t *drawinfo, struct tilebg_info *null_item, const char *tooltip);
 
+struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
+                                      char *default_text, char **value_ptr);
+
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);
 int menu_return(struct menu_item *item, enum menu_callback callback, void *data);
