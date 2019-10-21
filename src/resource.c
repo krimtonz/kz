@@ -34,7 +34,7 @@ static void *resource_load_kz_texture(enum resource resource){
         kztext->tile_height = gtext->tile_height;
         kztext->x_tiles = gtext->tiles_x;
         kztext->y_tiles = gtext->tiles_y;
-        kztext->tile_size = ((kztext->tile_width * kztext->tile_height * G_SIZ_BITS(kztext->img_size) + 7) / 8 + 63) / 64 * 64;
+        kztext->tile_size = (kztext->tile_width * kztext->tile_height * G_SIZ_BITS(kztext->img_size) + 63) / 64 * 8;
         return kztext;
     }
     return NULL;

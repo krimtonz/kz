@@ -252,7 +252,7 @@ void gfx_texture_desaturate(void *data, size_t len){
 }
 
 inline size_t calc_tile_size(int width, int height, g_isiz_t size){
-    return ((width * height * G_SIZ_BITS(size) + 7) / 8 + 63) / 64 * 64;
+    return (width * height * G_SIZ_BITS(size) + 63) / 64 * 8;
 }
 
 gfx_texture *gfx_load_item_texture(uint8_t item_id){
