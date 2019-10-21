@@ -10,7 +10,30 @@ struct item_data {
     _Bool                   active;
     void                   *data;
     menu_generic_callback   callback;
+    void                   *callback_data;
 };
+
+int get_option_index(struct menu_item *item, uint32_t value){
+    struct item_data *data = item->data;
+    for(int i=0;i<data->option_cnt;i++){
+        uint32_t val;
+        switch(data->value_size){
+            case 1:
+                val = ((uint8_t*)(data->values))[i];
+                break;
+            case 2:
+                val = ((uint16_t*)(data->values))[i];
+                break;
+            case 4:
+            default:
+                val = ((uint32_t*)(data->values))[i];
+        }
+        if(value == val){
+            return i;
+        }
+    }
+    return -1;
+}
 
 static int option_nav(struct menu_item *item, enum menu_nav nav){
     struct item_data *data = item->data;
@@ -51,6 +74,34 @@ static void option_activate(struct menu_item *item){
     data->active = !data->active;
 }
 
+static void option_update(struct menu_item *item){
+    struct item_data *data = item->data;
+    if(data->data){
+        if(!data->active){
+            uint32_t d; 
+            switch(data->value_size){
+                case 1:
+                    d = *(uint8_t*)data->data;
+                    break;
+                case 2:
+                    d = *(uint16_t*)data->data;
+                    break;
+                case 4:
+                default:
+                    d = *(uint32_t*)data->data;
+                    break;
+            }
+            int idx = get_option_index(item,d);
+            if(idx>=0){
+                data->selected_idx = idx;
+            }
+        }
+    }
+    if(data->callback){
+        data->callback(item, MENU_CALLBACK_UPDATE, NULL);
+    }
+}
+
 static void option_draw(struct menu_item *item){
     struct item_data *data = item->data;
     z2_rgba32_t color = MENU_DEFAULT_COLOR;
@@ -77,6 +128,7 @@ struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
         item->draw_proc = option_draw;
         item->navigate_proc = option_nav;
         item->activate_proc = option_activate;
+        item->update_proc = option_update;
         item->data = data;
         item->interactive = 1;
     }

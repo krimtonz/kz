@@ -9,6 +9,7 @@
 #include "collision_view.h"
 
 #define KZ_MEMFILE_MAX 3
+#define KZ_POSITION_MAX 3
 
 enum cheats {
     CHEAT_STICKS,
@@ -46,6 +47,11 @@ typedef struct{
     uint16_t    scene;
 } memfile_t;
 
+typedef struct{
+    z2_xyzf_t   pos;
+    z2_rot_t    rot;
+} position_t;
+
 struct log {
     char   *mesg;
     int     time;
@@ -70,8 +76,11 @@ typedef struct  {
     struct disp_p           disp_p;
     uint8_t                 memfile_slot;
     memfile_t             **memfile;
+    uint8_t                 pos_slot;
+    position_t            **position_save;
     const char             *tooltip;
     struct log              log[10];
+    _Bool                   debug_active;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;

@@ -414,7 +414,9 @@ typedef struct {
         uint32_t    unk_0x14;                       /* 0x0014 */
         uint32_t    unk_0x18;                       /* 0x0018 */
     }               save_scene_flags[0x78];         /* 0x00F8 */
-    char            unk_0x0E18_[0x1D4];             /* 0x0E18 */
+    char            unk_0x0E18_[0xE0];              /* 0x0E18 */
+    char            week_event_inf[0x64];           /* 0x0EF8 */
+    char            unk_0x0F5C[0x90];               /* 0x0F5C */
 #if Z2_VERSION!=NZSE
     char            unk_0x0FEC_[0x2F64];                            /* 0x0FEC */
 #else
@@ -635,17 +637,17 @@ typedef struct z2_ctxt z2_ctxt_t;
 typedef void (*game_update_t)(z2_ctxt_t* ctxt);
 
 struct z2_ctxt{
-    z2_gfx_t        *gfx;                   /* 0x0000 */
+    z2_gfx_t       *gfx;                    /* 0x0000 */
     game_update_t   gamestate_update;       /* 0x0004 */
-    void            *gamestate_dtor;        /* 0x0008 */
-    void            *gamestate_ctor;        /* 0x000C */
-    uint32_t         ctxt_size;             /* 0x0010 */
+    void           *gamestate_dtor;         /* 0x0008 */
+    void           *gamestate_ctor;         /* 0x000C */
+    uint32_t        ctxt_size;              /* 0x0010 */
     z2_input_t      input[4];               /* 0x0014 */
     uint32_t        gamestate_heap_size;    /* 0x0074 */
-    void            *gamestate_heap_ptr;    /* 0x0078 */
-    void            *heap_append_start;     /* 0x007C */
-    void            *heap_append_end;       /* 0x0080 */
-    void            *gamestate_heap_node;   /* 0x0084 */
+    void           *gamestate_heap_ptr;     /* 0x0078 */
+    void           *heap_append_start;      /* 0x007C */
+    void           *heap_append_end;        /* 0x0080 */
+    void           *gamestate_heap_node;    /* 0x0084 */
     char            unk_0x88_[0x10];        /* 0x0088 */
     int32_t         execute_state;          /* 0x0098 */
     int32_t         gamestate_frames;       /* 0x009C */
@@ -1003,7 +1005,8 @@ typedef struct{
     Gfx        *bg_dlist;           /* 0x017C */
     char        unk_0x180[0x6C];    /* 0x0180 */
     uint16_t    state;              /* 0x01EC */
-    char        unk_0x1EE[0x12];    /* 0x01EE */
+    uint16_t    debug_menu;         /* 0x01EE */
+    char        unk_0x1F0[0x10];    /* 0x01F0 */
     uint16_t    switching_screen;   /* 0x0200 */
     uint16_t    unk_0x202;          /* 0x0202 */
     uint16_t    screen_idx;         /* 0x0204 */
@@ -1241,6 +1244,7 @@ typedef struct{
 #define z2_file_msgqueue_addr       0x8009B2C0
 #define z2_arena_addr               0x8009CD20
 #define z2_file_table_addr          0x8009F8B0
+#define z2_pause_persp_addr         0x800F4A10
 #define z2_btnupdate_addr           0x80112B40
 #define z2_loadroom_addr            0x8012E96C
 #define z2_unloadroom_addr          0x8012EBF8
@@ -1252,8 +1256,11 @@ typedef struct{
 #define z2_kz_dma_addr              0x801748A0
 #define z2_set_heap_addr            0x80174C4C
 #define z2_DecodeArchiveFile_addr   0x80178DAC
+#define z2_dmaflashtoram_addr       0x80185968
+#define z2_dmaramtoflash_addr       0x80185B1C
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801BD910
+#define z2_stored_song_addr         0x801C6A7C
 #define z2_player_ovl_table_addr    0x801D0B70
 #define z2_file_addr                0x801EF670
 #define z2_game_arena_addr          0x801F5100
@@ -1278,6 +1285,7 @@ typedef struct{
 #define z2_file_msgqueue_addr       0x8009CE10
 #define z2_arena_addr               0x8009E860
 #define z2_file_table_addr          0x800A13F0
+#define z2_pause_persp_addr         0x800F6530
 #define z2_btnupdate_addr           0x801146F8
 #define z2_loadroom_addr            0x8013044C
 #define z2_unloadroom_addr          0x801306D8
@@ -1289,8 +1297,11 @@ typedef struct{
 #define z2_kz_dma_addr              0x80170168
 #define z2_set_heap_addr            0x80170500
 #define z2_DecodeArchiveFile_addr   0x8017431C
+#define z2_dmaflashtoram_addr       0x80180e28
+#define z2_dmaramtoflash_addr       0x80180FDC
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801B89E0
+#define z2_stored_song_addr         0x801C1AFC
 #define z2_player_ovl_table_addr    0x801CB540
 #define z2_file_addr                0x801EF710
 #define z2_game_arena_addr          0x801F5530
@@ -1315,6 +1326,7 @@ typedef struct{
 #define z2_file_msgqueue_addr       0x8009CED0
 #define z2_arena_addr               0x8009E920
 #define z2_file_table_addr          0x800A14B0
+#define z2_pause_persp_addr         0x800F6510
 #define z2_btnupdate_addr           0x801146B8
 #define z2_loadroom_addr            0x801303EC
 #define z2_unloadroom_addr          0x80130678
@@ -1326,8 +1338,11 @@ typedef struct{
 #define z2_kz_dma_addr              0x80170078
 #define z2_set_heap_addr            0x80170410
 #define z2_DecodeArchiveFile_addr   0x801740EC
+#define z2_dmaflashtoram_addr       0x80180BF8
+#define z2_dmaramtoflash_addr       0x80180DAC
 #define z2_actor_ovl_table_addr     0x801A9E60
 #define z2_gamestate_table_addr     0x801B87A0
+#define z2_stored_song_addr         0x801C18EC
 #define z2_player_ovl_table_addr    0x801CB330
 #define z2_file_addr                0x801EF460
 #define z2_game_arena_addr          0x801F5280
@@ -1351,6 +1366,9 @@ typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
 typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
+typedef void (*z2_dmaflashtoram_t)(void *buf, uint32_t block, uint32_t block_cnt);
+typedef void (*z2_dmaramtoflash_t)(void *buf, uint32_t block, uint32_t block_cnt);
+typedef void (*z2_pause_persp_t)(z2_game_t *game);
 
 /* Data */
 #define z2_game                 (*(z2_game_t*)              z2_ctxt_addr)
@@ -1371,6 +1389,7 @@ typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
 #define z2_vi_counter           (*(int32_t*)                z2_vi_counter_addr)
 #define z2_input_direct         (*(z2_input_t*)             z2_input_direct_addr)
 #define z2_cimg                 ((uint32_t*)                z2_cimg_addr)
+#define z2_stored_song          (*(uint16_t*)               z2_stored_song_addr)
 
 /* Functions */
 #define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
@@ -1385,5 +1404,8 @@ typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
 #define z2_loadroom             ((z2_loadroom_t)            z2_loadroom_addr)
 #define z2_unloadroom           ((z2_unloadroom_t)          z2_unloadroom_addr)
 #define z2_blur                 ((z2_blur_t)                z2_blur_addr)
+#define z2_pause_persp          ((z2_pause_persp_t)         z2_pause_persp_addr)
+#define z2_dmaflashtoram        ((z2_dmaflashtoram_t)       z2_dmaflashtoram_addr)
+#define z2_dmaramtoflash        ((z2_dmaramtoflash_t)       z2_dmaramtoflash_addr)
 
 #endif

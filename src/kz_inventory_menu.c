@@ -323,11 +323,14 @@ static int magic_callback(struct menu_item *item, enum menu_callback callback, v
 }
 
 static int change_selected_dungeon(struct menu_item *item, enum menu_callback callback, void *data){
-    int selected_idx = (int)data;
-    dungeon_keys = z2_file.dungeon_keys[selected_idx];
-    dungeon_items = z2_file.dungeon_items[selected_idx].dungeon_item;
-    stray_fairies = z2_file.stray_fairies[selected_idx];
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        int selected_idx = (int)data;
+        dungeon_keys = z2_file.dungeon_keys[selected_idx];
+        dungeon_items = z2_file.dungeon_items[selected_idx].dungeon_item;
+        stray_fairies = z2_file.stray_fairies[selected_idx];
+        return 1;
+    }
+    return 0;
 }
 
 static int update_dungeon_keys(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){

@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "settings.h"
-#include "io.h"
 #include "kz.h"
 #include "input.h"
 
@@ -30,6 +29,10 @@ void load_default_settings(){
     settings->binds[Z2_CMD_SAVE_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_RIGHT);
     settings->binds[Z2_CMD_NEXT_MEMFILE] = BIND_END;
     settings->binds[Z2_CMD_PREV_MEMFILE] = BIND_END;
+    settings->binds[Z2_CMD_SAVE_POSITION] = make_bind(2, BUTTON_C_LEFT, BUTTON_D_LEFT);
+    settings->binds[Z2_CMD_LOAD_POSITION] = make_bind(2, BUTTON_C_LEFT, BUTTON_D_RIGHT);
+    settings->binds[Z2_CMD_NEXT_POSITION] = BIND_END;
+    settings->binds[Z2_CMD_PREV_POSITION] = BIND_END;
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 20;
@@ -42,29 +45,32 @@ void load_default_settings(){
     settings->menu_x = 20;
     settings->menu_y = 30;
     settings->cheats = 0;
+    settings->memfile_action = 0;
 }
 
 void save_settings_to_flashram(int profile){
-    settings->watch_cnt = kz.watches.size;
-    int i=0;
-    for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
-        settings->watch_addresses[i] = (uint32_t)watch->address;
-        settings->watch_x[i] = watch->x;
-        settings->watch_y[i] = watch->y;
-        settings->watch_info[i].floating = watch->floating;
-        settings->watch_info[i].type = watch->type;
-        if(watch->label){
-            memcpy(settings->watch_labels[i],watch->label,20);
+    if(kz.watches.first){
+        settings->watch_cnt = kz.watches.size;
+        int i=0;
+        for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
+            settings->watch_addresses[i] = (uint32_t)watch->address;
+            settings->watch_x[i] = watch->x;
+            settings->watch_y[i] = watch->y;
+            settings->watch_info[i].floating = watch->floating;
+            settings->watch_info[i].type = watch->type;
+            if(watch->label){
+                memcpy(settings->watch_labels[i],watch->label,20);
+            }
+            i++;
         }
-        i++;
     }
-    kz_io(&settings_info,SETTINGS_ADDR + (profile * sizeof(settings_info)),sizeof(*settings),OS_WRITE);
+    z2_dmaramtoflash(&settings_info,SIZE_TO_BLOCK(SETTINGS_ADDR + (profile * sizeof(settings_info))),SIZE_TO_BLOCK(sizeof(*settings)));
 }
 
 void load_settings_from_flashram(int profile){
     struct settings settings_temp;
-    kz_io(&settings_temp,SETTINGS_ADDR + (profile * sizeof(settings_temp)),sizeof(settings_temp),OS_READ);
-    if(settings_temp.header.version == SETTINGS_VER){
+    z2_dmaflashtoram(&settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR + (profile * sizeof(settings_temp))),SIZE_TO_BLOCK(sizeof(settings_temp)));
+    if(settings_temp.header.version>0 && settings_temp.header.version == SETTINGS_VER){
         if(settings_temp.header.magic[0] == 'k' && settings_temp.header.magic[1]=='z' && settings_temp.header.magic[2] == 'k' && settings_temp.header.magic[3] == 'z'){
             memcpy((void*)&settings_info,(void*)&settings_temp,sizeof(settings_temp));
         }else{
@@ -73,9 +79,8 @@ void load_settings_from_flashram(int profile){
     }else{
         // if settings version is not the same as the current version, delete the profile from the save file, and load default settings
         // in the future might provide an update path? 
-        memset(&settings_temp,0,sizeof(settings_temp));
-        save_settings_to_flashram(profile);
         load_default_settings();
+        save_settings_to_flashram(profile);
     }
 }
 

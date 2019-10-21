@@ -11,10 +11,7 @@
 #include "scenes.h"
 #include "commands.h"
 #include "settings.h"
-#include "io.h"
 #include "resource.h"
-#include "gu.h"
-
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = {
@@ -125,7 +122,6 @@ static void kz_main(void) {
     gfx_begin();
 
     input_update();
-
     // Emergency settings reset, konami code
     {
         static uint16_t settings_reset[] = {
@@ -273,7 +269,9 @@ static void kz_main(void) {
             struct menu *kz_menu = &kz.main_menu;
             if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
                 kz.menu_active=0;
-                free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+                if(!kz.debug_active){
+                    free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+                }
             }else if(input_bind_pressed(Z2_CMD_RETURN)){
                 menu_callback(kz_menu,MENU_CALLBACK_RETURN);
             }else{
@@ -368,8 +366,13 @@ static void kz_main(void) {
         int y = Z2_SCREEN_HEIGHT - 40;
         gfx_printf_color(x,y,GPACK_RGB24A8(0xFFFFFF,alpha),"%s",log_entry->mesg);
     }
-    
 
+    // Release Debug Menu Bindings
+    if(z2_game.pause_ctx.state==0 && !kz.menu_active && kz.debug_active){
+        free_buttons(BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP | BUTTON_L);
+        kz.debug_active = 0;
+    }
+    
 #ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);
     for(int i=0;i<Z2_ITEM_END;i++){
@@ -431,6 +434,10 @@ void init() {
     kz.memfile = malloc(sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
     memset(kz.memfile,0,sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
     kz.memfile_slot = 0;
+
+    kz.position_save = malloc(sizeof(*kz.position_save) * KZ_POSITION_MAX);
+    memset(kz.position_save,0,sizeof(*kz.position_save) * KZ_POSITION_MAX);
+    kz.pos_slot = 0;
     
     kz.ready = 1;
 }

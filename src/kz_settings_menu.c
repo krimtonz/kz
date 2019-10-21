@@ -40,6 +40,16 @@ static int memfile_inc(struct menu_item *item, enum menu_callback callback, void
     return 1;
 }
 
+static int position_dec(struct menu_item *item, enum menu_callback callback, void *data){
+    command_prev_position();
+    return 1;
+}
+
+static int position_inc(struct menu_item *item, enum menu_callback callback, void *data){
+    command_next_position();
+    return 1;
+}
+
 static int save_profile(struct menu_item *item, enum menu_callback callback, void *data){
     save_settings_to_flashram(kz.settings_profile);
     return 1;
@@ -151,13 +161,28 @@ struct menu *create_settings_menu(){
     item->navigate_proc = nav_item;
 
     menu_add(&settingsm,0,8,"memfile");
-    menu_add_button(&settingsm,12,8,"-",memfile_dec,NULL);
+    menu_add_button(&settingsm,15,8,"-",memfile_dec,NULL);
     static watch_t memfile_watch;
     memfile_watch.address = &kz.memfile_slot;
     memfile_watch.type=WATCH_TYPE_U8;
     memfile_watch.floating = 0;
-    menu_add_watch(&settingsm,13,8,&memfile_watch,1);
-    menu_add_button(&settingsm,14,8,"+",memfile_inc,NULL);
+    menu_add_watch(&settingsm,16,8,&memfile_watch,1);
+    menu_add_button(&settingsm,17,8,"+",memfile_inc,NULL);
+    
+    menu_add_gfx_switch(&settingsm,0,9,&settings->memfile_action,1,MEMFILE_VOID,NULL,NULL,&draw_info);
+    menu_add(&settingsm,3,9,"void on loading memfile");
+
+    menu_add_gfx_switch(&settingsm,0,10,&settings->memfile_action,1,MEMFILE_POS,NULL,NULL,&draw_info);
+    menu_add(&settingsm,3,10,"load position on loading memfile");
+
+    menu_add(&settingsm,0,11,"saved position");
+    menu_add_button(&settingsm,15,11,"-",position_dec,NULL);
+    static watch_t position_watch;
+    position_watch.address = &kz.pos_slot;
+    position_watch.type=WATCH_TYPE_U8;
+    position_watch.floating = 0;
+    menu_add_watch(&settingsm,16,11,&position_watch,1);
+    menu_add_button(&settingsm,17,11,"+",position_inc,NULL);
 
     static struct menu commands;
     menu_init(&commands,0,0);
@@ -171,7 +196,7 @@ struct menu *create_settings_menu(){
         menu_add_bind(&commands,20,y++,i);
     }
 
-    menu_add_submenu(&settingsm,0,9,&commands,"commands");
+    menu_add_submenu(&settingsm,0,12,&commands,"commands");
 
     return &settingsm;
 }

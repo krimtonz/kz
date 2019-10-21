@@ -21,6 +21,10 @@ struct command kz_commands[Z2_CMD_MAX] = {
     {"load memfile",        COMMAND_PRESS,  command_load_memfile},
     {"next memfile",        COMMAND_PRESS,  command_next_memfile},
     {"prev memfile",        COMMAND_PRESS,  command_prev_memfile},
+    {"save position",       COMMAND_PRESS,  command_save_position},
+    {"load position",       COMMAND_PRESS,  command_load_position},
+    {"next position",       COMMAND_PRESS,  command_next_position},
+    {"prev position",       COMMAND_PRESS,  command_prev_position},
 };
 
 void command_timer(){
@@ -83,25 +87,29 @@ void command_lag_reset(){
 }
 
 void command_save_memfile(){
+    memfile_t *newmemfile;
     if(!kz.memfile[kz.memfile_slot]){
-        memfile_t *newmemfile = malloc(sizeof(*newmemfile));
-        // Save 3 day clock day switching boundaries to prevent day/night advancing when loading outside current day/night
-        for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
-            if(actor->id == 0x15A){
-                z2_timer_t *timer = (z2_timer_t*)actor;
-                memcpy(&newmemfile->timer_boundaries,&timer->timer_boundaries,sizeof(newmemfile->timer_boundaries));
-                break;
-            }
-        }
-        newmemfile->scene_flags[0] = z2_game.actor_ctxt.chest;
-        newmemfile->scene_flags[1] = z2_game.actor_ctxt.switch_1;
-        newmemfile->scene_flags[2] = z2_game.actor_ctxt.switch_2;
-        newmemfile->scene_flags[3] = z2_game.actor_ctxt.clear;
-        newmemfile->scene_flags[4] = z2_game.actor_ctxt.collectible_1;
-        newmemfile->scene = z2_game.scene_index;
-        memcpy(&newmemfile->file,&z2_file,sizeof(newmemfile->file));
+        newmemfile = malloc(sizeof(*newmemfile));
         kz.memfile[kz.memfile_slot] = newmemfile;
+    }else{
+        newmemfile = kz.memfile[kz.memfile_slot];
     }
+    
+    // Save 3 day clock day switching boundaries to prevent day/night advancing when loading outside current day/night
+    for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+        if(actor->id == 0x15A){
+            z2_timer_t *timer = (z2_timer_t*)actor;
+            memcpy(&newmemfile->timer_boundaries,&timer->timer_boundaries,sizeof(newmemfile->timer_boundaries));
+            break;
+        }
+    }
+    newmemfile->scene_flags[0] = z2_game.actor_ctxt.chest;
+    newmemfile->scene_flags[1] = z2_game.actor_ctxt.switch_1;
+    newmemfile->scene_flags[2] = z2_game.actor_ctxt.switch_2;
+    newmemfile->scene_flags[3] = z2_game.actor_ctxt.clear;
+    newmemfile->scene_flags[4] = z2_game.actor_ctxt.collectible_1;
+    newmemfile->scene = z2_game.scene_index;
+    memcpy(&newmemfile->file,&z2_file,sizeof(newmemfile->file));
     char mesg[100];
     snprintf(mesg,100,"memfile %d saved",kz.memfile_slot);
     kz_log(mesg);
@@ -131,6 +139,8 @@ void command_load_memfile(){
         for(int i=0;i<4;i++){
             z2_btnupdate(&z2_game,i);
         }
+        if(settings->memfile_action & MEMFILE_VOID) dovoid = 1;
+        if(settings->memfile_action & MEMFILE_POS) command_load_position();
         if(dovoid) command_void();
         char mesg[100];
         snprintf(mesg,100,"memfile %d loaded",kz.memfile_slot);
@@ -152,4 +162,46 @@ void command_next_memfile(){
 void command_prev_memfile(){
     kz.memfile_slot += KZ_MEMFILE_MAX;
     kz.memfile_slot %= KZ_MEMFILE_MAX;
+}
+
+void command_save_position(){
+    position_t *newpos;
+    if(!kz.position_save[kz.pos_slot]){
+        newpos = malloc(sizeof(*newpos));
+        kz.position_save[kz.pos_slot] = newpos;
+    }else{
+        newpos = kz.position_save[kz.pos_slot];
+    }
+    memcpy(&newpos->pos,&z2_link.common.pos_2,sizeof(newpos->pos));
+    memcpy(&newpos->rot,&z2_link.common.rot_2,sizeof(newpos->rot));
+    char mesg[100];
+    snprintf(mesg,100,"position %d saved",kz.pos_slot);
+    kz_log(mesg);
+}
+
+void command_load_position(){
+    position_t *position = kz.position_save[kz.pos_slot];
+    if(position){
+        memcpy(&z2_link.common.pos_1,&position->pos,sizeof(position->pos));
+        memcpy(&z2_link.common.pos_2,&position->pos,sizeof(position->pos));
+        memcpy(&z2_link.common.rot_2,&position->rot,sizeof(position->rot));
+        char mesg[100];
+        snprintf(mesg,100,"position %d loaded",kz.pos_slot);
+        kz_log(mesg);
+    }
+    else{
+        char mesg[100];
+        snprintf(mesg,100,"no position %d",kz.pos_slot);
+        kz_log(mesg);
+    }
+}
+
+void command_next_position(){
+    kz.pos_slot++;
+    kz.pos_slot %= KZ_POSITION_MAX;
+}
+
+void command_prev_position(){
+    kz.pos_slot+=KZ_POSITION_MAX;
+    kz.pos_slot%=KZ_POSITION_MAX;
 }

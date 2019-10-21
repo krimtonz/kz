@@ -4,14 +4,21 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "watches.h"
-#include "io.h"
 #include "commands.h"
 
-#define SETTINGS_VER    3
-#define SETTINGS_ADDR   0x1C200
-#define SETTINGS_SIZE   (sizeof(struct settings_header) + sizeof(struct settings_data))
-#define SETTINGS_PAD    ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
-#define SETTINGS_MAX    3
+#define IO_BLOCK_SIZE       0x80
+#define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)
+
+#define SETTINGS_VER        4
+#define SETTINGS_ADDR       0x20000
+#define SETTINGS_SIZE       (sizeof(struct settings_header) + sizeof(struct settings_data))
+#define SETTINGS_PAD        ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
+#define SETTINGS_MAX        3
+
+#define MEMFILE_NONE        0
+#define MEMFILE_VOID        1
+#define MEMFILE_LOAD        2
+#define MEMFILE_POS         4
 
 struct settings_header{
     char        magic[4];
@@ -37,6 +44,7 @@ struct settings_data{
     int16_t             menu_x;
     int16_t             menu_y;
     uint32_t            cheats;
+    uint8_t             memfile_action;
     uint16_t            binds[Z2_CMD_MAX];
 };
 
