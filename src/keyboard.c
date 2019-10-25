@@ -4,7 +4,9 @@
 #include "kz.h"
 #include "resource.h"
 
-#define MAX_STR_LEN 30
+#define MAX_STR_LEN         30
+#define SHORTCUT_BACKSPACE  (BUTTON_Z | BUTTON_C_LEFT)
+#define SHORTCUT_SHIFT      (BUTTON_Z | BUTTON_C_UP)
 
 struct key_data {
     int row;
@@ -101,12 +103,35 @@ static int keyboard_input_nav_proc(struct menu_item *item, enum menu_nav nav){
     }
 }
 
+static void backspace(){
+    if(cursor_pos > 0){
+        strcpy(input_buf + cursor_pos - 1, input_buf + cursor_pos);
+        cursor_pos--;
+        buf_sanity();
+    }
+}
+
+static inline void shift(){
+    shifted = !shifted;
+}
+
+static void keyboard_update_proc(struct menu_item *item){
+    uint16_t input = input_pressed();
+    if((input & SHORTCUT_BACKSPACE) == SHORTCUT_BACKSPACE){
+        backspace();
+    }
+    else if((input & SHORTCUT_SHIFT) == SHORTCUT_SHIFT){
+        shift();
+    }
+}
+
 static struct menu_item *menu_add_keyboard_input(struct menu *menu, int x, int y){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         item->data = NULL;
         item->draw_proc = keyboard_input_draw_proc;
         item->navigate_proc = keyboard_input_nav_proc;
+        item->update_proc = keyboard_update_proc;
         item->interactive = 1;
     }
     return item;
@@ -133,14 +158,10 @@ static void key_activate_proc(struct menu_item *item){
     const char **source = shifted ? keyboard_shift_rows : keyboard_rows;
     int c = source[data->row][data->col];
     if(c == 0x01){
-        shifted = !shifted;
+        shift();
         return;
     }else if(c == 0x08){
-        if(cursor_pos > 0){
-            strcpy(input_buf + cursor_pos - 1, input_buf + cursor_pos);
-            cursor_pos--;
-            buf_sanity();
-        }
+        backspace();
         return;
     }
     input_buf[cursor_pos] = source[data->row][data->col];
