@@ -12,6 +12,7 @@
 #include "commands.h"
 #include "settings.h"
 #include "resource.h"
+#include "keyboard.h"
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = {
@@ -427,9 +428,10 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
-
     menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
     menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
+
+    init_kz_keyboard();
 
     kz.memfile = malloc(sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
     memset(kz.memfile,0,sizeof(*kz.memfile) * KZ_MEMFILE_MAX);

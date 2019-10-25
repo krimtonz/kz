@@ -92,6 +92,7 @@ void menu_draw(struct menu *menu);
 void menu_update(struct menu *menu);
 void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height);
 void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y);
+void menu_set_pos(struct menu *menu, uint16_t x, uint16_t y);
 
 struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text);
 struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y, draw_info_t *drawinfo, _Bool load_item);
@@ -130,7 +131,7 @@ struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
                                      draw_info_t *drawinfo, struct tilebg_info *null_item, const char *tooltip);
 
 struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
-                                      char *default_text, char **value_ptr);
+                                      const char *default_text, char **value_ptr);
 
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);

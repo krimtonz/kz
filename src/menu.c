@@ -51,6 +51,11 @@ void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y){
     menu->y_padding = y;
 }
 
+void menu_set_pos(struct menu *menu, uint16_t x, uint16_t y){
+    menu->x = x;
+    menu->y = y;
+}
+
 void menu_draw(struct menu *menu){
     if(menu->child){
         menu_draw(menu->child);
