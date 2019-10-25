@@ -2,6 +2,7 @@
 #include "keyboard.h"
 #include "input.h"
 #include "kz.h"
+#include "resource.h"
 
 #define MAX_STR_LEN 30
 
@@ -23,17 +24,17 @@ static menu_generic_callback dest_callback = NULL;
 static struct menu_item *keyboard_caller = NULL;
 
 static const char *keyboard_rows[] = {
-    "`1234567890-=",
+    "`1234567890-=\x08",
     "qwertyuiop[]\\",
     "asdfghjkl;'",
     "\x01zxcvbnm,./\x01"
 };
 
 static const char *keyboard_shift_rows[] = {
-    "~!@#$%^&*()_+",
+    "~!@#$%^&*()_+\x08",
     "QWERTYUIOP{}|",
     "ASDFGHJKL;\"",
-    "\x01ZXCVBNM<>?"
+    "\x01ZXCVBNM<>?\x01"
 };
 
 static void buf_sanity(){
@@ -52,8 +53,6 @@ static void buf_sanity(){
 }
 
 static void keyboard_input_draw_proc(struct menu_item *item){
-    if(input_pressed_raw() & BUTTON_R) shifted = 1;
-    else shifted = 0;
     uint32_t color = 0xFFFFFFFF;
     if(item->owner->selected_item == item){
         color = MENU_SELECTED_COLOR.color;
@@ -119,12 +118,31 @@ static void key_draw_proc(struct menu_item *item){
     if(item->owner->selected_item == item){
         gfx_draw_rectangle(get_item_x_pos(item) - 4,get_item_y_pos(item) - 4,16,16,MENU_SELECTED_COLOR.color);
     }
-    gfx_printf(get_item_x_pos(item),get_item_y_pos(item),"%c",source[data->row][data->col]);
+    char c = source[data->row][data->col];
+    if(c == 0x01){
+        gfx_draw_sprite(resource_get(R_KZ_ICON),get_item_x_pos(item),get_item_y_pos(item),5,8,8);
+    }else if(c == 0x08){
+        gfx_draw_sprite(resource_get(R_KZ_ICON),get_item_x_pos(item),get_item_y_pos(item),6,8,8);
+    }else{
+        gfx_printf(get_item_x_pos(item),get_item_y_pos(item),"%c",source[data->row][data->col]);
+    }
 }
 
 static void key_activate_proc(struct menu_item *item){
     struct key_data *data = item->data;
     const char **source = shifted ? keyboard_shift_rows : keyboard_rows;
+    int c = source[data->row][data->col];
+    if(c == 0x01){
+        shifted = !shifted;
+        return;
+    }else if(c == 0x08){
+        if(cursor_pos > 0){
+            strcpy(input_buf + cursor_pos - 1, input_buf + cursor_pos);
+            cursor_pos--;
+            buf_sanity();
+        }
+        return;
+    }
     input_buf[cursor_pos] = source[data->row][data->col];
     if(cursor_pos < sizeof(input_buf) - 1){
         cursor_pos++;
