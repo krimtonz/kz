@@ -19,6 +19,8 @@ kz_ctxt_t kz = {
     .ready = 0,
 };
 
+char restriction_table[0x23A];
+
 void save_disp_p(struct disp_p *disp_p){
     z2_gfx_t *gfx = z2_game.common.gfx;
     disp_p->work_p = gfx->work.p - gfx->work.buf;
@@ -441,6 +443,8 @@ void init() {
     memset(kz.position_save,0,sizeof(*kz.position_save) * KZ_POSITION_MAX);
     kz.pos_slot = 0;
     
+    //memcpy(restriction_table,(void*)z2_restriction_table_addr,sizeof(restriction_table));
+
     kz.ready = 1;
 }
 

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include "resource.h"
 
+#if Z2_VERSION!=NZSE
 static z2_item_t texture_map[] = {
     Z2_ITEM_OCARINA,
     Z2_ITEM_HEROS_BOW,
@@ -134,6 +135,7 @@ static z2_item_t texture_map[] = {
     Z2_ITEM_TWINMOLDS_REMAINS,
     Z2_ITEM_BOMBERS_NOTEBOOK,
 };
+#endif
 
 struct tilebg_info *checkbox_bg;
 

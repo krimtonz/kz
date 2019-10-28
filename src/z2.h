@@ -1261,6 +1261,7 @@ typedef struct{
 #define z2_dmaramtoflash_addr       0x80185B1C
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801BD910
+#define z2_restriction_table_addr   0x801C2410
 #define z2_stored_song_addr         0x801C6A7C
 #define z2_player_ovl_table_addr    0x801D0B70
 #define z2_file_addr                0x801EF670
@@ -1302,6 +1303,7 @@ typedef struct{
 #define z2_dmaramtoflash_addr       0x80180FDC
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801B89E0
+#define z2_restriction_table_addr   0x801BD534
 #define z2_stored_song_addr         0x801C1AFC
 #define z2_player_ovl_table_addr    0x801CB540
 #define z2_file_addr                0x801EF710
@@ -1343,6 +1345,7 @@ typedef struct{
 #define z2_dmaramtoflash_addr       0x80180DAC
 #define z2_actor_ovl_table_addr     0x801A9E60
 #define z2_gamestate_table_addr     0x801B87A0
+#define z2_restriction_table_addr   0x801BD324
 #define z2_stored_song_addr         0x801C18EC
 #define z2_player_ovl_table_addr    0x801CB330
 #define z2_file_addr                0x801EF460

@@ -84,6 +84,7 @@ typedef struct  {
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;
+extern char restriction_table[0x23A];
 
 struct menu *create_warps_menu();
 struct menu *create_inventory_menu();
