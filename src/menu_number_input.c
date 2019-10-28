@@ -107,6 +107,7 @@ static void menu_number_draw(struct menu_item *item){
 static int menu_number_nav(struct menu_item *item, enum menu_nav nav){
     struct menu_data_number *data = item->data;
     if(!data->editing) return 0;
+    int v = char_to_int(data->digits[data->edit_idx]);
     switch(nav){
         case MENU_NAV_LEFT:
             if(data->edit_idx==00) data->edit_idx = data->length - 1;
@@ -117,14 +118,14 @@ static int menu_number_nav(struct menu_item *item, enum menu_nav nav){
             if(data->edit_idx>=data->length)data->edit_idx = 0;
             break;
         case MENU_NAV_UP:
-            data->digits[data->edit_idx]++;
-            if(data->digits[data->edit_idx]>'f') data->digits[data->edit_idx] = '0';
-            else if(data->digits[data->edit_idx]>'9' && data->digits[data->edit_idx]<'a') data->digits[data->edit_idx] = 'a';
+            v++;
+            v = (v + data->base) % data->base;
+            data->digits[data->edit_idx] = int_to_char(v);
             break;
         case MENU_NAV_DOWN:
-            data->digits[data->edit_idx]--;
-            if(data->digits[data->edit_idx]<'0') data->digits[data->edit_idx] = 'f';
-            else if(data->digits[data->edit_idx]<'a' && data->digits[data->edit_idx]>'9') data->digits[data->edit_idx] = '9';
+            v--;
+            v = (v + data->base) % data->base;
+            data->digits[data->edit_idx] = int_to_char(v);
             break;
         default:
             break;
