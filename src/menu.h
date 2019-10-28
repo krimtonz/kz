@@ -103,7 +103,7 @@ struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watc
 
 struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y,
                                         menu_number_callback callback, void *callback_data,
-                                        uint8_t base, uint8_t length, void *value, uint8_t val_len);
+                                        int8_t base, uint8_t length, void *value, uint8_t val_len);
 struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
                                   void *addr, uint8_t addr_len, uint32_t bitmask, 
                                   menu_generic_callback callback, void *callback_data,
