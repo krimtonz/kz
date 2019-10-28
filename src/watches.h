@@ -33,5 +33,7 @@ typedef struct {
 } watch_t;
 
 void watch_printf(watch_t *watch);
+void clear_watches();
+void init_watch_rows();
 
 #endif

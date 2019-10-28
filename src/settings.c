@@ -85,6 +85,9 @@ void load_settings_from_flashram(int profile){
 }
 
 void kz_apply_settings(){
+    if(kz.ready){
+        clear_watches();
+    }
     for(int i=0;i<settings->watch_cnt;i++){
         watch_t *watch = list_push_back(&kz.watches,NULL);
         watch->address = (void*)settings->watch_addresses[i];
@@ -95,5 +98,8 @@ void kz_apply_settings(){
         watch->label = malloc(21);
         memcpy(watch->label,settings->watch_labels[i],20);
         watch->label[20] = 0;
+    }
+    if(kz.ready){
+        init_watch_rows();
     }
 }

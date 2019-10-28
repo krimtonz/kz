@@ -5,8 +5,10 @@
 #include "resource.h"
 
 #define MAX_STR_LEN         30
+
 #define SHORTCUT_BACKSPACE  (BUTTON_Z | BUTTON_C_LEFT)
 #define SHORTCUT_SHIFT      (BUTTON_Z | BUTTON_C_UP)
+#define SHORTCUT_SPACE      (BUTTON_Z | BUTTON_C_RIGHT)
 
 struct key_data {
     int row;
@@ -45,7 +47,7 @@ static void buf_sanity(){
     }
     int buf_len = strlen(input_buf);
     if(cursor_pos > buf_len){
-        memset(&input_buf[buf_len],'_',cursor_pos - buf_len);
+        memset(&input_buf[buf_len],' ',cursor_pos - buf_len);
     }
     for(int i = cursor_pos + 1;i < sizeof(input_buf) - 1;i++){
         if(input_buf[i] == ' ' || input_buf[i] == '_'){
@@ -69,7 +71,9 @@ static void keyboard_input_draw_proc(struct menu_item *item){
         gfx_printf_color(x,y,color,"%s",input_buf_pre);
         x += strlen(input_buf_pre) * 8;
     }
-    gfx_printf_color(x,y,COLOR_GREEN,"%c",input_buf[cursor_pos]);
+    char c = input_buf[cursor_pos];
+    if(c ==' ') c = '_';
+    gfx_printf_color(x,y,COLOR_GREEN,"%c",c);
     x += 8;
 
     int post_len = input_len - cursor_pos - 1;
@@ -122,6 +126,12 @@ static void keyboard_update_proc(struct menu_item *item){
     }
     else if((input & SHORTCUT_SHIFT) == SHORTCUT_SHIFT){
         shift();
+    }
+    else if((input & SHORTCUT_SPACE) == SHORTCUT_SPACE){
+        if(cursor_pos < MAX_STR_LEN - 1){
+            input_buf[cursor_pos] = ' ';
+            cursor_pos++;
+        }
     }
 }
 
