@@ -75,11 +75,11 @@ static void menu_number_activate_callback(struct menu_item *item){
         }
         if(data->_signed && data->digits[0] == '-') val *= -1;
         data->value = val;
+        if(data->callback && data->callback(item, MENU_CALLBACK_ACTIVATE, data->callback_data, data->value)){
+            return;
+        }
         if(data->val_ptr){
             set_val(data->val_ptr,data->val_len,val);
-        }
-        if(data->callback){
-            data->callback(item, MENU_CALLBACK_ACTIVATE, data->callback_data, data->value);
         }
     }else{
         data->editing = 1;

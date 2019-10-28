@@ -1116,7 +1116,8 @@ typedef struct{
 
 typedef struct{
     z2_actor_t          common;                 /* 0x0000 */
-    char                unk_0x144[2];           /* 0x0144 */
+    uint8_t             daynight;               /* 0x0144 */
+    char                unk_0x145;              /* 0x0145 */
     uint16_t            timer_boundaries[3];    /* 0x0146 */
 } z2_timer_t;
 

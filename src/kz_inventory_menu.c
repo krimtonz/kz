@@ -280,7 +280,7 @@ static struct menu_item *menu_add_item_switch(struct menu *menu, uint16_t x, uin
 }
 
 static int max_health_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
-    z2_file.max_health = (uint16_t)value;
+    z2_file.max_health = value;
     if(z2_file.defense_hearts>0) z2_file.defense_hearts = value;
     return 1;
 }
@@ -334,12 +334,12 @@ static int change_selected_dungeon(struct menu_item *item, enum menu_callback ca
 }
 
 static int update_dungeon_keys(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
-    z2_file.dungeon_keys[dungeon_idx] = dungeon_keys;
+    z2_file.dungeon_keys[dungeon_idx] = val;
     return 1;
 }
 
 static int update_stray_fairies(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
-    z2_file.stray_fairies[dungeon_idx] = stray_fairies;
+    z2_file.stray_fairies[dungeon_idx] = val;
     return 1;
 }
 

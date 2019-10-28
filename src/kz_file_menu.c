@@ -41,6 +41,29 @@ static int debug_menu(struct menu_item *item, enum menu_callback callback, void 
     return 1;
 }
 
+static int time_of_day_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
+    for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+        if(actor->id == 0x15A){
+            if(z2_file.daynight == 1 && (value>=0xC000 || value < 0x4000)){
+                z2_file.daynight = 0;
+            }else if(z2_file.daynight == 0 && (value<=0xC000 || value >= 0x4000)){
+                z2_file.daynight = 1;
+            }
+            z2_timer_t *timer = (z2_timer_t*)actor;
+            timer->daynight = z2_file.daynight;
+            timer->timer_boundaries[0] = (uint16_t)value;
+            if(value<0x4000){
+                timer->timer_boundaries[1] = 0x4000;
+            }else{
+                timer->timer_boundaries[1] = 0xC000;
+            }
+            timer->timer_boundaries[2] = (uint16_t)value;
+            break;
+        }
+    }
+    return 0;
+}
+
 struct menu *create_file_menu(){
     static struct menu file;
     menu_init(&file,0,0);
@@ -55,5 +78,11 @@ struct menu *create_file_menu(){
     menu_add_button(&file,0,3,"debug menu",debug_menu,NULL);
     menu_add(&file,0,4,"stored song");
     menu_add_list(&file,12,4,stored_song_text,stored_song_values,2,sizeof(stored_song_values)/sizeof(*stored_song_values),&z2_stored_song,NULL);
+    menu_add(&file,0,5,"current day");
+    menu_add_number_input(&file,12,5,NULL,NULL,10,1,&z2_file.day,4);
+    menu_add(&file,0,6,"time of day");
+    menu_add_number_input(&file,12,6,time_of_day_callback,NULL,16,4,&z2_file.time_of_day,2);
+    menu_add(&file,0,7,"time speed");
+    menu_add_number_input(&file,12,7,NULL,NULL,-10,2,&z2_file.timespeed,4);
     return &file;
 }
