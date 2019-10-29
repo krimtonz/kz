@@ -1,0 +1,5 @@
+#!/bin/sh
+
+gzinject -a genkey -k "build/common-key.bin"
+gru build/lua/makewad.lua "$@"
+rm -rf "build/common-key.bin"

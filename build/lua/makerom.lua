@@ -1,4 +1,4 @@
-require("build/rom_info")
+require("build/lua/rom_info")
 local arg={...}
 local rom = gru.n64rom_load(arg[1])
 local rom_info = roms[rom:crc32()]
