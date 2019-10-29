@@ -40,8 +40,10 @@ KZ-NZSJ10	= $(OBJ-kz-NZSJ10) $(ELF-kz-NZSJ10) $(HOOKS-kz-NZSJ10) $(KZ-LITE-NZSJ1
 all			: $(KZ) $(KZ_LITE)
 clean       :
 	rm -rf $(OBJDIR) $(BINDIR)
+distclean 	: clean
+	rm -rf build/*.z64 build/*.wad
 
-.PHONY		: all clean
+.PHONY		: all clean distclean
 
 define bin_template
 SRCDIR-$(1)      = $(5)
