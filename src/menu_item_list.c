@@ -36,7 +36,7 @@ static Gfx wheel_state[] = {
 #endif
 
 struct item_list_data {
-    uint8_t                 selected_idx;
+    int                     selected_idx;
     _Bool                   active;
     menu_generic_callback   callback;
     void                   *callback_data;
@@ -172,7 +172,7 @@ static void draw_wheel(struct menu_item *item){
     gfx_begin();
 }
 
-static int nav_wheel(struct menu_item *item, enum menu_nav nav){
+ static int nav_wheel(struct menu_item *item, enum menu_nav nav){
     struct item_list_data *data = item->data;
     int n = 0;
     switch(nav){
