@@ -1,6 +1,7 @@
 #include "kz.h"
 #include "resource.h"
 #include "input.h"
+#include "zu.h"
 
 static uint8_t cur_form;
 
@@ -30,14 +31,20 @@ static int change_selected_form(struct menu_item *item, enum menu_callback callb
 }
 
 static int debug_menu(struct menu_item *item, enum menu_callback callback, void *data){
-    if(z2_game.pause_ctx.state == 0){
-        z2_game.pause_ctx.state = 1;
-            z2_pause_persp(&z2_game);
-            z2_game.pause_ctx.unk_0x202 = (z2_game.pause_ctx.screen_idx * 2) + 1;
+    if(zu_ingame() && z2_game.cutscene_state == 0){
+        if(z2_game.pause_ctx.state == 0){
+            z2_game.pause_ctx.state = 1;
+                z2_pause_persp(&z2_game);
+                z2_game.pause_ctx.unk_0x202 = (z2_game.pause_ctx.screen_idx * 2) + 1;
+        }
+        z2_game.pause_ctx.debug_menu = 1;
+        reserve_buttons(BUTTON_D_DOWN | BUTTON_D_RIGHT | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_L);
+        kz.debug_active = 1;
+        kz.menu_active = 0;
+        kz.pending_frames = -1;
+    }else{
+        kz_log("cannot debug menu here");
     }
-    z2_game.pause_ctx.debug_menu = 1;
-    reserve_buttons(BUTTON_D_DOWN | BUTTON_D_RIGHT | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_L);
-    kz.debug_active = 1;
     return 1;
 }
 
