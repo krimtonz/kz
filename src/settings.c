@@ -46,6 +46,7 @@ void load_default_settings(){
     settings->menu_y = 30;
     settings->cheats = 0;
     settings->memfile_action = 0;
+    kz_log("default settings loaded");
 }
 
 void save_settings_to_flashram(int profile){
@@ -65,6 +66,7 @@ void save_settings_to_flashram(int profile){
         }
     }
     z2_dmaramtoflash(&settings_info,SIZE_TO_BLOCK(SETTINGS_ADDR + (profile * sizeof(settings_info))),SIZE_TO_BLOCK(sizeof(*settings)));
+    kz_log("saved settings profile %d",profile);
 }
 
 void load_settings_from_flashram(int profile){
@@ -73,14 +75,17 @@ void load_settings_from_flashram(int profile){
     if(settings_temp.header.version>0 && settings_temp.header.version == SETTINGS_VER){
         if(settings_temp.header.magic[0] == 'k' && settings_temp.header.magic[1]=='z' && settings_temp.header.magic[2] == 'k' && settings_temp.header.magic[3] == 'z'){
             memcpy((void*)&settings_info,(void*)&settings_temp,sizeof(settings_temp));
+            kz_log("loaded settings profile %d",profile);
         }else{
             load_default_settings();
+            kz_log("invalid magic");
         }
     }else{
         // if settings version is not the same as the current version, delete the profile from the save file, and load default settings
         // in the future might provide an update path? 
         load_default_settings();
         save_settings_to_flashram(profile);
+        kz_log("invalid settings version");
     }
 }
 

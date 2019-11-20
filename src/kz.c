@@ -367,7 +367,7 @@ static void kz_main(void) {
         }
         int x = Z2_SCREEN_WIDTH - 10 - strlen(log_entry->mesg) * 8;
         int y = Z2_SCREEN_HEIGHT - 40;
-        gfx_printf_color(x,y,GPACK_RGB24A8(0xFFFFFF,alpha),"%s",log_entry->mesg);
+        gfx_printf_color(x,y - (i*10),GPACK_RGB24A8(0xFFFFFF,alpha),"%s",log_entry->mesg);
     }
 
     // Release Debug Menu Bindings
