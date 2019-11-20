@@ -69,9 +69,9 @@ static uint16_t bind_get_bitmask(uint16_t bind){
 
 static int button_get_index(uint16_t button_mask){
     for(int i=0;i<16;i++){
-        if((1 << i) & button_mask) return i;
+        if(button_mask & (1 << i)) return i;
     }
-    return 0;
+    return -1;
 }
 
 uint16_t make_bind(int len, ...){
@@ -236,12 +236,16 @@ void draw_bind(struct menu_item *item){
             bcolor.color = color;
         }
         gfx_draw_sprite_color(t_button,get_item_x_pos(item) + (i++ * 10),get_item_y_pos(item),b,8,8,bcolor.color);
+        if(i==4) break;
     }
 }
 
 static void bind_activate(struct menu_item *item){
     struct bind_item_data *data = item->data;
-    data->state = BIND_STATE_BEGIN;
+    if(data->state == BIND_STATE_NONE){
+        data->state = BIND_STATE_BEGIN;
+        input_enabled = 0;
+    }
 }
 
 static void bind_update(struct menu_item *item){
@@ -250,7 +254,6 @@ static void bind_update(struct menu_item *item){
     if(data->state==BIND_STATE_BEGIN){
         if(!pad){
             data->state = BIND_STATE_ACTION;
-            input_enabled = 0;
         }
         else if(button_time[button_get_index(BUTTON_L)]>=INPUT_REPEAT){
             input_enabled = 1;
@@ -258,18 +261,18 @@ static void bind_update(struct menu_item *item){
             data->state = BIND_STATE_NONE;
         }
     }
-    else if (data->state == BIND_STATE_ACTION){
+    if (data->state == BIND_STATE_ACTION){
         if(pad){
             *bind = make_bind(0);
             data->state = BIND_STATE_LISTENING;
         }
     }
     if(data->state == BIND_STATE_LISTENING){
-        if(!pad){
-            data->state = BIND_STATE_NONE;
+        uint16_t p = bind_get_bitmask(*bind);
+        if(pad == 0){
+            data->state = 0;
             input_enabled = 1;
         }else{
-            uint16_t p = bind_get_bitmask(*bind);
             uint16_t pressed = pad_pressed_raw & ~p;
             for(int i=0;pressed && i<4;++i){
                 int btn = bind_get_component(*bind,i);
