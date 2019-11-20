@@ -68,6 +68,15 @@ static int watch_update_callback(struct menu_item *item, enum menu_callback call
     return 1;
 }
 
+int watch_type_callback(struct menu_item *item, enum menu_callback callback, void *data, int idx){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        struct watch_row *row = data;
+        row->watch->address -= (uint32_t)row->watch->address % watch_data_sizes[idx];
+        return 1;
+    }
+    return 0;
+}
+
 static struct watch_row *delete_row(struct watch_row *row){
     struct watch_row *prev_row = list_prev(row);
     struct menu *menu = &watches;
@@ -199,7 +208,7 @@ static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
     row->move_button = witem;
     witem->navigate_proc = menu_watch_move_nav;
     row->addr_input = menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,row,16,8,&watch->address,sizeof(watch->address));
-    row->type_list = menu_add_list(item->owner,x + 13,item->y,watch_type_names,watch_type_values,sizeof(*watch_type_values),sizeof(watch_type_values)/sizeof(*watch_type_values),&(watch->type),NULL);
+    row->type_list = menu_add_list(item->owner,x + 13,item->y,watch_type_names,watch_type_values,sizeof(*watch_type_values),sizeof(watch_type_values)/sizeof(*watch_type_values),&(watch->type),watch_type_callback,row);
     witem = menu_add_watch(item->owner,x + 17,item->y,watch, setpos);
     if(setpos){
         watch->x = get_item_x_pos(witem);

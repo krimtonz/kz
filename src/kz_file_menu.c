@@ -77,7 +77,7 @@ struct menu *create_file_menu(){
     menu_add(&file,2,2,"great spin");
     menu_add_button(&file,0,3,"debug menu",debug_menu,NULL);
     menu_add(&file,0,4,"stored song");
-    menu_add_list(&file,12,4,stored_song_text,stored_song_values,2,sizeof(stored_song_values)/sizeof(*stored_song_values),&z2_stored_song,NULL);
+    menu_add_list(&file,12,4,stored_song_text,stored_song_values,2,sizeof(stored_song_values)/sizeof(*stored_song_values),&z2_stored_song,NULL,NULL);
     menu_add(&file,0,5,"current day");
     menu_add_number_input(&file,12,5,NULL,NULL,10,1,&z2_file.day,4);
     menu_add(&file,0,6,"time of day");

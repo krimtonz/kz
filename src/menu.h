@@ -86,6 +86,7 @@ typedef struct{
 
 typedef int  (*menu_generic_callback)(struct menu_item *item, enum menu_callback callback, void *data);
 typedef int  (*menu_number_callback)(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value);
+typedef int  (*menu_list_callback)(struct menu_item *item, enum menu_callback callback, void *data, int idx);
 
 void menu_init(struct menu *menu, uint16_t x, uint16_t y);
 void menu_draw(struct menu *menu);
@@ -116,7 +117,8 @@ struct menu_item *menu_add_gfx_switch(struct menu *menu, uint16_t x, uint16_t y,
 
 struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
                                 const char **text, void *values, uint8_t value_size,
-                                uint16_t options, void *list_data, menu_generic_callback callback);
+                                uint16_t options, void *list_data,
+                                menu_list_callback callback, void *callbakc_data);
 
 struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
                                       void *addr, uint8_t addr_len, uint32_t bitmask,

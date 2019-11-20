@@ -322,12 +322,11 @@ static int magic_callback(struct menu_item *item, enum menu_callback callback, v
     return 0;
 }
 
-static int change_selected_dungeon(struct menu_item *item, enum menu_callback callback, void *data){
+static int change_selected_dungeon(struct menu_item *item, enum menu_callback callback, void *data, int idx){
     if(callback == MENU_CALLBACK_ACTIVATE){
-        int selected_idx = (int)data;
-        dungeon_keys = z2_file.dungeon_keys[selected_idx];
-        dungeon_items = z2_file.dungeon_items[selected_idx].dungeon_item;
-        stray_fairies = z2_file.stray_fairies[selected_idx];
+        dungeon_keys = z2_file.dungeon_keys[idx];
+        dungeon_items = z2_file.dungeon_items[idx].dungeon_item;
+        stray_fairies = z2_file.stray_fairies[idx];
         return 1;
     }
     return 0;
@@ -477,7 +476,7 @@ struct menu *create_inventory_menu(){
         menu_add_switch(&quest_status,0,y++,&z2_file.has_magic,1,0x01,magic_callback,(void*)0,"magic");
         menu_add_switch(&quest_status,0,y++,&z2_file.has_double_magic,1,0x01,magic_callback,(void*)1,"double magic");
         menu_add(&quest_status,0,y++,"dungeon");
-        menu_add_list(&quest_status,15,y++,dungeon_names,dungeon_name_values,1,4,&dungeon_idx,change_selected_dungeon);
+        menu_add_list(&quest_status,15,y++,dungeon_names,dungeon_name_values,1,4,&dungeon_idx,change_selected_dungeon,NULL);
         menu_add(&quest_status,0,y,"small keys");
         menu_add_number_input(&quest_status,15,y++,update_dungeon_keys,NULL,16,2,&dungeon_keys,1);
         menu_add(&quest_status,0,y,"stray fairies");

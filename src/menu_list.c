@@ -9,7 +9,7 @@ struct item_data {
     int                     selected_idx;
     _Bool                   active;
     void                   *data;
-    menu_generic_callback   callback;
+    menu_list_callback      callback;
     void                   *callback_data;
 };
 
@@ -68,7 +68,7 @@ static void option_activate(struct menu_item *item){
             }
         }
         if(data->callback){
-            data->callback(item,MENU_CALLBACK_ACTIVATE,(void*)data->selected_idx);
+            data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data,data->selected_idx);
         }
     }
     data->active = !data->active;
@@ -98,7 +98,7 @@ static void option_update(struct menu_item *item){
         }
     }
     if(data->callback){
-        data->callback(item, MENU_CALLBACK_UPDATE, NULL);
+        data->callback(item, MENU_CALLBACK_UPDATE, NULL, -1);
     }
 }
 
@@ -112,8 +112,8 @@ static void option_draw(struct menu_item *item){
 
 struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
                                 const char **text, void *values,
-                                uint8_t value_size, uint16_t options,
-                                void *list_data, menu_generic_callback callback){
+                                uint8_t value_size, uint16_t options, void *list_data,
+                                menu_list_callback callback, void *callback_data){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
@@ -125,6 +125,7 @@ struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
         data->data = list_data;
         data->active = 0;
         data->callback = callback;
+        data->callback_data = callback_data;
         item->draw_proc = option_draw;
         item->navigate_proc = option_nav;
         item->activate_proc = option_activate;
