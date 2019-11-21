@@ -431,7 +431,8 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
     menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
-    menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
+    menu_add_submenu(&kz.main_menu,0,8,create_debug_menu(),"debug");
+    menu_add_submenu(&kz.main_menu,0,9,create_settings_menu(),"settings");
 
     init_kz_keyboard();
 

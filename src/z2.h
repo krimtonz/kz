@@ -949,7 +949,7 @@ typedef struct{
 } z2_loadfile_t;                                /* 0x0020 */
 
 typedef struct{
-    uint16_t            id;                     /* 0x0000 */
+    int16_t             id;                     /* 0x0000 */
     char                pad_0x02[0x02];         /* 0x0002 */
     void               *data;                   /* 0x0004 */
     z2_loadfile_t       loadfile;               /* 0x0008 */
@@ -1230,6 +1230,11 @@ typedef struct{
     uint16_t    update_rate;        /* 0x0110 */
 } z2_static_ctxt_t;
 
+typedef struct{
+    uint32_t    vrom_start;
+    uint32_t    vrom_end;
+} z2_obj_file_t;
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1262,6 +1267,7 @@ typedef struct{
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801BD910
 #define z2_restriction_table_addr   0x801C2410
+#define z2_object_table_addr        0x801C2740
 #define z2_stored_song_addr         0x801C6A7C
 #define z2_player_ovl_table_addr    0x801D0B70
 #define z2_file_addr                0x801EF670
@@ -1394,7 +1400,7 @@ typedef void (*z2_pause_persp_t)(z2_game_t *game);
 #define z2_input_direct         (*(z2_input_t*)             z2_input_direct_addr)
 #define z2_cimg                 ((uint32_t*)                z2_cimg_addr)
 #define z2_stored_song          (*(uint16_t*)               z2_stored_song_addr)
-
+#define z2_obj_table            ((z2_obj_file_t*)           z2_object_table_addr)
 /* Functions */
 #define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
 #define osEPiWriteIo            ((osEPiWriteIo_t)           osEPiWriteIo_addr)
