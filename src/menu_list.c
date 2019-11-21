@@ -35,14 +35,14 @@ int get_option_index(struct menu_item *item, uint32_t value){
     return -1;
 }
 
-static int option_nav(struct menu_item *item, enum menu_nav nav){
+ int option_nav(struct menu_item *item, enum menu_nav nav){
     struct item_data *data = item->data;
     if(data->active){
         if(nav == MENU_NAV_UP){
             data->selected_idx++;
             data->selected_idx %= data->option_cnt;
         }else if(nav == MENU_NAV_DOWN){
-            data->selected_idx = data->option_cnt - 1;
+            data->selected_idx += data->option_cnt - 1;
             data->selected_idx %= data->option_cnt;
         }
         return 1;

@@ -36,6 +36,7 @@ struct watch_row{
 static struct list watch_rows;
 static struct menu_item *add_button = NULL;
 static struct menu watches;
+static int prev_addr = 0x80000000;
 
 static const char *watch_type_names[] = {
     "u8",   "s8",   "x8",
@@ -65,6 +66,7 @@ static int watch_update_callback(struct menu_item *item, enum menu_callback call
     watch_t *watch = row->watch;
     value -= value % watch_data_sizes[watch->type];
     watch->address = (void*)value;
+    prev_addr = value;
     return 1;
 }
 
@@ -223,7 +225,7 @@ static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
 static int watches_button_add(struct menu_item *item, enum menu_callback callback, void *data){
     watch_t *watch = list_push_back(&kz.watches,NULL);
     static enum watch_type type = WATCH_TYPE_U8;
-    watch->address = (void*)0x80000000; 
+    watch->address = (void*)prev_addr;
     watch->type = type;
     watch->floating = 0;
     watch->x = 0;
