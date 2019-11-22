@@ -3,17 +3,7 @@
 #include "input.h"
 #include "zu.h"
 
-static uint8_t cur_form;
-
-const char *form_options_text[] = {
-    "fierce diety","goron","zora","deku","human"
-};
-
-static uint8_t form_options_values[] = {
-    0,1,2,3,4
-};
-
-const char *stored_song_text[] = {
+static char *stored_song_text[] = {
     "none", "sonata of awakening", "goron's lullaby", "new wave bossa nova", "elegy of emptiness",
     "oath to order", "saria's song", "song of time", "song of healing", "epona's song",
     "song of soaring", "song of storms", "sun's song", "inverted song of time", 
@@ -23,12 +13,6 @@ const char *stored_song_text[] = {
 static uint16_t stored_song_values[] = {
     255, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14
 };
-
-static int change_selected_form(struct menu_item *item, enum menu_callback callback, void *data){
-    int selected_idx = (int)selected_idx;
-    z2_file.current_form = form_options_values[selected_idx];
-    return 1;
-}
 
 static int debug_menu(struct menu_item *item, enum menu_callback callback, void *data){
     if(zu_ingame() && z2_game.cutscene_state == 0){

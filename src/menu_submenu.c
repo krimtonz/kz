@@ -8,7 +8,7 @@ static void menu_submenu_activate(struct menu_item *item){
     }
 }
 
-struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, const char *name){
+struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, char *name){
     struct menu_item *item = menu_add(menu,x,y,name);
     if(item){
         item->activate_proc = menu_submenu_activate;

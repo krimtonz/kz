@@ -17,13 +17,13 @@ struct item_map_row {
 
 struct switch_data {
     uint32_t    bitmask;
-    const char *tooltip;
+    char       *tooltip;
 };
 
 struct song_data {
     uint32_t        bitmask;
     uint32_t        color;
-    const char     *tooltip;
+    char           *tooltip;
 };
 
 struct capacity_upgrade_option{
@@ -32,7 +32,7 @@ struct capacity_upgrade_option{
     _Bool       tile_per_option;
     uint8_t     cap_vals[8];
     int         tiles_cnt;
-    const char *tooltip;
+    char       *tooltip;
 };
 
 struct capacity_upgrade_data{
@@ -232,7 +232,7 @@ static int8_t trade_quest_contents[] = {
 #endif
 };
 
-static const char *dungeon_names[] = {
+static char *dungeon_names[] = {
     "woodfall", "snowhead", "great bay",
     "stone tower",
 };

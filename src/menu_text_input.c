@@ -34,7 +34,7 @@ static void activate_text_input(struct menu_item *item){
 }
 
 struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
-                                      const char *default_text, char **value_ptr){
+                                      char *default_text, char **value_ptr){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct item_data *data = malloc(sizeof(*data));

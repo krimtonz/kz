@@ -2,7 +2,7 @@
 #include "menu.h"
 
 struct item_data {
-    const char            **text;
+    char                  **text;
     void                   *values;
     uint8_t                 value_size;
     uint16_t                option_cnt;
@@ -111,7 +111,7 @@ static void option_draw(struct menu_item *item){
 }
 
 struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
-                                const char **text, void *values,
+                                char **text, void *values,
                                 uint8_t value_size, uint16_t options, void *list_data,
                                 menu_list_callback callback, void *callback_data){
     struct menu_item *item = menu_add(menu,x,y,NULL);

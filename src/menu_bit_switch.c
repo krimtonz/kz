@@ -81,7 +81,7 @@ struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
                                             void *addr, uint8_t addr_len, uint32_t bitmask,
                                             menu_generic_callback callback, void *callback_data,
                                             gfx_texture *texture, uint16_t tex_width, uint16_t tex_height,
-                                            uint16_t tile, _Bool has_off_tile, const char *tooltip,
+                                            uint16_t tile, _Bool has_off_tile, char *tooltip,
                                             uint32_t on_color, uint32_t off_color, _Bool load_item){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){

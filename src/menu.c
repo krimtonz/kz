@@ -87,7 +87,7 @@ void menu_update(struct menu *menu){
     }
 }
 
-struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, const char *text){
+struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, char *text){
     struct menu_item *item = list_push_back(&menu->items,NULL);
     if(item){
         item->text = text;

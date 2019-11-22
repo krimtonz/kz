@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 struct kz_scene_category {
-    const char *name;
+    char       *name;
     int         scene_cnt;
     uint8_t    *scenes;
 };
@@ -11,8 +11,8 @@ struct kz_scene_category {
 struct kz_scene {
     uint16_t        scene;
     uint16_t        entrance_cnt;
-    const char     *scene_name;
-    const char    **entrances;
+    char           *scene_name;
+    char          **entrances;
 };
 
 extern struct kz_scene          scenes[];

@@ -4,7 +4,7 @@
 
 struct cheat_item{
     enum cheats mask;
-    const char *name;
+    char       *name;
 };
 
 static struct cheat_item cheat_table[] = {

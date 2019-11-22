@@ -85,7 +85,7 @@ static void update_menu_switch(struct menu_item *item){
 struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
                                   void *addr, uint8_t addr_len, uint32_t bitmask, 
                                   menu_generic_callback callback, void *callback_data,
-                                  const char *text){
+                                  char *text){
     struct menu_item *item = menu_add(menu,x,y,text);
     if(item){
         struct item_data *data = malloc(sizeof(*data));

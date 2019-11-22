@@ -38,7 +38,7 @@ static struct menu_item *add_button = NULL;
 static struct menu watches;
 static int prev_addr = 0x80000000;
 
-static const char *watch_type_names[] = {
+static char *watch_type_names[] = {
     "u8",   "s8",   "x8",
     "u16",  "s16",  "x16",
     "u32",  "s32",  "x32",

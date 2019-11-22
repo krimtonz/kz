@@ -32,7 +32,7 @@ enum command_type{
 };
 
 struct command {
-    const char         *text;
+    char               *text;
     enum command_type   type;
     void              (*proc)();
 };

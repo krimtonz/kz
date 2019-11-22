@@ -4,7 +4,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0000 */
         0, 3,
         "mayor's residence",
-        (const char*[]){
+        (char*[]){
             "east clock town",
             "after couples mask",
             "unknown (crash)",
@@ -13,21 +13,21 @@ struct kz_scene scenes[] = {
     {                                                   /* 0001 */
         2, 1,
         "majora's lair",
-        (const char*[]){
+        (char*[]){
             "moon",
         },
     },
     {                                                   /* 0002 */
         4, 1,
         "hags potion shop",
-        (const char*[]){
+        (char*[]){
             "southern swamp",
         },
     },
     {                                                   /* 0003 */
         6, 3,
         "romani ranch buildings",
-        (const char*[]){
+        (char*[]){
             "barn from ranch",
             "house from ranch",
             "unknown (crash)"
@@ -36,14 +36,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0004 */
         8, 1,
         "honey & darling",
-        (const char*[]){
+        (char*[]){
             "east clock town",
         },
     },
     {                                                   /* 0005 */
         10, 2,
         "beneath graveyard",
-        (const char*[]){
+        (char*[]){
             "day 2 start",
             "day 1 start",
         },
@@ -51,7 +51,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0006 */
         12, 11,
         "southern swamp (clear)",
-        (const char*[]){
+        (char*[]){
             "swamp road",
             "boat house",
             "woodfall",
@@ -68,7 +68,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0007 */
         14, 4,
         "curiosity shop",
-        (const char*[]){
+        (char*[]){
             "west clock town",
             "kafei's hideout from laundry pool",
             "spying start",
@@ -78,14 +78,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0008 */
         16, 1,
         "test map",
-        (const char*[]){
+        (char*[]){
             "unknown",
         },
     },
     {                                                   /* 0009 */
         20, 17,
         "grottos",
-        (const char*[]){
+        (char*[]){
             "ocean gossip stones",
             "swamp gossip stones",
             "canyon gossip stones",
@@ -108,7 +108,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0010 */
         28, 10,
         "cutscene map",
-        (const char*[]){
+        (char*[]){
             "unknown",
             "unknown (crash)",
             "unknown (crash)",
@@ -124,7 +124,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0011 */
         32, 15,
         "ikana canyon",
-        (const char*[]){
+        (char*[]){
             "ikana road",
             "ghost hut",
             "music box house",
@@ -145,7 +145,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0012 */
         34, 15,
         "pirates fortress",
-        (const char*[]){
+        (char*[]){
             "exterior pirates fortress",
             "lower hookshot room",
             "upper hookshot room",
@@ -166,14 +166,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0013 */
         36, 1,
         "milk bar",
-        (const char*[]){
+        (char*[]){
             "east clock town",
         },
     },
     {                                                   /* 0014 */
         38, 2,
         "stone tower temple",
-        (const char*[]){
+        (char*[]){
             "intro",
             "no intro",
         },
@@ -181,7 +181,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0015 */
         40, 2,
         "treasure chest shop",
-        (const char*[]){
+        (char*[]){
             "east clock town",
             "after game",
         },
@@ -189,7 +189,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0016 */
         42, 3,
         "stone tower temple (inverted)",
-        (const char*[]){
+        (char*[]){
             "main entrance",
             "boss room entrance",
             "unknown (crash)",
@@ -198,7 +198,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0017 */
         44, 3,
         "clock tower",
-        (const char*[]){
+        (char*[]){
             "first encounter",
             "after song of time",
             "unknown (crash)",
@@ -207,7 +207,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0018 */
         46, 5,
         "before clock town",
-        (const char*[]){
+        (char*[]){
             "falling from cliff",
             "inside clock tower",
             "transformed to deku",
@@ -218,7 +218,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0019 */
         48, 3,
         "woodfall temple",
-        (const char*[]){
+        (char*[]){
             "main entrance",
             "prison after odolwa",
             "prision (unknown)",
@@ -227,7 +227,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0020 */
         50, 2,
         "path to mountain village",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "mountain village",
         },
@@ -235,7 +235,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0021 */
         52, 7,
         "ikana castle",
-        (const char*[]){
+        (char*[]){
             "beneath the well",
             "ikana canyon",
             "exterior from interior",
@@ -248,7 +248,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0022 */
         54, 2,
         "deku playground",
-        (const char*[]){
+        (char*[]){
             "north clock town",
             "after game",
         },
@@ -256,14 +256,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0023 */
         56, 1,
         "odolwa",
-        (const char*[]){
+        (char*[]){
             "woodfall temple",
         },
     },
     {                                                   /* 0024 */
         58, 2,
         "town shooting gallery",
-        (const char*[]){
+        (char*[]){
             "east clock town (intro)",
             "east clock town (no intro)",
         },
@@ -271,7 +271,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0025 */
         60, 2,
         "snowhead temple",
-        (const char*[]){
+        (char*[]){
             "snowhead (intro)",
             "snowhead (no intro)",
         },
@@ -279,7 +279,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0026 */
         62, 7,
         "milk road",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "romani ranch",
             "gorman track (track exit)",
@@ -292,7 +292,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0027 */
         64, 16,
         "pirates fortress interior",
-        (const char*[]){
+        (char*[]){
             "unknown",
             "unknown",
             "unknown",
@@ -314,14 +314,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0028 */
         66, 1,
         "swamp shooting gallery",
-        (const char*[]){
+        (char*[]){
             "road to southern swamp",
         },
     },
     {                                                   /* 0029 */
         68, 2,
         "pinnacle rock",
-        (const char*[]){
+        (char*[]){
             "great bay coast",
             "void respawn",
         },
@@ -329,7 +329,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0030 */
         70, 10,
         "fairy fountain",
-        (const char*[]){
+        (char*[]){
             "clock town",
             "woodfall",
             "snowhead",
@@ -345,21 +345,21 @@ struct kz_scene scenes[] = {
     {                                                   /* 0031 */
         72, 1,
         "swamp spider house",
-        (const char*[]){
+        (char*[]){
             "soutern swamp",
         },
     },
     {                                                   /* 0032 */
         74, 1,
         "oceanside spider house",
-        (const char*[]){
+        (char*[]){
             "great bay coast",
         },
     },
     {                                                   /* 0033 */
         76, 3,
         "observatory",
-        (const char*[]){
+        (char*[]){
             "east clock town",
             "termina field",
             "after telescope",
@@ -368,14 +368,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0034 */
         78, 1,
         "deku trial",
-        (const char*[]){
+        (char*[]){
             "moon",
         },
     },
     {                                                   /* 0035 */
         80, 11,
         "deku palace",
-        (const char*[]){
+        (char*[]){
             "soutern swamp",
             "thrown out",
             "deku king chamber",
@@ -392,14 +392,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0036 */
         82, 1,
         "mountain smithy",
-        (const char*[]){
+        (char*[]){
             "moutain village",
         },
     },
     {                                                   /* 0037 */
         84, 18,
         "termina field",
-        (const char*[]){
+        (char*[]){
             "west clock town",
             "road to soutern swamp",
             "great bay coast",
@@ -423,21 +423,21 @@ struct kz_scene scenes[] = {
     {                                                   /* 0038 */
         86, 1,
         "post office",
-        (const char*[]){
+        (char*[]){
             "west clock town",
         },
     },
     {                                                   /* 0039 */
         88, 1,
         "marine lab",
-        (const char*[]){
+        (char*[]){
             "great bay coast",
         },
     },
     {                                                   /* 0040 */
         90, 2,
         "dampes house",
-        (const char*[]){
+        (char*[]){
             "beneath the graveyard",
             "graveyard",
         },
@@ -445,7 +445,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0041 */
         94, 4,
         "goron shrine",
-        (const char*[]){
+        (char*[]){
             "goron village",
             "goron shop",
             "after lullaby",
@@ -455,7 +455,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0042 */
         96, 9,
         "zora hall",
-        (const char*[]){
+        (char*[]){
             "zora cape",
             "zora cape (turtle)",
             "zora shop",
@@ -470,7 +470,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0043 */
         98, 2,
         "trading post",
-        (const char*[]){
+        (char*[]){
             "west clock town (intro)",
             "west clock town (no intro)",
         },
@@ -478,7 +478,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0044 */
         100, 12,
         "romani ranch",
-        (const char*[]){
+        (char*[]){
             "milk road",
             "after target practice",
             "barn",
@@ -496,7 +496,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0045 */
         102, 5,
         "twinmold",
-        (const char*[]){
+        (char*[]){
             "inverted stone tower",
             "inverted stone tower",
             "unknown (crash)",
@@ -507,7 +507,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0046 */
         104, 14,
         "great bay coast",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "zora cape",
             "void respawn",
@@ -527,7 +527,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0047 */
         106, 10,
         "zora cape",
-        (const char*[]){
+        (char*[]){
             "great bay coast",
             "zora hall",
             "zora hall (turtle)",
@@ -543,14 +543,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0048 */
         108, 1,
         "lottery shop",
-        (const char*[]){
+        (char*[]){
             "west clock town",
         },
     },
     {                                                   /* 0049 */
         112, 7,
         "pirates fortress exterior",
-        (const char*[]){
+        (char*[]){
             "great bay coast",
             "unknown",
             "unknown",
@@ -563,21 +563,21 @@ struct kz_scene scenes[] = {
     {                                                   /* 0050 */
         114, 1,
         "fisherman's hut",
-        (const char*[]){
+        (char*[]){
             "great bay coast",
         },
     },
     {                                                   /* 0051 */
         116, 1,
         "goron shop",
-        (const char*[]){
+        (char*[]){
             "goron shrine",
         },
     },
     {                                                   /* 0052 */
         118, 4,
         "deku king's chamber",
-        (const char*[]){
+        (char*[]){
             "deku palace",
             "deku palace (upper)",
             "monkey released",
@@ -587,14 +587,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0053 */
         120, 1,
         "goron trial",
-        (const char*[]){
+        (char*[]){
             "moon",
         },
     },
     {                                                   /* 0054 */
         122, 3,
         "road to southern swamp",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "southern swamp",
             "swamp shooting gallery",
@@ -603,7 +603,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 00555 */
         124, 2,
         "doggy racetrack",
-        (const char*[]){
+        (char*[]){
             "romani ranch",
             "after race",
         },
@@ -611,7 +611,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0056 */
         126, 2,
         "cucco shack",
-        (const char*[]){
+        (char*[]){
             "romani ranch",
             "after bunny hood",
         },
@@ -619,7 +619,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0057 */
         128, 6,
         "ikana graveyard",
-        (const char*[]){
+        (char*[]){
             "road to ikana",
             "unknown",
             "unknown",
@@ -631,14 +631,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0058 */
         130, 1,
         "goht",
-        (const char*[]){
+        (char*[]){
             "snowhead temple",
         },
     },
     {                                                   /* 0059 */
         132, 11,
         "southern swamp (poison)",
-        (const char*[]){
+        (char*[]){
             "road to soutern swamp",
             "boat house",
             "woodfall",
@@ -655,7 +655,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0060 */
         134, 5,
         "woodfall",
-        (const char*[]){
+        (char*[]){
             "southern swamp",
             "unknown",
             "fairy fountain",
@@ -666,7 +666,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0061 */
         136, 2,
         "zora trial",
-        (const char*[]){
+        (char*[]){
             "moon",
             "void respawn",
         },
@@ -674,7 +674,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0062 */
         138, 5,
         "goron village (spring)",
-        (const char*[]){
+        (char*[]){
             "path to goron village (spring)",
             "unknown",
             "goron shrine",
@@ -685,7 +685,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0063 */
         140, 3,
         "great bay temple",
-        (const char*[]){
+        (char*[]){
             "zora cape (waving)",
             "zora cape",
             "unknown (crash)",
@@ -694,7 +694,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0064 */
         142, 4,
         "waterfall",
-        (const char*[]){
+        (char*[]){
             "zora cape",
             "race start",
             "race end",
@@ -704,7 +704,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0065 */
         144, 2,
         "beneath the well",
-        (const char*[]){
+        (char*[]){
             "ikana canyon",
             "ikana castle",
         },
@@ -712,7 +712,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0066 */
         146, 7,
         "zora hall rooms",
-        (const char*[]){
+        (char*[]){
             "mikau from zora hall",
             "japas from zora hall",
             "lulu from zora hall",
@@ -725,7 +725,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0067 */
         148, 5,
         "goron village (winter)",
-        (const char*[]){
+        (char*[]){
             "path to goron village (winter)",
             "unknown",
             "goron shrine",
@@ -736,7 +736,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0068 */
         150, 2,
         "goron graveyard",
-        (const char*[]){
+        (char*[]){
             "mountain village",
             "receiving goron mask",
         },
@@ -744,14 +744,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0069 */
         152, 1,
         "sakon's hideout",
-        (const char*[]){
+        (char*[]){
             "ikana canyon",
         },
     },
     {                                                   /* 0070 */
         154, 9,
         "mountain village (winter)",
-        (const char*[]){
+        (char*[]){
             "unknown",
             "mountain smithy",
             "path to goron village (winter)",
@@ -766,7 +766,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0071 */
         156, 3,
         "ghost hut",
-        (const char*[]){
+        (char*[]){
             "ikana canyon",
             "unknown",
             "unknown",
@@ -775,7 +775,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0072 */
         158, 3,
         "deku shrine",
-        (const char*[]){
+        (char*[]){
             "deku palace",
             "deku palace",
             "unknown (crash)",
@@ -784,7 +784,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0073 */
         160, 3,
         "road to ikana",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "ikana canyon",
             "ikana graveyard",
@@ -793,28 +793,28 @@ struct kz_scene scenes[] = {
     {                                                   /* 0074 */
         162, 1,
         "swordsman school",
-        (const char*[]){
+        (char*[]){
             "west clock town",
         },
     },
     {                                                   /* 0075 */
         164, 1,
         "music box house",
-        (const char*[]){
+        (char*[]){
             "ikana canyon",
         },
     },
     {                                                   /* 0076 */
         166, 1,
         "igos du ikana",
-        (const char*[]){
+        (char*[]){
             "ikana castle",
         },
     },
     {                                                   /* 0077 */
         168, 3,
         "boat house",
-        (const char*[]){
+        (char*[]){
             "southern swamp",
             "koume",
             "tingle's dad",
@@ -823,7 +823,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0078 */
         170, 4,
         "stone tower",
-        (const char*[]){
+        (char*[]){
             "ikana canyon",
             "unknown",
             "stone tower temple",
@@ -833,7 +833,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0079 */
         172, 2,
         "stone tower (inverted)",
-        (const char*[]){
+        (char*[]){
             "unknown",
             "unknown",
         },
@@ -841,7 +841,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0080 */
         174, 9,
         "mountain village (spring)",
-        (const char*[]){
+        (char*[]){
             "unknown",
             "mountain smithy",
             "path to goron village (spring)",
@@ -856,7 +856,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0081 */
         176, 4,
         "path to snowhead",
-        (const char*[]){
+        (char*[]){
             "mountain village",
             "unknown",
             "snowhead",
@@ -867,7 +867,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0082 */
         178, 4,
         "snowhead",
-        (const char*[]){
+        (char*[]){
             "path to snowhead",
             "snowhead temple",
             "fairy fountain",
@@ -877,7 +877,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0083 */
         180, 3,
         "path to goron village (winter)",
-        (const char*[]){
+        (char*[]){
             "mountain village (winter)",
             "goron village (winter)",
             "goron racetrack",
@@ -886,7 +886,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0084 */
         182, 3,
         "path to goron village (spring)",
-        (const char*[]){
+        (char*[]){
             "mountain village (spring)",
             "goron village (spring)",
             "goron racetrack",
@@ -895,7 +895,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0085 */
         184, 2,
         "gyorg",
-        (const char*[]){
+        (char*[]){
             "great bay temple",
             "unknown",
         },
@@ -903,14 +903,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0086 */
         186, 1,
         "secret shrine",
-        (const char*[]){
+        (char*[]){
             "ikana canyon",
         },
     },
     {                                                   /* 0087 */
         188, 6,
         "stock pot inn",
-        (const char*[]){
+        (char*[]){
             "east clock town (main)",
             "east clock town (balcony)",
             "granny's story",
@@ -922,14 +922,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0088 */
         190, 1,
         "great bay (cutscene)",
-        (const char*[]){
+        (char*[]){
             "zora cape",
         },
     },
     {                                                   /* 0089 */
         192, 7,
         "clock tower interior",
-        (const char*[]){
+        (char*[]){
             "before portal to termina",
             "south clock town",
             "unknown",
@@ -942,14 +942,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0090 */
         194, 1,
         "woods of mystery",
-        (const char*[]){
+        (char*[]){
             "southern swamp",
         },
     },
     {                                                   /* 0091 */
         196, 3,
         "lost woods",
-        (const char*[]){
+        (char*[]){
             "unknown",
             "unknown",
             "unknown",
@@ -958,21 +958,21 @@ struct kz_scene scenes[] = {
     {                                                   /* 0092 */
         198, 1,
         "link trial",
-        (const char*[]){
+        (char*[]){
             "moon",
         },
     },
     {                                                   /* 0093 */
         200, 1,
         "moon",
-        (const char*[]){
+        (char*[]){
             "clock tower",
         },
     },
     {                                                   /* 0094 */
         202,2,
         "bomb shop",
-        (const char*[]){
+        (char*[]){
             "west clock town",
             "west clock town",
         },
@@ -980,14 +980,14 @@ struct kz_scene scenes[] = {
     {                                                   /* 0095 */
         204, 1,
         "giants chamber",
-        (const char*[]){
+        (char*[]){
             "oath to order",
         },
     },
     {                                                   /* 0096 */
         206, 6,
         "gorman race track",
-        (const char*[]){
+        (char*[]){
             "milk road",
             "unknown",
             "unknown",
@@ -999,7 +999,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0097 */
         208, 3,
         "goron racetrack",
-        (const char*[]){
+        (char*[]){
             "path to mountain village",
             "race start",
             "race end",
@@ -1008,7 +1008,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0098 */
         210, 13,
         "east clock town",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "south clock town",
             "observatory",
@@ -1027,7 +1027,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0099 */
         212, 10,
         "west clock town",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "south clock town (lower)",
             "south clock town (upper)",
@@ -1043,7 +1043,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0100 */
         214, 8,
         "north clock town",
-        (const char*[]){
+        (char*[]){
             "termina field",
             "east clock town",
             "south clock town",
@@ -1057,7 +1057,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0101 */
         216, 11,
         "south clock town",
-        (const char*[]){
+        (char*[]){
             "clock tower interior",
             "termina field",
             "east clock town (upper)",
@@ -1074,7 +1074,7 @@ struct kz_scene scenes[] = {
     {                                                   /* 0102 */
         218, 3,
         "laundry pool",
-        (const char*[]){
+        (char*[]){
             "south clock town",
             "kafei's hideout",
             "unknown (crash)",
