@@ -4,131 +4,138 @@
 #include "input.h"
 #include "commands.h"
 
-struct item_data{
-    menu_generic_callback   callback;
-    void                   *callback_data;
+enum settings_switch_item {
+    SW_INPUT_DISPLAY,
+    SW_TIMER,
+    SW_LAG_COUNTER,
+    SW_MEMFILE_VOID,
+    SW_MEMFILE_POS,
 };
-
-enum moving_element{
-    INPUT_DISPLAY,
-    TIMER,
-    LAG_COUNTER,
-    NONE,
-};
-
-static enum moving_element moving = NONE;
 
 static int profile_dec(struct menu_item *item, enum menu_callback callback, void *data){
-    kz.settings_profile += SETTINGS_MAX - 1;
-    kz.settings_profile %= SETTINGS_MAX;
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        kz.settings_profile += SETTINGS_MAX - 1;
+        kz.settings_profile %= SETTINGS_MAX;
+        return 1;
+    }
+    return 0;
 }
 
 static int profile_inc(struct menu_item *item, enum menu_callback callback, void *data){
-    kz.settings_profile++;
-    kz.settings_profile %= SETTINGS_MAX;
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        kz.settings_profile++;
+        kz.settings_profile %= SETTINGS_MAX;
+        return 1;
+    }
+    return 0;
 }
 
 static int memfile_dec(struct menu_item *item, enum menu_callback callback, void *data){
-    command_prev_memfile();
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        command_prev_memfile();
+        return 1;
+    }
+    return 0;
 }
 
 static int memfile_inc(struct menu_item *item, enum menu_callback callback, void *data){
-    command_next_memfile();
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        command_next_memfile();
+        return 1;
+    }
+    return 0;
 }
 
 static int position_dec(struct menu_item *item, enum menu_callback callback, void *data){
-    command_prev_position();
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        command_prev_position();
+        return 1;
+    }
+    return 0;
 }
 
 static int position_inc(struct menu_item *item, enum menu_callback callback, void *data){
-    command_next_position();
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        command_next_position();
+        return 1;
+    }
+    return 0;
 }
 
 static int save_profile(struct menu_item *item, enum menu_callback callback, void *data){
-    save_settings_to_flashram(kz.settings_profile);
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        save_settings_to_flashram(kz.settings_profile);
+        return 1;
+    }
+    return 0;
 }
 
 static int load_profile(struct menu_item *item, enum menu_callback callback, void *data){
-    load_settings_from_flashram(kz.settings_profile);
-    kz_apply_settings();
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        load_settings_from_flashram(kz.settings_profile);
+        kz_apply_settings();
+        return 1;
+    }
+    return 0;
 }
 
 static int default_settings(struct menu_item *item, enum menu_callback callback, void *data){
-    load_default_settings();
-    kz_apply_settings();
-    return 1;
-}
-
-static int move_item(struct menu_item *item, enum menu_callback callback, void *data){
-    if(moving == NONE){
-        moving = (enum moving_element)data;
-    }else{
-        moving = NONE;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        load_default_settings();
+        kz_apply_settings();
+        return 1;
     }
-    return 1;
-}
-
-static int nav_item(struct menu_item *item, enum menu_nav nav){
-    struct item_data *data = item->data;
-    int16_t *x = NULL;
-    int16_t *y = NULL;
-    if((enum moving_element)data->callback_data != moving) return 0;
-    switch(moving){
-        case INPUT_DISPLAY:
-            x = &settings->id_x;
-            y = &settings->id_y;
-            break;
-        case LAG_COUNTER:
-            x = &settings->lag_x;
-            y = &settings->lag_y;
-            break;
-        case TIMER:
-            x = &settings->timer_x;
-            y = &settings->timer_y;
-            break;
-        case NONE:
-        default:
-            return 0;
-    }
-    int amt = input_pressed_raw() & BUTTON_Z?5:3;
-    switch(nav){
-        case MENU_NAV_DOWN:
-            (*y)+=amt;
-            break;
-        case MENU_NAV_LEFT:
-            (*x)-=amt;
-            break;
-        case MENU_NAV_RIGHT:
-            (*x)+=amt;
-            break;
-        case MENU_NAV_UP:
-            (*y)-=amt;
-            break;
-        default:
-            return 0;
-    }
-    return 1;
+    return 0;
 }
 
 static int run_command(struct menu_item *item, enum menu_callback callback, void *data){
-    int cmd = (int)data;
-    if(kz_commands[cmd].proc){
-        kz_commands[cmd].proc();
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        int cmd = (int)data;
+        if(kz_commands[cmd].proc){
+            kz_commands[cmd].proc();
+        }
+        return 1;
     }
-    return 1;
+    return 0;
+}
+
+static int settings_switch_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        enum settings_switch_item sw = (enum settings_switch_item)data;
+        switch(sw){
+            case SW_INPUT_DISPLAY:
+            settings->input_display = !settings->input_display;
+            break;
+            case SW_TIMER:
+            settings->timer = !settings->timer;
+            break;
+            case SW_LAG_COUNTER:
+            settings->lag_counter = !settings->lag_counter;
+            break;
+            case SW_MEMFILE_VOID:
+            if(settings->memfile_action != MEMFILE_NONE){
+                settings->memfile_action = MEMFILE_NONE;
+            }else{
+                settings->memfile_action = MEMFILE_VOID;
+            }
+            break;
+            case SW_MEMFILE_POS:
+            if(settings->memfile_action != MEMFILE_NONE){
+                settings->memfile_action = MEMFILE_NONE;
+            }else{
+                settings->memfile_action = MEMFILE_POS;
+            }
+            break;
+        }
+        return 1;
+    }
+    return 0;
 }
 
 struct menu *create_settings_menu(){
     static struct menu settingsm;
     menu_init(&settingsm,kz.main_menu.x,kz.main_menu.y);
+    menu_set_padding(&settingsm,0,2);
     settingsm.selected_item = menu_add_button(&settingsm,0,0,"return",menu_return,NULL);
     menu_add(&settingsm,0,1,"profile");
     menu_add_button(&settingsm,12,1,"-",profile_dec,NULL);
@@ -141,24 +148,21 @@ struct menu *create_settings_menu(){
     menu_add_button(&settingsm,0,2,"save settings",save_profile,NULL);
     menu_add_button(&settingsm,0,3,"load settings",load_profile,NULL);
     menu_add_button(&settingsm,0,4,"load default settings",default_settings,NULL);
-    draw_info_t draw_info = {
-        resource_get(R_KZ_CHECKBOX), 1,-1, 1.f, 1.f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}},0,checkbox_bg
-    };
-    menu_add_gfx_switch(&settingsm,0,5,&settings->input_display,1,0x01,NULL,NULL,&draw_info);
+    
+    struct menu_item *item = menu_add_checkbox(&settingsm,0,5,settings_switch_callback,(void*)SW_INPUT_DISPLAY);
+    menu_checkbox_set(item,settings->input_display);
     menu_add(&settingsm,2,5,"input display");
-    draw_info_t draw = {
-        resource_get(R_KZ_ICON), 2, -1, 1.f, 1.f, 8, 8, {{0xFF,0xFF,0xFF,0xFF}},{{0xFF,0xFF,0xFF,0xFF}},1,NULL
-    };
-    struct menu_item *item = menu_add_gfx_button(&settingsm,16,5,move_item,(void*)INPUT_DISPLAY,&draw);
-    item->navigate_proc = nav_item;
-    menu_add_gfx_switch(&settingsm,0,6,&settings->timer,1,0x01,NULL,NULL,&draw_info);
+    menu_add_move_button(&settingsm,16,5,&settings->id_x,&settings->id_y,NULL,NULL);
+    
+    item = menu_add_checkbox(&settingsm,0,6,settings_switch_callback,(void*)SW_TIMER);
+    menu_checkbox_set(item,settings->timer);
     menu_add(&settingsm,2,6,"timer");
-    item = menu_add_gfx_button(&settingsm,16,6,move_item,(void*)TIMER,&draw);
-    item->navigate_proc = nav_item;
-    menu_add_gfx_switch(&settingsm,0,7,&settings->lag_counter,1,0x01,NULL,NULL,&draw_info);
+    menu_add_move_button(&settingsm,16,6,&settings->timer_x,&settings->timer_y,NULL,NULL);
+
+    item = menu_add_checkbox(&settingsm,0,7,settings_switch_callback,(void*)SW_LAG_COUNTER);
+    menu_checkbox_set(item,settings->lag_counter);
     menu_add(&settingsm,2,7,"lag counter");
-    item = menu_add_gfx_button(&settingsm,16,7,move_item,(void*)LAG_COUNTER,&draw);
-    item->navigate_proc = nav_item;
+    menu_add_move_button(&settingsm,16,7,&settings->lag_x,&settings->lag_y,NULL,NULL);
 
     menu_add(&settingsm,0,8,"memfile");
     menu_add_button(&settingsm,15,8,"-",memfile_dec,NULL);
@@ -169,11 +173,17 @@ struct menu *create_settings_menu(){
     menu_add_watch(&settingsm,16,8,&memfile_watch,1);
     menu_add_button(&settingsm,17,8,"+",memfile_inc,NULL);
     
-    menu_add_gfx_switch(&settingsm,0,9,&settings->memfile_action,1,MEMFILE_VOID,NULL,NULL,&draw_info);
-    menu_add(&settingsm,3,9,"void on loading memfile");
+    item = menu_add_checkbox(&settingsm,0,9,settings_switch_callback,(void*)SW_MEMFILE_VOID);
+    if(settings->memfile_action == MEMFILE_VOID){
+        menu_checkbox_set(item,1);
+    }
+    menu_add(&settingsm,3,9,"void on load memfile");
 
-    menu_add_gfx_switch(&settingsm,0,10,&settings->memfile_action,1,MEMFILE_POS,NULL,NULL,&draw_info);
-    menu_add(&settingsm,3,10,"load position on loading memfile");
+    item = menu_add_checkbox(&settingsm,0,10,settings_switch_callback,(void*)SW_MEMFILE_POS);
+    if(settings->memfile_action == MEMFILE_POS){
+        menu_checkbox_set(item,1);
+    }
+    menu_add(&settingsm,3,10,"load pos on load memfile");
 
     menu_add(&settingsm,0,11,"saved position");
     menu_add_button(&settingsm,15,11,"-",position_dec,NULL);
@@ -186,6 +196,7 @@ struct menu *create_settings_menu(){
 
     static struct menu commands;
     menu_init(&commands,0,0);
+    menu_set_padding(&commands,0,1);
 
     commands.selected_item = menu_add_button(&commands,0,0,"return",menu_return,NULL);
     menu_add(&commands,0,1,"command");

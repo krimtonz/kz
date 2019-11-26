@@ -15,42 +15,63 @@ static uint16_t stored_song_values[] = {
 };
 
 static int debug_menu(struct menu_item *item, enum menu_callback callback, void *data){
-    if(zu_ingame() && z2_game.cutscene_state == 0){
-        if(z2_game.pause_ctx.state == 0){
-            z2_game.pause_ctx.state = 1;
-                z2_pause_persp(&z2_game);
-                z2_game.pause_ctx.unk_0x202 = (z2_game.pause_ctx.screen_idx * 2) + 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(zu_ingame() && z2_game.cutscene_state == 0){
+            if(z2_game.pause_ctx.state == 0){
+                z2_game.pause_ctx.state = 1;
+                    z2_pause_persp(&z2_game);
+                    z2_game.pause_ctx.unk_0x202 = (z2_game.pause_ctx.screen_idx * 2) + 1;
+            }
+            z2_game.pause_ctx.debug_menu = 1;
+            reserve_buttons(BUTTON_D_DOWN | BUTTON_D_RIGHT | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_L);
+            kz.debug_active = 1;
+            kz.menu_active = 0;
+            kz.pending_frames = -1;
+        }else{
+            kz_log("cannot debug menu here");
         }
-        z2_game.pause_ctx.debug_menu = 1;
-        reserve_buttons(BUTTON_D_DOWN | BUTTON_D_RIGHT | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_L);
-        kz.debug_active = 1;
-        kz.menu_active = 0;
-        kz.pending_frames = -1;
-    }else{
-        kz_log("cannot debug menu here");
+        return 1;
     }
-    return 1;
+    return 0;
 }
 
 static int time_of_day_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
-    for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
-        if(actor->id == 0x15A){
-            if(z2_file.daynight == 1 && (value>=0xC000 || value < 0x4000)){
-                z2_file.daynight = 0;
-            }else if(z2_file.daynight == 0 && (value<=0xC000 || value >= 0x4000)){
-                z2_file.daynight = 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+            if(actor->id == 0x15A){
+                if(z2_file.daynight == 1 && (value>=0xC000 || value < 0x4000)){
+                    z2_file.daynight = 0;
+                }else if(z2_file.daynight == 0 && (value<=0xC000 || value >= 0x4000)){
+                    z2_file.daynight = 1;
+                }
+                z2_timer_t *timer = (z2_timer_t*)actor;
+                timer->daynight = z2_file.daynight;
+                timer->timer_boundaries[0] = (uint16_t)value;
+                if(value<0x4000){
+                    timer->timer_boundaries[1] = 0x4000;
+                }else{
+                    timer->timer_boundaries[1] = 0xC000;
+                }
+                timer->timer_boundaries[2] = (uint16_t)value;
+                break;
             }
-            z2_timer_t *timer = (z2_timer_t*)actor;
-            timer->daynight = z2_file.daynight;
-            timer->timer_boundaries[0] = (uint16_t)value;
-            if(value<0x4000){
-                timer->timer_boundaries[1] = 0x4000;
-            }else{
-                timer->timer_boundaries[1] = 0xC000;
-            }
-            timer->timer_boundaries[2] = (uint16_t)value;
-            break;
         }
+    }
+    return 0;
+}
+
+static int intro_watched_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_file.intro_flag = !z2_file.intro_flag;
+        return 1;
+    }
+    return 0;
+}
+
+static int great_spin_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_file.week_event_inf[0x17] ^= 0x2;
+        return 1;
     }
     return 0;
 }
@@ -58,13 +79,11 @@ static int time_of_day_callback(struct menu_item *item, enum menu_callback callb
 struct menu *create_file_menu(){
     static struct menu file;
     menu_init(&file,0,0);
+    menu_set_padding(&file,0,2);
     file.selected_item = menu_add_button(&file,0,0,"return",menu_return,NULL);
-    draw_info_t draw_info = {
-        resource_get(R_KZ_CHECKBOX), 1,-1, 1.f, 1.f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}},0,checkbox_bg
-    };
-    menu_add_gfx_switch(&file,0,1,&z2_file.intro_flag,1,0x01,NULL,NULL,&draw_info);
+    menu_add_checkbox(&file,0,1,intro_watched_callback,NULL);
     menu_add(&file,2,1,"intro watched");
-    menu_add_gfx_switch(&file,0,2,&z2_file.week_event_inf[0x17],1,0x02,NULL,NULL,&draw_info);
+    menu_add_checkbox(&file,0,2,great_spin_callback,NULL);
     menu_add(&file,2,2,"great spin");
     menu_add_button(&file,0,3,"debug menu",debug_menu,NULL);
     menu_add(&file,0,4,"stored song");

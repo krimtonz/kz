@@ -19,20 +19,24 @@ static struct cheat_item cheat_table[] = {
     { CHEAT_RUPEES, "rupees" },
     { CHEAT_BLAST_MASK, "no blast mask cooldown" },
     { CHEAT_RESTRICTION, "no item restriction" },
-    { CHEAT_ISG, "isg" }
+    { CHEAT_ISG, "isg" },
+    { CHEAT_FREEZE_TIME, "freeze time"},
 };
 
- int restriction_callback(struct menu_item *item,enum menu_callback callback, void *data){
+static int cheat_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    enum cheats cheat = (enum cheats)data;
     if(callback == MENU_CALLBACK_ACTIVATE){
-        uint32_t mask = 1 << CHEAT_RESTRICTION;
-        settings->cheats ^= mask;
-        if((settings->cheats & mask) == mask){
-            memset((void*)z2_restriction_table_addr,1,sizeof(restriction_table));
-        }
-        else{
-            memcpy((void*)z2_restriction_table_addr,restriction_table,sizeof(restriction_table));
+        settings->cheats = settings->cheats ^ (1 << cheat);
+        if(cheat == CHEAT_RESTRICTION){
+            if(settings->cheats & (1 << CHEAT_RESTRICTION)){
+                memset((void*)z2_restriction_table_addr,1,sizeof(restriction_table));
+            }else{
+                memcpy((void*)z2_restriction_table_addr,restriction_table,sizeof(restriction_table));
+            }
         }
         return 1;
+    }else if(callback == MENU_CALLBACK_UPDATE){
+        menu_checkbox_set(item,((settings->cheats & (1 << cheat)) > 0));
     }
     return 0;
 }
@@ -40,17 +44,12 @@ static struct cheat_item cheat_table[] = {
 struct menu *create_cheats_menu(){
     static struct menu cheats;
     menu_init(&cheats,0,0);
+    menu_set_padding(&cheats,0,2);
     cheats.selected_item = menu_add_button(&cheats,0,0,"return",menu_return,NULL);
-    draw_info_t draw_info = {
-        resource_get(R_KZ_CHECKBOX), 1,-1, 1.f, 1.f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}},0,checkbox_bg
-    };
+    struct menu_item *item = NULL;
     for(int i=0;i<sizeof(cheat_table)/sizeof(*cheat_table);i++){
-        if(cheat_table[i].mask == CHEAT_RESTRICTION){
-            menu_add_gfx_switch(&cheats,0,i+1,&settings->cheats,4,(1 << cheat_table[i].mask),restriction_callback,NULL,&draw_info);
-        }
-        else{
-            menu_add_gfx_switch(&cheats,0,i+1,&settings->cheats,4,(1 << cheat_table[i].mask),NULL,NULL,&draw_info);
-        }
+        item = menu_add_checkbox(&cheats,0,i+1,cheat_callback,(void*)cheat_table[i].mask);
+        cheat_callback(item,MENU_CALLBACK_UPDATE,(void*)cheat_table[i].mask);
         menu_add(&cheats,2,i+1,cheat_table[i].name);
     }
     return &cheats;

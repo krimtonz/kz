@@ -28,6 +28,8 @@ enum resource{
     R_KZ_FONT,
     R_KZ_BUTTONS,
     R_KZ_AMOUNTS,
+    R_KZ_FLAGS,
+    R_KZ_ARROWS,
     R_END
 };
 
@@ -36,10 +38,8 @@ struct item_texture{
     int last_access_counter;
 };
 
-extern struct tilebg_info *checkbox_bg;
-
-void init_resources();
 void *resource_get(enum resource resource);
 gfx_texture *get_item_texture(uint8_t item_id);
 void resource_destroy(enum resource resource);
+
 #endif

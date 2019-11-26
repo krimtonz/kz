@@ -4,23 +4,27 @@
 #include "kz.h"
 
 static int activate_warp_proc(struct menu_item *item, enum menu_callback callback, void *data){
-    z2_game.entrance_index = (uint16_t)((uint32_t)data);
-    z2_file.exit = z2_game.entrance_index;
-    z2_game.common.execute_state = 0;
-    z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
-    z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_game.entrance_index = (uint16_t)((uint32_t)data);
+        z2_file.exit = z2_game.entrance_index;
+        z2_game.common.execute_state = 0;
+        z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
+        z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
+        return 1;
+    }
+    return 0;
 }
 
 struct menu *create_warps_menu(){
     static struct menu warps;
     menu_init(&warps,kz.main_menu.x,kz.main_menu.y);
-
+    menu_set_padding(&warps,0,1);
     warps.selected_item = menu_add_button(&warps,0,0,"return",menu_return,NULL);
     for(int i=0;i<sizeof(scene_categories)/sizeof(struct kz_scene_category);i++){
         struct kz_scene_category cat = scene_categories[i];
         struct menu *cat_menu = malloc(sizeof(*cat_menu));
         menu_init(cat_menu, 0, 0);
+        menu_set_padding(cat_menu,0,1);
         cat_menu->selected_item = menu_add_button(cat_menu,0,0,"return",menu_return,NULL);
         menu_add_submenu(&warps,0,i+1,cat_menu,cat.name);
         for(int j = 0; j<cat.scene_cnt;j++){

@@ -8,7 +8,7 @@
 #include "resource.h"
 
 #ifdef LITE
-#define     GFX_SIZE 0x1500
+#define     GFX_SIZE 0x1750
 #else
 #define     GFX_SIZE 0x6500
 #endif
@@ -371,6 +371,7 @@ void gfx_draw_sprite_scale_color(gfx_texture *texture, int x, int y, int tile, i
                          qu105(0),
                          qu105(0),
                          qu510(1.0f / x_scale_calc), qu510(1.0f / y_scale_calc));
+    rdp_mode_pop(RDP_MODE_FILTER);
     rdp_mode_pop(RDP_MODE_COMBINE);
     rdp_synced = 0;
 }

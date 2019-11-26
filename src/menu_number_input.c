@@ -2,17 +2,17 @@
 #include "menu.h"
 
 struct menu_data_number{
-    uint32_t                value;
-    void                   *val_ptr;
-    char                   *digits;
-    void                   *callback_data;
-    menu_number_callback    callback;
-    uint8_t                 base;
-    uint8_t                 editing;
-    uint8_t                 length;
-    uint8_t                 edit_idx;
-    uint8_t                 val_len;
-    _Bool                   _signed;
+    uint32_t                value; // 00
+    void                   *val_ptr; // 04
+    char                   *digits; // 08
+    void                   *callback_data; // 0c
+    menu_number_callback    callback; // 10
+    uint8_t                 base; // 14
+    uint8_t                 editing; // 15
+    uint8_t                 length; // 16
+    uint8_t                 edit_idx; // 17
+    uint8_t                 val_len; // 18
+    _Bool                   _signed; // 19
 };
 
 static char int_to_char(int i){
@@ -27,33 +27,41 @@ static int char_to_int(char c){
     return c - ('a' - 0xA);
 }
 
-static uint32_t get_val(void *value, uint8_t len){
-    switch(len){
-        case 1:
-            return *(uint8_t*)value;
-            break;
-        case 2:
-            return *(uint16_t*)value;
-            break;
-        case 4:
-        default:
-            return *(uint32_t*)value;
-            break;
+static uint32_t get_val(struct menu_data_number *data){
+    if(data->val_ptr){
+        switch(data->val_len){
+            case 1:
+                return *(uint8_t*)data->val_ptr;
+                break;
+            case 2:
+                return *(uint16_t*)data->val_ptr;
+                break;
+            case 4:
+            default:
+                return *(uint32_t*)data->val_ptr;
+                break;
+        }
+    }else{
+        return data->value;
     }
 }
 
-static void set_val(void *value, uint8_t len, uint32_t new_val){
-    switch(len){
-        case 1:
-            *(uint8_t*)value = (uint8_t)new_val;
-            break;
-        case 2:
-            *(uint16_t*)value = (uint16_t)new_val;
-            break;
-        case 4:
-        default:
-            *(uint32_t*)value = (uint32_t)new_val;
-            break;
+static void set_val(struct menu_data_number *data, uint32_t new_val){
+    if(data->val_ptr){
+        switch(data->val_len){
+            case 1:
+                *(uint8_t*)data->val_ptr = (uint8_t)new_val;
+                break;
+            case 2:
+                *(uint16_t*)data->val_ptr = (uint16_t)new_val;
+                break;
+            case 4:
+            default:
+                *(uint32_t*)data->val_ptr = (uint32_t)new_val;
+                break;
+        }
+    }else{
+        data->value = new_val;
     }
 }
 
@@ -79,7 +87,7 @@ static void menu_number_activate_callback(struct menu_item *item){
             return;
         }
         if(data->val_ptr){
-            set_val(data->val_ptr,data->val_len,val);
+            set_val(data,val);
         }
     }else{
         data->editing = 1;
@@ -92,8 +100,9 @@ static void menu_number_draw(struct menu_item *item){
     if(item->owner->selected_item == item && !data->editing)
         color = MENU_SELECTED_COLOR;
     int x = get_item_x_pos(item) + (kfont->c_width * (data->length-1));
+    if(!data->_signed) x -= kfont->c_width;
     int y = get_item_y_pos(item);
-    uint32_t val = get_val(data->val_ptr,data->val_len);
+    uint32_t val = get_val(data);
     int sign = (data->_signed && data->digits[0] == '-') ? -1 : 1;
     val *= sign;
     for(int i=data->length - 1;i>=0;i--){
@@ -102,19 +111,21 @@ static void menu_number_draw(struct menu_item *item){
         }
         if(data->editing){
             if(data->edit_idx == i){
-                color=MENU_SELECTED_COLOR;
+                color.color = 0x00FF00FF;
             }
             else{
                 color=MENU_DEFAULT_COLOR;
             }
         }
         else{
-            if(data->_signed && i == 0){
-                if(sign<0){
-                    data->digits[i] = '-';
-                }else{
-                    data->digits[i] = '+';
-                }
+            if(i == 0 && data->_signed && sign>0){
+                data->digits[i] = '+';
+            }else if(i == 0 && data->_signed && sign<0){
+                data->digits[i] = '-';
+            }
+            else if(!data->_signed && i == data->length - 1){
+                data->digits[i] = ' ';
+                continue;
             }
             else{
                 data->digits[i] = int_to_char(val % data->base);
@@ -186,6 +197,31 @@ static int menu_number_nav(struct menu_item *item, enum menu_nav nav){
     return 1;
 }
 
+void menu_number_set(struct menu_item *item, uint32_t val){
+    struct menu_data_number *data = item->data;
+    data->value = val;
+    for(int i=data->length - 1;i>=0;i--){
+        if(i == 0 && data->_signed){
+            data->digits[i] = '+';
+        }
+        else if(!data->_signed && i == data->length - 1){
+            data->digits[i] = ' ';
+            continue;
+        }
+        else{
+            data->digits[i] = int_to_char(val % data->base);
+            val /= data->base;
+        }
+    }
+}
+
+static void menu_number_update_proc(struct menu_item *item){
+    struct menu_data_number *data = item->data;
+    if(!data->editing && data->callback){
+        data->callback(item, MENU_CALLBACK_UPDATE, data->callback_data, data->value);
+    }
+}
+
 struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y,
                                         menu_number_callback callback, void *callback_data,
                                         int8_t base, uint8_t length, void *value,
@@ -194,6 +230,7 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
     if(item){
         struct menu_data_number *data = malloc(sizeof(*data));
         item->activate_proc = menu_number_activate_callback;
+        item->update_proc = menu_number_update_proc;
         item->draw_proc = menu_number_draw;
         item->navigate_proc = menu_number_nav;
         item->data = data;
@@ -208,11 +245,15 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
         data->base = base;
         data->length = length;
         data->editing = 0;
-        data->value = get_val(value,val_len);
-        data->digits = malloc(length + 1);
-        data->digits[length] = 0;
         data->val_ptr = value;
         data->val_len = val_len;
+        if(value){
+            data->value = get_val(data);
+        }else{
+            data->value = 0;
+        }
+        data->digits = malloc(length + 1);
+        data->digits[length] = 0;
         data->callback_data = callback_data;
         data->callback = callback;
         int val = data->value;
@@ -220,7 +261,7 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
             if(i == 0 && data->_signed){
                 data->digits[i] = '+';
             }
-            else if(!data->_signed && i == data->length){
+            else if(!data->_signed && i == data->length - 1){
                 data->digits[i] = ' ';
                 continue;
             }

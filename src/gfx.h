@@ -30,7 +30,6 @@ typedef struct{
     size_t tile_size;
     g_ifmt_t img_fmt;
     g_isiz_t img_size;
-
 } gfx_texture;
 
 typedef struct{

@@ -25,6 +25,7 @@ enum cheats {
     CHEAT_ISG,
     CHEAT_RUPEES,
     CHEAT_TURBO,
+    CHEAT_FREEZE_TIME,
     CHEAT_MAX
 };
 

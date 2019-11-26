@@ -246,6 +246,9 @@ static void kz_main(void) {
             z2_link.linear_velocity=18.0f;
             gfx_printf_color(Z2_SCREEN_WIDTH-60, Z2_SCREEN_HEIGHT-60,0x00FF00FF,"t");
         }
+        if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){
+            z2_file.timespeed = -5;
+        }
         if(settings->cheats & (1 << CHEAT_RESTRICTION)){
             memset(&z2_game.hud_ctx.restriction_flags,0,0xC);
             for(int i=0;i<4;i++){
@@ -396,7 +399,10 @@ void init() {
     do_global_ctors();
     gfx_init();
 
-    init_resources();
+    // preload item textures
+    #ifndef LITE
+    resource_get(R_Z2_ITEMS);
+    #endif
 
     kz.cpu_cycle_counter = 0;
     cpu_counter();

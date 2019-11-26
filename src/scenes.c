@@ -90,7 +90,7 @@ struct kz_scene scenes[] = {
             "swamp gossip stones",
             "canyon gossip stones",
             "mountain gossip stones",
-            "genetic grotto",
+            "generic grotto",
             "hot spring",
             "maze straight (a)",
             "dodongo",
@@ -346,7 +346,7 @@ struct kz_scene scenes[] = {
         72, 1,
         "swamp spider house",
         (char*[]){
-            "soutern swamp",
+            "southern swamp",
         },
     },
     {                                                   /* 0032 */
@@ -376,7 +376,7 @@ struct kz_scene scenes[] = {
         80, 11,
         "deku palace",
         (char*[]){
-            "soutern swamp",
+            "southern swamp",
             "thrown out",
             "deku king chamber",
             "deku king chamber (upper)",
@@ -401,7 +401,7 @@ struct kz_scene scenes[] = {
         "termina field",
         (char*[]){
             "west clock town",
-            "road to soutern swamp",
+            "road to southern swamp",
             "great bay coast",
             "path to mountain village",
             "road to ikana",
@@ -639,7 +639,7 @@ struct kz_scene scenes[] = {
         132, 11,
         "southern swamp (poison)",
         (char*[]){
-            "road to soutern swamp",
+            "road to southern swamp",
             "boat house",
             "woodfall",
             "deku palace",

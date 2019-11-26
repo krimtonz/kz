@@ -63,6 +63,7 @@ void menu_draw(struct menu *menu){
     }
 
     for(struct menu_item *item = menu->items.first; item; item = list_next(item)){
+        if(!item->enabled) continue;
         if(item->draw_proc){
             item->draw_proc(item);
             continue;
@@ -93,6 +94,7 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, char *text
         item->text = text;
         item->owner = menu;
         item->interactive = 0;
+        item->enabled = 1;
         item->x = x;
         item->y = y;
         item->x_offset = 0;
@@ -106,6 +108,10 @@ struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, char *text
         item->exit_proc=item_exit;
     }
     return item;
+}
+
+void menu_item_remove(struct menu_item *item){
+    list_erase(&item->owner->items, item);
 }
 
 void menu_navigate(struct menu *menu, enum menu_nav nav){
@@ -133,7 +139,7 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
     struct menu_item *far = NULL;
 
     for(struct menu_item *item = menu->items.first;item!=NULL;item=list_next(item)){
-        if(!item->interactive) continue;
+        if(!item->interactive || !item->enabled) continue;
         int distance_x = get_item_x_pos(item) - cur_x_pos;
         int distance_y = get_item_y_pos(item) - cur_y_pos;
 

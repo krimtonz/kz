@@ -420,7 +420,9 @@ typedef struct {
 #if Z2_VERSION!=NZSE
     char            unk_0x0FEC_[0x2F64];                            /* 0x0FEC */
 #else
-    char            unk_0x0FEC_[0x2CB4];            /* 0x0FEC */
+    char            unk_0x0FEC_[0x20];              /* 0x0FEC */
+    char            event_inf[0x8];                 /* 0x100C */
+    char            unk_0x1014[0x2C8C];             /* 0x1014 */
 #endif
     int32_t         file_index;                     /* 0x3CA0 */    /* 0x3F50 */
     char            unk_0x3CA4[0x0C];               /* 0x3CA4 */    /* 0x3F54 */
@@ -434,7 +436,9 @@ typedef struct {
 #if Z2_VERSION==NZSE
     char            unk_0x3F1C[0x4C];               /* 0x3F1C */
 #else
-    char            unk_0x42A0[0x54];                               /* 0x42A0 */
+    char            unk_0x42A0[0x1A];                               /* 0x42A0 */
+    char            event_inf[0x8];                                 /* 0x42BA */
+    char            unk_0x42C2[0x32];                               /* 0x4232 */
 #endif
     struct {                                        /* 0x3F68 */    /* 0x42F4 */
                     uint32_t    chest;          /* 0x0000 */
@@ -1235,6 +1239,42 @@ typedef struct{
     uint32_t    vrom_end;
 } z2_obj_file_t;
 
+typedef union {
+    struct{
+        uint16_t    no_y_rot    : 1;
+        uint16_t    no_x_rot    : 1;
+        uint16_t    no_z_rot    : 1;
+        uint16_t                : 1;
+        uint16_t    actor_id    : 12;
+    };
+    uint16_t    param_1;
+} z2_actorlist_param0_t;
+
+typedef union{
+    struct{
+        uint16_t    x_rot               : 9;
+        uint16_t                        : 4;
+        uint16_t    spawn_time_flags_hi : 3;
+    };
+    uint16_t param_4;
+} z2_actorlist_param4_t;
+
+typedef union{
+    struct{
+        uint16_t    y_rot       : 9;
+        uint16_t    camera_idx  : 7;
+    };
+    uint16_t param_5;
+} z2_actorlist_param5_t;
+
+typedef union{
+    struct{
+        uint16_t    z_rot               : 9;
+        uint16_t    spawn_time_flags_lo : 7;
+    };
+    uint16_t param_6;
+} z2_actorlist_param6_t;
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1250,6 +1290,8 @@ typedef struct{
 #define z2_file_msgqueue_addr       0x8009B2C0
 #define z2_arena_addr               0x8009CD20
 #define z2_file_table_addr          0x8009F8B0
+#define z2_SpawnActor_addr          0x800BAE14
+#define z2_DeleteActor_addr         0x800BB498
 #define z2_pause_persp_addr         0x800F4A10
 #define z2_btnupdate_addr           0x80112B40
 #define z2_loadroom_addr            0x8012E96C
@@ -1264,11 +1306,13 @@ typedef struct{
 #define z2_DecodeArchiveFile_addr   0x80178DAC
 #define z2_dmaflashtoram_addr       0x80185968
 #define z2_dmaramtoflash_addr       0x80185B1C
-#define z2_actor_ovl_table_addr     0x801AA0A0
+#define z2_actor_ovl_table_addr     0x801AEFD0
 #define z2_gamestate_table_addr     0x801BD910
 #define z2_restriction_table_addr   0x801C2410
+#define z2_link_form_obj_idx_addr   0x801C2730
 #define z2_object_table_addr        0x801C2740
 #define z2_stored_song_addr         0x801C6A7C
+#define z2_link_spawn_obj_addr      0x801D0B58
 #define z2_player_ovl_table_addr    0x801D0B70
 #define z2_file_addr                0x801EF670
 #define z2_game_arena_addr          0x801F5100
@@ -1293,6 +1337,8 @@ typedef struct{
 #define z2_file_msgqueue_addr       0x8009CE10
 #define z2_arena_addr               0x8009E860
 #define z2_file_table_addr          0x800A13F0
+#define z2_SpawnActor_addr          0x800BC934
+#define z2_DeleteActor_addr         0x800BCFB8
 #define z2_pause_persp_addr         0x800F6530
 #define z2_btnupdate_addr           0x801146F8
 #define z2_loadroom_addr            0x8013044C
@@ -1310,7 +1356,10 @@ typedef struct{
 #define z2_actor_ovl_table_addr     0x801AA0A0
 #define z2_gamestate_table_addr     0x801B89E0
 #define z2_restriction_table_addr   0x801BD534
+#define z2_link_form_obj_idx_addr   0x801BD850
+#define z2_object_table_addr        0x801BD860
 #define z2_stored_song_addr         0x801C1AFC
+#define z2_link_spawn_obj_addr      0x801CB528
 #define z2_player_ovl_table_addr    0x801CB540
 #define z2_file_addr                0x801EF710
 #define z2_game_arena_addr          0x801F5530
@@ -1335,6 +1384,8 @@ typedef struct{
 #define z2_file_msgqueue_addr       0x8009CED0
 #define z2_arena_addr               0x8009E920
 #define z2_file_table_addr          0x800A14B0
+#define z2_SpawnActor_addr          0x800BC98C
+#define z2_DeleteActor_addr         0x800BD010
 #define z2_pause_persp_addr         0x800F6510
 #define z2_btnupdate_addr           0x801146B8
 #define z2_loadroom_addr            0x801303EC
@@ -1352,7 +1403,10 @@ typedef struct{
 #define z2_actor_ovl_table_addr     0x801A9E60
 #define z2_gamestate_table_addr     0x801B87A0
 #define z2_restriction_table_addr   0x801BD324
+#define z2_link_form_obj_idx_addr   0x801BD640
+#define z2_object_table_addr        0x801BD650
 #define z2_stored_song_addr         0x801C18EC
+#define z2_link_spawn_obj_addr      0x801CB318
 #define z2_player_ovl_table_addr    0x801CB330
 #define z2_file_addr                0x801EF460
 #define z2_game_arena_addr          0x801F5280
@@ -1379,6 +1433,10 @@ typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
 typedef void (*z2_dmaflashtoram_t)(void *buf, uint32_t block, uint32_t block_cnt);
 typedef void (*z2_dmaramtoflash_t)(void *buf, uint32_t block, uint32_t block_cnt);
 typedef void (*z2_pause_persp_t)(z2_game_t *game);
+typedef void (*z2_DeleteActor_t)(z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
+typedef z2_actor_t *(*z2_SpawnActor_t)(z2_actor_ctxt_t *actor_ctx, z2_game_t *game, uint16_t actor_id,
+                                        float x, float y, float z, z2_angle_t rx, z2_angle_t ry, z2_angle_t rz,
+                                        int16_t actor_variable, int camera_cmd_idx, int spawn_time_flags, void *param_13);
 
 /* Data */
 #define z2_game                 (*(z2_game_t*)              z2_ctxt_addr)
@@ -1401,6 +1459,8 @@ typedef void (*z2_pause_persp_t)(z2_game_t *game);
 #define z2_cimg                 ((uint32_t*)                z2_cimg_addr)
 #define z2_stored_song          (*(uint16_t*)               z2_stored_song_addr)
 #define z2_obj_table            ((z2_obj_file_t*)           z2_object_table_addr)
+#define z2_link_form_obj_idx    ((uint16_t*)                z2_link_form_obj_idx_addr)
+#define z2_link_spawn_obj       (*(uint16_t*)               z2_link_spawn_obj_addr)
 /* Functions */
 #define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
 #define osEPiWriteIo            ((osEPiWriteIo_t)           osEPiWriteIo_addr)
@@ -1417,5 +1477,6 @@ typedef void (*z2_pause_persp_t)(z2_game_t *game);
 #define z2_pause_persp          ((z2_pause_persp_t)         z2_pause_persp_addr)
 #define z2_dmaflashtoram        ((z2_dmaflashtoram_t)       z2_dmaflashtoram_addr)
 #define z2_dmaramtoflash        ((z2_dmaramtoflash_t)       z2_dmaramtoflash_addr)
-
+#define z2_SpawnActor           ((z2_SpawnActor_t)          z2_SpawnActor_addr)
+#define z2_DeleteActor          ((z2_DeleteActor_t)         z2_DeleteActor_addr)
 #endif

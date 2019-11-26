@@ -11,13 +11,7 @@ struct item_data{
     void                   *callback_data;
 };
 
-struct move_data {
-    watch_t *watch;
-    _Bool moving;
-};
-
 struct watch_row{
-    struct move_data *mdata;
     union{
         struct {
             struct menu_item *delete_button;
@@ -62,12 +56,15 @@ static uint8_t watch_data_sizes[] = {
 static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos);
 
 static int watch_update_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
-    struct watch_row *row = data;
-    watch_t *watch = row->watch;
-    value -= value % watch_data_sizes[watch->type];
-    watch->address = (void*)value;
-    prev_addr = value;
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        struct watch_row *row = data;
+        watch_t *watch = row->watch;
+        value -= value % watch_data_sizes[watch->type];
+        watch->address = (void*)value;
+        prev_addr = value;
+        return 1;
+    }
+    return 0;
 }
 
 int watch_type_callback(struct menu_item *item, enum menu_callback callback, void *data, int idx){
@@ -94,9 +91,6 @@ static struct watch_row *delete_row(struct watch_row *row){
         }
         list_erase(&kz.watches,row->watch);
     }
-    if(row->mdata){
-        free(row->mdata);
-    }
     list_erase(&watch_rows,row);
     return prev_row;
 }
@@ -116,7 +110,7 @@ static int menu_watch_delete(struct menu_item *item, enum menu_callback callback
         }else{
             item->owner->selected_item = add_button;
         }
-        add_button->y--;
+        add_button->y -= 2;
         return 1;
     }
     return 0;
@@ -149,46 +143,15 @@ static int menu_watch_anchor(struct menu_item *item, enum menu_callback callback
         if(!row->watch->floating){
             row->watch->x = get_item_x_pos(row->watch_item);
             row->watch->y = get_item_y_pos(row->watch_item);
+            row->move_button->enabled = 0;
+            menu_button_set_tile(item,7);
+        }else{
+            row->move_button->enabled = 1;
+            menu_button_set_tile(item,1);
         }
         return 1;
     }
     return 0;
-}
-
-static int menu_watch_move(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        struct watch_row *row = data;
-        row->mdata->moving = !row->mdata->moving;
-        return 1;
-    }
-    return 0;
-}
-
-static int menu_watch_move_nav(struct menu_item *item, enum menu_nav nav){
-    struct item_data *data = item->data;
-    struct watch_row *row = data->callback_data;
-    struct move_data *mdata = row->mdata;
-    if(!mdata) return 0;
-    if(!mdata->moving) return 0;
-    if(!mdata->watch->floating) return 0;
-    int amt = input_pressed_raw() & BUTTON_Z?5:3;
-    switch(nav){
-        case MENU_NAV_DOWN:
-            mdata->watch->y+=amt;
-            break;
-        case MENU_NAV_UP:
-            mdata->watch->y-=amt;
-            break;
-        case MENU_NAV_LEFT:
-            mdata->watch->x-=amt;
-            break;
-        case MENU_NAV_RIGHT:
-            mdata->watch->x+=amt;
-            break;
-        default:
-            break;
-    }
-    return 1;
 }
 
 static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
@@ -199,41 +162,40 @@ static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
         resource_get(R_KZ_ICON), 0, -1, 0.8f, 0.8f, 10, 10, {{0xFF,0xFF,0xFF,0xFF}},{{0xFF,0xFF,0xFF,0xFF}},1,NULL
     };
     row->delete_button = menu_add_gfx_button(item->owner,x,item->y,menu_watch_delete,row,&draw);
-    draw.on_tile = 1;
+    draw.on_tile = watch->floating ? 1 : 7;
     row->anchor_button = menu_add_gfx_button(item->owner,x+1,item->y,menu_watch_anchor,row,&draw);
-    struct move_data *mdata = malloc(sizeof(*mdata));
-    mdata->moving = 0;
-    mdata->watch = watch;
-    row->mdata = mdata;
     draw.on_tile = 2;
-    struct menu_item *witem = menu_add_gfx_button(item->owner,x+2,item->y,menu_watch_move,row,&draw);
+    struct menu_item *witem = menu_add_move_button(item->owner,x+2,item->y,&watch->x,&watch->y,NULL,NULL);
     row->move_button = witem;
-    witem->navigate_proc = menu_watch_move_nav;
+    witem->enabled = watch->floating;
     row->addr_input = menu_add_number_input(item->owner,x+4,item->y,watch_update_callback,row,16,8,&watch->address,sizeof(watch->address));
-    row->type_list = menu_add_list(item->owner,x + 13,item->y,watch_type_names,watch_type_values,sizeof(*watch_type_values),sizeof(watch_type_values)/sizeof(*watch_type_values),&(watch->type),watch_type_callback,row);
-    witem = menu_add_watch(item->owner,x + 17,item->y,watch, setpos);
+    row->type_list = menu_add_list(item->owner,x + 14,item->y,watch_type_names,watch_type_values,sizeof(*watch_type_values),sizeof(watch_type_values)/sizeof(*watch_type_values),&(watch->type),watch_type_callback,row);
+    witem = menu_add_watch(item->owner,x + 18,item->y,watch, setpos);
     if(setpos){
         watch->x = get_item_x_pos(witem);
         watch->y = get_item_y_pos(witem);
     }
     row->watch_item = witem;
     row->watch = watch;
-    row->label_item = menu_add_text_input(item->owner,x+28,item->y,"label",&watch->label);
+    row->label_item = menu_add_text_input(item->owner,x+4,++item->y,"label",&watch->label);
     item->y++;
 }
 
 static int watches_button_add(struct menu_item *item, enum menu_callback callback, void *data){
-    watch_t *watch = list_push_back(&kz.watches,NULL);
-    static enum watch_type type = WATCH_TYPE_U8;
-    watch->address = (void*)prev_addr;
-    watch->type = type;
-    watch->floating = 0;
-    watch->x = 0;
-    watch->y = 0;
-    watch->label = malloc(21);
-    memset(watch->label,0,21);
-    watch_add(watch,item,1);
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        watch_t *watch = list_push_back(&kz.watches,NULL);
+        static enum watch_type type = WATCH_TYPE_U8;
+        watch->address = (void*)prev_addr;
+        watch->type = type;
+        watch->floating = 0;
+        watch->x = 0;
+        watch->y = 0;
+        watch->label = malloc(21);
+        memset(watch->label,0,21);
+        watch_add(watch,item,1);
+        return 1;
+    }
+    return 0;
 }
 
 struct menu *create_watches_menu(){

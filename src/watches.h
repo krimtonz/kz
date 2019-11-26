@@ -24,12 +24,12 @@ enum watch_type{
 };
 
 typedef struct {
-    void *address;
-    enum watch_type type;
-    uint16_t x;
-    uint16_t y;
-    uint8_t floating;
-    char *label;
+    void               *address;
+    enum watch_type     type;
+    int16_t             x;
+    int16_t             y;
+    uint8_t             floating;
+    char               *label;
 } watch_t;
 
 void watch_printf(watch_t *watch);

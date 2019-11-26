@@ -28,5 +28,17 @@
     "name": "amounts",
     "format": "i8",
     "tile_height": 8
+  },
+  "flags.png": {
+      "type": "texture",
+      "name": "flags",
+      "format": "rgba16",
+      "tile_height": 8
+  },
+  "arrows.png": {
+      "type": "texture",
+      "name": "arrows",
+      "format": "i8",
+      "tile_height": 8
   }
 }

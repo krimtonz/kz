@@ -29,38 +29,31 @@ struct song_data {
 struct capacity_upgrade_option{
     uint8_t     shift;
     uint16_t    item_tile;
-    _Bool       tile_per_option;
+    int         option_cnt;
     uint8_t     cap_vals[8];
     int         tiles_cnt;
     char       *tooltip;
 };
 
 struct capacity_upgrade_data{
-    uint8_t     shift;
-    _Bool       tile_per_option;
+    int8_t      idx;
     int8_t      value;
 };
 
 static struct capacity_upgrade_option capacity_options[] = {
     {
-        3, Z2_ITEM_BOMB_BAG_20,1,
+        3, Z2_ITEM_BOMB_BAG_20, 0b111,
         { 0, 2, 3, 4, 0, 0, 0, 0 }, -1,
         "bomb bag"
     },
     {
-        0, Z2_ITEM_QUIVER_30,1,
+        0, Z2_ITEM_QUIVER_30, 0b111,
         { 0, 3, 4, 5, 6, 2, 3, 4 }, -1,
         "quiver"
     },
     {
-        17, Z2_ITEM_STICK,0,
-        { 0, 1, 2, 3, 0, 2, 3, 4}, 1,
-        "stick upgrade"
-    },
-    {
-        20, Z2_ITEM_NUT,0,
-        { 0, 2, 3, 4, 0, 7, 0, 7}, 1,
-        "nut upgrade"
+        12, Z2_ITEM_ADULTS_WALLET, 0b11,
+        { -1, -1, -1, -1, -1, -1, -1, -1}, -1, "wallet"
     },
 };
 
@@ -126,16 +119,13 @@ static struct switch_data owl_data_table[] = {
     { 0x8000,   "hidden owl" },
 };
 
-static struct switch_data remains_data_table[] = {
-    { 0x0001,   "odolwa's remains" },
-    { 0x0002,   "goht's remains" },
-    { 0x0004,   "gyorg's remains" },
-    { 0x0008,   "twinmold's remains" },
-};
-
-static struct switch_data bombers_notebook_table =
+static struct switch_data quest_status_table[] = {
+    { 0x0001,       "odolwa's remains" },
+    { 0x0002,       "goht's remains" },
+    { 0x0004,       "gyorg's remains" },
+    { 0x0008,       "twinmold's remains" },
     { 0x0040000,    "bomber's notebook" }
-;
+};
 
 static struct song_data song_data_table[] = {
     { 0x0001000, 0xFFFFFFFF, "song of time" },
@@ -247,42 +237,13 @@ struct item_switch_data {
     uint8_t                 map;
 };
 
-static void draw_item_switch(struct menu_item *item){
-    struct item_switch_data *data = item->data;
-    struct item_map_row map = data->map==0?item_map_table[data->map_idx]:mask_map_table[data->map_idx];
-    gfx_texture *texture = get_item_texture(map.item);
-    int tile_idx = *map.slot==Z2_ITEM_NULL ? 1 : 0;
-    if(item->owner->selected_item == item){
-        gfx_draw_rectangle(get_item_x_pos(item),get_item_y_pos(item),16,16,GPACK_RGBA8888(0x80,0x80,0xFF,0x80));
-    }
-    gfx_draw_sprite(texture,get_item_x_pos(item),get_item_y_pos(item),tile_idx,16,16);
-}
-
-static void activate_item_switch(struct menu_item *item){
-    struct item_switch_data *data = item->data;
-    struct item_map_row map = data->map==0?item_map_table[data->map_idx]:mask_map_table[data->map_idx];
-    if(*map.slot == Z2_ITEM_NULL) *map.slot = map.item;
-    else *map.slot = Z2_ITEM_NULL;
-}
-
-static struct menu_item *menu_add_item_switch(struct menu *menu, uint16_t x, uint16_t y, uint8_t map_idx, uint8_t map){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
-    if(item){
-        struct item_switch_data *data = malloc(sizeof(*data));
-        data->map = map;
-        data->map_idx = map_idx;
-        item->draw_proc = draw_item_switch;
-        item->activate_proc = activate_item_switch;
-        item->interactive = 1;
-        item->data = data;
-    }
-    return item;
-}
-
 static int max_health_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
-    z2_file.max_health = value;
-    if(z2_file.defense_hearts>0) z2_file.defense_hearts = value;
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_file.max_health = value;
+        if(z2_file.defense_hearts>0) z2_file.defense_hearts = value;
+        return 1;
+    }
+    return 0;
 }
 
 static int double_defense_callback(struct menu_item *item, enum menu_callback callback, void *data){
@@ -293,6 +254,8 @@ static int double_defense_callback(struct menu_item *item, enum menu_callback ca
             z2_file.defense_hearts = 0;
         }
         return 1;
+    }else if (callback == MENU_CALLBACK_UPDATE){
+        menu_checkbox_set(item,z2_file.defense_hearts > 0);
     }
     return 0;
 }
@@ -318,6 +281,13 @@ static int magic_callback(struct menu_item *item, enum menu_callback callback, v
             }
         }
         return 1;
+    }else if (callback == MENU_CALLBACK_UPDATE){
+        if((int)data == 0){
+            menu_checkbox_set(item,z2_file.has_magic);
+        }else if((int)data == 1){
+            menu_checkbox_set(item,z2_file.has_double_magic);
+        }
+        return 1;
     }
     return 0;
 }
@@ -333,19 +303,50 @@ static int change_selected_dungeon(struct menu_item *item, enum menu_callback ca
 }
 
 static int update_dungeon_keys(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
-    z2_file.dungeon_keys[dungeon_idx] = val;
-    return 1;
+    if(callback == MENU_CALLBACK_UPDATE){
+        z2_file.dungeon_keys[dungeon_idx] = val;
+        return 1;
+    }
+    return 0;
 }
 
 static int update_stray_fairies(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
-    z2_file.stray_fairies[dungeon_idx] = val;
-    return 1;
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_file.stray_fairies[dungeon_idx] = val;
+        return 1;
+    }
+    return 0;
 }
 
-static int set_dungeon_item(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback==MENU_CALLBACK_ACTIVATE){
+static int dungeon_item_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
         dungeon_items = dungeon_items ^ (uint8_t)((int)data);
         z2_file.dungeon_items[dungeon_idx].dungeon_item = dungeon_items;
+        return 1;
+    }else if(callback == MENU_CALLBACK_UPDATE){
+        menu_switch_set(item,(dungeon_items & (uint8_t)((int)data)) > 0);
+        return 1;
+    }
+    return 0;
+}
+
+static int quest_status_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_file.quest_status = z2_file.quest_status ^ (int)data;
+        return 1;
+    }else if(callback == MENU_CALLBACK_UPDATE){
+        menu_switch_set(item,(z2_file.quest_status & (int)data) > 0);
+        return 1;
+    }
+    return 0;
+}
+
+static int owl_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        z2_file.owls_hit = z2_file.owls_hit ^ (int)data;
+        return 1;
+    }else if(callback == MENU_CALLBACK_UPDATE){
+        menu_switch_set(item,(z2_file.owls_hit & (int)data) > 0);
         return 1;
     }
     return 0;
@@ -353,15 +354,40 @@ static int set_dungeon_item(struct menu_item *item, enum menu_callback callback,
 
 static int cap_callback(struct menu_item *item, enum menu_callback callback, void *data){
     struct capacity_upgrade_data *cdata = data;
+    struct capacity_upgrade_option *row = &capacity_options[cdata->idx];
     if(callback == MENU_CALLBACK_ACTIVATE){
-        int v = cdata->value;
-        if(cdata->tile_per_option) v++;
-        z2_file.equipment_upgrades = (z2_file.equipment_upgrades & ~(0b111 << cdata->shift)) | (v << cdata->shift);
+        int v = ++cdata->value;
+        z2_file.equipment_upgrades = (z2_file.equipment_upgrades & ~(row->option_cnt << row->shift)) | (v << row->shift);
         return 1;
     }else{
-        int v = (z2_file.equipment_upgrades >> cdata->shift) & 0b111;
-        if(cdata->tile_per_option) v--;
-        cdata->value = v;
+        int v = (z2_file.equipment_upgrades >> row->shift) & row->option_cnt;
+        cdata->value = v - 1;
+        return 1;
+    }
+    return 0;
+}
+
+static int item_switch_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    struct item_switch_data *swdata = data;
+    struct item_map_row *row = NULL;
+    if(swdata->map == 0){
+        row = &item_map_table[swdata->map_idx];
+    }else{
+        row = &mask_map_table[swdata->map_idx];
+    }
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(*row->slot == row->item){
+            *row->slot = Z2_ITEM_NULL;
+        }else{
+            *row->slot = row->item;
+        }
+        return 1;
+    }else if(callback == MENU_CALLBACK_UPDATE){
+        if(*row->slot == row->item){
+            menu_switch_set(item,1);
+        }else{
+            menu_switch_set(item,0);
+        }
         return 1;
     }
     return 0;
@@ -400,7 +426,12 @@ struct menu *create_inventory_menu(){
         int x = 1;
         int y = 1;
         for(int i=0;i<15;i++){
-            menu_add_item_switch(&items,x++,y,i,0);
+            struct item_switch_data *data = malloc(sizeof(*data));
+            data->map = 0;
+            data->map_idx = i;
+            menu_add_switch(&items,x++,y,item_switch_callback,data,get_item_texture(i),NULL,
+                            0xFFFFFFFF, 0xFFFFFFFF,0,1,
+                            16,16,NULL);
             if(x==6){
                 x=1;
                 y++;
@@ -431,15 +462,25 @@ struct menu *create_inventory_menu(){
 
         int nopt = sizeof(capacity_options)/sizeof(*capacity_options);
         y = 1;
-        static int8_t options[] = {0,1,2,3,4,5,6,7};
-        static int8_t options_pertile[] = {Z2_ITEM_NULL,0,1,2,3,4,5,6};
+        static int8_t threebit_options[] = {Z2_ITEM_NULL,0,1,2,3,4,5,6};
+        static int8_t twobit_options[] = {Z2_ITEM_NULL,0,1,2,3};
         for(int i=0;i<nopt;i++){
             struct capacity_upgrade_data *capdata = malloc(sizeof(*capdata));
-            _Bool peropt = capacity_options[i].tile_per_option;
-            capdata->shift=capacity_options[i].shift;  
-            capdata->tile_per_option = capacity_options[i].tile_per_option;
+            
+            capdata->value = 0;
+            capdata->idx = i;
+
+            int8_t *options = NULL;
+            int8_t option_cnt = 0;
+            if(capacity_options[i].option_cnt == 7){
+                options = threebit_options;
+                option_cnt = 8;
+            }else{
+                options = twobit_options;
+                option_cnt = 4;
+            }
             menu_add_item_list(&items,0,y++,cap_callback,capdata,capacity_options[i].item_tile,
-                                peropt?options_pertile:options,7,&capdata->value,capacity_options[i].cap_vals,
+                                options,option_cnt,&capdata->value,capacity_options[i].cap_vals,
                                 capacity_options[i].tiles_cnt,&list_draw_info,NULL,capacity_options[i].tooltip);
         }
     }
@@ -452,7 +493,12 @@ struct menu *create_inventory_menu(){
         int x = 0;
         int y = 1;
         for(int i=0;i<24;i++){
-            menu_add_item_switch(&masks,x++,y,i,1);
+            struct item_switch_data *data = malloc(sizeof(*data));
+            data->map = 1;
+            data->map_idx = i;
+            menu_add_switch(&masks,x++,y,item_switch_callback,data,get_item_texture(mask_map_table[i].item), NULL,
+                            0xFFFFFFFF,0xFFFFFFFF,0,1,
+                            16,16,NULL);
             if(x==6){
                 x=0;
                 y++;
@@ -462,6 +508,7 @@ struct menu *create_inventory_menu(){
     
     // Populate quest status menu
     {
+        menu_set_padding(&quest_status,0,1);
         quest_status.selected_item = menu_add_button(&quest_status,0,0,"return",menu_return,NULL);
 
         int x = 0;
@@ -472,10 +519,13 @@ struct menu *create_inventory_menu(){
         struct menu_item *item;
         menu_add(&quest_status,x,y,"max health");
         menu_add_number_input(&quest_status,15,y++,max_health_callback,NULL,16,4,&z2_file.max_health,sizeof(z2_file.max_health));
-        menu_add_switch(&quest_status,0,y++,&z2_file.has_double_defense,2,0x01,double_defense_callback,NULL,"double defense");
-        menu_add_switch(&quest_status,0,y++,&z2_file.has_magic,1,0x01,magic_callback,(void*)0,"magic");
-        menu_add_switch(&quest_status,0,y++,&z2_file.has_double_magic,1,0x01,magic_callback,(void*)1,"double magic");
-        menu_add(&quest_status,0,y++,"dungeon");
+        menu_add_checkbox(&quest_status,0,y,double_defense_callback,NULL);
+        menu_add(&quest_status,2,y++,"double defense");
+        menu_add_checkbox(&quest_status,0,y,magic_callback,(void*)0);
+        menu_add(&quest_status,2,y++,"magic");
+        menu_add_checkbox(&quest_status,0,y,magic_callback,(void*)1);
+        menu_add(&quest_status,2,y++,"double magic");
+        menu_add(&quest_status,0,y,"dungeon");
         menu_add_list(&quest_status,15,y++,dungeon_names,dungeon_name_values,1,4,&dungeon_idx,change_selected_dungeon,NULL);
         menu_add(&quest_status,0,y,"small keys");
         menu_add_number_input(&quest_status,15,y++,update_dungeon_keys,NULL,16,2,&dungeon_keys,1);
@@ -485,31 +535,31 @@ struct menu *create_inventory_menu(){
 
         gfx_texture *dungeon_items_tex = resource_get(R_Z2_DUNGEON);
 
-        item = menu_add_bit_switch(&quest_status,0,y,&dungeon_items,1,
-                                   0x01,set_dungeon_item,(void*)1,dungeon_items_tex,
-                                   16,16,6,1,"boss key",0xFFFFFFFF,0xFFFFFFFF,0);
+        item = menu_add_switch(&quest_status,0,y,dungeon_item_callback,(void*)1,
+                               dungeon_items_tex,NULL,0xFFFFFFFF,0xFFFFFFFF,
+                               6,dungeon_items_tex->y_tiles/2 + 6,16,16,"boss key");
         set_item_offset(item,0,oy);
-        item = menu_add_bit_switch(&quest_status,1,y,&dungeon_items,1,
-                                   0x02,set_dungeon_item,(void*)2,dungeon_items_tex,
-                                   16,16,7,1,"compass",0xFFFFFFFF,0xFFFFFFFF,0);
+
+        item = menu_add_switch(&quest_status,1,y,dungeon_item_callback,(void*)2,
+                               dungeon_items_tex,NULL,0xFFFFFFFF,0xFFFFFFFF,
+                               7,dungeon_items_tex->y_tiles/2 + 7,16,16,"compass");
         set_item_offset(item,10,oy);
-        item = menu_add_bit_switch(&quest_status,2,y++,&dungeon_items,1,0x04,
-                                   set_dungeon_item,(void*)4,dungeon_items_tex,
-                                   16,16,8,1,"map",0xFFFFFFFF,0xFFFFFFFF,0);
+
+        item = menu_add_switch(&quest_status,2,y,dungeon_item_callback,(void*)4,
+                               dungeon_items_tex,NULL,0xFFFFFFFF,0xFFFFFFFF,
+                               8,dungeon_items_tex->y_tiles/2 + 8,16,16,"map");
+
         set_item_offset(item,20,oy);
-        oy+=10;
-        for(int i=0;i<sizeof(remains_data_table)/sizeof(*remains_data_table);i++){
-            item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,
-                                        remains_data_table[i].bitmask,NULL,NULL,NULL,
-                                        16,16,Z2_ITEM_ODOLWAS_REMAINS + i,1, remains_data_table[i].tooltip,
-                                        0xFFFFFFFF,0xFFFFFFFF,1);
+        oy+=16;
+        for(int i=0;i<sizeof(quest_status_table)/sizeof(*quest_status_table);i++){
+            item = menu_add_switch(&quest_status,x,y,quest_status_callback,(void*)quest_status_table[i].bitmask,
+                                    get_item_texture(Z2_ITEM_ODOLWAS_REMAINS + i),NULL,0xFFFFFFFF, 0xFFFFFFFF,
+                                    0, 1, 16,16,quest_status_table[i].tooltip);
+
             set_item_offset(item,x++ * 10,oy);
         }
-        item = menu_add_bit_switch(&quest_status,x,y++,&z2_file.quest_status,4,bombers_notebook_table.bitmask,
-                                    NULL,NULL,NULL,16,16,Z2_ITEM_BOMBERS_NOTEBOOK,1,
-                                    bombers_notebook_table.tooltip,0xFFFFFFFF,0xFFFFFFFF,1);
-        set_item_offset(item,x*10,oy);
         x=0;
+        y++;
         int start_y = y;
         int start_oy = oy;
         int start_ox = ox;
@@ -521,9 +571,11 @@ struct menu *create_inventory_menu(){
                 y++;
                 oy+=9;
             }
-            struct menu_item *item = menu_add_bit_switch(&quest_status,x,y,&z2_file.owls_hit,2,
-                                                         owl_data_table[i].bitmask,NULL,NULL,owl_icon_texture,
-                                                         16,8,0,1,owl_data_table[i].tooltip,0xFFFFFFFF,0xFFFFFFFF,0);
+
+            item = menu_add_switch(&quest_status,x,y,owl_callback,(void*)owl_data_table[i].bitmask,
+                                    owl_icon_texture, NULL, 0xFFFFFFFF, 0xFFFFFFFF, 0, 1,
+                                    16, 8, owl_data_table[i].tooltip);
+
             set_item_offset(item,ox,oy);
         }
         y = start_y;
@@ -537,11 +589,10 @@ struct menu *create_inventory_menu(){
                 y++;
                 oy+=8;
             }
+            item = menu_add_switch(&quest_status,x,y,quest_status_callback,(void*)song_data_table[i].bitmask,
+                                    note_texture, NULL,song_data_table[i].color,0x808080FF,0,0
+                                    ,10,16,song_data_table[i].tooltip);
 
-            struct menu_item *item = menu_add_bit_switch(&quest_status,x,y,&z2_file.quest_status,4,
-                                                         song_data_table[i].bitmask,NULL,NULL,
-                                                         note_texture,10,16,0,0,song_data_table[i].tooltip,
-                                                         song_data_table[i].color,0x808080FF,0);
             set_item_offset(item,ox,oy);
         }
     }
@@ -550,11 +601,6 @@ struct menu *create_inventory_menu(){
     {
         menu_set_cell(&amounts,16,16);
         amounts.selected_item = menu_add_button(&amounts,0,0,"return",menu_return,NULL);
-        z2_rgba32_t rgba = {{0xFF,0xFF,0xFF,0xFF}};
-        draw_info_t draw = {
-            NULL, 0, -1, 1.f, 1.f, 12, 12, rgba, rgba,
-            0, NULL
-        };
 
         uint8_t items[] = {
             Z2_ITEM_HEROS_BOW, Z2_ITEM_BOMB, Z2_ITEM_BOMBCHU,
@@ -564,24 +610,20 @@ struct menu *create_inventory_menu(){
         struct menu_item *item;
         int y = 1, x = 0;
         for(int i=0;i<sizeof(items)/sizeof(*items);i++){
-            draw.texture = NULL;
-            draw.on_tile = items[i];
-            menu_add_gfx(&amounts,x,y,&draw,1);
-            item = menu_add_number_input(&amounts,++x,y,NULL,NULL,10,3,&z2_file.ammo[items[i]],1);
-            set_item_offset(item,0,2);
-            x+=2;
+            menu_add_gfx(&amounts,x,y,get_item_texture(items[i]),0,12,12);
+            item = menu_add_number_input(&amounts,x+1,y,NULL,NULL,10,3,&z2_file.ammo[items[i]],1);
+            set_item_offset(item,5,2);
+            x+=3;
             x%=9;
             if(x==0) y++;
         }
-        draw.texture = resource_get(R_Z2_DUNGEON);
-        draw.on_tile = 12;
-        menu_add_gfx(&amounts,3,3,&draw,0);
+        gfx_texture *dungeon_tex = resource_get(R_Z2_DUNGEON);
+        menu_add_gfx(&amounts,3,3,dungeon_tex,12,12,12);
         item = menu_add_number_input(&amounts,4,3,NULL,NULL,10,3,&z2_file.current_magic,1);
-        set_item_offset(item,0,2);
-        draw.on_tile = 1;
-        menu_add_gfx(&amounts,6,3,&draw,0);
+        set_item_offset(item,5,2);
+        menu_add_gfx(&amounts,6,3,dungeon_tex,1,12,12);
         item = menu_add_number_input(&amounts,7,3,NULL,NULL,10,5,&z2_file.current_health,2);
-        set_item_offset(item,0,2);
+        set_item_offset(item,5,2);
         
     }
     

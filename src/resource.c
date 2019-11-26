@@ -137,8 +137,6 @@ static z2_item_t texture_map[] = {
 };
 #endif
 
-struct tilebg_info *checkbox_bg;
-
 static const char *resource_names[R_END] = {
     NULL,
     NULL,
@@ -150,6 +148,8 @@ static const char *resource_names[R_END] = {
     "font",
     "buttons",
     "amounts",
+    "flags",
+    "arrows",
 };
 
 static void *resource_load_kz_texture(enum resource resource){
@@ -239,6 +239,8 @@ static void *(*resource_ctors[R_END])(enum resource) = {
     resource_load_kz_texture,
     resource_load_kz_texture,
     resource_load_kz_texture,
+    resource_load_kz_texture,
+    resource_load_kz_texture,
 };
 
 void *resource_get(enum resource resource){
@@ -261,14 +263,4 @@ gfx_texture *get_item_texture(uint8_t item_id){
     return item->texture;
 }
 
-void init_resources(){
-#ifndef LITE
-    resource_get(R_Z2_ITEMS);
-#endif
-    checkbox_bg = malloc(sizeof(*checkbox_bg));
-    checkbox_bg->texture = resource_get(R_KZ_CHECKBOX);
-    checkbox_bg->tile = 0;
-    checkbox_bg->off_color.color = 0xFFFFFFFF;
-    checkbox_bg->on_color.color=0xFFFFFFFF;
-}
 #include <grc.c>

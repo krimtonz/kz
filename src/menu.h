@@ -38,6 +38,7 @@ struct menu_item{
     uint16_t            x;
     uint16_t            y;
     uint8_t             interactive;
+    uint8_t             enabled;
     int16_t             x_offset;
     int16_t             y_offset;
     char               *tooltip;
@@ -96,7 +97,6 @@ void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y);
 void menu_set_pos(struct menu *menu, uint16_t x, uint16_t y);
 
 struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, char *text);
-struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y, draw_info_t *drawinfo, _Bool load_item);
 struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, char *name);
 struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, char *text, menu_generic_callback callback, void *data);
 struct menu_item *menu_add_gfx_button(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback, void *data, draw_info_t *drawinfo);
@@ -105,27 +105,18 @@ struct menu_item *menu_add_watch(struct menu *menu, uint16_t x, uint16_t y, watc
 struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y,
                                         menu_number_callback callback, void *callback_data,
                                         int8_t base, uint8_t length, void *value, uint8_t val_len);
-struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
-                                  void *addr, uint8_t addr_len, uint32_t bitmask, 
-                                  menu_generic_callback callback, void *callback_data,
-                                  char *text);
-
-struct menu_item *menu_add_gfx_switch(struct menu *menu, uint16_t x, uint16_t y,
-                                  void *addr, uint8_t addr_len,
-                                  uint32_t bitmask, menu_generic_callback callback,
-                                  void *callback_data, draw_info_t *drawinfo);
 
 struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
                                 char **text, void *values, uint8_t value_size,
                                 uint16_t options, void *list_data,
                                 menu_list_callback callback, void *callbakc_data);
 
-struct menu_item *menu_add_bit_switch(struct menu *menu, uint16_t x, uint16_t y,
-                                      void *addr, uint8_t addr_len, uint32_t bitmask,
-                                      menu_generic_callback callback,  void *callback_data,
-                                      gfx_texture *texture, uint16_t tex_width, uint16_t tex_height,
-                                      uint16_t tile, _Bool has_off_tile, char *tooltip,
-                                      uint32_t on_color, uint32_t off_color, _Bool load_item);
+struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
+                                  menu_generic_callback callback, void *callback_data,
+                                  gfx_texture *on_texture, gfx_texture *off_texture,
+                                  uint32_t on_color, uint32_t off_color,
+                                  uint8_t on_tile, uint8_t off_tile, 
+                                  int width, int height, char *tooltip);
 
 struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, menu_generic_callback callback,
                                      void *callback_data, uint16_t start_tile, int8_t *options,
@@ -135,9 +126,26 @@ struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
 struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
                                       char *default_text, char **value_ptr);
 
+struct menu_item *menu_add_checkbox(struct menu *menu, uint16_t x, uint16_t y,
+                                    menu_generic_callback callback, void *callback_data);
+
+struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y, 
+                               gfx_texture *texture, int tile,
+                               int width, int height);
+
+struct menu_item *menu_add_move_button(struct menu *menu, uint16_t x, uint16_t y,
+                                       int16_t *move_x, int16_t *move_y,
+                                       menu_generic_callback callback, void *callback_data);
+
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);
 int menu_return(struct menu_item *item, enum menu_callback callback, void *data);
+void menu_item_remove(struct menu_item *item);
+void menu_number_set(struct menu_item *item, uint32_t val);
+void menu_checkbox_set(struct menu_item *item, _Bool status);
+void menu_switch_set(struct menu_item *item, _Bool status);
+void menu_button_set_tile(struct menu_item *item, int tile);
+
 
 int get_item_x_pos(struct menu_item *item);
 int get_item_y_pos(struct menu_item *item);

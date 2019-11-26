@@ -134,8 +134,11 @@ static void draw_item(struct item_list_data *data, int item, float rot){
         gfx_load_tile(texture,0);
         gfx_push(gsSP2Triangles(0,1,2,0,2,1,3,0));
         if(data->ovl_values){
-            gfx_load_tile(resource_get(R_KZ_AMOUNTS),data->ovl_values[ovl_idx]);
-            gfx_push(gsSP2Triangles(4,5,6,4,6,5,7,4));
+            int ovl_tile = data->ovl_values[ovl_idx];
+            if(ovl_tile >= 0){
+                gfx_load_tile(resource_get(R_KZ_AMOUNTS),ovl_tile);
+                gfx_push(gsSP2Triangles(4,5,6,4,6,5,7,4));
+            }
         }
     }
 }
@@ -245,7 +248,10 @@ static void draw_item_list(struct menu_item *item){
         gfx_texture *texture = get_item_texture(tile_idx);
         gfx_draw_sprite_scale(texture,get_item_x_pos(item),get_item_y_pos(item),0, 16,16,draw->x_scale,draw->y_scale);
         if(data->ovl_values){
-            gfx_draw_sprite_scale(resource_get(R_KZ_AMOUNTS),get_item_x_pos(item)+8,get_item_y_pos(item)+11,data->ovl_values[idx],16,8,0.5f,0.5f);
+            int ovl_tile = data->ovl_values[idx];
+            if(ovl_tile>=0){
+                gfx_draw_sprite_scale(resource_get(R_KZ_AMOUNTS),get_item_x_pos(item)+8,get_item_y_pos(item)+11,ovl_tile,16,8,0.5f,0.5f);
+            }
         }
     }else if(data->null_item!=NULL){
         struct tilebg_info *null_item = data->null_item;
