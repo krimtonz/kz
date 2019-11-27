@@ -1,0 +1,36 @@
+#!/bin/bash
+
+elf="$1"
+if [ -z "$elf" ]; then
+    echo usage: \`genhooks \<elf\>\`
+fi
+
+vcaddr()
+{
+    printf "#include \"src/vc.h\"\n$1" | powerpc-eabi-cpp - $CPPFLAGS | tail -n 1 | sed -e s/^M//g
+}
+
+vcsym()
+{
+    addr="0x`powerpc-eabi-nm "$elf" | sed -e s/^M//g | grep " $1" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
+    addr="$(printf "%d" "$addr")"
+    vcaddr="$(printf "%d" "$2")"
+    
+    val=$(expr "$addr" - "$vcaddr")
+    printf "0x%08x" "$val"
+}
+
+genhook()
+{
+    addr="$(printf "%d" "$1")"
+    tmp="$(mktemp)"
+    echo "$2" | powerpc-eabi-as - -o "$tmp"
+    powerpc-eabi-readelf -x .text "$tmp" | grep "0x[0-9A-Fa-f]\{8\}" | grep -o " [0-9A-Fa-f]\{8\}" |
+    while read -r line; do
+        echo "$line"
+    done
+    rm -f "$tmp"
+}
+
+#vcsym treeInitNode "$(vcaddr treeInitNode_addr)"
+genhook "$(vcaddr treeInitNode_addr)" "b $(vcsym treeInitNode $(vcaddr treeInitNode_addr));"
