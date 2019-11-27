@@ -30,7 +30,7 @@ bool cpuHeapTake(int **code,int cpu,func_tree_node_t *node,int size)
             if(node->n64_start > 0x80800000){
                 node->alloc_type = 3;
             }
-            if (size < 0x3c01) {
+            else if (size < 0x3c01) {
                 node->alloc_type = 1;
             }
             else {
@@ -60,13 +60,11 @@ bool cpuHeapTake(int **code,int cpu,func_tree_node_t *node,int size)
                 return xlHeapTake((void**)code,size);
             }
         }
-        else {
-            if (node->alloc_type == 2) {
-                node->alloc_type = 2;
-                unaff_r26 = 0xd;
-                unaff_r27 = (uint32_t *)(cpu + 0x11388);
-                unaff_r25 = iVar2 - (iVar2 >> 0x1f);
-            }
+        else if (node->alloc_type == 2) {
+            node->alloc_type = 2;
+            unaff_r26 = 0xd;
+            unaff_r27 = (uint32_t *)(cpu + 0x11388);
+            unaff_r25 = iVar2 - (iVar2 >> 0x1f);
         }
         if (node->alloc_type == 3 || 0x1f < unaff_r25) {
             node->alloc_type = 3;

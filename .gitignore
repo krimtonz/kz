@@ -1,6 +1,8 @@
 obj/
 notes/
 bin/
+vc/bin/
+vc/obj/
 *.o
 *.elf
 .vs/
@@ -10,3 +12,4 @@ bin/
 *.sra
 *.bak
 patch/kz-*
+patch/dol

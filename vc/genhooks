@@ -14,23 +14,35 @@ vcsym()
 {
     addr="0x`powerpc-eabi-nm "$elf" | sed -e s/^M//g | grep " $1" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
     addr="$(printf "%d" "$addr")"
-    vcaddr="$(printf "%d" "$2")"
-    
+    vcaddr="$(vcaddr "$2")"
+    vcaddr="$(printf "%d" "$vcaddr")"
+
     val=$(expr "$addr" - "$vcaddr")
     printf "0x%08x" "$val"
+}
+
+gzi32()
+{
+    addr2="$(printf "%d" "$1")"
+    addr2="$(expr "$addr2" - 2147512512 + 9696)" # addr - 800070c0 + 25e0 should probably actually read the dol here, but lazy
+    printf "0304 %08x %s\n" "$addr2" "$2"
 }
 
 genhook()
 {
     addr="$(printf "%d" "$1")"
     tmp="$(mktemp)"
-    echo "$2" | powerpc-eabi-as - -o "$tmp"
+    echo "$2" | powerpc-eabi-as -mregnames - -o "$tmp"
     powerpc-eabi-readelf -x .text "$tmp" | grep "0x[0-9A-Fa-f]\{8\}" | grep -o " [0-9A-Fa-f]\{8\}" |
     while read -r line; do
-        echo "$line"
+        gzi32 "$addr" "$line"
+        addr=$(expr "$addr" + 4)
     done
     rm -f "$tmp"
 }
 
-#vcsym treeInitNode "$(vcaddr treeInitNode_addr)"
-genhook "$(vcaddr treeInitNode_addr)" "b $(vcsym treeInitNode $(vcaddr treeInitNode_addr));"
+echo "0000 00000000 00000001"
+genhook "$(vcaddr treeInitNode_addr)" "b $(vcsym treeInitNode treeInitNode_addr);"
+genhook "$(vcaddr cpuHeapTake_addr)" "b $(vcsym cpuHeapTake cpuHeapTake_addr);"
+genhook "$(vcaddr treeInsert_addr)" "b $(vcsym treeInsert treeInsert_addr);"
+genhook "$(vcaddr heap_size_hook_addr)" "lis r3, 0x8178;nop;"

@@ -2,6 +2,7 @@ CC          = powerpc-eabi-gcc
 LD          = powerpc-eabi-g++
 AS			= powerpc-eabi-gcc -x assembler-with-cpp
 OBJCOPY     = powerpc-eabi-objcopy
+GENHOOKS	= CPPFLAGS='$(subst ','\'',$(CPPFLAGS))' ./genhooks
 CFILES      = *.c
 SFILES		= *.S
 SRCDIR		= src
@@ -17,8 +18,8 @@ ALL_LDFLAGS     = -T vc.ld -G 0 -nostartfiles -specs=nosys.specs -Wl,--section-s
 
 VC 			= $(foreach v,$(VC_VERSIONS),kz-vc-$(v))
 
-VC-NARJ	= $(OBJ-kz-vc-NARJ) $(ELF-kz-vc-NARJ)
-VC-NARE	= $(OBJ-kz-vc-NARE) $(ELF-kz-vc-NARE)
+VC-NARJ	= $(OBJ-kz-vc-NARJ) $(ELF-kz-vc-NARJ) $(HOOKS-kz-vc-NARJ)
+VC-NARE	= $(OBJ-kz-vc-NARE) $(ELF-kz-vc-NARE) $(HOOKS-kz-vc-NARE)
 
 all			: $(VC)
 clean       :
@@ -29,8 +30,8 @@ clean       :
 define bin_template
 SRCDIR-$(1)      = $(5)
 OBJDIR-$(1)      = obj/$(1)
-BINDIR-$(1)      = bin/$(1)
-HOOKSDIR-$(1)	 = patch/$(1)
+BINDIR-$(1)      = ../patch/dol/$(1)/
+HOOKSDIR-$(1)	 = ../patch/$(1)/
 NAME-$(1)        = $(1)
 ADDRESS-$(1)	 = $(4)
 CSRC-$(1)       := $$(foreach s,$$(CFILES),$$(wildcard $$(SRCDIR-$(1))/$$(s)))
@@ -41,11 +42,11 @@ OBJ-$(1)		 = $$(COBJ-$(1)) $$(SOBJ-$(1))
 ELF-$(1)         = $$(BINDIR-$(1))/$(3).elf
 BIN-$(1)         = $$(BINDIR-$(1))/$(3).bin
 OUTDIR-$(1)      = $$(OBJDIR-$(1)) $$(BINDIR-$(1)) $$(HOOKSDIR-$(1))
-HOOKS-$(1)		 = patch/$(1)/hooks.gsc
+HOOKS-$(1)		 = $$(HOOKSDIR-$(1))/$(3).gzi
 BUILD-$(1)		 = $(1)
 CLEAN-$(1)		 = clean-$(1)
 $$(ELF-$(1))		 : LDFLAGS += -Wl,--defsym,start=$$(ADDRESS-$(1))
-$$(BUILD-$(1))       : $$(BIN-$(1))
+$$(BUILD-$(1))       : $$(BIN-$(1)) $$(HOOKS-$(1))
 $$(CLEAN-$(1))       :
 	rm -rf $$(OUTDIR-$(1))
 
@@ -59,6 +60,8 @@ $$(BIN-$(1))      : $$(ELF-$(1)) | $$(BINDIR-$(1))
 	$(OBJCOPY) -S -O binary $$< $$@
 $$(OUTDIR-$(1))   :
 	mkdir -p $$@
+$$(HOOKS-$(1))	: $$(ELF-$(1)) $$(HOOKSDIR-$(1)) | $$(SRCDIR-$(1))/vc.h
+	$$(GENHOOKS) $$< >$$@
 endef
 
 $(foreach v,$(VC_VERSIONS),$(eval $(call bin_template,kz-vc-$(v),$(v),kz-vc,$(ADDRESS),src)))
