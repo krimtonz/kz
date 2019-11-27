@@ -160,7 +160,7 @@ void command_next_memfile(){
 }
 
 void command_prev_memfile(){
-    kz.memfile_slot += KZ_MEMFILE_MAX;
+    kz.memfile_slot += KZ_MEMFILE_MAX - 1;
     kz.memfile_slot %= KZ_MEMFILE_MAX;
 }
 
@@ -202,6 +202,6 @@ void command_next_position(){
 }
 
 void command_prev_position(){
-    kz.pos_slot+=KZ_POSITION_MAX;
+    kz.pos_slot+=KZ_POSITION_MAX - 1;
     kz.pos_slot%=KZ_POSITION_MAX;
 }
