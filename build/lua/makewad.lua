@@ -25,6 +25,7 @@ os.execute("rm -rf \"build/rom.z64\"")
 print("Packing build/" .. kz_version .. ".wad\n")
 os.execute(gzinject .. 
             " -d \"build/wadextract\"" ..
+            " -k \"build/common-key.bin\"" .. 
             " -a pack" ..
             " -w \"build/" .. kz_version .. ".wad\"" ..
             " -i " .. title_id ..
