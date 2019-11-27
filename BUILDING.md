@@ -11,8 +11,8 @@ To build all kz binaries, run `make all` to only build a sepecific version run `
 
 ## Patching
 In order to build a ROM that will work on the Wii U VC or N64, and standard N64 Emulators, run
-`gru build/makerom.lua /patch/to/vanilla/rom.z64 lite`, in order to build a full kz version rom
-run `gru builld/makerom.lua /path/to/vanilla/rom.z64` Note: this rom will only work on a modified
+`build/makerom-lite /patch/to/vanilla/rom.z64`, in order to build a full kz version rom
+run `builld/makerom /path/to/vanilla/rom.z64` Note: this rom will only work on a modified
 [Project64](https://github.com/krimtonz/project64).  To build a Wii VC Wad which contains the full
-version of kz, run `gru build/makewad.lua /path/to/vanilla/wad.wad`  The patching scripts will run
+version of kz, run `build/makewad /path/to/vanilla/wad.wad`  The patching scripts will run
 the building process, so you can skip the building process if you plan on patching.  

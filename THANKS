@@ -2,4 +2,6 @@ Thanks to everyone who has contributed directly or indirectly, this project is s
 
 Special thanks to 
     glank, a lot of concepts, and code snippets were borrowed from the Ocarina of Time Practice Rom (gz)
-    mzxrules, certain hooks, and other addresses were provided by him, as well as the ASM building script
+    mzxrules, original idea of shrinking game heap in order to fit custom code payload, this is used for lite versions now
+    antiformant (notwa), provided scene names 
+    
