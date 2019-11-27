@@ -65,7 +65,7 @@ struct menu_item *menu_add_gfx_button(struct menu *menu, uint16_t x, uint16_t y,
         item->data = data;
         item->draw_proc = draw_gfx_button;
         item->activate_proc = button_activate;
-        item->update_proc = button_activate;
+        item->update_proc = button_update;
         item->interactive = 1;
         item->data = idata;
 

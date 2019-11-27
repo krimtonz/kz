@@ -305,7 +305,6 @@ static int change_selected_dungeon(struct menu_item *item, enum menu_callback ca
 static int update_dungeon_keys(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
     if(callback == MENU_CALLBACK_UPDATE){
         z2_file.dungeon_keys[dungeon_idx] = val;
-        return 1;
     }
     return 0;
 }
@@ -313,7 +312,6 @@ static int update_dungeon_keys(struct menu_item *item, enum menu_callback callba
 static int update_stray_fairies(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
     if(callback == MENU_CALLBACK_ACTIVATE){
         z2_file.stray_fairies[dungeon_idx] = val;
-        return 1;
     }
     return 0;
 }
@@ -429,7 +427,7 @@ struct menu *create_inventory_menu(){
             struct item_switch_data *data = malloc(sizeof(*data));
             data->map = 0;
             data->map_idx = i;
-            menu_add_switch(&items,x++,y,item_switch_callback,data,get_item_texture(i),NULL,
+            menu_add_switch(&items,x++,y,item_switch_callback,data,get_item_texture(item_map_table[i].item),NULL,
                             0xFFFFFFFF, 0xFFFFFFFF,0,1,
                             16,16,NULL);
             if(x==6){
