@@ -82,6 +82,7 @@ typedef struct  {
     const char             *tooltip;
     struct log              log[10];
     _Bool                   debug_active;
+    int                     prev_timespeed;
 } kz_ctxt_t;
 
 extern kz_ctxt_t kz;

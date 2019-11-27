@@ -1223,7 +1223,7 @@ typedef struct
 
 typedef struct{
     char        unk_0x00_[0x32];    /* 0x0000 */
-    uint16_t    time_speed;         /* 0x0032 */
+    int16_t     time_speed;         /* 0x0032 */
     char        unk_0x34_[0x06];    /* 0x0034 */
     int16_t     acceleration;       /* 0x003A */
     char        unk_0x3C_[0x0E];    /* 0x003C */

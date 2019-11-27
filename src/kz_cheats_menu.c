@@ -33,6 +33,17 @@ static int cheat_callback(struct menu_item *item, enum menu_callback callback, v
             }else{
                 memcpy((void*)z2_restriction_table_addr,restriction_table,sizeof(restriction_table));
             }
+        }else if(cheat == CHEAT_FREEZE_TIME){
+            if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){
+                kz.prev_timespeed = z2_file.timespeed;
+            }else{
+                if(kz.prev_timespeed == 0x80000000){
+                    z2_file.timespeed = 0;
+                }else{
+                    z2_file.timespeed = kz.prev_timespeed;
+                }
+                kz.prev_timespeed = 0x80000000;
+            }
         }
         return 1;
     }else if(callback == MENU_CALLBACK_UPDATE){

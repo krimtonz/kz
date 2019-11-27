@@ -247,7 +247,7 @@ static void kz_main(void) {
             gfx_printf_color(Z2_SCREEN_WIDTH-60, Z2_SCREEN_HEIGHT-60,0x00FF00FF,"t");
         }
         if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){
-            z2_file.timespeed = -5;
+            z2_file.timespeed = -z2_static_ctxt.time_speed;
         }
         if(settings->cheats & (1 << CHEAT_RESTRICTION)){
             memset(&z2_game.hud_ctx.restriction_flags,0,0xC);
@@ -419,6 +419,7 @@ void init() {
     list_init(&kz.watches,sizeof(watch_t));
 
     kz.pending_frames=-1;
+    kz.prev_timespeed = 0x80000000;
 
     kz.settings_profile = 0;
     load_settings_from_flashram(kz.settings_profile);
