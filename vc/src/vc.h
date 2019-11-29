@@ -6277,7 +6277,8 @@ struct recomp_ctxt_t {
     int n64_end;
     char field_0x14[32];
     int field_0x34;
-    char field_0x38[48];
+    char field_0x38[44];
+    struct func_tree_node_t * kz_tree_root;
     struct func_tree_node_t * code_tree_root;
     struct func_tree_node_t * other_tree_root;
     int new_f_cnt;
@@ -6288,6 +6289,7 @@ struct recomp_ctxt_t {
 };
 
 bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size);
+bool treeBalance(recomp_ctxt_t *ctx);
 
 #if VC_VERSION == NARJ
 #define xlHeapTake_addr     0x800887e0
@@ -6295,39 +6297,37 @@ bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size);
 #define cpuHeapTake_addr    0x8004c5c0
 #define treeInitNode_addr   0x8004d5c4
 #define heap_size_hook_addr 0x80091f70
-#define xlHeapGetFree_addr  0x800895c4
-#define treeAdjustRoot_addr 0x8004e33c
-#define treeInsertNode_addr 0x8004e0cc
-#define treeBalance_addr    0x8004e1ac
-#define treeInsert_addr     0x8004dfbc
+#define treeAdjustRoot_addr 0x8004e3b0
+#define treeInsertNode_addr 0x8004e140
+#define treeInsert_addr     0x8004e030
+#define treeInit_addr       0x8004d56c
+#define treeSearchNode_addr 0x8004e594
 #else
 #define xlHeapTake_addr     0x80088790
 #define cpuTreeTake_addr    0x8004c87c
 #define cpuHeapTake_addr    0x8004c54c
 #define treeInitNode_addr   0x8004d550
 #define heap_size_hook_addr 0x80091ec0
-#define xlHeapGetFree_addr  0x800895c4
 #define treeAdjustRoot_addr 0x8004e33c
 #define treeInsertNode_addr 0x8004e0cc
-#define treeBalance_addr    0x8004e1ac
 #define treeInsert_addr     0x8004dfbc
+#define treeInit_addr       0x8004d4f8
+#define treeSearchNode_addr 0x8004e520
 #endif
 
 typedef bool (*xlHeapTake_t)(void **dst, int size);
 typedef bool (*cpuTreeTake_t)(func_tree_node_t **out_node, int *out_pos, int size);
-typedef bool (*xlHeapGetFree_t)(int *heap_free);
 typedef bool (*treeAdjustRoot_t)(n64_cpu_t *cpu,int n64_start,int n64_end);
 typedef bool (*treeInsertNode_t)(func_tree_node_t **start,int n64_start,int n64_end,func_tree_node_t **new_node);
-typedef bool (*treeBalance_t)(recomp_ctxt_t *ctx);
 
 #define xlHeapTake      ((xlHeapTake_t)     xlHeapTake_addr)
 #define cpuTreeTake     ((cpuTreeTake_t)    cpuTreeTake_addr)
-#define xlHeapGetFree   ((xlHeapGetFree_t)  xlHeapGetFree_addr)
 #define treeAdjustRoot  ((treeAdjustRoot_t) treeAdjustRoot_addr)
 #define treeInsertNode  ((treeInsertNode_t) treeInsertNode_addr)
-#define treeBalance     ((treeBalance_t)    treeBalance_addr)
 
-extern func_tree_node_t kz_tree[];
-extern int kz_tree_status[];
+extern func_tree_node_t kz_tree[0x100];
+extern int kz_tree_status[8];
+extern recomp_ctxt_t *tree_ctx;
+extern func_tree_node_t *kz_tree_root;
 
 #endif

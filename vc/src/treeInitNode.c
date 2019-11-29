@@ -12,12 +12,11 @@ bool treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n64_start
     func_tree_node_t *out_node;
 
     bVar1 = false;
-    xlHeapGetFree(&heap_free);
-    //if(n64_start > 0x80800000){
-    //    bVar1 = kz_cpuTreeTake(&out_node, &out_pos, 0x48);
-    //}else{
+    if(n64_start > 0x80800000){
+        bVar1 = kz_cpuTreeTake(&out_node, &out_pos, 0x48);
+    }else{
         bVar1 = cpuTreeTake(&out_node,&out_pos,0x48);
-    //}
+    }
     if (bVar1 != false) {
         out_node->n64_start = n64_start;
         out_node->n64_end = n64_end;

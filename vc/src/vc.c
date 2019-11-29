@@ -1,7 +1,10 @@
+#include <stdlib.h>
 #include "vc.h"
 
 func_tree_node_t kz_tree[0x100] = {0};
 int kz_tree_status[8] = {0};
+recomp_ctxt_t *tree_ctx = NULL;
+func_tree_node_t *kz_tree_root = NULL;
 
 bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size){
     bool found_node = false;
@@ -11,6 +14,7 @@ bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size){
             if(kz_tree_status[i] & (1 << j)) continue;
             *out_pos = i * 32 + j;
             found_node = true;
+            kz_tree_status[i] |= (1 << j);
             break;
         }
         if(found_node) break;

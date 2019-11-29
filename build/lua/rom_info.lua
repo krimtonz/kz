@@ -7,6 +7,9 @@ roms = {
         rom_id = "NZSJ",
         kz = "kz-NZSJ",
         wad_patch = "patch/NKZJ.gzi",
+        vc_fix_patch = "patch/kz-vc-NARJ/kz-vc.gzi",
+        vc_fix_inject = "patch/dol/kz-vc-NARJ/kz-vc.bin",
+        vc_fix_addr = "81780000",
         title_id = "NKZJ",
         title = "kz-j-1.1"
     },
@@ -18,6 +21,9 @@ roms = {
         rom_id = "NZSJ10",
         kz = "kz-NZSJ10",
         wad_patch = "patch/NKZJ.gzi",
+        vc_fix_patch = "patch/kz-vc-NARJ/kz-vc.gzi",
+        vc_fix_inject = "patch/dol/kz-vc-NARJ/kz-vc.bin",
+        vc_fix_addr = "81780000",
         title_id = "NKZJ",
         title = "kz-j-1.0"
     },
@@ -29,6 +35,9 @@ roms = {
         rom_id = "NZSE",
         kz = "kz-NZSE",
         wad_patch = "patch/NKZE.gzi",
+        vc_fix_patch = "patch/kz-vc-NARE/kz-vc.gzi",
+        vc_fix_inject = "patch/dol/kz-vc-NARE/kz-vc.bin",
+        vc_fix_addr = "81780000",
         title_id = "NKZE",
         title = "kz-e"
     }
