@@ -6296,7 +6296,7 @@ bool treeBalance(recomp_ctxt_t *ctx);
 #define cpuTreeTake_addr    0x8004c8f0
 #define cpuHeapTake_addr    0x8004c5c0
 #define treeInitNode_addr   0x8004d5c4
-#define heap_size_hook_addr 0x80091f70
+#define heap_size_hook_addr 0x80091f54
 #define treeAdjustRoot_addr 0x8004e3b0
 #define treeInsertNode_addr 0x8004e140
 #define treeInsert_addr     0x8004e030
@@ -6307,7 +6307,7 @@ bool treeBalance(recomp_ctxt_t *ctx);
 #define cpuTreeTake_addr    0x8004c87c
 #define cpuHeapTake_addr    0x8004c54c
 #define treeInitNode_addr   0x8004d550
-#define heap_size_hook_addr 0x80091ec0
+#define heap_size_hook_addr 0x80091ea4
 #define treeAdjustRoot_addr 0x8004e33c
 #define treeInsertNode_addr 0x8004e0cc
 #define treeInsert_addr     0x8004dfbc

@@ -12,7 +12,7 @@ vcaddr()
 
 vcsym()
 {
-    addr="0x`powerpc-eabi-nm "$elf" | sed -e s/^M//g | grep " $1" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
+    addr="0x`powerpc-eabi-nm "$elf" | sed -e s/^M//g | grep -w "$1" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
     addr="$(printf "%d" "$addr")"
     vcaddr="$(vcaddr "$2")"
     vcaddr="$(printf "%d" "$vcaddr")"
@@ -47,4 +47,4 @@ genhook "$(vcaddr cpuHeapTake_addr)" "b $(vcsym cpuHeapTake cpuHeapTake_addr);"
 genhook "$(vcaddr treeInsert_addr)" "b $(vcsym treeInsert treeInsert_addr);"
 genhook "$(vcaddr treeInit_addr)" "b $(vcsym treeInit treeInit_addr);"
 genhook "$(vcaddr treeSearchNode_addr)" "b $(vcsym treeSearchNode treeSearchNode_addr);"
-genhook "$(vcaddr heap_size_hook_addr)" "lis r3, 0x8178;nop;"
+genhook "$(vcaddr heap_size_hook_addr)" "lis r3, 0x8023;"
