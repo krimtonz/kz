@@ -1,8 +1,13 @@
 #!/bin/bash
 
 elf="$1"
+bin="$2"
 if [ -z "$elf" ]; then
-    echo usage: \`genhooks \<elf\>\`
+    echo usage: \`genhooks \<elf\> \<bin\>\`
+fi
+
+if [ -z "$bin" ]; then
+    echo usage: \`genhooks \<elf\> \<bin\>\`
 fi
 
 vcaddr()
@@ -12,13 +17,17 @@ vcaddr()
 
 vcsym()
 {
-    addr="0x`powerpc-eabi-nm "$elf" | sed -e s/^M//g | grep -w "$1" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
-    addr="$(printf "%d" "$addr")"
-    vcaddr="$(vcaddr "$2")"
-    vcaddr="$(printf "%d" "$vcaddr")"
+    echo "0x`powerpc-eabi-nm "$elf" | sed -e s/^M//g | grep -w "$1" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
+}
 
-    val=$(expr "$addr" - "$vcaddr")
-    printf "0x%08x" "$val"
+vcbranch()
+{
+    dest="$(vcsym "$1")"
+    dest="$(printf "%d" "$dest")"
+    origin="$(vcaddr "$2")"
+    origin="$(printf "%d" "$origin")"
+    val=$(expr "$dest" - "$origin")
+    printf "0x%08x" "$val"    
 }
 
 gzi32()
@@ -42,9 +51,14 @@ genhook()
 }
 
 echo "0000 00000000 00000001"
-genhook "$(vcaddr treeInitNode_addr)" "b $(vcsym treeInitNode treeInitNode_addr);"
-genhook "$(vcaddr cpuHeapTake_addr)" "b $(vcsym cpuHeapTake cpuHeapTake_addr);"
-genhook "$(vcaddr treeInsert_addr)" "b $(vcsym treeInsert treeInsert_addr);"
-genhook "$(vcaddr treeInit_addr)" "b $(vcsym treeInit treeInit_addr);"
-genhook "$(vcaddr treeSearchNode_addr)" "b $(vcsym treeSearchNode treeSearchNode_addr);"
-genhook "$(vcaddr heap_size_hook_addr)" "lis r3, 0x8023;"
+genhook "$(vcaddr treeInitNode_addr)" "b $(vcbranch treeInitNode treeInitNode_addr);"
+genhook "$(vcaddr cpuHeapTake_addr)" "b $(vcbranch cpuHeapTake cpuHeapTake_addr);"
+genhook "$(vcaddr treeInsert_addr)" "b $(vcbranch treeInsert treeInsert_addr);"
+genhook "$(vcaddr treeInit_addr)" "b $(vcbranch treeInit treeInit_addr);"
+genhook "$(vcaddr treeSearchNode_addr)" "b $(vcbranch treeSearchNode treeSearchNode_addr);"
+binsiz="$(stat --printf="%s" "$bin")"
+initaddr="$(vcsym _start)"
+initaddr=$(printf "%d" "$initaddr")
+heapaddr=$(expr "$initaddr" + "$binsiz")
+heapaddr=$(printf "0x%08x" "$heapaddr")
+genhook "$(vcaddr heap_size_hook_addr)" "lis r3, "$heapaddr"@h;addi r3, r3, "$heapaddr"@l;"

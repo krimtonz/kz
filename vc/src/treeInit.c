@@ -15,6 +15,7 @@
 bool treeInit(n64_cpu_t *cpu,int code_end)
 
 {
+    _start();
     recomp_ctxt_t *prVar1;
     
     prVar1 = cpu->recomp_ctx;

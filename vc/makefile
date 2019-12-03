@@ -1,7 +1,7 @@
 CC          = powerpc-eabi-gcc
 LD          = powerpc-eabi-g++
 AS			= powerpc-eabi-gcc -x assembler-with-cpp
-OBJCOPY     = powerpc-eabi-objcopy
+OBJCOPY     = powerpc-eabi-objcopy --set-section-flags .bss=alloc,load,content
 GENHOOKS	= CPPFLAGS='$(subst ','\'',$(CPPFLAGS))' ./genhooks
 CFILES      = *.c
 SFILES		= *.S
@@ -58,8 +58,8 @@ $$(BIN-$(1))      : $$(ELF-$(1)) | $$(BINDIR-$(1))
 	$(OBJCOPY) -S -O binary $$< $$@
 $$(OUTDIR-$(1))   :
 	mkdir -p $$@
-$$(HOOKS-$(1))	: $$(ELF-$(1)) $$(BINDIR-$(1)) | $$(SRCDIR-$(1))/vc.h
-	$$(GENHOOKS) $$< >$$@
+$$(HOOKS-$(1))	: $$(ELF-$(1)) $$(BIN-$(1)) | $$(BINDIR-$(1))
+	$$(GENHOOKS) $$^ >$$@
 endef
 
 $(foreach v,$(VC_VERSIONS),$(eval $(call bin_template,kz-vc-$(v),$(v),kz-vc,src)))

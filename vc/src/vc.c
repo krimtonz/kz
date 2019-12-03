@@ -6,6 +6,11 @@ int kz_tree_status[8] = {0};
 recomp_ctxt_t *tree_ctx = NULL;
 func_tree_node_t *kz_tree_root = NULL;
 
+extern __attribute__((section(".bss"))) void *__bss_end;
+extern __attribute__((section(".bss"))) void *__bss_start;
+extern __attribute__((section(".sbss"))) void *__sbss_end;
+extern __attribute__((section(".sbss"))) void *__sbss_start;
+
 bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size){
     bool found_node = false;
     for(int i=0;i<8;i++){
@@ -25,5 +30,15 @@ bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size){
 }
 
 __attribute__((section(".init"))) int _start(){
+    char *p = (char*)&__bss_start;
+    char *end = (char*)&__bss_end;
+    while (p < end){
+        *p++ = 0;
+    }
+    p = (char*)&__sbss_start;
+    end = (char*)&__sbss_end;
+    while (p < end){
+        *p++ = 0;
+    }
     return 0;
 }
