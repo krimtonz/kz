@@ -35,11 +35,14 @@ enum resource{
 
 struct item_texture{
     gfx_texture *texture;
+#ifdef LITE
     int last_access_counter;
+    _Bool release;
 };
+#endif
 
 void *resource_get(enum resource resource);
-gfx_texture *get_item_texture(uint8_t item_id);
+gfx_texture *get_item_texture(uint8_t item_id, _Bool release);
 void resource_destroy(enum resource resource);
 
 #endif

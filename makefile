@@ -18,7 +18,7 @@ NAME		= kz
 RESDESC		= res.json
 
 ADDRESS     = 0x80800060
-ADDRESS_LITE	= 0x806F0060
+ADDRESS_LITE	= 0x806E0060
 ADDRESS_LDR	= 0x80080000
 ALL_CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
 ALL_CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS)

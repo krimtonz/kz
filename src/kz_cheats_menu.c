@@ -59,7 +59,7 @@ struct menu *create_cheats_menu(){
     cheats.selected_item = menu_add_button(&cheats,0,0,"return",menu_return,NULL);
     struct menu_item *item = NULL;
     for(int i=0;i<sizeof(cheat_table)/sizeof(*cheat_table);i++){
-        item = menu_add_checkbox(&cheats,0,i+1,cheat_callback,(void*)cheat_table[i].mask);
+        item = menu_add_checkbox(&cheats,0,i+1,cheat_callback,(void*)cheat_table[i].mask,NULL);
         cheat_callback(item,MENU_CALLBACK_UPDATE,(void*)cheat_table[i].mask);
         menu_add(&cheats,2,i+1,cheat_table[i].name);
     }

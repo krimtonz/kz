@@ -149,17 +149,17 @@ struct menu *create_settings_menu(){
     menu_add_button(&settingsm,0,3,"load settings",load_profile,NULL);
     menu_add_button(&settingsm,0,4,"load default settings",default_settings,NULL);
     
-    struct menu_item *item = menu_add_checkbox(&settingsm,0,5,settings_switch_callback,(void*)SW_INPUT_DISPLAY);
+    struct menu_item *item = menu_add_checkbox(&settingsm,0,5,settings_switch_callback,(void*)SW_INPUT_DISPLAY,NULL);
     menu_checkbox_set(item,settings->input_display);
     menu_add(&settingsm,2,5,"input display");
     menu_add_move_button(&settingsm,16,5,&settings->id_x,&settings->id_y,NULL,NULL);
     
-    item = menu_add_checkbox(&settingsm,0,6,settings_switch_callback,(void*)SW_TIMER);
+    item = menu_add_checkbox(&settingsm,0,6,settings_switch_callback,(void*)SW_TIMER,NULL);
     menu_checkbox_set(item,settings->timer);
     menu_add(&settingsm,2,6,"timer");
     menu_add_move_button(&settingsm,16,6,&settings->timer_x,&settings->timer_y,NULL,NULL);
 
-    item = menu_add_checkbox(&settingsm,0,7,settings_switch_callback,(void*)SW_LAG_COUNTER);
+    item = menu_add_checkbox(&settingsm,0,7,settings_switch_callback,(void*)SW_LAG_COUNTER,NULL);
     menu_checkbox_set(item,settings->lag_counter);
     menu_add(&settingsm,2,7,"lag counter");
     menu_add_move_button(&settingsm,16,7,&settings->lag_x,&settings->lag_y,NULL,NULL);
@@ -173,13 +173,13 @@ struct menu *create_settings_menu(){
     menu_add_watch(&settingsm,16,8,&memfile_watch,1);
     menu_add_button(&settingsm,17,8,"+",memfile_inc,NULL);
     
-    item = menu_add_checkbox(&settingsm,0,9,settings_switch_callback,(void*)SW_MEMFILE_VOID);
+    item = menu_add_checkbox(&settingsm,0,9,settings_switch_callback,(void*)SW_MEMFILE_VOID,NULL);
     if(settings->memfile_action == MEMFILE_VOID){
         menu_checkbox_set(item,1);
     }
     menu_add(&settingsm,3,9,"void on load memfile");
 
-    item = menu_add_checkbox(&settingsm,0,10,settings_switch_callback,(void*)SW_MEMFILE_POS);
+    item = menu_add_checkbox(&settingsm,0,10,settings_switch_callback,(void*)SW_MEMFILE_POS,NULL);
     if(settings->memfile_action == MEMFILE_POS){
         menu_checkbox_set(item,1);
     }

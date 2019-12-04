@@ -10,7 +10,7 @@ local suffix = ""
 local ram = 0x80800000
 if arg[2] == "lite" then
     suffix = "-lite"
-    ram = 0x806F0000
+    ram = 0x806E0000
 end
 local kz_version = "kz" .. suffix .. "-" .. rom_info.rom_id
 print("Building " .. kz_version)

@@ -73,11 +73,11 @@ struct menu *create_scene_menu(){
     menu_set_padding(&scene,0,2);
     scene.selected_item = menu_add_button(&scene,0,0,"return",menu_return,NULL);
     menu_add(&scene,0,1,"collision viewer");
-    menu_add_checkbox(&scene,17,1,collision_gen,NULL);
+    menu_add_checkbox(&scene,17,1,collision_gen,NULL,NULL);
     menu_add(&scene,2,2,"reduce");
-    menu_add_checkbox(&scene,10,2,collision_view_switch,(void*)COL_VIEW_REDUX);
+    menu_add_checkbox(&scene,10,2,collision_view_switch,(void*)COL_VIEW_REDUX,NULL);
     menu_add(&scene,2,3,"opaque");
-    menu_add_checkbox(&scene,10,3,collision_view_switch,(void*)COL_VIEW_OPAQUE);
+    menu_add_checkbox(&scene,10,3,collision_view_switch,(void*)COL_VIEW_OPAQUE,NULL);
     
     menu_add(&scene,0,4,"current room");
     static watch_t cur_room;

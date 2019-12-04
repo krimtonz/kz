@@ -382,7 +382,7 @@ static void kz_main(void) {
 #ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);
     for(int i=0;i<Z2_ITEM_END;i++){
-        if(!textures[i].texture) continue;
+        if(!textures[i].texture || !textures[i].release) continue;
         textures[i].last_access_counter++;
         if(textures[i].last_access_counter>=60){
             gfx_destroy_texture(textures[i].texture);
@@ -398,11 +398,6 @@ void init() {
     clear_bss();
     do_global_ctors();
     gfx_init();
-
-    // preload item textures
-    #ifndef LITE
-    resource_get(R_Z2_ITEMS);
-    #endif
 
     kz.cpu_cycle_counter = 0;
     cpu_counter();
@@ -438,8 +433,12 @@ void init() {
     menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
     menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
     menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
+    #ifndef LITE
     menu_add_submenu(&kz.main_menu,0,8,create_debug_menu(),"debug");
     menu_add_submenu(&kz.main_menu,0,9,create_settings_menu(),"settings");
+    #else
+    menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
+    #endif
 
     init_kz_keyboard();
 

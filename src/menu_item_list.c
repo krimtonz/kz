@@ -130,7 +130,7 @@ static void draw_item(struct item_list_data *data, int item, float rot){
         if(has_null(data)) ovl_idx++;
         if(item<data->start_tile) item = item + data->start_tile;
         if(data->tiles_cnt>0 && item>data->tiles_cnt) item = data->start_tile;
-        texture = get_item_texture(item);
+        texture = get_item_texture(item,1);
         gfx_load_tile(texture,0);
         gfx_push(gsSP2Triangles(0,1,2,0,2,1,3,0));
         if(data->ovl_values){
@@ -245,7 +245,7 @@ static void draw_item_list(struct menu_item *item){
         int tile_idx = idx;
         if(data->tiles_cnt>0 && tile_idx>=data->tiles_cnt-1) tile_idx = 1;
         tile_idx = tile_idx + data->start_tile - 1;
-        gfx_texture *texture = get_item_texture(tile_idx);
+        gfx_texture *texture = get_item_texture(tile_idx,1);
         gfx_draw_sprite_scale(texture,get_item_x_pos(item),get_item_y_pos(item),0, 16,16,draw->x_scale,draw->y_scale);
         if(data->ovl_values){
             int ovl_tile = data->ovl_values[idx];

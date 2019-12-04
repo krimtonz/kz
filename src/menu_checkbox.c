@@ -44,7 +44,7 @@ void menu_checkbox_set(struct menu_item *item, _Bool status){
 }
 
 struct menu_item *menu_add_checkbox(struct menu *menu, uint16_t x, uint16_t y,
-                                    menu_generic_callback callback, void *callback_data){
+                                    menu_generic_callback callback, void *callback_data, char *tooltip){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
@@ -53,6 +53,7 @@ struct menu_item *menu_add_checkbox(struct menu *menu, uint16_t x, uint16_t y,
         data->status = 0;
         item->data = data;
         item->interactive = 1;
+        item->tooltip = tooltip;
         item->draw_proc = draw_checkbox_proc;
         item->activate_proc = activate_checkbox_proc;
         item->update_proc = update_checkbox_proc;

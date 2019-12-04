@@ -89,11 +89,11 @@ struct menu *create_file_menu(){
     menu_init(&file,0,0);
     menu_set_padding(&file,0,2);
     file.selected_item = menu_add_button(&file,0,0,"return",menu_return,NULL);
-    menu_add_checkbox(&file,0,1,have_tatl_callback,NULL);
+    menu_add_checkbox(&file,0,1,have_tatl_callback,NULL,NULL);
     menu_add(&file,2,1,"have tatl");
-    menu_add_checkbox(&file,0,2,intro_watched_callback,NULL);
+    menu_add_checkbox(&file,0,2,intro_watched_callback,NULL,NULL);
     menu_add(&file,2,2,"intro watched");
-    menu_add_checkbox(&file,0,3,great_spin_callback,NULL);
+    menu_add_checkbox(&file,0,3,great_spin_callback,NULL,NULL);
     menu_add(&file,2,3,"great spin");
     menu_add_button(&file,0,4,"debug menu",debug_menu,NULL);
     menu_add(&file,0,5,"stored song");

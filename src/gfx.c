@@ -8,7 +8,7 @@
 #include "resource.h"
 
 #ifdef LITE
-#define     GFX_SIZE 0x1750
+#define     GFX_SIZE 0x1500
 #else
 #define     GFX_SIZE 0x6500
 #endif

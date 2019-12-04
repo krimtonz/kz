@@ -17,6 +17,7 @@ struct item_data {
 };
 
 static void draw_switch_proc(struct menu_item *item){
+    
     struct item_data *data = item->data;
     gfx_texture *texture = data->on_texture;
     int tile = data->on_tile;

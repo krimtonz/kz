@@ -1,3 +1,4 @@
+#ifndef LITE
 #include <stdint.h>
 #include <inttypes.h>
 #include <stdlib.h>
@@ -7,11 +8,7 @@
 #include "resource.h"
 #include "scenes.h"
 
-#ifdef LITE
-#define MEMORY_MAX  0x80800000
-#else
 #define MEMORY_MAX  0x80C00000
-#endif
 
 enum flags_region {
     FLAGS_WEEK_EVENT,
@@ -28,7 +25,6 @@ struct flags_data {
     enum flags_region   region;
 };
 
-#ifndef LITE
 struct actor_info_data {
     struct menu_item   *actor_button;
     struct menu        *memory_menu;
@@ -56,7 +52,6 @@ static char                    *actor_type_text[] = {
 
 // object vars
 static int16_t  obj_id = 0;
-#endif
 
 // memory vars
 static uint32_t             memory_start_addr = 0x80000000;
@@ -211,7 +206,6 @@ static struct menu_item *menu_add_memory_view(struct menu *menu, uint16_t x, uin
     return item;
 }
 
-#ifndef LITE
 static void objects_view_draw(struct menu_item *item){
     int x = get_item_x_pos(item);
     int y = get_item_y_pos(item);
@@ -406,8 +400,6 @@ static int actor_button_callback(struct menu_item *item, enum menu_callback call
     return 0;
 }
 
-#endif
-
 static int flag_callback(struct menu_item *item, enum menu_callback callback, void *data){
         int idx = (int)data;
         uint8_t *addr = (uint8_t*)(flag_start_addr[flags_data.region] + flags_data.offset + (idx / 8));
@@ -519,10 +511,8 @@ static int flags_inc_callback(struct menu_item *item, enum menu_callback callbac
 struct menu *create_debug_menu(){
     static struct menu debug;
     static struct menu memory;
-#ifndef LITE
     static struct menu objects;
     static struct menu actors;
-#endif
     static struct menu flags;
 
     menu_init(&debug, kz.main_menu.x, kz.main_menu.y);
@@ -550,7 +540,6 @@ struct menu *create_debug_menu(){
     }
 
     {
-#ifndef LITE
         // Create Objects menu
         menu_init(&objects, 0, 0);
         menu_set_padding(&objects,0,2);
@@ -560,11 +549,9 @@ struct menu *create_debug_menu(){
         menu_add_button(&objects,12,1,"push",object_push_callback,NULL);
         menu_add_button(&objects,20,1,"pop",object_pop_callback,NULL);
         menu_add_objects_view(&objects,0,2);
-#endif
     }
 
     {
-#ifndef LITE
         // Create Actors Menu
         menu_init(&actors, 0 ,0);
         menu_set_padding(&actors,0,2);
@@ -598,8 +585,6 @@ struct menu *create_debug_menu(){
         menu_add_number_input(&actors,19,9,NULL,NULL,16,4,&actor_rot[2],2);
         menu_add_button(&actors,0,10,"spawn",actor_spawn_callback,NULL);
         menu_add_button(&actors,7,10,"fetch from link",actor_fetch_link_callback,NULL);
-
-#endif
     }
 
     {
@@ -622,12 +607,9 @@ struct menu *create_debug_menu(){
     }
 
     menu_add_submenu(&debug,0,1,&memory,"memory");
-#ifndef LITE
     menu_add_submenu(&debug,0,2,&objects,"objects");
     menu_add_submenu(&debug,0,3,&actors,"actors");
     menu_add_submenu(&debug,0,4,&flags,"flags");
-#else
-    menu_add_submenu(&debug,0,2,&flags,"flags");
-#endif
     return &debug;
 }
+#endif

@@ -96,7 +96,9 @@ struct menu *create_cheats_menu();
 struct menu *create_file_menu();
 struct menu *create_equips_menu();
 struct menu *create_settings_menu();
+#ifndef LITE
 struct menu *create_debug_menu();
+#endif
 void kz_log(const char *format, ...);
 
 #endif

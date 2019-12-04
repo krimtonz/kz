@@ -252,12 +252,15 @@ void *resource_get(enum resource resource){
     return resource_table[resource];
 }
 
-gfx_texture *get_item_texture(uint8_t item_id){
+gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
 #if Z2_VERSION!=NZSE 
     item_id = texture_map[item_id];
 #endif
     struct item_texture *item = (struct item_texture*)resource_get(R_Z2_ITEMS) + item_id;
+#ifdef LITE
     item->last_access_counter = 0;
+    item->release = release;
+#endif
     if(item->texture) return item->texture;
     item->texture = gfx_load_item_texture(item_id);
     return item->texture;
