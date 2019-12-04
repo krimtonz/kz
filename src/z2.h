@@ -298,8 +298,8 @@ typedef struct {
     uint32_t        tatl_timer;                     /* 0x003C */
     uint8_t         has_magic;                      /* 0x0040 */
     uint8_t         has_double_magic;               /* 0x0041 */
-    uint16_t        has_double_defense;             /* 0x0042 */
-    char            unk_0x44_[0x02];                /* 0x0044 */
+    uint8_t         has_double_defense;             /* 0x0042 */
+    char            unk_0x43_[0x03];                /* 0x0043 */
     union {
         struct {
             uint16_t hidden_owl         : 1;

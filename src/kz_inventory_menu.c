@@ -298,7 +298,7 @@ struct item_switch_data {
 static int max_health_callback(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value){
     if(callback == MENU_CALLBACK_ACTIVATE){
         z2_file.max_health = value;
-        if(z2_file.defense_hearts>0) z2_file.defense_hearts = value;
+        if(z2_file.has_double_defense) z2_file.defense_hearts = value/16;
         return 1;
     }
     return 0;
@@ -306,14 +306,15 @@ static int max_health_callback(struct menu_item *item, enum menu_callback callba
 
 static int double_defense_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback==MENU_CALLBACK_ACTIVATE){
-        if(z2_file.defense_hearts==0){
-            z2_file.defense_hearts = z2_file.max_health;
+        z2_file.has_double_defense = !z2_file.has_double_defense;
+        if(z2_file.has_double_defense){
+            z2_file.defense_hearts = z2_file.max_health / 16;
         }else{
             z2_file.defense_hearts = 0;
         }
         return 1;
     }else if (callback == MENU_CALLBACK_UPDATE){
-        menu_checkbox_set(item,z2_file.defense_hearts > 0);
+        menu_checkbox_set(item,z2_file.has_double_defense);
     }
     return 0;
 }
