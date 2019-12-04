@@ -145,6 +145,7 @@ void menu_number_set(struct menu_item *item, uint32_t val);
 void menu_checkbox_set(struct menu_item *item, _Bool status);
 void menu_switch_set(struct menu_item *item, _Bool status);
 void menu_button_set_tile(struct menu_item *item, int tile);
+void menu_button_cb_data_set(struct menu_item *item, void *data);
 
 
 int get_item_x_pos(struct menu_item *item);

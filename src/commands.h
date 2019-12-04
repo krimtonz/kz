@@ -4,26 +4,28 @@
 #include "z2.h"
 
 enum{
-    Z2_CMD_TOGGLE_MENU,
-    Z2_CMD_LEVITATE,
-    Z2_CMD_TURBO,
-    Z2_CMD_VOID,
-    Z2_CMD_BREAK,
-    Z2_CMD_PAUSE,
-    Z2_CMD_ADVANCE,
-    Z2_CMD_RETURN,
-    Z2_CMD_RESET_LAG,
-    Z2_CMD_TIMER,
-    Z2_CMD_TIMER_RESET,
-    Z2_CMD_SAVE_MEMFILE,
-    Z2_CMD_LOAD_MEMFILE,
-    Z2_CMD_NEXT_MEMFILE,
-    Z2_CMD_PREV_MEMFILE,
-    Z2_CMD_SAVE_POSITION,
-    Z2_CMD_LOAD_POSITION,
-    Z2_CMD_NEXT_POSITION,
-    Z2_CMD_PREV_POSITION,
-    Z2_CMD_MAX
+    KZ_CMD_TOGGLE_MENU,
+    KZ_CMD_RETURN,
+    KZ_CMD_LEVITATE,
+    KZ_CMD_TURBO,
+    KZ_CMD_FALL,
+    KZ_CMD_RELOAD,
+    KZ_CMD_VOID,
+    KZ_CMD_BREAK,
+    KZ_CMD_PAUSE,
+    KZ_CMD_ADVANCE,
+    KZ_CMD_RESET_LAG,
+    KZ_CMD_TIMER,
+    KZ_CMD_TIMER_RESET,
+    KZ_CMD_SAVE_MEMFILE,
+    KZ_CMD_LOAD_MEMFILE,
+    KZ_CMD_NEXT_MEMFILE,
+    KZ_CMD_PREV_MEMFILE,
+    KZ_CMD_SAVE_POSITION,
+    KZ_CMD_LOAD_POSITION,
+    KZ_CMD_NEXT_POSITION,
+    KZ_CMD_PREV_POSITION,
+    KZ_CMD_MAX
 };
 
 enum command_type{
@@ -40,6 +42,7 @@ struct command {
 void command_levitate();
 void command_void();
 void command_reloadarea();
+void command_fall();
 void command_turbo();
 void command_break();
 void command_pause();
@@ -57,6 +60,6 @@ void command_load_position();
 void command_next_position();
 void command_prev_position();
 
-extern struct command kz_commands[Z2_CMD_MAX];
+extern struct command kz_commands[KZ_CMD_MAX];
 
 #endif

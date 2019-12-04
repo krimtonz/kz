@@ -47,10 +47,10 @@ static uint16_t pad;
 static uint16_t reserved;
 static int8_t stick_x;
 static int8_t stick_y;
-static int bind_component_state[Z2_CMD_MAX];
-static int bind_time[Z2_CMD_MAX];
-static _Bool bind_pressed_raw[Z2_CMD_MAX];
-static _Bool bind_pressed[Z2_CMD_MAX];
+static int bind_component_state[KZ_CMD_MAX];
+static int bind_time[KZ_CMD_MAX];
+static _Bool bind_pressed_raw[KZ_CMD_MAX];
+static _Bool bind_pressed[KZ_CMD_MAX];
 static _Bool input_enabled = 1;
 
 static int bind_get_component(uint16_t bind, int index){
@@ -113,15 +113,15 @@ void input_update(){
             pad_pressed |= p;
         }
     }
-    uint16_t bind_pad[Z2_CMD_MAX];
-    _Bool bind_state[Z2_CMD_MAX];
-    for(int i=0;i<Z2_CMD_MAX;i++){
+    uint16_t bind_pad[KZ_CMD_MAX];
+    _Bool bind_state[KZ_CMD_MAX];
+    for(int i=0;i<KZ_CMD_MAX;i++){
         uint16_t *b =  &settings->binds[i];
         bind_pad[i] = bind_get_bitmask(*b);
         int *cs = &bind_component_state[i];
         int j;
         uint16_t c;
-        if(((reserved & bind_pad[i]) && i!=0 && i!=Z2_CMD_RETURN) || !input_enabled){
+        if(((reserved & bind_pad[i]) && i!=0 && i!=KZ_CMD_RETURN) || !input_enabled){
             *cs = 0;
         }else{
             int css = *cs;
@@ -154,9 +154,9 @@ void input_update(){
         }
         bind_state[i] = (*cs && (j==4 || c == BIND_END));
     }
-    for(int i=0;i<Z2_CMD_MAX;i++){
+    for(int i=0;i<KZ_CMD_MAX;i++){
         uint16_t pi = bind_pad[i];
-        for(int j = 0;bind_state[i] && j < Z2_CMD_MAX;j++){
+        for(int j = 0;bind_state[i] && j < KZ_CMD_MAX;j++){
             if(!bind_state[j]) continue;
             uint16_t pj = bind_pad[j];
             if(pi!=pj && (pi & pj) == pi){
@@ -211,7 +211,7 @@ int8_t input_y(){
     return stick_y;
 }
 
-void draw_bind(struct menu_item *item){
+static void draw_bind(struct menu_item *item){
     struct bind_item_data *data = item->data;
     uint16_t bind = settings->binds[data->cmd];
     uint32_t color = 0xFFFFFFFF;
@@ -288,6 +288,12 @@ static void bind_update(struct menu_item *item){
             }
         }
     }
+}
+
+void menu_set_bind(struct menu_item *item, int cmd){
+    struct bind_item_data *data = item->data;
+    data->cmd = cmd;
+    data->state = BIND_STATE_NONE;
 }
 
 struct menu_item *menu_add_bind(struct menu *menu, int x, int y, int cmd){

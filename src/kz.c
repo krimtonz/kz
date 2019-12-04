@@ -273,12 +273,12 @@ static void kz_main(void) {
     {
         if(kz.menu_active){
             struct menu *kz_menu = &kz.main_menu;
-            if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
+            if(input_bind_pressed(KZ_CMD_TOGGLE_MENU)){
                 kz.menu_active=0;
                 if(!kz.debug_active){
                     free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
                 }
-            }else if(input_bind_pressed(Z2_CMD_RETURN)){
+            }else if(input_bind_pressed(KZ_CMD_RETURN)){
                 menu_callback(kz_menu,MENU_CALLBACK_RETURN);
             }else{
                 uint16_t pressed = input_pressed();
@@ -299,7 +299,7 @@ static void kz_main(void) {
                 }
             }
             menu_draw(kz_menu);
-        }else if(input_bind_pressed(Z2_CMD_TOGGLE_MENU)){
+        }else if(input_bind_pressed(KZ_CMD_TOGGLE_MENU)){
             kz.menu_active=1;
             reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
         }
@@ -307,7 +307,7 @@ static void kz_main(void) {
     menu_update(&kz.main_menu);
     /* handle command bindings */
     {
-        for(int i=0;i<Z2_CMD_MAX;i++){
+        for(int i=0;i<KZ_CMD_MAX;i++){
             _Bool activate = 0;
             switch(kz_commands[i].type){
                 case COMMAND_HOLD:

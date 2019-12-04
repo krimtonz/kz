@@ -5,15 +5,17 @@
 #include "kz.h"
 #include "settings.h"
 
-struct command kz_commands[Z2_CMD_MAX] = {
+struct command kz_commands[KZ_CMD_MAX] = {
     {"toggle menu",         COMMAND_PRESS,  NULL},
+    {"return",              COMMAND_PRESS,  NULL },
     {"levitate",            COMMAND_HOLD,   command_levitate},
     {"turbo",               COMMAND_PRESS,  command_turbo},
+    {"fall",                COMMAND_HOLD,   command_fall},
+    {"reload scene",        COMMAND_PRESS,  command_reloadarea},
     {"void out",            COMMAND_PRESS,  command_void},
     {"break free",          COMMAND_PRESS,  command_break},
     {"pause",               COMMAND_PRESS,  command_pause},
     {"advance",             COMMAND_PRESS,  command_advance},
-    {"return",              COMMAND_PRESS,  NULL },
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
@@ -50,7 +52,11 @@ void command_levitate(){
 }
 
 void command_turbo(){
-    settings->cheats ^= (1 << CHEAT_TURBO);
+    if(settings->turbo_type == TURBO_HOLD){
+        z2_link.linear_velocity = 18.0f;
+    }else{
+        settings->cheats ^= (1 << CHEAT_TURBO);
+    }
 }
 
 void command_fall(){
@@ -60,6 +66,13 @@ void command_fall(){
 void command_void(){
     z2_file.void_flag = 1;
     z2_game.entrance_index = z2_file.exit & 0xFFFF;
+    z2_game.common.execute_state = 0;
+    z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
+    z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
+}
+
+void command_reloadarea(){
+    z2_game.entrance_index = z2_file.exit;
     z2_game.common.execute_state = 0;
     z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
     z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;

@@ -81,7 +81,7 @@ static uint8_t flag_sizes[] = {
     0x64, 0x8, 0x3, 0x10, 0x4, 0x4, 0x10
 };
 
-uint32_t get_mem_val(void *ptr){
+static uint32_t get_mem_val(void *ptr){
     switch(memory_view_size){
         case 1:
         return *(uint8_t*)ptr;
@@ -93,7 +93,7 @@ uint32_t get_mem_val(void *ptr){
     }
 }
 
-void set_mem_val(void *ptr, uint32_t val){
+static void set_mem_val(void *ptr, uint32_t val){
     switch(memory_view_size){
         case 1:
         *(uint8_t*)ptr = val & 0xFF;
@@ -119,7 +119,7 @@ static int memory_cell_callback(struct menu_item *item, enum menu_callback callb
     return 0;
 }
 
- void memory_create_table(struct menu *menu){
+static void memory_create_table(struct menu *menu){
     int idx = 0;
     for(int i = 0;i<10;i++){
         for (int j = 0;j<8;j++){

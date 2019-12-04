@@ -9,7 +9,7 @@
 #define IO_BLOCK_SIZE       0x80
 #define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)
 
-#define SETTINGS_VER        4
+#define SETTINGS_VER        5
 #define SETTINGS_ADDR       0x20000
 #define SETTINGS_SIZE       (sizeof(struct settings_header) + sizeof(struct settings_data))
 #define SETTINGS_PAD        ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
@@ -17,8 +17,10 @@
 
 #define MEMFILE_NONE        0
 #define MEMFILE_VOID        1
-#define MEMFILE_LOAD        2
-#define MEMFILE_POS         4
+#define MEMFILE_POS         2
+
+#define TURBO_TOGGLE        0
+#define TURBO_HOLD          1
 
 struct settings_header{
     char        magic[4];
@@ -29,23 +31,30 @@ struct settings_data{
     uint32_t            watch_addresses[WATCHES_MAX];
     uint16_t            watch_x[WATCHES_MAX];
     uint16_t            watch_y[WATCHES_MAX];
-    struct watch_info   watch_info[WATCHES_MAX];
     size_t              watch_cnt;
     char                watch_labels[20][WATCHES_MAX];
-    uint8_t             lag_counter;
+    uint32_t            cheats;
+    union{
+        struct{
+            uint32_t                    : 26;
+            uint32_t    memfile_action  : 2;
+            uint32_t    input_display   : 1;
+            uint32_t    lag_counter     : 1;
+            uint32_t    timer           : 1;
+            uint32_t    turbo_type      : 1;
+        };
+        uint32_t    settings_bits;
+    };
+    struct watch_info   watch_info[WATCHES_MAX];
+    uint16_t            binds[KZ_CMD_MAX];
     int16_t             lag_x;
     int16_t             lag_y;
-    uint8_t             timer;
     int16_t             timer_x;
     int16_t             timer_y;
-    uint8_t             input_display;
     int16_t             id_x;
     int16_t             id_y;
     int16_t             menu_x;
     int16_t             menu_y;
-    uint32_t            cheats;
-    uint8_t             memfile_action;
-    uint16_t            binds[Z2_CMD_MAX];
 };
 
 struct settings {

@@ -41,6 +41,13 @@ void menu_button_set_tile(struct menu_item *item, int tile){
     data->draw_info.on_tile = tile;
 }
 
+void menu_button_cb_data_set(struct menu_item *item, void *data){
+    struct item_data *idata = item->data;
+    if(idata){
+        idata->callback_data = data;
+    }
+}
+
 struct menu_item *menu_add_button(struct menu *menu, uint16_t x, uint16_t y, char *name, menu_generic_callback callback, void *data){
     struct menu_item *item = menu_add(menu,x,y,name);
     if(item){
