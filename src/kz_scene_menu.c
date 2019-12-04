@@ -18,7 +18,7 @@ static int collision_gen(struct menu_item *item, enum menu_callback callback, vo
 
 static int collision_view_switch(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
-        kz.collision_view_settings = kz.collision_view_settings & (1 << (int)data);
+        kz.collision_view_settings ^= (int)data;
         return 1;
     }
     return 0;
