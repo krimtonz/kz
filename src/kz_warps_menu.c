@@ -10,6 +10,11 @@ static int activate_warp_proc(struct menu_item *item, enum menu_callback callbac
         z2_game.common.execute_state = 0;
         z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
         z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
+        int scene = ((uint32_t)data >> 8) & 0xFF;
+        if(scenes[scene].entrance_cnt > 0){
+            menu_callback(&kz.main_menu,MENU_CALLBACK_RETURN);
+        }
+        menu_callback(&kz.main_menu,MENU_CALLBACK_RETURN);
         return 1;
     }
     return 0;

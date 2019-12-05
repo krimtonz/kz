@@ -176,7 +176,6 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
         }
         menu->selected_item = far;
     }
-
 }
 
 void menu_callback(struct menu *menu, enum menu_callback callback){
@@ -194,11 +193,6 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
                 menu->parent->callback_proc(MENU_CALLBACK_ENTER);
             }
             menu->parent->child = NULL;
-        }else{
-            kz.menu_active = 0;
-            if(!kz.debug_active){
-                free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
-            }
         }
     }
     else if(menu->selected_item->activate_proc)
