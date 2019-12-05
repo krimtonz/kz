@@ -450,7 +450,7 @@ void init() {
     memset(kz.position_save,0,sizeof(*kz.position_save) * KZ_POSITION_MAX);
     kz.pos_slot = 0;
     
-    //memcpy(restriction_table,(void*)z2_restriction_table_addr,sizeof(restriction_table));
+    memcpy(restriction_table,(void*)z2_restriction_table_addr,sizeof(restriction_table));
 
     kz.ready = 1;
 }
