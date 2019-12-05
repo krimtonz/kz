@@ -1,3 +1,4 @@
+#ifndef LITE
 #ifndef _FAT_H
 #define _FAT_H
 
@@ -117,4 +118,5 @@ uint32_t fat_rw(fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt,
 int fat_flush(fat_ctxt_t *fat);
 int dir_find(fat_ctxt_t *fat, uint32_t cluster, const char *name, fat_entry_t *entry);
 
+#endif
 #endif

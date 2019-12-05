@@ -215,3 +215,24 @@ int menu_return(struct menu_item *item, enum menu_callback callback, void *data)
     }
     return 0;
 }
+
+void menu_enter(struct menu *menu, struct menu *submenu){
+    if(menu->child){
+        menu_enter(menu->child,submenu);
+        return;
+    }
+    menu->child = submenu;
+    submenu->parent = menu;
+    if(menu->callback_proc){
+        menu->callback_proc(MENU_CALLBACK_EXIT);
+    }
+    if(menu->selected_item->exit_proc){
+        menu->selected_item->exit_proc(menu->selected_item);
+    }
+    if(submenu->callback_proc){
+        submenu->callback_proc(MENU_CALLBACK_ENTER);
+    }
+    if(submenu->selected_item->enter_proc){
+        submenu->selected_item->enter_proc(submenu->selected_item);
+    }
+}

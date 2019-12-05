@@ -191,7 +191,7 @@ static int watches_button_add(struct menu_item *item, enum menu_callback callbac
         watch->x = 0;
         watch->y = 0;
         watch->label = malloc(21);
-        memset(watch->label,0,21);
+        watch->label = "label";
         watch_add(watch,item,1);
         return 1;
     }

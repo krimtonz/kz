@@ -1,8 +1,11 @@
+#include <stdlib.h>
 #include "kz.h"
 #include "settings.h"
 #include "resource.h"
 #include "input.h"
 #include "commands.h"
+#include "menu_file.h"
+#include "sys.h"
 
 enum settings_switch_item {
     SW_INPUT_DISPLAY,
@@ -182,6 +185,50 @@ static int command_inc_callback(struct menu_item *item, enum menu_callback callb
     return 0;
 }
 
+static void do_export_memfile(char *path, void *data){
+    int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(file!=-1){
+        memfile_t *memfile = kz.memfile[kz.memfile_slot];
+        write(file,memfile,sizeof(*memfile));
+        kz_log("saved from memfile %d",kz.memfile_slot);
+    }
+    close(file);
+}
+
+static void do_import_memfile(char *path, void *data){
+    int file = open(path, O_RDONLY);
+    if(file!=-1){
+        memfile_t *memfile = kz.memfile[kz.memfile_slot];
+        if(!memfile){
+            memfile = malloc(sizeof(*memfile));
+            read(file,memfile,sizeof(*memfile));
+        }
+        kz.memfile[kz.memfile_slot] = memfile;
+        kz_log("loaded to memfile %d",kz.memfile_slot);
+    }
+    close(file);
+}
+
+static int export_memfile_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(!kz.memfile[kz.memfile_slot]){
+            kz_log("no memfile");
+            return 1;
+        }
+        menu_get_file(FILE_MODE_SAVE,"memfile",".kzm",do_export_memfile,NULL);
+        return 1;
+    }
+    return 0;
+}
+
+static int import_memfile_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        menu_get_file(FILE_MODE_LOAD,"memfile",".kzm",do_import_memfile,NULL);
+        return 1;
+    }
+    return 0;
+}
+
 struct menu *create_settings_menu(){
     static struct menu settingsm;
     menu_init(&settingsm,kz.main_menu.x,kz.main_menu.y);
@@ -227,26 +274,29 @@ struct menu *create_settings_menu(){
     menu_add_watch(&settingsm,16,9,&memfile_watch,1);
     menu_add_button(&settingsm,17,9,"+",memfile_inc,NULL);
     
-    item = menu_add_checkbox(&settingsm,0,10,settings_switch_callback,(void*)SW_MEMFILE_VOID,NULL);
+    menu_add_button(&settingsm,0,10,"export",export_memfile_callback,NULL);
+    menu_add_button(&settingsm,8,10,"import",import_memfile_callback,NULL);
+
+    item = menu_add_checkbox(&settingsm,0,11,settings_switch_callback,(void*)SW_MEMFILE_VOID,NULL);
     if(settings->memfile_action == MEMFILE_VOID){
         menu_checkbox_set(item,1);
     }
-    menu_add(&settingsm,3,10,"void on load memfile");
+    menu_add(&settingsm,3,11,"void on load memfile");
 
-    item = menu_add_checkbox(&settingsm,0,11,settings_switch_callback,(void*)SW_MEMFILE_POS,NULL);
+    item = menu_add_checkbox(&settingsm,0,12,settings_switch_callback,(void*)SW_MEMFILE_POS,NULL);
     if(settings->memfile_action == MEMFILE_POS){
         menu_checkbox_set(item,1);
     }
-    menu_add(&settingsm,3,11,"load pos on load memfile");
+    menu_add(&settingsm,3,12,"load pos on load memfile");
 
-    menu_add(&settingsm,0,12,"saved position");
-    menu_add_button(&settingsm,15,12,"-",position_dec,NULL);
+    menu_add(&settingsm,0,13,"saved position");
+    menu_add_button(&settingsm,15,13,"-",position_dec,NULL);
     static watch_t position_watch;
     position_watch.address = &kz.pos_slot;
     position_watch.type=WATCH_TYPE_U8;
     position_watch.floating = 0;
-    menu_add_watch(&settingsm,16,12,&position_watch,1);
-    menu_add_button(&settingsm,17,12,"+",position_inc,NULL);
+    menu_add_watch(&settingsm,16,13,&position_watch,1);
+    menu_add_button(&settingsm,17,13,"+",position_inc,NULL);
 
     static struct menu commands;
     menu_init(&commands,0,0);
@@ -274,7 +324,7 @@ struct menu *create_settings_menu(){
         command_bindings[i].command_bind = menu_add_bind(&commands,22,y++,i);
     }
 
-    menu_add_submenu(&settingsm,0,13,&commands,"commands");
+    menu_add_submenu(&settingsm,0,14,&commands,"commands");
 
     return &settingsm;
 }

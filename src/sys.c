@@ -1,7 +1,9 @@
+#ifndef LITE
 #include <errno.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "sys.h"
 #include "hb.h"
@@ -24,6 +26,12 @@ typedef struct {
     desc_t      descriptor;
     uint32_t    pos;
 } file_desc_t;
+
+typedef struct {
+    desc_t      base;
+    long        pos;
+    dirent_t    dirent;
+} dir_desc_t;
 
 static fat_ctxt_t fat;
 static desc_t *desc_list[FOPEN_MAX];
@@ -157,6 +165,22 @@ static int entry_access(fat_entry_t *entry, _Bool write){
         }
     }
     return 0;
+}
+
+static int ent_mode(fat_entry_t *ent){
+    mode_t mode;
+    if(ent->attributes & FAT_ATTRIBUTE_DIRECTORY){
+        mode = S_IFDIR | S_IXUSR | S_IXGRP | S_IXOTH;
+    }else{
+        mode = S_IFREG;
+    }
+    if(!(ent->attributes & FAT_ATTRIBUTE_HIDDEN)){
+        mode |= S_IRUSR | S_IRGRP | S_IROTH;
+    }
+    if(!(ent->attributes & FAT_ATTRIBUTE_READONLY)){
+        mode |= S_IWUSR;
+    }
+    return mode;
 }
 
 static void delete_desc(int file){
@@ -323,3 +347,144 @@ int write(int file, void *buf, uint32_t byte_cnt){
     fdesc->pos += cnt;
     return cnt;
 }
+
+int read(int file, void *buf, uint32_t byte_cnt){
+    file_desc_t *fd = get_desc(file);
+    if(!fd){
+        return -1;
+    }
+    if(!(fd->descriptor.flags & _FREAD)){
+        errno = EBADF;
+        return -1;
+    }
+    if(byte_cnt == 0){
+        return 0;
+    }
+    if(seek_file(fd)){
+        return -1;
+    }
+    uint32_t cnt = fat_rw(&fd->descriptor.file, FAT_READ,buf, byte_cnt,&fd->descriptor.file,NULL);
+    fd->pos += cnt;
+    return cnt;
+}
+
+static fat_path_t *wd_path(const char *path){
+    const char *tail;
+    fat_path_t *origin = get_origin(path,&tail);
+    return fat_path(&fat,origin,tail,NULL);
+}
+
+DIR *opendir(const char *dir){
+    if(init_fat()){
+        return NULL;
+    }
+    int e = errno;
+    errno = 0;
+    fat_path_t *fp = wd_path(dir);
+    if(errno == 0){
+        errno = e;
+    }
+    else{
+        goto error;
+    }
+    fat_entry_t *ent = fat_path_target(fp);
+    if(!(ent->attributes & FAT_ATTRIBUTE_DIRECTORY)){
+        errno = ENOTDIR;
+        goto error;
+    }
+    if(entry_access(ent,0)){
+        goto error;
+    }
+    dir_desc_t *dd = new_desc(sizeof(*dd), fp, _FREAD);
+    if(!dd){
+        goto error;
+    }
+    dd->pos = 0;
+    return (void*)dd;
+error:
+    if(fp){
+        fat_free(fp);
+    }
+    return NULL;
+}
+
+char *getcwd(char *buf, size_t size){
+    if(init_fat()){
+        return NULL;
+    }
+    if(size == 0){
+        errno = EINVAL;
+        return NULL;
+    }
+    char *p = buf;
+    char *end = buf + size;
+    for(fat_entry_t *ent = wd->entry_list.first;ent;ent = list_next(ent)){
+        char *name = ent->long_name;
+        while(*name && p!=end){
+            *p++ = *name++;
+        }
+        if((ent == wd->entry_list.first || ent!= wd->entry_list.last) && p != end){
+            *p++='/';
+        }
+        if(p == end){
+            errno = ERANGE;
+            return NULL;
+        }
+    }
+    *p = 0;
+    return buf;
+}
+
+int closedir(DIR *dir){
+    dir_desc_t *dd = (void*)dir;
+    delete_desc(dd->base.descriptor);
+    return 0;
+}
+
+dirent_t *readdir(DIR *dir){
+    dir_desc_t *dd = (void*)dir;
+    fat_entry_t ent;
+    do{
+        if(fat_dir(&dd->base.file,&ent)){
+            return NULL;
+        } 
+    }while(ent.attributes & FAT_ATTRIBUTE_LABEL);
+    dd->pos++;
+    dirent_t *dirent = &dd->dirent;
+    dirent->dir_ino = make_sn(&ent);
+    strcpy(dirent->dir_name,ent.long_name);
+    dirent->mode = ent_mode(&ent);
+    dirent->create_time = ent.create;
+    dirent->modify_time = ent.modify_time;
+    dirent->size = ent.size;
+    return &dd->dirent;
+}
+
+int chdir(const char *path){
+    if(init_fat()){
+        return -1;
+    }
+    int e = errno;
+    errno = 0;
+    fat_path_t *fp = wd_path(path);
+    if(errno == 0){
+        if(!(fat_path_target(fp)->attributes & FAT_ATTRIBUTE_DIRECTORY)){
+            errno = ENOTDIR;
+            goto error;
+        }else{
+            errno = e;
+        }
+    }else{
+        goto error;
+    }
+    fat_free(wd);
+    wd = fp;
+    return 0;
+error:
+    if(fp){
+        fat_free(fp);
+    }
+    return -1;
+}
+
+#endif

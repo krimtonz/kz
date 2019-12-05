@@ -1,8 +1,13 @@
+#ifndef LITE
 #include <mips.h>
 #include "hb.h"
 
+int hb_available(void){
+    return hb_sd_regs.key == 0x1234;
+}
+
 int hb_sd_init(void){
-    if(hb_sd_regs.key!=0x1234){
+    if(!hb_available()){
         return -1;
     }
     hb_sd_regs.initialize = 1;
@@ -34,3 +39,4 @@ int hb_sd_write(void *buf, uint32_t lba, uint32_t block_cnt){
     }
     return 0;
 }
+#endif

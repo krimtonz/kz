@@ -140,6 +140,7 @@ struct menu_item *menu_add_move_button(struct menu *menu, uint16_t x, uint16_t y
 void menu_navigate(struct menu *menu, enum menu_nav nav);
 void menu_callback(struct menu *menu, enum menu_callback callback);
 int menu_return(struct menu_item *item, enum menu_callback callback, void *data);
+void menu_enter(struct menu *menu, struct menu *submenu);
 void menu_item_remove(struct menu_item *item);
 void menu_number_set(struct menu_item *item, uint32_t val);
 void menu_checkbox_set(struct menu_item *item, _Bool status);

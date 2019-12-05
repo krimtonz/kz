@@ -1,3 +1,4 @@
+#ifndef LITE
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1433,7 +1434,7 @@ fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const c
         }
         if(directory_entry.attributes & FAT_ATTRIBUTE_DIRECTORY){
             _Bool exist = 0;
-            for(fat_entry_t *entry = ret->entry_list.first;entry;list_next(entry)){
+            for(fat_entry_t *entry = ret->entry_list.first;entry;entry = list_next(entry)){
                 if(exist){
                     fat_entry_t *t = entry;
                     entry = list_prev(entry);
@@ -1705,3 +1706,4 @@ int fat_init(fat_ctxt_t *fat, fat_io_proc read, fat_io_proc write){
     }
     return 0;
 }
+#endif
