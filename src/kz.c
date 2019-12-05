@@ -348,7 +348,7 @@ static void kz_main(void) {
 #undef MAKESTRING
 
     if(kz.tooltip && kz.menu_active){
-        gfx_printf(10, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
+        gfx_printf(kz.main_menu.x, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
     }
 
     for(int i = 9;i>=0;i--){

@@ -179,7 +179,9 @@ void menu_navigate(struct menu *menu, enum menu_nav nav){
 }
 
 void menu_callback(struct menu *menu, enum menu_callback callback){
-    if(callback==MENU_CALLBACK_NONE) return;
+    if(callback == MENU_CALLBACK_NONE){
+        return;
+    }
     if(menu->child){
         menu_callback(menu->child,callback);
         return;
@@ -189,14 +191,21 @@ void menu_callback(struct menu *menu, enum menu_callback callback){
             if(menu->callback_proc){
                 menu->callback_proc(MENU_CALLBACK_EXIT);
             }
+            if(menu->selected_item->exit_proc){
+                menu->selected_item->exit_proc(menu->selected_item);
+            }
             if(menu->parent->callback_proc){
                 menu->parent->callback_proc(MENU_CALLBACK_ENTER);
+            }
+            if(menu->parent->selected_item->enter_proc){
+                menu->parent->selected_item->enter_proc(menu->parent->selected_item);
             }
             menu->parent->child = NULL;
         }
     }
-    else if(menu->selected_item->activate_proc)
+    else if(menu->selected_item->activate_proc){
         menu->selected_item->activate_proc(menu->selected_item);
+    }
 }
 
 int menu_return(struct menu_item *item, enum menu_callback callback, void *data){
