@@ -1,11 +1,14 @@
 local arg = {...}
 
 local opt_no_vc_fix
+local opt_raphnet
 local in_wad
 
 while arg[1] do
-    if arg[1] == "-no-vc-fix" then
+    if arg[1] == "--no-vc-fix" then
         opt_no_vc_fix = 1
+    elseif arg[1] == "--raphnet" then
+        opt_raphnet = 1
     else
         in_wad = arg[1]
     end
@@ -16,6 +19,7 @@ local gzinject = os.getenv("GZINJECT")
 if(gzinject == nil or gzinject == "") then
     gzinject="gzinject"
 end
+
 print("Extracting " .. in_wad .. "\n")
 os.execute(gzinject .. 
             " -a extract" ..
@@ -31,16 +35,24 @@ os.execute(gzinject ..
 
 local make = loadfile("build/lua/makerom.lua")
 local kz_version, patched_rom, patch_file, vc_fix_patch, vc_fix_inject, vc_fix_addr, title_id, title = make("build/rom.z64")
+
 patched_rom:write(4,patched_rom)
 patched_rom:write32be(0,0x08000000)
 patched_rom:save("build/wadextract/content5/romc")
+
 os.execute("rm -rf \"build/rom.z64\"")
 print("Packing build/" .. kz_version .. ".wad\n")
+
+local out_wad = "build/" .. kz_version .. ".wad"
+if(opt_raphnet ~= nil and opt_raphnet == 1) then
+    patch_file = patch_file:gsub(".gzi","-raphnet.gzi")
+    out_wad = out_wad:gsub(".wad","-raphnet.wad")
+end
 local gzinject_pack = gzinject .. 
         " -d \"build/wadextract\"" ..
         " -k \"build/common-key.bin\"" .. 
         " -a pack" ..
-        " -w \"build/" .. kz_version .. ".wad\"" ..
+        " -w \"" .. out_wad .. "\"" ..
         " -i " .. title_id ..
         " -t \"" .. title .. "\"" ..
         " -p \"" .. patch_file .."\""
