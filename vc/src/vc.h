@@ -132,6 +132,9 @@ int _start();
 #define treeInsert_addr     0x8004e030
 #define treeInit_addr       0x8004d56c
 #define treeSearchNode_addr 0x8004e594
+#define ramSetSize_addr     0x8005083c
+#define ramSetSizeCall_addr 0x8001563c
+#define mem2_heap_size_addr 0x80091FF4
 #else
 #define xlHeapTake_addr     0x80088790
 #define cpuTreeTake_addr    0x8004c87c
@@ -143,17 +146,25 @@ int _start();
 #define treeInsert_addr     0x8004dfbc
 #define treeInit_addr       0x8004d4f8
 #define treeSearchNode_addr 0x8004e520
+#define ramSetSizeCall_addr 0x8001563c
+#define ramSetSize_addr     0x800507c8
+#define mem2_heap_size_addr 0x80091F44
 #endif
+
+#define hb_init_addr        0x90000800
 
 typedef bool (*xlHeapTake_t)(void **dst, int size);
 typedef bool (*cpuTreeTake_t)(func_tree_node_t **out_node, int *out_pos, int size);
 typedef bool (*treeAdjustRoot_t)(n64_cpu_t *cpu,int n64_start,int n64_end);
 typedef bool (*treeInsertNode_t)(func_tree_node_t **start,int n64_start,int n64_end,func_tree_node_t **new_node);
+typedef bool (*ramSetSize_t)(void **dst, int size);
 
 #define xlHeapTake      ((xlHeapTake_t)     xlHeapTake_addr)
 #define cpuTreeTake     ((cpuTreeTake_t)    cpuTreeTake_addr)
 #define treeAdjustRoot  ((treeAdjustRoot_t) treeAdjustRoot_addr)
 #define treeInsertNode  ((treeInsertNode_t) treeInsertNode_addr)
+#define hb_init         ((ramSetSize_t)     hb_init_addr)
+
 
 extern func_tree_node_t kz_tree[0x100];
 extern int kz_tree_status[8];

@@ -2,6 +2,7 @@ local arg = {...}
 
 local opt_no_vc_fix
 local opt_raphnet
+local opt_no_homeboy
 local in_wad
 
 while arg[1] do
@@ -9,6 +10,8 @@ while arg[1] do
         opt_no_vc_fix = 1
     elseif arg[1] == "--raphnet" then
         opt_raphnet = 1
+    elseif arg[1] == "--no-homeboy" then
+        opt_no_homeboy = 1
     else
         in_wad = arg[1]
     end
@@ -34,7 +37,7 @@ os.execute(gzinject ..
             " -o \"build/rom.z64\"")
 
 local make = loadfile("build/lua/makerom.lua")
-local kz_version, patched_rom, patch_file, vc_fix_patch, vc_fix_inject, vc_fix_addr, title_id, title = make("build/rom.z64")
+local kz_version, patched_rom, patch_file, hb_addr, vc_fix_inject, vc_fix_addr, title_id, title = make("build/rom.z64")
 
 patched_rom:write(4,patched_rom)
 patched_rom:write32be(0,0x08000000)
@@ -48,6 +51,7 @@ if(opt_raphnet ~= nil and opt_raphnet == 1) then
     patch_file = patch_file:gsub(".gzi","-raphnet.gzi")
     out_wad = out_wad:gsub(".wad","-raphnet.wad")
 end
+
 local gzinject_pack = gzinject .. 
         " -d \"build/wadextract\"" ..
         " -k \"build/common-key.bin\"" .. 
@@ -57,16 +61,27 @@ local gzinject_pack = gzinject ..
         " -t \"" .. title .. "\"" ..
         " -p \"" .. patch_file .."\""
 
+local genhooksflags = ""
+local finpatch = ""
+
+if(opt_no_homeboy == nil or opt_no_homeboy ~= 1) then
+    genhooksflags = "homeboy"
+    finpatch = " --dol-inject \"" .. vc_fix_inject .. "/homeboy.bin\"" ..
+               " --dol-loading \"" .. hb_addr .. "\""
+end
+
 if(opt_no_vc_fix == nil or opt_no_vc_fix ~= 1) then
-    local vcmake = os.execute("cd vc && make ../" .. vc_fix_inject .. "  && make ../" .. vc_fix_patch .. " && cd ..")
+    local vcmake = os.execute("cd vc && make ../" .. vc_fix_inject .. "/kz-vc.bin  && GENHOOKSFLAGS=\"" .. genhooksflags .. "\" make ../" .. vc_fix_inject .. "/kz-vc.gzi && cd ..")
     if(vcmake ~= nil and vcmake == true) then
         gzinject_pack = gzinject_pack ..
-            " -p \"" .. vc_fix_patch .. "\"" ..
-            " --dol-inject \"" .. vc_fix_inject .. "\"" ..
+            " -p \"" .. vc_fix_inject .. "/kz-vc.gzi\"" ..
+            " --dol-inject \"" .. vc_fix_inject .. "/kz-vc.bin\"" ..
             " --dol-loading \"" .. vc_fix_addr .. "\"" ..
             " --dol-after 0"
     end
 end
+
+gzinject_pack = gzinject_pack .. finpatch
 
 gzinject_pack = gzinject_pack ..
         " -p \"patch/compress.gzi\"" ..
