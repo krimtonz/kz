@@ -353,6 +353,7 @@ static int magic_callback(struct menu_item *item, enum menu_callback callback, v
 
 static int change_selected_dungeon(struct menu_item *item, enum menu_callback callback, void *data, int idx){
     if(callback == MENU_CALLBACK_ACTIVATE){
+        dungeon_idx = idx;
         dungeon_keys = z2_file.dungeon_keys[idx];
         dungeon_items = z2_file.dungeon_items[idx].dungeon_item;
         stray_fairies = z2_file.stray_fairies[idx];
@@ -362,8 +363,10 @@ static int change_selected_dungeon(struct menu_item *item, enum menu_callback ca
 }
 
 static int update_dungeon_keys(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
-    if(callback == MENU_CALLBACK_UPDATE){
+    if(callback == MENU_CALLBACK_ACTIVATE){
         z2_file.dungeon_keys[dungeon_idx] = val;
+    }else if (callback == MENU_CALLBACK_UPDATE){
+        dungeon_keys = z2_file.dungeon_keys[dungeon_idx];
     }
     return 0;
 }
@@ -371,6 +374,8 @@ static int update_dungeon_keys(struct menu_item *item, enum menu_callback callba
 static int update_stray_fairies(struct menu_item *item, enum menu_callback callback, void *data, uint32_t val){
     if(callback == MENU_CALLBACK_ACTIVATE){
         z2_file.stray_fairies[dungeon_idx] = val;
+    }else if(callback == MENU_CALLBACK_UPDATE){
+        stray_fairies = z2_file.stray_fairies[dungeon_idx];
     }
     return 0;
 }
