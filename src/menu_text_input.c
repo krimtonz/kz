@@ -8,14 +8,15 @@ struct item_data {
     char   *value;
     char   *empty_string;
     char  **value_ptr;
-    
+    int     val_len;
 };
 
 static int keyboard_accepted(struct menu_item *item, enum menu_callback callback, void *data){
     struct item_data *idata = item->data;
     if(callback == MENU_CALLBACK_ACTIVATE){
         if(idata->value_ptr && *idata->value_ptr){
-            strcpy(*idata->value_ptr,idata->value);
+            strncpy(*idata->value_ptr,idata->value,idata->val_len);
+            (*idata->value_ptr)[idata->val_len] = 0;
         }
     }
     return 0;
@@ -42,13 +43,13 @@ static void activate_text_input(struct menu_item *item){
 static void update_text_input(struct menu_item *item){
     struct item_data *data = item->data;
     if(data->value_ptr){
-        strncpy(data->value,*data->value_ptr,31);
-        data->value[31] = 0;
+        strncpy(data->value,*data->value_ptr,data->val_len);
+        data->value[data->val_len] = 0;
     }
 }
 
 struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
-                                      char *default_text, char **value_ptr){
+                                      char *default_text, char **value_ptr, int val_len){
     struct menu_item *item = menu_add(menu,x,y,NULL);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
@@ -57,6 +58,8 @@ struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
         memset(data->value,0,32);
         memset(data->empty_string,0,32);
         data->value_ptr = value_ptr;
+        data->val_len = val_len - 1;
+        if(data->val_len>31) data->val_len = 31;
         if(default_text){
             strncpy(data->empty_string,default_text,31);
         }else{

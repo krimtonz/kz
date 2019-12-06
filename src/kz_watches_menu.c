@@ -98,17 +98,22 @@ static struct watch_row *delete_row(struct watch_row *row){
 static int menu_watch_delete(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
         struct watch_row *prev = delete_row((struct watch_row*)data);
+        struct watch_row *next = NULL;
         if(prev){
-            item->owner->selected_item = prev->delete_button;
-            struct watch_row *next = list_next(prev);
-            while(next){
-                for(int i = 0;i<sizeof(next->row_items)/sizeof(*next->row_items);i++){
-                    next->row_items[i]->y--;
-                }
-                next = list_next(next);
-            }
+            next = list_next(prev);
+        }else{
+            next = watch_rows.first;
+        }
+        if(next){
+            item->owner->selected_item = next->delete_button;
         }else{
             item->owner->selected_item = add_button;
+        }
+        while(next){
+            for(int i = 0;i<sizeof(next->row_items)/sizeof(*next->row_items);i++){
+                next->row_items[i]->y-=2;
+            }
+            next = list_next(next);
         }
         add_button->y -= 2;
         return 1;
@@ -177,7 +182,7 @@ static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
     }
     row->watch_item = witem;
     row->watch = watch;
-    row->label_item = menu_add_text_input(item->owner,x+4,++item->y,"label",&watch->label);
+    row->label_item = menu_add_text_input(item->owner,x+4,++item->y,"label",&watch->label,21);
     item->y++;
 }
 

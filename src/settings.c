@@ -14,6 +14,7 @@ void load_default_settings(){
     settings_info.header.version = SETTINGS_VER;
     list_destroy(&kz.watches);
     list_init(&kz.watches,sizeof(watch_t));
+    settings->watch_cnt = 0;
     settings->binds[KZ_CMD_TOGGLE_MENU] = make_bind(2, BUTTON_R, BUTTON_L);
     settings->binds[KZ_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
     settings->binds[KZ_CMD_LEVITATE] = make_bind(1, BUTTON_L);
@@ -53,8 +54,8 @@ void load_default_settings(){
 }
 
 void save_settings_to_flashram(int profile){
+    settings->watch_cnt = kz.watches.size;
     if(kz.watches.first){
-        settings->watch_cnt = kz.watches.size;
         int i=0;
         for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
             settings->watch_addresses[i] = (uint32_t)watch->address;

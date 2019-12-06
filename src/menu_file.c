@@ -316,7 +316,7 @@ static void init_file_menu(){
     menu_add_button(&file_menu,0,1,"reset disk",reset_disk_callback,NULL);
     file_menu_location = menu_add(&file_menu,0,2,"");
     file_menu_text_value = malloc(32);
-    file_menu_text_entry = menu_add_text_input(&file_menu,0,3,"untitled",&file_menu_text_value);
+    file_menu_text_entry = menu_add_text_input(&file_menu,0,3,"untitled",&file_menu_text_value,32);
     file_menu_accept_button = menu_add_button(&file_menu,0,4,"accept",accept_callback,NULL);
     file_menu_clear_button = menu_add_button(&file_menu,8,4,"clear",clear_callback,NULL);
     int y = 3;

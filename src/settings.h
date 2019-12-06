@@ -9,7 +9,7 @@
 #define IO_BLOCK_SIZE       0x80
 #define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)
 
-#define SETTINGS_VER        5
+#define SETTINGS_VER        6
 #define SETTINGS_ADDR       0x20000
 #define SETTINGS_SIZE       (sizeof(struct settings_header) + sizeof(struct settings_data))
 #define SETTINGS_PAD        ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
@@ -32,7 +32,7 @@ struct settings_data{
     uint16_t            watch_x[WATCHES_MAX];
     uint16_t            watch_y[WATCHES_MAX];
     size_t              watch_cnt;
-    char                watch_labels[20][WATCHES_MAX];
+    char                watch_labels[WATCHES_MAX][20];
     uint32_t            cheats;
     union{
         struct{

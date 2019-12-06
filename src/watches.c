@@ -33,7 +33,7 @@ void watch_printf(watch_t *watch){
             sprintf(buf,"%8lX",*(uint32_t*)watch->address);
             break;
         case WATCH_TYPE_FLOAT:
-            sprintf(buf,"%f",*(float*)watch->address);
+            sprintf(buf,"%g",*(float*)watch->address);
             break;
     }
     gfx_printf(watch->x,watch->y,"%s",buf);

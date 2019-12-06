@@ -124,7 +124,7 @@ struct menu_item *menu_add_item_list(struct menu *menu, uint16_t x, uint16_t y, 
                                      draw_info_t *drawinfo, struct tilebg_info *null_item, char *tooltip);
 
 struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
-                                      char *default_text, char **value_ptr);
+                                      char *default_text, char **value_ptr, int val_len);
 
 struct menu_item *menu_add_checkbox(struct menu *menu, uint16_t x, uint16_t y,
                                     menu_generic_callback callback, void *callback_data, char *tooltip);
