@@ -30,6 +30,7 @@ enum resource{
     R_KZ_AMOUNTS,
     R_KZ_FLAGS,
     R_KZ_ARROWS,
+    R_KZ_FILES,
     R_END
 };
 

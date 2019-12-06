@@ -36,6 +36,7 @@ int hb_sd_write(void *buf, uint32_t lba, uint32_t block_cnt);
 int hb_sd_read(void *buf, uint32_t lba, uint32_t block_cnt);
 int hb_sd_init(void);
 int hb_available(void);
+int hb_reset(void);
 
 #endif
 #endif

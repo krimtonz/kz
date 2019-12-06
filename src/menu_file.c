@@ -2,11 +2,13 @@
 #include <vector/vector.h>
 #include <set/set.h>
 #include <stdlib.h>
+#include <errno.h>
 #include "menu.h"
 #include "sys.h"
 #include "fat.h"
 #include "menu_file.h"
 #include "kz.h"
+#include "resource.h"
 
 #define FILE_ROWS 13
 
@@ -16,6 +18,9 @@ static struct menu_item *file_menu_location = NULL;
 static struct menu_item *file_menu_text_entry = NULL;
 static struct menu_item *file_menu_accept_button = NULL;
 static struct menu_item *file_menu_clear_button = NULL;
+static struct menu_item *file_menu_down_button = NULL;
+static struct menu_item *file_menu_up_button = NULL;
+static int file_menu_offset = 0;
 static const char *file_menu_default = NULL;
 static const char *file_menu_extension = NULL;
 static enum file_mode file_menu_mode;
@@ -53,6 +58,13 @@ static _Bool update_file_list(void){
     vector_clear(&dir_files.container);
     DIR *dir = opendir(".");
     if(!dir){
+        if(errno == ENODEV){
+            strcpy(file_menu_location->text,"no disk");
+        }else if(errno == ENOENT){
+            strcpy(file_menu_location->text,"no filesystem");
+        }else{
+            strncpy(file_menu_location->text,strerror(errno),31);
+        }
         return 0;
     }
     getcwd(file_menu_location->text,32);
@@ -71,14 +83,10 @@ static _Bool update_file_list(void){
         dir_entry_t ent;
         strcpy(ent.name,dirent->dir_name);
         ent.isdir = isdir;
-        if(strcmp(dirent->dir_name,"..") == 0){
-            strcpy(ent.text,"back");
-        }
-        else{
-            memcpy(ent.text,dirent->dir_name,32);
-            if(name_len > 31){
-                strcpy(&ent.text[28],"...");
-            }
+
+        memcpy(ent.text,dirent->dir_name,32);
+        if(name_len > 31){
+            strcpy(&ent.text[28],"...");
         }
         set_insert(&dir_files,&ent);
     }
@@ -87,28 +95,40 @@ static _Bool update_file_list(void){
 }
 
 static void update_view(){
-    update_file_list();
     int y = 0;
-    if(file_menu_mode == FILE_MODE_LOAD){
-        y = 3;
+    if(update_file_list()){
+        if(file_menu_mode == FILE_MODE_LOAD){
+            y = 3;
+            file_menu_accept_button->enabled = 0;
+            file_menu_clear_button->enabled = 0;
+            file_menu_text_entry->enabled = 0;
+        }else{
+            file_menu_accept_button->enabled = 1;
+            file_menu_clear_button->enabled = 1;
+            file_menu_text_entry->enabled = 1;
+            y = 5;
+        }
+        file_menu_up_button->y = y;
+        file_menu_down_button->y = y + FILE_ROWS - 1;
+        file_menu_up_button->enabled = 1;
+        file_menu_down_button->enabled = 1;
+        for(int i = 0; i<FILE_ROWS;i++){
+            struct menu_item *item = file_menu_rows[i];
+            item->y = y++;
+            if(i < dir_files.container.size){
+                item->enabled = 1;
+            }else{
+                item->enabled = 0;
+            }
+        }
+    }else{
+        file_menu_up_button->enabled = 0;
+        file_menu_down_button->enabled = 0;
         file_menu_accept_button->enabled = 0;
         file_menu_clear_button->enabled = 0;
         file_menu_text_entry->enabled = 0;
-    }else{
-        file_menu_accept_button->enabled = 1;
-        file_menu_clear_button->enabled = 1;
-        file_menu_text_entry->enabled = 1;
-        y = 5;
-    }
-    for(int i = 0; i<FILE_ROWS;i++){
-        struct menu_item *item = file_menu_rows[i];
-        item->y = y++;
-        if(i < dir_files.container.size){
-            dir_entry_t *ent = set_at(&dir_files,i);
-            item->enabled = 1;
-            item->text = ent->text;
-        }else{
-            item->enabled = 0;  
+        for(int i = 0; i<FILE_ROWS;i++){
+            file_menu_rows[i]->enabled = 0;
         }
     }
 }
@@ -197,6 +217,9 @@ static void return_path(char *path){
 
 static int reset_disk_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
+        reset_disk();
+        update_view();
+        file_menu_offset = 0;
         return 1;
     }
     return 0;
@@ -217,24 +240,66 @@ static int clear_callback(struct menu_item *item, enum menu_callback callback, v
     return 0;
 }
 
-static int file_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        dir_entry_t *dirent = (dir_entry_t*)set_at(&dir_files,(int)data);
-        if(dirent->isdir){
-            chdir(dirent->name);
-            update_view();
+static void file_activate(struct menu_item *item){
+    int data = (int)item->data;
+    dir_entry_t *dirent = (dir_entry_t*)set_at(&dir_files,(int)data + file_menu_offset);
+    if(dirent->isdir){
+        chdir(dirent->name);
+        update_view();
+    }else{
+        int len = strlen(dirent->name) - file_menu_extension_len;
+        char *path = malloc(len + 1);
+        memcpy(path,dirent->name,len);
+        path[len] = 0;
+        if(file_menu_mode == FILE_MODE_SAVE){
+            strncpy(file_menu_text_value,path,31);
+            file_menu_text_value[31] = 0;
         }else{
-            int len = strlen(dirent->name) - file_menu_extension_len;
-            char *path = malloc(len + 1);
-            memcpy(path,dirent->name,len);
-            path[len] = 0;
-            if(file_menu_mode == FILE_MODE_SAVE){
-                strncpy(file_menu_text_value,path,31);
-                file_menu_text_value[31] = 0;
-            }else{
-                return_path(path);
-            }
-            free(path);
+            return_path(path);
+        }
+        free(path);
+    }
+}
+
+static void file_draw(struct menu_item *item){
+    dir_entry_t *ent = set_at(&dir_files,(int)item->data + file_menu_offset);
+    int x = get_item_x_pos(item);
+    int y = get_item_y_pos(item);
+    int tile = 0;
+    char *text = ent->text;
+    if(strcmp(ent->text,"..") == 0){
+        tile = 2;
+        text = "back";
+    }
+    else if(ent->isdir){
+        tile = 1;
+    }
+    uint32_t color = 0xFFFFFFFF;
+    if(item->owner->selected_item == item){
+        color = MENU_SELECTED_COLOR.color;
+    }
+    gfx_draw_sprite_color(resource_get(R_KZ_FILES),x,y,tile,8,8,color);
+    gfx_printf_color(x + 10, y,color,"%s",text);
+}
+
+static int file_menu_up_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(file_menu_offset == 0){
+            file_menu_offset = dir_files.container.size - FILE_ROWS;
+        }else{
+            file_menu_offset--;
+        }
+        return 1;
+    }
+    return 0;
+}
+
+static int file_menu_down_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(file_menu_offset >= dir_files.container.size - FILE_ROWS){
+            file_menu_offset = 0;
+        }else{
+            file_menu_offset++;
         }
         return 1;
     }
@@ -255,8 +320,23 @@ static void init_file_menu(){
     file_menu_accept_button = menu_add_button(&file_menu,0,4,"accept",accept_callback,NULL);
     file_menu_clear_button = menu_add_button(&file_menu,8,4,"clear",clear_callback,NULL);
     int y = 3;
+
+    draw_info_t scroll_draw = {
+        NULL, 0,0,1.0f, 1.0f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}}, 1, NULL
+    };
+    scroll_draw.texture = resource_get(R_KZ_ARROWS);
+
+    file_menu_up_button = menu_add_gfx_button(&file_menu,0,y,file_menu_up_callback,NULL,&scroll_draw);
+    scroll_draw.on_tile = 1;
+    file_menu_down_button = menu_add_gfx_button(&file_menu,0,y + FILE_ROWS - 1,file_menu_down_callback,NULL,&scroll_draw);
+
     for(int i=0;i<FILE_ROWS;i++){
-        file_menu_rows[i] = menu_add_button(&file_menu,0,y++,NULL,file_callback,(void*)i);
+        struct menu_item *item = menu_add(&file_menu,1,y++,NULL);
+        item->data = (void*)i;
+        item->activate_proc = file_activate;
+        item->draw_proc = file_draw;
+        item->interactive = 1;
+        file_menu_rows[i] = item;
     }
     file_menu_ready = 1;
 }
@@ -271,6 +351,7 @@ void menu_get_file(enum file_mode mode, const char *default_fn, const char *exte
     file_menu_callback = callback;
     file_menu_callback_data = callback_data;
     file_menu_mode = mode;
+    file_menu_offset = 0;
     if(default_fn){
         strncpy(file_menu_text_value,default_fn,31);
         file_menu_text_value[31] = 0;

@@ -162,7 +162,7 @@ static void update_commands_table(){
 static int command_dec_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
         if(command_pos==0){
-            command_pos = KZ_CMD_MAX - 14;
+            command_pos = KZ_CMD_MAX - 13;
         }else{
             command_pos--;
         }
@@ -185,14 +185,15 @@ static int command_inc_callback(struct menu_item *item, enum menu_callback callb
     return 0;
 }
 
+#ifndef LITE
 static void do_export_memfile(char *path, void *data){
     int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file!=-1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
         write(file,memfile,sizeof(*memfile));
         kz_log("saved from memfile %d",kz.memfile_slot);
+        close(file);
     }
-    close(file);
 }
 
 static void do_import_memfile(char *path, void *data){
@@ -205,8 +206,8 @@ static void do_import_memfile(char *path, void *data){
         }
         kz.memfile[kz.memfile_slot] = memfile;
         kz_log("loaded to memfile %d",kz.memfile_slot);
+        close(file);
     }
-    close(file);
 }
 
 static int export_memfile_callback(struct menu_item *item, enum menu_callback callback, void *data){
@@ -228,9 +229,12 @@ static int import_memfile_callback(struct menu_item *item, enum menu_callback ca
     }
     return 0;
 }
+#endif
 
 struct menu *create_settings_menu(){
     static struct menu settingsm;
+    static struct menu commands;
+
     menu_init(&settingsm,kz.main_menu.x,kz.main_menu.y);
     menu_set_padding(&settingsm,0,2);
     settingsm.selected_item = menu_add_button(&settingsm,0,0,"return",menu_return,NULL);
@@ -264,67 +268,69 @@ struct menu *create_settings_menu(){
     menu_add_checkbox(&settingsm,0,8,settings_switch_callback,(void*)SW_TURBO,NULL);
     menu_checkbox_set(item,settings->turbo_type);
     menu_add(&settingsm,2,8,"turbo hold");
-
-    menu_add(&settingsm,0,9,"memfile");
-    menu_add_button(&settingsm,15,9,"-",memfile_dec,NULL);
+    int y = 9;
+    menu_add(&settingsm,0,y,"memfile");
+    menu_add_button(&settingsm,15,y,"-",memfile_dec,NULL);
     static watch_t memfile_watch;
     memfile_watch.address = &kz.memfile_slot;
     memfile_watch.type=WATCH_TYPE_U8;
     memfile_watch.floating = 0;
-    menu_add_watch(&settingsm,16,9,&memfile_watch,1);
-    menu_add_button(&settingsm,17,9,"+",memfile_inc,NULL);
-    
-    menu_add_button(&settingsm,0,10,"export",export_memfile_callback,NULL);
-    menu_add_button(&settingsm,8,10,"import",import_memfile_callback,NULL);
+    menu_add_watch(&settingsm,16,y,&memfile_watch,1);
+    menu_add_button(&settingsm,17,y++,"+",memfile_inc,NULL);
 
-    item = menu_add_checkbox(&settingsm,0,11,settings_switch_callback,(void*)SW_MEMFILE_VOID,NULL);
+#ifndef LITE
+    menu_add_button(&settingsm,0,y,"export",export_memfile_callback,NULL);
+    menu_add_button(&settingsm,8,y++,"import",import_memfile_callback,NULL);
+#endif
+
+    item = menu_add_checkbox(&settingsm,0,y,settings_switch_callback,(void*)SW_MEMFILE_VOID,NULL);
     if(settings->memfile_action == MEMFILE_VOID){
         menu_checkbox_set(item,1);
     }
-    menu_add(&settingsm,3,11,"void on load memfile");
+    menu_add(&settingsm,3,y++,"void on load memfile");
 
-    item = menu_add_checkbox(&settingsm,0,12,settings_switch_callback,(void*)SW_MEMFILE_POS,NULL);
+    item = menu_add_checkbox(&settingsm,0,y,settings_switch_callback,(void*)SW_MEMFILE_POS,NULL);
     if(settings->memfile_action == MEMFILE_POS){
         menu_checkbox_set(item,1);
     }
-    menu_add(&settingsm,3,12,"load pos on load memfile");
+    menu_add(&settingsm,3,y++,"load pos on load memfile");
 
-    menu_add(&settingsm,0,13,"saved position");
-    menu_add_button(&settingsm,15,13,"-",position_dec,NULL);
+    menu_add(&settingsm,0,y,"saved position");
+    menu_add_button(&settingsm,15,y,"-",position_dec,NULL);
     static watch_t position_watch;
     position_watch.address = &kz.pos_slot;
     position_watch.type=WATCH_TYPE_U8;
     position_watch.floating = 0;
-    menu_add_watch(&settingsm,16,13,&position_watch,1);
-    menu_add_button(&settingsm,17,13,"+",position_inc,NULL);
+    menu_add_watch(&settingsm,16,y,&position_watch,1);
+    menu_add_button(&settingsm,17,y++,"+",position_inc,NULL);
+    menu_add_submenu(&settingsm,0,y,&commands,"commands");
 
-    static struct menu commands;
-    menu_init(&commands,0,0);
-    menu_set_padding(&commands,0,1);
+    // Build commands menu
+    {
+        menu_init(&commands,kz.main_menu.x,kz.main_menu.y);
+        menu_set_padding(&commands,0,1);
 
-    commands.selected_item = menu_add_button(&commands,0,0,"return",menu_return,NULL);
-    menu_add(&commands,2,1,"command");
-    menu_add(&commands,22,1,"bind");
-    int y = 2;
+        commands.selected_item = menu_add_button(&commands,0,0,"return",menu_return,NULL);
+        menu_add(&commands,2,1,"command");
+        menu_add(&commands,22,1,"bind");
+        y = 2;
 
-    static draw_info_t dec_scroll_draw = {
-        NULL, 0,0,1.0f, 1.0f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}}, 1, NULL
-    };
+        static draw_info_t dec_scroll_draw = {
+            NULL, 0,0,1.0f, 1.0f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}}, 1, NULL
+        };
 
-    dec_scroll_draw.texture = resource_get(R_KZ_ARROWS);
-    static draw_info_t inc_scroll_draw;
-    memcpy(&inc_scroll_draw,&dec_scroll_draw,sizeof(inc_scroll_draw));
-    inc_scroll_draw.on_tile = 1;
+        dec_scroll_draw.texture = resource_get(R_KZ_ARROWS);
+        static draw_info_t inc_scroll_draw;
+        memcpy(&inc_scroll_draw,&dec_scroll_draw,sizeof(inc_scroll_draw));
+        inc_scroll_draw.on_tile = 1;
 
-    menu_add_gfx_button(&commands,0,2,command_dec_callback,NULL,&dec_scroll_draw);
-    menu_add_gfx_button(&commands,0,14,command_inc_callback,NULL,&inc_scroll_draw);
+        menu_add_gfx_button(&commands,0,2,command_dec_callback,NULL,&dec_scroll_draw);
+        menu_add_gfx_button(&commands,0,14,command_inc_callback,NULL,&inc_scroll_draw);
 
-    for(int i=0;i<13;i++){
-        command_bindings[i].command_button = menu_add_button(&commands,2,y,kz_commands[i].text,run_command,(void*)i);
-        command_bindings[i].command_bind = menu_add_bind(&commands,22,y++,i);
+        for(int i=0;i<13;i++){
+            command_bindings[i].command_button = menu_add_button(&commands,2,y,kz_commands[i].text,run_command,(void*)i);
+            command_bindings[i].command_bind = menu_add_bind(&commands,22,y++,i);
+        }
     }
-
-    menu_add_submenu(&settingsm,0,14,&commands,"commands");
-
     return &settingsm;
 }

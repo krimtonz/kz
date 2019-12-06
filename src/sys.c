@@ -83,6 +83,9 @@ static int init_fat(){
     }
     if(hb_sd_init() == 0){
         device_type = DEVICE_HOMEBOY;
+    }else{
+        errno = ENODEV;
+        return -1;
     }
     if(fat_init(&fat,read_sd, write_sd)){
         return -1;
@@ -485,6 +488,10 @@ error:
         fat_free(fp);
     }
     return -1;
+}
+
+int reset_disk(void){
+    return hb_reset();
 }
 
 #endif

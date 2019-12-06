@@ -40,5 +40,11 @@
       "name": "arrows",
       "format": "i8",
       "tile_height": 8
+  },
+  "files.png": {
+      "type" : "texture",
+      "name" : "files",
+      "format" : "rgba16",
+      "tile_height" : 10
   }
 }
