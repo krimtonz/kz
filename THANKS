@@ -1,7 +1,4 @@
-Thanks to everyone who has contributed directly or indirectly, this project is supported by a great community of people.
-
-Special thanks to 
-    glank, a lot of concepts, and code snippets were borrowed from the Ocarina of Time Practice Rom (gz)
-    mzxrules, original idea of shrinking game heap in order to fit custom code payload, this is used for lite versions now
-    antiformant (notwa), provided scene names 
-    
+Thanks to everyone who has contributed directly or indirectly.
+This project is support by a great number of people in the community,
+and would not be possible without the research and documentation of 
+many others.
