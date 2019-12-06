@@ -5,8 +5,10 @@
 #include "keyboard.h"
 
 struct item_data {
-    char    *value;
-    char   **value_ptr;
+    char   *value;
+    char   *empty_string;
+    char  **value_ptr;
+    
 };
 
 static int keyboard_accepted(struct menu_item *item, enum menu_callback callback, void *data){
@@ -25,7 +27,11 @@ static void draw_text_input(struct menu_item *item){
     if(item->owner->selected_item == item){
         color = MENU_SELECTED_COLOR.color;
     }
-    gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"%s",data->value);
+    char *text = data->value;
+    if(strlen(text) == 0){
+        text = data->empty_string;
+    }
+    gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"%s",text);
 }
 
 static void activate_text_input(struct menu_item *item){
@@ -47,13 +53,15 @@ struct menu_item *menu_add_text_input(struct menu *menu, uint16_t x, uint16_t y,
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->value = malloc(32);
+        data->empty_string = malloc(32);
+        memset(data->value,0,32);
+        memset(data->empty_string,0,32);
         data->value_ptr = value_ptr;
         if(default_text){
-            strncpy(data->value,default_text,31);
+            strncpy(data->empty_string,default_text,31);
         }else{
-            strncpy(data->value,"untitled",31);
+            strncpy(data->empty_string,"untitled",31);
         }
-        data->value[31] = 0;
         item->interactive = 1;
         item->data = data;
         item->activate_proc = activate_text_input;

@@ -183,6 +183,10 @@ static void watch_add(watch_t *watch, struct menu_item *item, _Bool setpos){
 
 static int watches_button_add(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
+        if(kz.watches.size >= WATCHES_MAX){
+            kz_log("watches limit reached");
+            return 1;
+        }
         watch_t *watch = list_push_back(&kz.watches,NULL);
         static enum watch_type type = WATCH_TYPE_U8;
         watch->address = (void*)prev_addr;
@@ -191,7 +195,7 @@ static int watches_button_add(struct menu_item *item, enum menu_callback callbac
         watch->x = 0;
         watch->y = 0;
         watch->label = malloc(21);
-        watch->label = "label";
+        memset(watch->label,0,21);
         watch_add(watch,item,1);
         return 1;
     }
