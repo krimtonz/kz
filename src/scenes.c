@@ -1132,14 +1132,14 @@ struct kz_scene_category scene_categories[] = {
     },
     {
         "other",
-        6, (uint8_t[]){
-            91,18,17,89,95,88
+        7, (uint8_t[]){
+            91,18,17,89,95,88,10
         }
     },
     {
         "beta",
-        2, (uint8_t[]){
-            10,8
+        1, (uint8_t[]){
+            8
         }
     },
 };
