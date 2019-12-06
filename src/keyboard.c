@@ -220,6 +220,7 @@ static int accept_proc(struct menu_item *item, enum menu_callback callback, void
 }
 
 void show_keyboard(struct menu_item *item, char **dest, menu_generic_callback callback){
+    memset(input_buf,0,sizeof(input_buf));
     dest_string = dest;
     dest_callback = callback;
     keyboard_caller = item;
@@ -227,8 +228,6 @@ void show_keyboard(struct menu_item *item, char **dest, menu_generic_callback ca
         strcpy(input_buf,*dest);
         cursor_pos = strlen(input_buf);
         buf_sanity();
-    }else{
-        memset(input_buf,0,sizeof(input_buf));
     }
     item->owner->child = &kz_keyboard;
     kz_keyboard.parent = item->owner;
