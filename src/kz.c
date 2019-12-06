@@ -394,6 +394,14 @@ static void kz_main(void) {
     gfx_finish();
 }
 
+static int main_menu_return(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        kz.menu_active = 0;
+        return 1;
+    }
+    return 0;
+}
+
 void init() {
     clear_bss();
     do_global_ctors();
@@ -424,7 +432,7 @@ void init() {
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
-    kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",menu_return,NULL);
+    kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",main_menu_return,NULL);
 
     menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
     menu_add_submenu(&kz.main_menu,0,2,create_cheats_menu(),"cheats");
