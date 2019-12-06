@@ -243,9 +243,9 @@ Next to the previous and next buttons is the current flag set indicator.
 
 Underneath the current flag set indicator are the bit offsets for the flags.  Next to the previous and next offset buttons are the current flag offsets.  
 
-The `previous` button is indicated by the ^ button.  This will move the current flag set's offset back by 2.  Holding `Z` while hitting this button will move the flag set up a page.  
+The `previous` button is indicated by the ^ button.  This will move the current flag set's offset back by 2.
 
-The `next` button is indicated by the v button.  This will move the current flag set's offset forward by 2.  Holding `Z` while hitting this button will move the flag set up a page.  
+The `next` button is indicated by the v button.  This will move the current flag set's offset forward by 2.
 
 **Note:** The switch, chest, clear, and collect flag sets are for the ***current scene***
 

@@ -7,6 +7,7 @@
 #include "kz.h"
 #include "resource.h"
 #include "scenes.h"
+#include "input.h"
 
 #define MEMORY_MAX  0x80C00000
 
@@ -173,10 +174,11 @@ static void memory_view_draw(struct menu_item *item){
 
 static int memory_inc_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
-        if(memory_start_addr >= MEMORY_MAX - 0x4A){
-            memory_start_addr = 0x80000000  ;
+        uint32_t new_addr = memory_start_addr + ((input_pressed_raw() & BUTTON_Z) ? 0x50 : 0x8);
+        if(new_addr >= MEMORY_MAX - 0x50){
+            memory_start_addr = 0x80000000;
         }else{
-            memory_start_addr += 0x8;
+            memory_start_addr = new_addr;
         }
         memory_create_table(item->owner);
         return 1;
@@ -186,10 +188,11 @@ static int memory_inc_callback(struct menu_item *item, enum menu_callback callba
 
 static int memory_dec_callback(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
-        if(memory_start_addr == 0x80000000){
-            memory_start_addr = MEMORY_MAX - 0x4A;
+        uint32_t new_addr = memory_start_addr - ((input_pressed_raw() & BUTTON_Z) ? 0x50 : 0x8);
+        if(memory_start_addr <= 0x80000000){
+            memory_start_addr = MEMORY_MAX - 0x50;
         }else{
-            memory_start_addr -= 0x8;
+            memory_start_addr = new_addr;
         }
         memory_create_table(item->owner);
         return 1;
