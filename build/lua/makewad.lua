@@ -84,7 +84,7 @@ end
 gzinject_pack = gzinject_pack .. finpatch
 
 gzinject_pack = gzinject_pack ..
-        " -p \"patch/compress.gzi\"" ..
+        " -p \"patch/gzi/compress.gzi\"" ..
         " --cleanup" ..
         " --verbose"
 

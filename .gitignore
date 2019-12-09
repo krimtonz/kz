@@ -11,5 +11,5 @@ vc/obj/
 .vscode/
 *.sra
 *.bak
-patch/kz-*
+patch/gsc/kz-*/hooks.gsc
 patch/dol

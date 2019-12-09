@@ -14,22 +14,25 @@ if arg[2] == "lite" then
 end
 local kz_version = "kz" .. suffix .. "-" .. rom_info.rom_id
 print("Building " .. kz_version)
-local _,_,res = os.execute("make " .. kz_version .. " && make patch/" .. kz_version .. "/hooks.gsc")
+local _,_,res = os.execute("make " .. kz_version .. " && make patch/gsc/" .. kz_version .. "/hooks.gsc")
 local fs = gru.z64fs_load_blob(rom)
 local code = fs:get(rom_info.code)
-local hooks = gru.gsc_load("patch/" .. kz_version .. "/hooks.gsc")
+local hooks = gru.gsc_load("patch/gsc/" .. kz_version .. "/hooks.gsc")
 print("Applying hooks")
 hooks:shift(-rom_info.code_ram)
 hooks:apply_be(code)
+local ups = gru.gsc_load("patch/gsc/" .. kz_version .. "/ups_size_patch.gsc")
+ups:shift(-rom_info.code_ram)
+ups:apply_be(code)
 print("Assembling rom")
 fs:replace(rom_info.code,code,fs:compressed(rom_info.code))
 local patched_rom = fs:assemble_rom()
 print("Applying memory hack")
 local zero_patch
 if arg[2] == "lite" then
-    zero_patch = gru.gsc_load("patch/zero_patch_lite.gsc")
+    zero_patch = gru.gsc_load("patch/gsc/zero_patch_lite.gsc")
 else
-    zero_patch = gru.gsc_load("patch/zero_patch.gsc")
+    zero_patch = gru.gsc_load("patch/gsc/zero_patch.gsc")
 end
 zero_patch:apply_be(patched_rom)
 local prev_ldr = patched_rom:copy(0x1000,0x60)

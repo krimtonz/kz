@@ -63,7 +63,7 @@ OBJ-$(1)		 = $$(COBJ-$(1)) $$(SOBJ-$(1)) $$(RESOBJ-$(1))
 ELF-$(1)         = $$(BINDIR-$(1))/$(3).elf
 BIN-$(1)         = $$(BINDIR-$(1))/$(3).bin
 OUTDIR-$(1)      = $$(OBJDIR-$(1)) $$(BINDIR-$(1)) $$(HOOKSDIR-$(1))
-HOOKS-$(1)		 = patch/$(1)/hooks.gsc
+HOOKS-$(1)		 = patch/gsc/$(1)/hooks.gsc
 BUILD-$(1)		 = $(1)
 CLEAN-$(1)		 = clean-$(1)
 $$(ELF-$(1))		 : LDFLAGS += -Wl,--defsym,start=$$(ADDRESS-$(1))
