@@ -35,8 +35,6 @@ bool treeInit(n64_cpu_t *cpu,int code_end)
     prVar1->node_being_cleaned = NULL;
     prVar1->node_cleaned_found = 0;
     tree_ctx = prVar1;
-    memset(kz_tree,0,sizeof(kz_tree));
-    memset(kz_tree_status,0,sizeof(kz_tree_status));
     return true;
 }
 

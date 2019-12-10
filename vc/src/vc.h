@@ -166,8 +166,8 @@ typedef bool (*ramSetSize_t)(void **dst, int size);
 #define hb_init         ((ramSetSize_t)     hb_init_addr)
 
 
-extern func_tree_node_t kz_tree[0x100];
-extern int kz_tree_status[8];
+extern func_tree_node_t kz_tree[0x200];
+extern int kz_tree_status[0x10];
 extern recomp_ctxt_t *tree_ctx;
 extern func_tree_node_t *kz_tree_root;
 

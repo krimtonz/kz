@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include "vc.h"
 
-func_tree_node_t kz_tree[0x100] = {0};
-int kz_tree_status[8] = {0};
+func_tree_node_t kz_tree[0x200] = {0};
+int kz_tree_status[0x10] = {0};
 recomp_ctxt_t *tree_ctx = NULL;
 func_tree_node_t *kz_tree_root = NULL;
 
@@ -13,7 +13,7 @@ extern __attribute__((section(".sbss"))) void *__sbss_start;
 
 bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size){
     bool found_node = false;
-    for(int i=0;i<8;i++){
+    for(int i=0;i<0x10;i++){
         if(kz_tree_status[i] == -1) continue;
         for(int j=0;j<32;j++){
             if(kz_tree_status[i] & (1 << j)) continue;
@@ -44,6 +44,5 @@ __attribute__((section(".init"))) int _start(){
     while (p < end){
         *p++ = 0;
     }
-
     return 0;
 }
