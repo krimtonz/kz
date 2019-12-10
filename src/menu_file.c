@@ -259,6 +259,7 @@ static void file_activate(struct menu_item *item){
         if(file_menu_mode == FILE_MODE_SAVE){
             strncpy(file_menu_text_value,path,31);
             file_menu_text_value[31] = 0;
+            file_menu.selected_item = file_menu_accept_button;
         }else{
             return_path(path);
         }
@@ -350,6 +351,7 @@ void menu_get_file(enum file_mode mode, const char *default_fn, const char *exte
     if(!file_menu_ready){
         init_file_menu();
     }
+    file_menu.selected_item = file_menu.items.first;
     file_menu_default = default_fn;
     file_menu_extension = extension;
     file_menu_extension_len = strlen(extension);

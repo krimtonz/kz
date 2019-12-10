@@ -229,12 +229,10 @@ void show_keyboard(struct menu_item *item, char **dest, menu_generic_callback ca
         cursor_pos = strlen(input_buf);
         buf_sanity();
     }
-    item->owner->child = &kz_keyboard;
-    kz_keyboard.parent = item->owner;
-    if(item->owner->child->callback_proc){
-        item->owner->child->callback_proc(MENU_CALLBACK_ENTER);
-    }
+    kz_keyboard.selected_item = kz_keyboard.items.first;
+    menu_enter(&kz.main_menu,&kz_keyboard);
     menu_set_pos(&kz_keyboard,kz.main_menu.x,kz.main_menu.y);
+
 }
 
 void init_kz_keyboard(){
