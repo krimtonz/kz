@@ -16,6 +16,9 @@
 #define NARJ    0x00
 #define NARE    0x01
 
+#define ENTRY __attribute__((section(".init")))
+#define HOOK  __attribute__((section(".text.hook")))
+
 typedef struct cpu_cache_entry_t cpu_cache_entry_t, *Pcpu_cache_entry_t;
 
 typedef struct func_tree_node_t func_tree_node_t, *Pfunc_tree_node_t;

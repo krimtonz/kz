@@ -3,8 +3,8 @@
 #include <stdbool.h>
 
 #include "vc.h"
-int heap_free = 0;
-bool treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n64_start,int n64_end)
+
+HOOK bool treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n64_start,int n64_end)
 
 {
     bool bVar1;

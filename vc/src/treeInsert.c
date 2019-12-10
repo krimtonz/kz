@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "vc.h"
 
-bool treeInsert(n64_cpu_t *cpu,uint32_t n64_start,int n64_end)
+HOOK bool treeInsert(n64_cpu_t *cpu,uint32_t n64_start,int n64_end)
 
 {
     bool bVar1;

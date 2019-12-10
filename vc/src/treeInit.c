@@ -12,7 +12,7 @@
  * 
 */
 
-bool treeInit(n64_cpu_t *cpu,int code_end)
+HOOK bool treeInit(n64_cpu_t *cpu,int code_end)
 
 {
     _start();

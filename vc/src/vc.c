@@ -29,11 +29,11 @@ bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, int size){
     return found_node;
 }
 
-bool hb_hook(void **dest, int size){
-    hb_init(dest,size);
+HOOK bool hb_hook(void **dest, int size){
+    return hb_init(dest,size);
 }
 
-__attribute__((section(".init"))) int _start(){
+ENTRY int _start(){
     char *p = (char*)&__bss_start;
     char *end = (char*)&__bss_end;
     while (p < end){

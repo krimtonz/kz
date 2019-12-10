@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "vc.h"
 
-bool treeBalance(recomp_ctxt_t *ctx)
+HOOK bool treeBalance(recomp_ctxt_t *ctx)
 
 {
     func_tree_node_t *pfVar1;

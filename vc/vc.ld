@@ -40,9 +40,9 @@ SECTIONS
 		KEEP (*crt0.o(*.init))
 	} :text = 0
 
-    .hook           :
+    .text.hook           :
     {
-        KEEP(*(.hook))
+        KEEP(*(.text.hook))
     } :text = 0
 
 	.plt      : { *(.plt)	}
