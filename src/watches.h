@@ -3,7 +3,11 @@
 
 #include <stdint.h>
 
+#ifndef LITE
 #define WATCHES_MAX 10
+#else
+#define WATCHES_MAX 5
+#endif
 
 struct watch_info{
     uint8_t type        : 4;

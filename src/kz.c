@@ -351,7 +351,7 @@ static void kz_main(void) {
         gfx_printf(kz.main_menu.x, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
     }
 
-    for(int i = 9;i>=0;i--){
+    for(int i = KZ_LOG_MAX;i>=0;i--){
         const int fade_start = 20;
         const int fade_len = 20;
         struct log *log_entry = &kz.log[i];
@@ -478,11 +478,11 @@ void blur_hook(void){
 }
 
 void kz_log(const char *format, ...){
-    struct log *log_entry = &kz.log[9];
+    struct log *log_entry = &kz.log[KZ_LOG_MAX-1];
     if(log_entry->mesg){
         free(log_entry->mesg);
     }
-    for(int i=9;i>0;i--){
+    for(int i=KZ_LOG_MAX-1;i>0;i--){
         kz.log[i] = kz.log[i-1];
     }
     va_list va;

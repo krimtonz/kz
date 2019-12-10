@@ -4,6 +4,7 @@
 #include "input.h"
 #include "kz.h"
 #include "settings.h"
+#include "z2.h"
 
 struct command kz_commands[KZ_CMD_MAX] = {
     {"toggle menu",         COMMAND_PRESS,  NULL},
@@ -122,6 +123,7 @@ void command_save_memfile(){
     newmemfile->scene_flags[3] = z2_game.actor_ctxt.clear;
     newmemfile->scene_flags[4] = z2_game.actor_ctxt.collectible_1;
     newmemfile->scene = z2_game.scene_index;
+    newmemfile->z2_version = Z2_VERSION;
     memcpy(&newmemfile->file,&z2_file,sizeof(newmemfile->file));
     char mesg[100];
     snprintf(mesg,100,"memfile %d saved",kz.memfile_slot);
@@ -131,33 +133,37 @@ void command_save_memfile(){
 void command_load_memfile(){
     memfile_t *memfile = kz.memfile[kz.memfile_slot];
     if(memfile){
-        for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
-            if(actor->id == 0x15A){
-                z2_timer_t *timer = (z2_timer_t*)actor;
-                memcpy(&timer->timer_boundaries,&memfile->timer_boundaries,sizeof(timer->timer_boundaries));
+        if(memfile->z2_version == Z2_VERSION){
+            for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+                if(actor->id == 0x15A){
+                    z2_timer_t *timer = (z2_timer_t*)actor;
+                    memcpy(&timer->timer_boundaries,&memfile->timer_boundaries,sizeof(timer->timer_boundaries));
+                }
             }
+            if(memfile->scene==z2_game.scene_index){
+                z2_game.actor_ctxt.chest = memfile->scene_flags[0];
+                z2_game.actor_ctxt.switch_1 = memfile->scene_flags[1];
+                z2_game.actor_ctxt.switch_2 = memfile->scene_flags[2];
+                z2_game.actor_ctxt.clear = memfile->scene_flags[3];
+                z2_game.actor_ctxt.collectible_1 = memfile->scene_flags[4];
+            }
+            _Bool dovoid = 0;
+            if(z2_file.exit != memfile->file.exit){
+                dovoid=1;
+            }
+            memcpy(&z2_file,&memfile->file,sizeof(z2_file));
+            for(int i=0;i<4;i++){
+                z2_btnupdate(&z2_game,i);
+            }
+            if(settings->memfile_action & MEMFILE_VOID) dovoid = 1;
+            if(settings->memfile_action & MEMFILE_POS) command_load_position();
+            if(dovoid) command_void();
+            char mesg[100];
+            snprintf(mesg,100,"memfile %d loaded",kz.memfile_slot);
+            kz_log(mesg);
+        }else{
+            kz_log("mismatched mm version");    
         }
-        if(memfile->scene==z2_game.scene_index){
-            z2_game.actor_ctxt.chest = memfile->scene_flags[0];
-            z2_game.actor_ctxt.switch_1 = memfile->scene_flags[1];
-            z2_game.actor_ctxt.switch_2 = memfile->scene_flags[2];
-            z2_game.actor_ctxt.clear = memfile->scene_flags[3];
-            z2_game.actor_ctxt.collectible_1 = memfile->scene_flags[4];
-        }
-        _Bool dovoid = 0;
-        if(z2_file.exit != memfile->file.exit){
-            dovoid=1;
-        }
-        memcpy(&z2_file,&memfile->file,sizeof(z2_file));
-        for(int i=0;i<4;i++){
-            z2_btnupdate(&z2_game,i);
-        }
-        if(settings->memfile_action & MEMFILE_VOID) dovoid = 1;
-        if(settings->memfile_action & MEMFILE_POS) command_load_position();
-        if(dovoid) command_void();
-        char mesg[100];
-        snprintf(mesg,100,"memfile %d loaded",kz.memfile_slot);
-        kz_log(mesg);
     }
     else{
         char mesg[100];

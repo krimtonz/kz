@@ -5,15 +5,17 @@
 #include <stddef.h>
 #include "watches.h"
 #include "commands.h"
+#include "kz.h"
 
 #define IO_BLOCK_SIZE       0x80
 #define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)
 
-#define SETTINGS_VER        6
+#define SETTINGS_VER        7
 #define SETTINGS_ADDR       0x20000
 #define SETTINGS_SIZE       (sizeof(struct settings_header) + sizeof(struct settings_data))
 #define SETTINGS_PAD        ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
 #define SETTINGS_MAX        3
+#define FULL_SETTINGS       ((uint32_t)(((uint32_t)Z2_VERSION << 16) | ((uint32_t)KZ_VERSION << 8) | (uint32_t)SETTINGS_VER))
 
 #define MEMFILE_NONE        0
 #define MEMFILE_VOID        1

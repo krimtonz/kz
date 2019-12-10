@@ -11,6 +11,19 @@
 #define KZ_MEMFILE_MAX 3
 #define KZ_POSITION_MAX 3
 
+#define KZ_LITE 0x00
+#define KZ_FULL 0x01
+
+#ifndef KZ_VERSION
+#define KZ_VERSION KZ_FULL
+#endif
+
+#ifdef LITE
+#define KZ_LOG_MAX 3
+#else
+#define KZ_LOG_MAX 10
+#endif
+
 enum cheats {
     CHEAT_STICKS,
     CHEAT_NUTS,
@@ -42,8 +55,9 @@ struct disp_p
 };
 
 typedef struct{
-    z2_file_t   file;
+    uint16_t    z2_version;
     uint16_t    timer_boundaries[3];
+    z2_file_t   file;
     uint32_t    scene_flags[5];
     uint16_t    scene;
 } memfile_t;
@@ -80,7 +94,7 @@ typedef struct  {
     uint8_t                 pos_slot;
     position_t            **position_save;
     const char             *tooltip;
-    struct log              log[10];
+    struct log              log[KZ_LOG_MAX];
     _Bool                   debug_active;
     int                     prev_timespeed;
 } kz_ctxt_t;

@@ -29,6 +29,7 @@ KZ_LITE		= $(foreach v,$(KZ_VERSIONS),kz-lite-$(v))
 LDR			= $(foreach v,$(KZ_VERSIONS),ldr-kz-$(v))
 LDRLITE		= $(foreach v,$(KZ_VERSIONS),ldr-kz-lite-$(v))
 
+KZ-FULL			= $(OBJ-kz-NZSE) $(OBJ-kz-NZSJ) $(OBJ-kz-NZSJ10)
 KZ-LITE-NZSE	= $(OBJ-kz-lite-NZSE) $(ELF-kz-lite-NZSE) $(HOOKS-kz-lite-NZSE)
 KZ-LITE-NZSJ	= $(OBJ-kz-lite-NZSJ) $(ELF-kz-lite-NZSJ) $(HOOKS-kz-lite-NZSJ)
 KZ-LITE-NZSJ10	= $(OBJ-kz-lite-NZSJ10) $(ELF-kz-lite-NZSJ10) $(HOOKS-kz-lite-NZSJ10)
@@ -95,4 +96,5 @@ $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-lite-$(v),$(v),ldr,
 $(KZ-NZSE)  	: CPPFLAGS	?=	-DZ2_VERSION=NZSE
 $(KZ-NZSJ)		: CPPFLAGS	?=	-DZ2_VERSION=NZSJ
 $(KZ-NZSJ10)	: CPPFLAGS	?=	-DZ2_VERSION=NZSJ10
-$(KZ-LITE)		: CPPFLAGS	+=	-DLITE
+$(KZ-FULL)		: CPPFLAGS	+=	-DKZ_VERSION=KZ_FULL
+$(KZ-LITE)		: CPPFLAGS	+=	-DLITE -DKZ_VERSION=KZ_LITE
