@@ -490,8 +490,17 @@ error:
     return -1;
 }
 
-int reset_disk(void){
-    return hb_reset();
+void reset_disk(void){
+    fat_ready = 0;
+    for(int i = 0;i<FOPEN_MAX;i++){
+        if(desc_list[i]){
+            delete_desc(i);
+        }
+    }
+    if(wd){
+        fat_free(wd);
+        wd = NULL;
+    }
 }
 
 #endif

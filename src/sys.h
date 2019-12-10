@@ -29,7 +29,7 @@ int close(int file);
 time_t time(time_t *tloc);
 char *getcwd(char *buf, size_t size);
 int chdir(const char *path);
-int reset_disk(void);
+void reset_disk(void);
 
 #endif
 #endif
