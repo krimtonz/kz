@@ -65,9 +65,17 @@ local genhooksflags = ""
 local finpatch = ""
 
 if(opt_no_homeboy == nil or opt_no_homeboy ~= 1) then
-    genhooksflags = "homeboy"
-    finpatch = " --dol-inject \"" .. vc_fix_inject .. "/homeboy.bin\"" ..
-               " --dol-loading \"" .. hb_addr .. "\""
+    local homeboy_bin = vc_fix_inject .. "/homeboy.bin"
+    local f=io.open(homeboy_bin,"r")
+    if f~=nil then
+        io.close(f)
+        genhooksflags = "homeboy"
+        finpatch = " --dol-inject \"" .. homeboy_bin .. "\"" ..
+                   " --dol-loading \"" .. hb_addr .. "\""
+    else
+        print("homeboy binary not found, please add " .. homeboy_bin .. "\nPress ENTER to continue without it.\n")
+        io.read()
+    end
 end
 
 if(opt_no_vc_fix == nil or opt_no_vc_fix ~= 1) then
