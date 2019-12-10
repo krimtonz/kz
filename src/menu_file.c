@@ -110,8 +110,13 @@ static void update_view(){
         }
         file_menu_up_button->y = y;
         file_menu_down_button->y = y + FILE_ROWS - 1;
-        file_menu_up_button->enabled = 1;
-        file_menu_down_button->enabled = 1;
+        if(dir_files.container.size > FILE_ROWS){
+            file_menu_up_button->enabled = 1;
+            file_menu_down_button->enabled = 1;
+        }else{
+            file_menu_up_button->enabled = 0;
+            file_menu_down_button->enabled = 0;
+        }
         for(int i = 0; i<FILE_ROWS;i++){
             struct menu_item *item = file_menu_rows[i];
             item->y = y++;
