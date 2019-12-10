@@ -191,7 +191,7 @@ static void do_export_memfile(char *path, void *data){
     if(file!=-1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
         write(file,memfile,sizeof(*memfile));
-        kz_log("saved from memfile %d",kz.memfile_slot);
+        kz_log("export from memfile %d",kz.memfile_slot);
         close(file);
     }
 }
@@ -202,10 +202,10 @@ static void do_import_memfile(char *path, void *data){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
         if(!memfile){
             memfile = malloc(sizeof(*memfile));
-            read(file,memfile,sizeof(*memfile));
         }
+        read(file,memfile,sizeof(*memfile));
         kz.memfile[kz.memfile_slot] = memfile;
-        kz_log("loaded to memfile %d",kz.memfile_slot);
+        kz_log("imported to memfile %d",kz.memfile_slot);
         close(file);
     }
 }
