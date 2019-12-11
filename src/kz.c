@@ -351,7 +351,7 @@ static void kz_main(void) {
         gfx_printf(kz.main_menu.x, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
     }
 
-    for(int i = KZ_LOG_MAX;i>=0;i--){
+    for(int i = KZ_LOG_MAX-1;i>=0;i--){
         const int fade_start = 20;
         const int fade_len = 20;
         struct log *log_entry = &kz.log[i];
