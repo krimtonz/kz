@@ -273,7 +273,7 @@ static void kz_main(void) {
     {
         if(kz.menu_active){
             struct menu *kz_menu = &kz.main_menu;
-            if(input_bind_pressed(KZ_CMD_TOGGLE_MENU)){
+            if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)){
                 kz.menu_active=0;
                 if(!kz.debug_active){
                     free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
@@ -300,7 +300,7 @@ static void kz_main(void) {
             }
             menu_update(&kz.main_menu);
             menu_draw(kz_menu);
-        }else if(input_bind_pressed(KZ_CMD_TOGGLE_MENU)){
+        }else if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)){
             kz.menu_active=1;
             reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
         }

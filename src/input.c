@@ -136,7 +136,7 @@ void input_update(){
                         if(*cs & ~((1 << (j+1))-1)){
                             *cs = 0;
                         }else{
-                            *cs = ~csm;
+                            *cs &= ~csm;
                         }
                         break;
                     }
