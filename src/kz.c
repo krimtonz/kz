@@ -396,6 +396,7 @@ static void kz_main(void) {
 
 static int main_menu_return(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
+        free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
         kz.menu_active = 0;
         return 1;
     }
