@@ -4,20 +4,14 @@ In order to build kz, you need to have the [n64 toolchain](https://github.com/gl
 If you're planning on building for the Wii U VC, you will need to be build 
 the toolchain with `CFLAGS_FOR_TARGET='-mno-check-zero-division' CXX_FLAGS_FOR_TARGET='-mno-check-zero-division'`
 
-
 If building for the Wii U VC or the Wii VC, you will need the `--enable-vc` option when configuring the toolchain
-
 
 In order to create a Wii Virtual Console WAD you will need [gzinject](https://github.com/krimtonz/gzinject)
 
-kz has source code in the `vc` directory which will improve the WiiVC Emulator in regards to kz's code.  In order to build this you will need a PowerPC compiler.  [devkitPro](https://devkitpro.org/) contains an installable PowerPC toolchain called `devkitPPC`.  If you'd like to create your own toolchain see [wii-toolchain](https://github.com/krimtonz/wii-toolchain).  Building the vc improvements is optional, but recommended.
 
 # Building 
 To build all kz binaries, run `make all` to only build a sepecific version run `make kz-VERSION` Where VERSION is
 `kz-NZSJ kz-NZSJ10 kz-NZSE kz-lite-NZSJ kz-lite-NZSJ10 kz-lite-NZSE`
-
-# Building VC Enhancements
-Run `make` in the `vc` directory in order to build vc enhancements.  This will also create the necessary gzinject patch file for including the enhancements
 
 # Patching
 The patching scripts will run the building process, so you can skip the building process if you plan on patching.  
@@ -39,6 +33,10 @@ version of kz, run
 
     build/makewad /path/to/vanilla/wad.wad
 
-By default the wad patching script will attempt to build the vc enhacements mentioned above, if this part fails by not having a PowerPC compilier, the wad will be built without the enhancements.  
+By default the script will build the vc patches in the `vc` directory.  These patches are not required, but are recommended.  Building the patches will require the `homeboy` submodule.
 
-The wad building script will also attempt to include the [homeboy](https://github.com/krimtonz/homeboy) binary which is used for SD Card Access.  The binary compiled from the homeboy project should be placed in the `patch/dol/vc/kz-vc-NZS[E,J]` directory.
+    git submodule update --init
+
+This will also require a compatible PowerPC&trade; Compiler.  See [devkitPro](https://devkitpro.org/) for a prebuilt toolchain.  
+
+In order to exclude the VC patches pass `--no-vc-fix` to the `makewad` script.  

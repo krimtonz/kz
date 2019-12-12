@@ -13,7 +13,11 @@ RESFILES	= *.png
 SRCDIR		= src
 OBJDIR 		= obj
 BINDIR		= bin
+VCDIR		= vc
+HOMEBOYDIR	= homeboy
+PATCHDIR	= patch/dol
 KZ_VERSIONS	= NZSE NZSJ NZSJ10
+VC_VERSIONS	= NARJ NARE
 NAME		= kz
 RESDESC		= res.json
 
@@ -38,9 +42,11 @@ KZ-NZSE		= $(OBJ-kz-NZSE) $(ELF-kz-NZSE) $(HOOKS-kz-NZSE) $(KZ-LITE-NZSE)
 KZ-NZSJ		= $(OBJ-kz-NZSJ) $(ELF-kz-NZSJ) $(HOOKS-kz-NZSJ) $(KZ-LITE-NZSJ)
 KZ-NZSJ10	= $(OBJ-kz-NZSJ10) $(ELF-kz-NZSJ10) $(HOOKS-kz-NZSJ10) $(KZ-LITE-NZSJ10)
 
-all			: $(KZ) $(KZ_LITE)
+VC	= $(foreach v,$(VC_VERSIONS),kz-vc-$(v))
+
+all			: $(KZ) $(KZ_LITE) $(VC)
 clean       :
-	rm -rf $(OBJDIR) $(BINDIR)
+	rm -rf $(OBJDIR) $(BINDIR) $(PATCHDIR)
 distclean 	: clean
 	rm -rf build/*.z64 build/*.wad
 
@@ -88,10 +94,30 @@ $$(HOOKS-$(1))	: $$(ELF-$(1)) $$(HOOKSDIR-$(1)) | $$(SRCDIR-$(1))/z2.h
 	$$(GENHOOKS) $$< $(7) >$$@  
 endef
 
+define vc_template
+VCDIR-$(1)	= $(PATCHDIR)/vc/$(1)
+PATCH-$(1)	= $$(VCDIR-$(1))/$(2).gzi
+BIN-$(1)	= $$(VCDIR-$(1))/$(2).bin
+HOMEBOY-$(1)	= $$(VCDIR-$(1))/homeboy.bin
+BUILD-$(1)	= $(1)
+$$(BUILD-$(1)) : $$(HOMEBOY-$(1))
+
+$$(PATCH-$(1))	: $$(BIN-$(1))
+	cd $(VCDIR) && make ../$$@
+
+$$(BIN-$(1))	:
+	cd $(VCDIR) && make ../$$@
+
+$$(HOMEBOY-$(1))	: $$(PATCH-$(1))
+	cd $(HOMEBOYDIR) && make bin/hb-$(3)/homeboy.bin
+	cp $(HOMEBOYDIR)/bin/hb-$(3)/homeboy.bin $$@
+endef
+
 $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,kz-$(v),$(v),kz,$(ADDRESS),src,res)))
 $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,kz-lite-$(v),$(v),kz,$(ADDRESS_LITE),src,res,lite)))
 $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-$(v),$(v),ldr,$(ADDRESS_LDR),ldr,ldr/res)))
 $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-lite-$(v),$(v),ldr,$(ADDRESS_LDR),ldr,ldr/res)))
+$(foreach v,$(VC_VERSIONS),$(eval $(call vc_template,kz-vc-$(v),kz-vc,$(v))))
 
 $(KZ-NZSE)  	: CPPFLAGS	?=	-DZ2_VERSION=NZSE
 $(KZ-NZSJ)		: CPPFLAGS	?=	-DZ2_VERSION=NZSJ
