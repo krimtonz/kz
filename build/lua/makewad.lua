@@ -2,7 +2,6 @@ local arg = {...}
 
 local opt_no_vc_fix
 local opt_raphnet
-local opt_no_homeboy
 local in_wad
 
 while arg[1] do
@@ -10,8 +9,6 @@ while arg[1] do
         opt_no_vc_fix = 1
     elseif arg[1] == "--raphnet" then
         opt_raphnet = 1
-    elseif arg[1] == "--no-homeboy" then
-        opt_no_homeboy = 1
     else
         in_wad = arg[1]
     end
@@ -61,35 +58,21 @@ local gzinject_pack = gzinject ..
         " -t \"" .. title .. "\"" ..
         " -p \"" .. patch_file .."\""
 
-local genhooksflags = ""
-local finpatch = ""
-
-if(opt_no_homeboy == nil or opt_no_homeboy ~= 1) then
-    local homeboy_bin = vc_fix_inject .. "/homeboy.bin"
-    local f=io.open(homeboy_bin,"r")
-    if f~=nil then
-        io.close(f)
-        genhooksflags = "homeboy"
-        finpatch = " --dol-inject \"" .. homeboy_bin .. "\"" ..
-                   " --dol-loading \"" .. hb_addr .. "\""
-    else
-        print("homeboy binary not found, please add " .. homeboy_bin .. "\nPress ENTER to continue without it.\n")
-        io.read()
-    end
-end
-
 if(opt_no_vc_fix == nil or opt_no_vc_fix ~= 1) then
-    local vcmake = os.execute("cd vc && make ../" .. vc_fix_inject .. "/kz-vc.bin  && GENHOOKSFLAGS=\"" .. genhooksflags .. "\" make ../" .. vc_fix_inject .. "/kz-vc.gzi && cd ..")
+    local vcmake = os.execute("make " .. vc_fix_inject .. "/homeboy.bin")
     if(vcmake ~= nil and vcmake == true) then
         gzinject_pack = gzinject_pack ..
             " -p \"" .. vc_fix_inject .. "/kz-vc.gzi\"" ..
             " --dol-inject \"" .. vc_fix_inject .. "/kz-vc.bin\"" ..
             " --dol-loading \"" .. vc_fix_addr .. "\"" ..
+            " --dol-inject \"" .. vc_fix_inject .. "/homeboy.bin\"" ..
+            " --dol-loading \"" .. hb_addr .. "\"" ..
             " --dol-after 0"
+    else
+        print("Could not build vc patches\n")
+        return
     end
 end
-
-gzinject_pack = gzinject_pack .. finpatch
 
 gzinject_pack = gzinject_pack ..
         " -p \"patch/gzi/compress.gzi\"" ..

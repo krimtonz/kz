@@ -69,16 +69,21 @@ void save_settings_to_flashram(int profile){
             i++;
         }
     }
-    z2_dmaramtoflash(&settings_info,SIZE_TO_BLOCK(SETTINGS_ADDR + (profile * sizeof(settings_info))),SIZE_TO_BLOCK(sizeof(*settings)));
+    struct settings *settings_temp = malloc(sizeof(*settings_temp) * SETTINGS_MAX);
+    z2_dmaflashtoram(settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR),SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
+    memcpy(settings_temp + profile,&settings_info,sizeof(settings_info));
+    z2_dmaramtoflash(settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR),SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
     kz_log("saved settings profile %d",profile);
+    free(settings_temp);
 }
 
 void load_settings_from_flashram(int profile){
-    struct settings settings_temp;
-    z2_dmaflashtoram(&settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR + (profile * sizeof(settings_temp))),SIZE_TO_BLOCK(sizeof(settings_temp)));
-    if(settings_temp.header.version>0 && settings_temp.header.version == FULL_SETTINGS){
-        if(settings_temp.header.magic[0] == 'k' && settings_temp.header.magic[1]=='z' && settings_temp.header.magic[2] == 'k' && settings_temp.header.magic[3] == 'z'){
-            memcpy((void*)&settings_info,(void*)&settings_temp,sizeof(settings_temp));
+    struct settings *settings_temp = malloc(sizeof(*settings_temp) * SETTINGS_MAX);
+    z2_dmaflashtoram(settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR),SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
+    struct settings *settings_profile = &settings_temp[profile];
+    if(settings_profile->header.version>0 && settings_profile->header.version == FULL_SETTINGS){
+        if(settings_profile->header.magic[0] == 'k' && settings_profile->header.magic[1]=='z' && settings_profile->header.magic[2] == 'k' && settings_profile->header.magic[3] == 'z'){
+            memcpy((void*)&settings_info,(void*)settings_profile,sizeof(*settings_profile));
             kz_log("loaded settings profile %d",profile);
         }else{
             load_default_settings();
@@ -91,6 +96,7 @@ void load_settings_from_flashram(int profile){
         save_settings_to_flashram(profile);
         kz_log("invalid settings version");
     }
+    free(settings_temp);
 }
 
 void kz_apply_settings(){

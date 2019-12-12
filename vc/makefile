@@ -15,7 +15,6 @@ ADDRESS		=
 ALL_CFLAGS      	= -c -mcpu=750 -meabi -mhard-float -G 0 -O3 -ffunction-sections -fdata-sections $(CFLAGS)
 ALL_CPPFLAGS		= $(CPPFLAGS)
 ALL_LDFLAGS     	= -T vc.ld -G 0 -nostartfiles -specs=nosys.specs $(LDFLAGS)
-ALL_GENHOOKS_FLAGS	= $(GENHOOKSFLAGS)
 
 VC 			= $(foreach v,$(VC_VERSIONS),kz-vc-$(v))
 
@@ -60,7 +59,7 @@ $$(BIN-$(1))      : $$(ELF-$(1)) | $$(BINDIR-$(1))
 $$(OUTDIR-$(1))   :
 	mkdir -p $$@
 $$(HOOKS-$(1))	: $$(ELF-$(1)) $$(BIN-$(1)) | $$(BINDIR-$(1))
-	$$(GENHOOKS) $$^ $$(ALL_GENHOOKS_FLAGS) >$$@
+	$$(GENHOOKS) $$^ >$$@
 endef
 
 $(foreach v,$(VC_VERSIONS),$(eval $(call bin_template,kz-vc-$(v),$(v),kz-vc,src)))
