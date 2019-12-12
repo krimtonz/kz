@@ -16,6 +16,14 @@ enum settings_switch_item {
     SW_TURBO
 };
 
+static char *memfile_action_text[] = {
+    "none", "void", "load position",
+};
+
+static int memfile_action_values[] = {
+    MEMFILE_NONE, MEMFILE_VOID, MEMFILE_POS,
+};
+
 struct binding_view_row{
     struct menu_item *command_button;
     struct menu_item *command_bind;
@@ -231,6 +239,14 @@ static int import_memfile_callback(struct menu_item *item, enum menu_callback ca
 }
 #endif
 
+static int memfile_action_callback(struct menu_item *item, enum menu_callback callback, void *data, int idx){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        settings->memfile_action = memfile_action_values[idx];
+        return 1;
+    }
+    return 0;
+}
+
 struct menu *create_settings_menu(){
     static struct menu settingsm;
     static struct menu commands;
@@ -282,19 +298,10 @@ struct menu *create_settings_menu(){
     menu_add_button(&settingsm,0,y,"export",export_memfile_callback,NULL);
     menu_add_button(&settingsm,8,y++,"import",import_memfile_callback,NULL);
 #endif
-
-    item = menu_add_checkbox(&settingsm,0,y,settings_switch_callback,(void*)SW_MEMFILE_VOID,NULL);
-    if(settings->memfile_action == MEMFILE_VOID){
-        menu_checkbox_set(item,1);
-    }
-    menu_add(&settingsm,3,y++,"void on load memfile");
-
-    item = menu_add_checkbox(&settingsm,0,y,settings_switch_callback,(void*)SW_MEMFILE_POS,NULL);
-    if(settings->memfile_action == MEMFILE_POS){
-        menu_checkbox_set(item,1);
-    }
-    menu_add(&settingsm,3,y++,"load pos on load memfile");
-
+    menu_add(&settingsm,0,y,"memfile action");
+    item = menu_add_list(&settingsm,15,y++,memfile_action_text,memfile_action_values,4,sizeof(memfile_action_values)/sizeof(*memfile_action_values),NULL,
+                         memfile_action_callback,NULL);
+    
     menu_add(&settingsm,0,y,"saved position");
     menu_add_button(&settingsm,15,y,"-",position_dec,NULL);
     static watch_t position_watch;
