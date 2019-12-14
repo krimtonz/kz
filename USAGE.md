@@ -274,9 +274,9 @@ The `export` button will allow you to export the memfile to an sd card.  The mem
 
 The `import` button will allow you to import a memfile from the sd card into the currently selected memfile slot.  See [sd features](#6-sd-features) for file management. 
 
-The `void on load memfile checkbox` will cause a void to occur when a memfile is loaded.
-
-The `load pos on load memfile checkbox` will cause links position to be loaded from the currently selected position save when a memfile is loaded.  
+The `memfile action` option list will allow you to select an action when a memfile is loaded.
+* `void` will cause a scene void out
+* `load position` will cause the current saved positoin slot to be loaded
 
 The `saved position increase/decrease` buttons will allow you to change which position slot is being used.  You can use up to 3 positions.
 
