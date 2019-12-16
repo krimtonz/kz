@@ -89,7 +89,7 @@ typedef int  (*menu_generic_callback)(struct menu_item *item, enum menu_callback
 typedef int  (*menu_number_callback)(struct menu_item *item, enum menu_callback callback, void *data, uint32_t value);
 typedef int  (*menu_list_callback)(struct menu_item *item, enum menu_callback callback, void *data, int idx);
 
-void menu_init(struct menu *menu, uint16_t x, uint16_t y);
+void menu_init(struct menu *menu);
 void menu_draw(struct menu *menu);
 void menu_update(struct menu *menu);
 void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height);

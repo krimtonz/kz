@@ -54,7 +54,7 @@ static int cheat_callback(struct menu_item *item, enum menu_callback callback, v
 
 struct menu *create_cheats_menu(){
     static struct menu cheats;
-    menu_init(&cheats,0,0);
+    menu_init(&cheats);
     menu_set_padding(&cheats,0,2);
     cheats.selected_item = menu_add_button(&cheats,0,0,"return",menu_return,NULL);
     struct menu_item *item = NULL;

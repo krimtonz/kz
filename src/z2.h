@@ -1364,14 +1364,19 @@ typedef union{
 #define z2_file_msgqueue_addr       0x8009B2C0
 #define z2_arena_addr               0x8009CD20
 #define z2_file_table_addr          0x8009F8B0
+#define z2_DrawActors_addr          0x800BA42C
 #define z2_SpawnActor_addr          0x800BAE14
 #define z2_DeleteActor_addr         0x800BB498
 #define z2_pause_persp_addr         0x800F4A10
 #define z2_btnupdate_addr           0x80112B40
-#define z2_loadroom_addr            0x8012E96C
-#define z2_unloadroom_addr          0x8012EBF8
-#define z2_blur_addr                0x80165460
-#define z2_blur_hook_addr           0x80168B68
+#define z2_LoadRoom_addr            0x8012E96C
+#define z2_DrawRoom_addr            0x8012EBA8
+#define z2_UnloadRoom_addr          0x8012EBF8
+#define z2_MotionBlur_addr          0x80165460
+#define z2_draw_room_1_hook_addr    0x80168940
+#define z2_draw_room_2_hook_addr    0x80168958
+#define z2_draw_actors_hook_addr    0x80168A20
+#define z2_motion_blur_hook_addr    0x80168B68
 #define z2_input_update_addr        0x80173754
 #define z2_main_hook_addr           0x801737A0
 #define z2_input_hook_addr          0x801744B8
@@ -1411,14 +1416,19 @@ typedef union{
 #define z2_file_msgqueue_addr       0x8009CE10
 #define z2_arena_addr               0x8009E860
 #define z2_file_table_addr          0x800A13F0
+#define z2_DrawActors_addr          0x800BBF4C
 #define z2_SpawnActor_addr          0x800BC934
 #define z2_DeleteActor_addr         0x800BCFB8
 #define z2_pause_persp_addr         0x800F6530
 #define z2_btnupdate_addr           0x801146F8
-#define z2_loadroom_addr            0x8013044C
-#define z2_unloadroom_addr          0x801306D8
-#define z2_blur_addr                0x80161010
-#define z2_blur_hook_addr           0x80164ED8
+#define z2_LoadRoom_addr            0x8013044C
+#define z2_DrawRoom_addr            0x80130688
+#define z2_UnloadRoom_addr          0x801306D8
+#define z2_MotionBlur_addr          0x80161010
+#define z2_draw_room_1_hook_addr    0x80164CB0
+#define z2_draw_room_2_hook_addr    0x80164CC8
+#define z2_draw_actors_hook_addr    0x80164D90
+#define z2_motion_blur_hook_addr    0x80164ED8
 #define z2_input_update_addr        0x8016F074
 #define z2_main_hook_addr           0x8016F0C0
 #define z2_input_hook_addr          0x8016FD40
@@ -1458,14 +1468,19 @@ typedef union{
 #define z2_file_msgqueue_addr       0x8009CED0
 #define z2_arena_addr               0x8009E920
 #define z2_file_table_addr          0x800A14B0
+#define z2_DrawActors_addr          0x800BBFE8
 #define z2_SpawnActor_addr          0x800BC98C
 #define z2_DeleteActor_addr         0x800BD010
 #define z2_pause_persp_addr         0x800F6510
 #define z2_btnupdate_addr           0x801146B8
-#define z2_loadroom_addr            0x801303EC
-#define z2_unloadroom_addr          0x80130678
-#define z2_blur_addr                0x80160F20
-#define z2_blur_hook_addr           0x80164DE8
+#define z2_LoadRoom_addr            0x801303EC
+#define z2_DrawRoom_addr            0x80130628
+#define z2_UnloadRoom_addr          0x80130678
+#define z2_MotionBlur_addr          0x80160F20
+#define z2_draw_room_1_hook_addr    0x80164BC0
+#define z2_draw_room_2_hook_addr    0x80164BD8
+#define z2_draw_actors_hook_addr    0x80164CA0
+#define z2_motion_blur_hook_addr    0x80164DE8
 #define z2_input_update_addr        0x8016EF84
 #define z2_main_hook_addr           0x8016EFD0
 #define z2_input_hook_addr          0x8016FC50
@@ -1498,15 +1513,17 @@ typedef union{
 /* Function Prototypes */
 typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
 typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
-typedef void (*z2_loadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
-typedef void (*z2_unloadroom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
+typedef void (*z2_LoadRoom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
+typedef void (*z2_UnloadRoom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
 typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
 typedef void (*z2_gamesate_update_t)(z2_game_t *game);
 typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
-typedef void (*z2_blur_t)(z2_ctxt_t *ctxt);
+typedef void (*z2_MotionBlur_t)(z2_ctxt_t *ctxt);
 typedef void (*z2_dmaflashtoram_t)(void *buf, uint32_t block, uint32_t block_cnt);
 typedef void (*z2_dmaramtoflash_t)(void *buf, uint32_t block, uint32_t block_cnt);
 typedef void (*z2_pause_persp_t)(z2_game_t *game);
+typedef void (*z2_DrawRoom_t)(z2_game_t *game, z2_room_t *room, int a2);
+typedef void (*z2_DrawActors_t)(z2_game_t *game, z2_actor_ctxt_t *actor_ctx);
 typedef void (*z2_DeleteActor_t)(z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
 typedef z2_actor_t *(*z2_SpawnActor_t)(z2_actor_ctxt_t *actor_ctx, z2_game_t *game, uint16_t actor_id,
                                         float x, float y, float z, z2_angle_t rx, z2_angle_t ry, z2_angle_t rz,
@@ -1545,12 +1562,14 @@ typedef z2_actor_t *(*z2_SpawnActor_t)(z2_actor_ctxt_t *actor_ctx, z2_game_t *ga
 #define osSendMesg              ((osSendMesg_t)             osSendMesg_addr)
 #define osRecvMesg              ((osRecvMesg_t)             osRecvMesg_addr)
 #define osCreateMesgQueue       ((osCreateMesgQueue_t)      osCreateMesgQueue_addr)
-#define z2_loadroom             ((z2_loadroom_t)            z2_loadroom_addr)
-#define z2_unloadroom           ((z2_unloadroom_t)          z2_unloadroom_addr)
-#define z2_blur                 ((z2_blur_t)                z2_blur_addr)
+#define z2_LoadRoom             ((z2_LoadRoom_t)            z2_LoadRoom_addr)
+#define z2_UnloadRoom           ((z2_UnloadRoom_t)          z2_UnloadRoom_addr)
+#define z2_MotionBlur           ((z2_MotionBlur_t)          z2_MotionBlur_addr)
 #define z2_pause_persp          ((z2_pause_persp_t)         z2_pause_persp_addr)
 #define z2_dmaflashtoram        ((z2_dmaflashtoram_t)       z2_dmaflashtoram_addr)
 #define z2_dmaramtoflash        ((z2_dmaramtoflash_t)       z2_dmaramtoflash_addr)
+#define z2_DrawRoom             ((z2_DrawRoom_t)            z2_DrawRoom_addr)
+#define z2_DrawActors           ((z2_DrawActors_t)          z2_DrawActors_addr)
 #define z2_SpawnActor           ((z2_SpawnActor_t)          z2_SpawnActor_addr)
 #define z2_DeleteActor          ((z2_DeleteActor_t)         z2_DeleteActor_addr)
 #endif

@@ -477,11 +477,11 @@ struct menu *create_inventory_menu(){
     list_bg.on_color.color = 0x00FF00FF;
     list_bg.tile = 1;
 
-    menu_init(&menu,kz.main_menu.x,kz.main_menu.y);
-    menu_init(&items,0,0);
-    menu_init(&masks,0,0);
-    menu_init(&quest_status,0,0);
-    menu_init(&amounts,0,0);
+    menu_init(&menu);
+    menu_init(&items);
+    menu_init(&masks);
+    menu_init(&quest_status);
+    menu_init(&amounts);
 
     menu.selected_item = menu_add_button(&menu,0,0,"return",menu_return,NULL);
     menu_add_submenu(&menu,0,1,&items,"items");

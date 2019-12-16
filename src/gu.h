@@ -30,4 +30,6 @@ void guMtxCatF(const MtxF *m, const MtxF *n, MtxF *r);
 void guMtxF2L(const MtxF *mf, Mtx *m);
 void guTranslateF(MtxF *mf, float x, float y, float z);
 void guPerspectiveF(MtxF *mf, uint16_t *perspNorm, float fovy, float aspect, float near, float far, float scale);
+void guMtxIdent(Mtx *m);
+void guScaleF(MtxF *mf, float x, float y, float z);
 #endif

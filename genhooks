@@ -42,7 +42,10 @@ genhook()
 
 genhook "$(z2addr z2_input_hook_addr)" "jal $(kzsym input_hook);"
 genhook "$(z2addr z2_main_hook_addr)" "jal $(kzsym _start);"
-genhook "$(z2addr z2_blur_hook_addr)" "jal $(kzsym blur_hook);";
+genhook "$(z2addr z2_motion_blur_hook_addr)" "jal $(kzsym motion_blur_hook);";
+genhook "$(z2addr z2_draw_actors_hook_addr)" "jal $(kzsym draw_actors_hook)"
+genhook "$(z2addr z2_draw_room_1_hook_addr)" "jal $(kzsym draw_room_hook)"
+genhook "$(z2addr z2_draw_room_2_hook_addr)" "jal $(kzsym draw_room_hook)"
 
 if [ "$2" == "lite" ]; then
 	genhook "$(z2addr z2_set_heap_addr)" "la \$t8, 0x806E0000;"

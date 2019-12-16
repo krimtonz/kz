@@ -231,13 +231,10 @@ void show_keyboard(struct menu_item *item, char **dest, menu_generic_callback ca
     }
     kz_keyboard.selected_item = kz_keyboard.items.first;
     menu_enter(&kz.main_menu,&kz_keyboard);
-    menu_set_pos(&kz_keyboard,kz.main_menu.x,kz.main_menu.y);
-
 }
 
 void init_kz_keyboard(){
-
-    menu_init(&kz_keyboard,0,0);
+    menu_init(&kz_keyboard);
     menu_set_padding(&kz_keyboard,8,8);
 
     kz_keyboard.selected_item = menu_add_button(&kz_keyboard,0,0,"return",menu_return,NULL);

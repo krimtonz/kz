@@ -75,8 +75,8 @@ struct log {
 typedef struct  {
     _Bool                   ready;
     struct list             watches;
-    enum col_view_settings  collision_view_settings;
     enum col_view_status    collision_view_status;
+    enum col_view_status    hitbox_view_status;
     struct menu             main_menu;
     uint8_t                 settings_profile;
     _Bool                   menu_active;
@@ -87,6 +87,8 @@ typedef struct  {
     int32_t                 frames;
     int32_t                 frames_offset;
     _Bool                   lag_counter;
+    _Bool                   hide_actors;
+    _Bool                   hide_room;
     int32_t                 pending_frames;
     struct disp_p           disp_p;
     uint8_t                 memfile_slot;

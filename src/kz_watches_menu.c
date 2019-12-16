@@ -208,7 +208,7 @@ static int watches_button_add(struct menu_item *item, enum menu_callback callbac
 }
 
 struct menu *create_watches_menu(){
-    menu_init(&watches,0,0);
+    menu_init(&watches);
     list_init(&watch_rows,sizeof(struct watch_row));
     watches.selected_item = menu_add_button(&watches,0,0,"return",menu_return,NULL);
     add_button = menu_add_button(&watches,0,1,"+",watches_button_add,NULL);

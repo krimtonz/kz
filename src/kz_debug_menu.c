@@ -518,7 +518,7 @@ struct menu *create_debug_menu(){
     static struct menu actors;
     static struct menu flags;
 
-    menu_init(&debug, kz.main_menu.x, kz.main_menu.y);
+    menu_init(&debug);
     menu_set_padding(&debug,0,2);
     static draw_info_t dec_scroll_draw = { 
         NULL, 0,0,1.0f, 1.0f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}}, 1, NULL
@@ -532,7 +532,7 @@ struct menu *create_debug_menu(){
     debug.selected_item = menu_add_button(&debug,0,0,"return",menu_return,NULL);
     {
         // Create memory menu
-        menu_init(&memory, 0, 0);
+        menu_init(&memory);
         menu_set_padding(&memory,1,5);
         memory.selected_item = menu_add_button(&memory,0,0,"return",menu_return,NULL);
         menu_add_number_input(&memory,0,1,memory_start_callback, NULL, 16, 8, &memory_start_addr, 4);
@@ -544,7 +544,7 @@ struct menu *create_debug_menu(){
 
     {
         // Create Objects menu
-        menu_init(&objects, 0, 0);
+        menu_init(&objects);
         menu_set_padding(&objects,0,2);
         objects.selected_item = menu_add_button(&objects,0,0,"return",menu_return,NULL);
         menu_add(&objects,0,1,"id:");
@@ -556,7 +556,7 @@ struct menu *create_debug_menu(){
 
     {
         // Create Actors Menu
-        menu_init(&actors, 0 ,0);
+        menu_init(&actors);
         menu_set_padding(&actors,0,2);
         actors.selected_item = menu_add_button(&actors,0,0,"return",menu_return,NULL);
         menu_add(&actors,0,1,"type");
@@ -592,7 +592,7 @@ struct menu *create_debug_menu(){
 
     {
         // Create Flags Menu
-        menu_init(&flags,0,0);
+        menu_init(&flags);
         flags.selected_item = menu_add_button(&flags, 0, 0, "return", menu_return, NULL);
         flags_data.offset = 0;
         flags_data.region = FLAGS_WEEK_EVENT;

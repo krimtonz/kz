@@ -251,7 +251,7 @@ struct menu *create_settings_menu(){
     static struct menu settingsm;
     static struct menu commands;
 
-    menu_init(&settingsm,kz.main_menu.x,kz.main_menu.y);
+    menu_init(&settingsm);
     menu_set_padding(&settingsm,0,2);
     settingsm.selected_item = menu_add_button(&settingsm,0,0,"return",menu_return,NULL);
     menu_add(&settingsm,0,1,"profile");
@@ -314,7 +314,7 @@ struct menu *create_settings_menu(){
 
     // Build commands menu
     {
-        menu_init(&commands,kz.main_menu.x,kz.main_menu.y);
+        menu_init(&commands);
         menu_set_padding(&commands,0,1);
 
         commands.selected_item = menu_add_button(&commands,0,0,"return",menu_return,NULL);

@@ -84,7 +84,7 @@ static struct menu_item *add_equip_option(struct menu *menu, int x, int y, struc
 struct menu *create_equips_menu(){
     static struct menu equips;
 
-    menu_init(&equips,0,0);
+    menu_init(&equips);
     menu_set_cell(&equips,16,16);
 
     equips.selected_item = menu_add_button(&equips,0,0,"return",menu_return,NULL);

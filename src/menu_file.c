@@ -317,7 +317,7 @@ static void init_file_menu(){
         return;
     }
     set_init(&dir_files,sizeof(dir_entry_t),dir_ent_comp);
-    menu_init(&file_menu,kz.main_menu.x,kz.main_menu.y);
+    menu_init(&file_menu);
     file_menu.selected_item = menu_add_button(&file_menu,0,0,"return",menu_return,NULL);
     menu_add_button(&file_menu,0,1,"reset disk",reset_disk_callback,NULL);
     file_menu_location = menu_add(&file_menu,0,2,"");

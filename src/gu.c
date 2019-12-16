@@ -83,3 +83,17 @@ void guMtxF2L(const MtxF *mf, Mtx *m)
     m->f[i] = (n >> 0)  & 0x0000FFFF;
   }
 }
+
+void guMtxIdent(Mtx *m){
+    *m = (Mtx)gdSPDefMtx(1,0,0,0,
+                         0,1,0,0,
+                         0,0,1,0,
+                         0,0,0,1);
+}
+
+void guScaleF(MtxF *mf, float x, float y, float z){
+    *mf = (MtxF)guDefMtxF(x,  0.f,  0.f,  0.f,
+                          0.f,  y,  0.f,  0.f,
+                          0.f,  0.f,  z,  0.f,
+                          0.f,  0.f,  0.f,  1.f);
+}

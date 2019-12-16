@@ -86,7 +86,7 @@ static int have_tatl_callback(struct menu_item *item, enum menu_callback callbac
 
 struct menu *create_file_menu(){
     static struct menu file;
-    menu_init(&file,0,0);
+    menu_init(&file);
     menu_set_padding(&file,0,2);
     file.selected_item = menu_add_button(&file,0,0,"return",menu_return,NULL);
     menu_add_checkbox(&file,0,1,have_tatl_callback,NULL,NULL);

@@ -13,6 +13,7 @@
 #include "settings.h"
 #include "resource.h"
 #include "keyboard.h"
+#include "zu.h"
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = {
@@ -262,11 +263,10 @@ static void kz_main(void) {
         }
     }
 
-    /* collision view */
+    /* collision view / hitbox view */
     {
-        if(z2_game.pause_ctx.state==0){
-            kz_col_view();
-        }
+        kz_col_view();
+        kz_hitbox_view();
     }
 
     /* handle menu */
@@ -419,6 +419,8 @@ void init() {
     kz.lag_counter = 1;
 
     kz.collision_view_status = COL_VIEW_NONE;
+    kz.hitbox_view_status = COL_VIEW_NONE;
+    kz.hide_actors = 0;
 
     list_init(&kz.watches,sizeof(watch_t));
 
@@ -432,7 +434,8 @@ void init() {
     memset(&kz.log,0,sizeof(kz.log));
 
     kz.menu_active = 0;
-    menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
+    menu_init(&kz.main_menu);
+    menu_set_pos(&kz.main_menu, settings->menu_x, settings->menu_y);
     kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",main_menu_return,NULL);
 
     menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
@@ -462,20 +465,6 @@ void init() {
     memcpy(restriction_table,(void*)z2_restriction_table_addr,sizeof(restriction_table));
 
     kz.ready = 1;
-}
-
-void input_hook(void){
-    if(kz.pending_frames!=0){
-        void (*z2_input_update)(z2_game_t *game);
-        z2_input_update = (void*)z2_input_update_addr;
-        z2_input_update(&z2_game);
-    }
-}
-
-void blur_hook(void){
-    if(kz.pending_frames!=0){
-        z2_blur(&z2_ctxt);
-    }
 }
 
 void kz_log(const char *format, ...){
@@ -536,6 +525,42 @@ static void kz_stack(void (*kzfunc)(void)) {
                         ::
                         "r"(kzfunc),
                         "i"(&stack[sizeof(stack)]));
+}
+
+HOOK void input_hook(void){
+    if(kz.pending_frames!=0){
+        void (*z2_input_update)(z2_game_t *game);
+        z2_input_update = (void*)z2_input_update_addr;
+        z2_input_update(&z2_game);
+    }
+}
+
+HOOK void motion_blur_hook(void){
+    if(kz.pending_frames!=0){
+        z2_MotionBlur(&z2_ctxt);
+    }
+}
+
+HOOK void draw_actors_hook(void){
+    if(kz.hide_actors){
+        struct disp_p disp_p;
+        save_disp_p(&disp_p);
+        z2_DrawActors(&z2_game,&z2_game.actor_ctxt);
+        load_disp_p(&disp_p);
+    }else{
+        z2_DrawActors(&z2_game,&z2_game.actor_ctxt);
+    }
+}
+
+HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room, int a2){
+    if(kz.hide_room){
+        struct disp_p disp_p;
+        save_disp_p(&disp_p);
+        z2_DrawRoom(game,room,a2);
+        load_disp_p(&disp_p);
+    }else{
+        z2_DrawRoom(game,room,a2);
+    }
 }
 
 /* Entry Point of KZ executable */

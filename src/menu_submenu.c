@@ -13,7 +13,5 @@ struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, st
         item->x = x;
         item->y = y;
     }
-    submenu->x = menu->x;
-    submenu->y = menu->y;
     return item;
 }

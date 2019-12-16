@@ -7,13 +7,10 @@ enum col_view_status {
     COL_VIEW_DESTROY,
     COL_VIEW_KILL,
     COL_VIEW_GENERATE,
-};
-
-enum col_view_settings {
-    COL_VIEW_REDUX = 1,
-    COL_VIEW_OPAQUE = 2,
+    COL_VIEW_REGENERATE,
 };
 
 void kz_col_view();
+void kz_hitbox_view();
 
 #endif

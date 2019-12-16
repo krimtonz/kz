@@ -14,12 +14,28 @@ static void item_exit(struct menu_item *item){
     kz.tooltip = NULL;
 }
 
+static int get_menu_x_pos(struct menu *menu){
+    int x_pos = menu->x;
+    if(menu->parent){
+        x_pos += get_menu_x_pos(menu->parent);
+    }
+    return x_pos;
+}
+
+static int get_menu_y_pos(struct menu *menu){
+    int y_pos = menu->y;
+    if(menu->parent){
+        y_pos += get_menu_y_pos(menu->parent);
+    }
+    return y_pos;
+}
+
 int get_item_x_pos(struct menu_item *item){
-    return item->owner->x + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding) + item->x_offset;
+    return get_menu_x_pos(item->owner) + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding) + item->x_offset;
 }
 
 int get_item_y_pos(struct menu_item *item){
-    return item->owner->y + item->y * item->owner->cell_height + item->y * item->owner->y_padding + item->y_offset;
+    return get_menu_y_pos(item->owner) + item->y * item->owner->cell_height + item->y * item->owner->y_padding + item->y_offset;
 }
 
 void set_item_offset(struct menu_item *item, int16_t x, int16_t y){
@@ -27,14 +43,12 @@ void set_item_offset(struct menu_item *item, int16_t x, int16_t y){
     item->y_offset = y;
 }
 
-void menu_init(struct menu *menu, uint16_t x, uint16_t y){
+void menu_init(struct menu *menu){
     list_init(&menu->items, sizeof(struct menu_item));
     menu->child=NULL;
     menu->parent=NULL;
     menu->selected_item=NULL;
     menu->callback_proc = NULL;
-    menu->x = x;
-    menu->y = y;
     menu->cell_height = kfont->c_height;
     menu->cell_width = kfont->c_width;
     menu->x_padding = 0;
