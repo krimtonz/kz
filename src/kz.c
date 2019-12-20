@@ -14,6 +14,7 @@
 #include "resource.h"
 #include "keyboard.h"
 #include "zu.h"
+#include "state.h"
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = {
@@ -119,6 +120,33 @@ static void cpu_counter(){
                      "sw $t0, %0" : "=m"(new_count) :: "t0");
     kz.cpu_cycle_counter += new_count - count;
     count = new_count;
+}
+
+static void *state = NULL;
+static int save_state_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(state){
+            free(state);
+        }
+        state = malloc(768 * 1024);
+        kz_state_hdr_t *kz_state = state;
+        kz_state->size = save_state(state);
+        kz_state->z2_version = Z2_VERSION;
+        kz_state->settings_version = 0;
+        state = realloc(state,kz_state->size);
+        return 1;
+    }
+    return 0;
+}
+
+static int load_state_callback(struct menu_item *item, enum menu_callback callback, void *data){
+    if(callback == MENU_CALLBACK_ACTIVATE){
+        if(state){
+            load_state(state);
+        }
+        return 1;
+    }
+    return 0;
 }
 
 static void kz_main(void) {
@@ -448,6 +476,8 @@ void init() {
     #ifndef LITE
     menu_add_submenu(&kz.main_menu,0,8,create_debug_menu(),"debug");
     menu_add_submenu(&kz.main_menu,0,9,create_settings_menu(),"settings");
+    menu_add_button(&kz.main_menu,0,10,"save state",save_state_callback,NULL);
+    menu_add_button(&kz.main_menu,0,11,"load state",load_state_callback,NULL);
     #else
     menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
     #endif

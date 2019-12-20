@@ -331,6 +331,13 @@ void kz_hitbox_view(){
         do_hitbox_view(&hit_view_p,&hit_view_d,z2_game.hitbox_ctxt.other_cnt,z2_game.hitbox_ctxt.other,0x00FFFFFF);
         do_hitbox_view(&hit_view_p,&hit_view_d,z2_game.hitbox_ctxt.ac_cnt,z2_game.hitbox_ctxt.ac,0x000000FF);
         do_hitbox_view(&hit_view_p,&hit_view_d,z2_game.hitbox_ctxt.attack_cnt,z2_game.hitbox_ctxt.attack,0x00FF0000);
+        gDPSetPrimColor(hit_view_p++,0,0,0x00,0xFF,0xFF,0xFF);
+        for(int i = 0; i < z2_particle_info.part_cnt;i++){
+            z2_particle_t *part = &z2_particle_info.part_space[i];
+            if(part->time >= 0 && part->id == 0x18){
+                draw_cylinder(&hit_view_p,&hit_view_d,60,60,(int16_t)part->pos.x,(int16_t)part->pos.y,(int16_t)part->pos.z);
+            }
+        }
         gSPEndDisplayList(hit_view_p++);
         gSPDisplayList(z2_gfx_p,hit_view_start);
     }
@@ -352,7 +359,7 @@ static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *po
         }else if(type->flags_1.special == 0xC){
             color = 0xFF0000FF;
         }else if(type->flags_1.exit != 0 || type->flags_1.special == 0x5){
-            color = 0x00FFFF00;
+            color = 0x00FFFFFF;
         }else if(type->flags_1.behavior!=0 || type->flags_2.wall_damage){
             color = 0x00FF00FF;
         }else if(type->flags_2.terrain == 1){
@@ -384,10 +391,36 @@ static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *po
     }
 }
 
+void do_dynamic_list(poly_writer_t *writer, z2_col_hdr_t *hdr, uint16_t idx){
+    z2_col_ctxt_t *col_ctx = &z2_game.col_ctxt;
+    while(idx!=0xFFFF){
+        z2_col_list_t *list = &col_ctx->dyn.list[idx];
+        do_poly_list(writer,col_ctx->dyn_vtx,&col_ctx->dyn_poly[list->poly_idx],
+                     hdr->type,1,0);
+        idx = list->list_next;
+    }
+}
+
+void do_dynamic_collision(poly_writer_t *writer){
+    z2_col_ctxt_t *col_ctx = &z2_game.col_ctxt;
+    for(int i = 0;i<32;i++){
+        if(col_ctx->dynamic_flags[i].active){
+            z2_col_chk_actor_t *col = &col_ctx->actors[i];
+            do_dynamic_list(writer,col->col_hdr,col->ceiling_list_idx);
+            do_dynamic_list(writer,col->col_hdr,col->wall_list_idx);
+            do_dynamic_list(writer,col->col_hdr,col->floor_list_idx);
+        }
+    }
+}
+
 void kz_col_view(){
     static Gfx *static_col = NULL;
+    static Gfx *dynamic_gfx[2];
+    static int dynamic_idx = 0;
 
     static uint16_t col_view_scene = 0;
+
+    poly_writer_t writer;
 
     if(col_view_scene != z2_game.scene_index && kz.collision_view_status == COL_VIEW_SHOW){
         kz.collision_view_status = COL_VIEW_REGENERATE;
@@ -408,11 +441,14 @@ void kz_col_view(){
         static_col = malloc(sizeof(*static_col) * static_col_size);
         Gfx *static_col_p = static_col;
         Gfx *static_col_d = static_col + static_col_size;
-        poly_writer_t writer;
         poly_writer_init(&writer,static_col_p, static_col_d);
         do_poly_list(&writer,hdr->vtx,hdr->poly,hdr->type,hdr->n_poly,settings->col_view_red);
         poly_writer_finish(&writer,&static_col_p,&static_col_d);
         gSPEndDisplayList(static_col_p++);
+
+        dynamic_gfx[0] = malloc(0x1000 * sizeof(*dynamic_gfx[0]));
+        dynamic_gfx[1] = malloc(0x1000 * sizeof(*dynamic_gfx[0]));
+
         kz.collision_view_status = COL_VIEW_SHOW;
     }else if(kz.collision_view_status == COL_VIEW_KILL){
         kz.collision_view_status = COL_VIEW_DESTROY;
@@ -429,6 +465,20 @@ void kz_col_view(){
                                              z2_game.pause_ctx.state == 0;
 
     if(show){
+        Gfx *dynamic_buf = NULL;
+        Gfx *dynamic_gfx_p = NULL;
+        Gfx *dynamic_gfx_d = NULL;
+        poly_writer_t *dynamic_writer = NULL;
+
+        dynamic_buf = dynamic_gfx[dynamic_idx];
+        dynamic_gfx_p = dynamic_buf;
+        dynamic_gfx_d = dynamic_buf + 0x1000;
+        dynamic_writer = &writer;
+        poly_writer_init(dynamic_writer,dynamic_gfx_p,dynamic_gfx_d);
+        do_dynamic_collision(dynamic_writer);
+        poly_writer_finish(dynamic_writer,&dynamic_gfx_p,&dynamic_gfx_d);
+        gSPEndDisplayList(dynamic_gfx_p++);
+
         Gfx **gfx_p;
         Gfx **gfx_d;
         _Bool xlu = !settings->col_view_opq;
@@ -443,6 +493,7 @@ void kz_col_view(){
         init_poly_list(gfx_p, gfx_d,xlu,1);
         gSPSetGeometryMode((*gfx_p)++,G_CULL_BACK);
         gSPDisplayList((*gfx_p)++,static_col);
+        gSPDisplayList((*gfx_p)++,dynamic_gfx[dynamic_idx]);
     }
 }
 

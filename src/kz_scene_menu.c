@@ -88,7 +88,7 @@ static int unload_room(struct menu_item *item, enum menu_callback callback, void
 static int load_room(struct menu_item *item, enum menu_callback callback, void *data){
     if(callback == MENU_CALLBACK_ACTIVATE){
         if(room_idx == z2_game.room_ctx.rooms[0].idx) return unload_room(item,callback,data);
-        if(room_idx >= z2_game.room_cnt) return 1;
+        if(room_idx >= z2_game.room_ctx.transition_cnt) return 1;
         z2_game.room_ctx.rooms[0].idx = room_idx;
         z2_game.room_ctx.rooms[0].file = NULL;
         z2_UnloadRoom(&z2_game,&z2_game.room_ctx);
@@ -163,7 +163,7 @@ struct menu *create_scene_menu(){
     menu_add_watch(&scene,13,2,&cur_room,1);
     menu_add(&scene,0,3,"num rooms");
     static watch_t num_rooms;
-    num_rooms.address = &z2_game.room_cnt;
+    num_rooms.address = &z2_game.room_ctx.transition_cnt;
     num_rooms.type = WATCH_TYPE_U8;
     num_rooms.floating = 0;
     menu_add_watch(&scene,13,3,&num_rooms,1);

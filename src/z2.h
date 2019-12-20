@@ -878,10 +878,10 @@ typedef struct
 {
     z2_actor_t       *actor;                    /* 0x0000 */
     z2_col_hdr_t     *col_hdr;                  /* 0x0004 */
-    uint16_t          unk_0x08;                 /* 0x0008 */
-    uint16_t          unk_0x0A;                 /* 0x000A */
-    uint16_t          unk_0x0C;                 /* 0x000C */
-    int16_t           unk_0x0E;                 /* 0x000E number of polys? */
+    uint16_t          poly_idx;                 /* 0x0008 */
+    uint16_t          ceiling_list_idx;         /* 0x000A */
+    uint16_t          wall_list_idx;            /* 0x000C */
+    uint16_t          floor_list_idx;           /* 0x000E */
     int16_t           unk_0x10;                 /* 0x0010 */
     z2_xyzf_t         scale_1;                  /* 0x0014 */
     z2_rot_t          rot_1;                    /* 0x0020 */
@@ -923,7 +923,14 @@ typedef struct /* z2_col_ctxt_t */
                                                 /* bg actor collision struct start */
     int8_t              unk_0x0050;             /* 0x0050 */
     z2_col_chk_actor_t  actors[50];             /* 0x0054 */
-    uint16_t            actor_loaded[50];       /* 0x13DC */
+    union {
+        uint16_t        data;
+        struct {
+            uint16_t    unk_0x00    : 14;
+            uint16_t    destroy     : 1;
+            uint16_t    active      : 1;
+        };
+    }                   dynamic_flags[50];      /* 0x13DC */
                                                 /* dynamic collision stuff */
     z2_col_poly_t      *dyn_poly;               /* 0x1440 */
     z2_xyz_t           *dyn_vtx;                /* 0x1444 */
@@ -945,12 +952,17 @@ typedef struct /* z2_col_ctxt_t */
 } z2_col_ctxt_t;                                /* 0x1470 */
 
 typedef struct{
+    uint32_t    vrom_start;     /* 0x0000 */
+    uint32_t    vrom_end;       /* 0x0004 */
+} z2_rom_file_t;                /* 0x0008 */
+
+typedef struct{
     uint32_t            vrom_addr;              /* 0x0000 */
     void               *dram;                   /* 0x0004 */
     uint32_t            size;                   /* 0x0008 */
     char               *filename;               /* 0x000C */
     int32_t             line;                   /* 0x0010 */
-    char                unk_0x14[0x4];          /* 0x0014 */
+    int32_t             unk_0x14;               /* 0x0014 */
     OSMesgQueue        *notify_mq;              /* 0x0018 */
     OSMesg              notify_msg;             /* 0x001C */
 } z2_loadfile_t;                                /* 0x0020 */
@@ -974,6 +986,17 @@ typedef struct{
     z2_obj_t            obj[35];                /* 0x000C */
 } z2_obj_ctxt_t;                                /* 0x0958 */
 
+typedef struct {
+    int8_t      room_1;     /* 0x0000 */
+    int8_t      effect_1;   /* 0x0001 */
+    int8_t      room_2;     /* 0x0002 */
+    int8_t      effect_2;   /* 0x0003 */
+    int16_t     actor_id;   /* 0x0004 */
+    z2_xyz_t    pos;        /* 0x0006 */
+    z2_angle_t  rot;        /* 0x000C */
+    int16_t     variable;   /* 0x000E */
+} z2_room_trans_actor_t;    /* 0x0010 */
+
 typedef struct{
     uint8_t             idx;                    /* 0x0000 */
     char                unk_0x01[0x03];         /* 0x0001 */
@@ -996,11 +1019,11 @@ typedef struct{
     z2_loadfile_t       loadfile;               /* 0x0038 */
     OSMesgQueue         load_mq;                /* 0x0058 */
     OSMesg              load_msg;               /* 0x0070 */
-    char                unk_0x0074[0x04];       /* 0x0074 */
-    uint8_t             transition_cnt;         /* 0x0078 */
-    char                pad_0x0079[0x03];       /* 0x0079 */
-    void               *transition_list;        /* 0x007C */
-} z2_room_ctxt_t;                               /* 0x0080 */
+    char                unk_0x0074[0x0C];       /* 0x0074 */
+    uint8_t             transition_cnt;         /* 0x0080 */
+    char                pad_0x0079[0x03];       /* 0x0081 */
+    void               *transition_list;        /* 0x0084 */
+} z2_room_ctxt_t;                               /* 0x0088 */
 
 typedef struct{
     char        unk_0x00[0x168];                /* 0x0000 */
@@ -1135,91 +1158,97 @@ typedef struct {
     z2_hitbox_t                *other[50];          /* 0x01C4 */
 } z2_hitbox_ctxt_t;                                 /* 0x028C */
 
-typedef struct {                                /*   NZSE  */   /*  NZSJ  */
-    z2_ctxt_t           common;                 /* 0x00000 */
-    uint16_t            scene_index;            /* 0x000A4 */
-    uint8_t             scene_draw_id;          /* 0x000A6 */
-    char                unk_0x000A7[9];         /* 0x000A7 */
-    void               *scene_addr;             /* 0x000B0 */
-    char                unk_0x00B4[4];          /* 0x000B4 */
-    z2_view_t           view_scene;             /* 0x000B8 */
-    z2_camera_t         cameras[4];             /* 0x00220 */
-    z2_camera_t        *active_cameras[4];      /* 0x00800 */
-    int16_t             camera_cur;             /* 0x00810 */
-    int16_t             camera_next;            /* 0x00812 */
-    char                unk_0x814[0x1C];        /* 0x00814 */
-    z2_col_ctxt_t       col_ctxt;               /* 0x00830 */
-    z2_actor_ctxt_t     actor_ctxt;             /* 0x01CA0 */
-    char                unk_0x1F24[0x04];       /* 0x01F24 */
-    void               *cutscene_ptr;           /* 0x01F28 */
-    int8_t              cutscene_state;         /* 0x01F2C */
-    char                unk_0x1F2D[0x148FD];    /* 0x01F2D */
-    uint8_t             message_state_1;        /* 0x1682A */
-    char                unk_0x1682B[0xFD];      /* 0x1682B */
-    uint8_t             message_state_2;        /* 0x16928 */
-    char                unk_0x16829[0x02];      /* 0x16929 */
-    uint8_t             message_state_3;        /* 0x1692B */
-    char                unk_0x1692C[0x9C];      /* 0x1692C */
+typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
+    z2_ctxt_t           common;                     /* 0x00000 */
+    uint16_t            scene_index;                /* 0x000A4 */
+    uint8_t             scene_draw_id;              /* 0x000A6 */
+    char                unk_0x000A7[9];             /* 0x000A7 */
+    void               *scene_addr;                 /* 0x000B0 */
+    char                unk_0x00B4[4];              /* 0x000B4 */
+    z2_view_t           view_scene;                 /* 0x000B8 */
+    z2_camera_t         cameras[4];                 /* 0x00220 */
+    z2_camera_t        *active_cameras[4];          /* 0x00800 */
+    int16_t             camera_cur;                 /* 0x00810 */
+    int16_t             camera_next;                /* 0x00812 */
+    char                unk_0x814[0x1C];            /* 0x00814 */
+    z2_col_ctxt_t       col_ctxt;                   /* 0x00830 */
+    z2_actor_ctxt_t     actor_ctxt;                 /* 0x01CA0 */
+    char                unk_0x1F24[0x04];           /* 0x01F24 */
+    void               *cutscene_ptr;               /* 0x01F28 */
+    int8_t              cutscene_state;             /* 0x01F2C */
+    char                unk_0x1F2D[0x148FD];        /* 0x01F2D */
+    uint8_t             message_state_1;            /* 0x1682A */
+    char                unk_0x1682B[0xFD];          /* 0x1682B */
+    uint8_t             message_state_2;            /* 0x16928 */
+    char                unk_0x16829[0x02];          /* 0x16929 */
+    uint8_t             message_state_3;            /* 0x1692B */
+    char                unk_0x1692C[0x9C];          /* 0x1692C */
 #if Z2_VERSION==NZSE
-    char                unk_0x169C8[0x20];      /* 0x169C8 */
+    char                unk_0x169C8[0x20];          /* 0x169C8 */
 #endif
-    z2_hud_ctxt_t       hud_ctx;                /* 0x169E8 */   /* 0x169C8 */
-    z2_pause_ctxt_t     pause_ctx;              /* 0x16D30 */   /* 0x16D10 */
-    char                unk_0x16F30[0xDE8];     /* 0x16FA0 */   /* 0x16F80 */
-    z2_obj_ctxt_t       obj_ctx;                /* 0x17D88 */   /* 0x17D68 */
-    z2_room_ctxt_t      room_ctx;               /* 0x186E0 */   /* 0x186C0 */
-    uint8_t             room_cnt;               /* 0x18760 */   /* 0x18740 */
-    char                unk_0x18761[0x114];     /* 0x18761 */   /* 0x18741 */
-    uint8_t             scene_load_flag;        /* 0x18875 */   /* 0x18855 */
-    char                unk_0x18876[0x04];      /* 0x18876 */   /* 0x18856 */
-    uint16_t            entrance_index;         /* 0x1887A */   /* 0x1885A */
-    char                unk_0x1887C[0x08];      /* 0x1887C */   /* 0x1885C */
-    z2_hitbox_ctxt_t    hitbox_ctxt;            /* 0x18884 */   /* 0x18864 */
-    char                unk_0x18B10[0x748];     /* 0x18B10 */   /* 0x18910 */
-} z2_game_t;                                    /* 0x19258 */   /* 0x19238 */
+    z2_hud_ctxt_t       hud_ctx;                    /* 0x169E8 */   /* 0x169C8 */
+    z2_pause_ctxt_t     pause_ctx;                  /* 0x16D30 */   /* 0x16D10 */
+    char                unk_0x16F30[0xDE8];         /* 0x16FA0 */   /* 0x16F80 */
+    z2_obj_ctxt_t       obj_ctx;                    /* 0x17D88 */   /* 0x17D68 */
+    z2_room_ctxt_t      room_ctx;                   /* 0x186E0 */   /* 0x186C0 */
+    char                unk_0x18768[0xE4];          /* 0x18768 */   /* 0x18748 */
+    z2_rom_file_t      *room_list;                  /* 0x1884C */   /* 0x1882C */
+    char                unk_0x18850[0x25];          /* 0x18850 */   /* 0x18830 */
+    uint8_t             scene_load_flag;            /* 0x18875 */   /* 0x18855 */
+    char                unk_0x18876[0x04];          /* 0x18876 */   /* 0x18856 */
+    uint16_t            entrance_index;             /* 0x1887A */   /* 0x1885A */
+    char                unk_0x1887C[0x08];          /* 0x1887C */   /* 0x1885C */
+    z2_hitbox_ctxt_t    hitbox_ctxt;                /* 0x18884 */   /* 0x18864 */
+    char                unk_0x18B10[0x748];         /* 0x18B10 */   /* 0x18910 */
+} z2_game_t;                                        /* 0x19258 */   /* 0x19238 */
 
 typedef struct{
-    z2_actor_t          common;                 /* 0x0000 */
-    char                unk_0x144[0x928];       /* 0x0144 */
-    uint32_t            state_flags_1;          /* 0x0A6C */
-    uint32_t            state_flags_2;          /* 0x0A70 */
-    char                unk_0xA74[0x5C];        /* 0x0A74 */
-    float               linear_velocity;        /* 0x0AD0 */
-    uint16_t            movement_angle;         /* 0x0AD4 */
-    char                unk_0xAD6[0x05];        /* 0x0AD6 */
-    uint8_t             sword_active;           /* 0x0ADB */
-    char                unk_0xADC[0x84];        /* 0x0ADC */
-    uint16_t            blast_mask_timer;       /* 0x0B60 */
-} z2_link_t;                                    /* 0x0B62 */
+    z2_actor_t          common;                     /* 0x0000 */
+    char                unk_0x144[0x928];           /* 0x0144 */
+    uint32_t            state_flags_1;              /* 0x0A6C */
+    uint32_t            state_flags_2;              /* 0x0A70 */
+    char                unk_0xA74[0x5C];            /* 0x0A74 */
+    float               linear_velocity;            /* 0x0AD0 */
+    uint16_t            movement_angle;             /* 0x0AD4 */
+    char                unk_0xAD6[0x05];            /* 0x0AD6 */
+    uint8_t             sword_active;               /* 0x0ADB */
+    char                unk_0xADC[0x84];            /* 0x0ADC */
+    uint16_t            blast_mask_timer;           /* 0x0B60 */
+} z2_link_t;                                        /* 0x0B62 */
 
 typedef struct{
-    z2_actor_t          common;                 /* 0x0000 */
-    uint8_t             daynight;               /* 0x0144 */
-    char                unk_0x145;              /* 0x0145 */
-    uint16_t            timer_boundaries[3];    /* 0x0146 */
+    z2_actor_t          common;                     /* 0x0000 */
+    uint8_t             daynight;                   /* 0x0144 */
+    char                unk_0x145;                  /* 0x0145 */
+    uint16_t            timer_boundaries[3];        /* 0x0146 */
 } z2_timer_t;
 
-typedef struct{
-    uint32_t    direct_reference;               /* 0x0000 */
-    uint32_t    nintendo_logo;                  /* 0x0004 */
-    uint32_t    current_scene;                  /* 0x0008 */
-    uint32_t    current_room;                   /* 0x000C */
-    uint32_t    gameplay_keep;                  /* 0x0010 */
-    uint32_t    gameplay_dungeon_field_keep;    /* 0x0014 */
-    uint32_t    current_object;                 /* 0x0018 */
-    uint32_t    link_animetion;                 /* 0x001C */
-    uint32_t    unk_0x0020;                     /* 0x0020 */
-    uint32_t    unk_0x0024;                     /* 0x0024 */
-    uint32_t    current_mask;                   /* 0x0028 */
-    uint32_t    unk_0x002C;                     /* 0x002C */
-    uint32_t    unk_0x0030;                     /* 0x0030 */
-    uint32_t    unk_0x0034;                     /* 0x0034 */
-    uint32_t    z_buffer;                       /* 0x0038 */
-    uint32_t    frame_buffer;                   /* 0x003C */
+typedef union{
+    struct{
+        uint32_t    direct_reference;               /* 0x0000 */
+        uint32_t    nintendo_logo;                  /* 0x0004 */
+        uint32_t    current_scene;                  /* 0x0008 */
+        uint32_t    current_room;                   /* 0x000C */
+        uint32_t    gameplay_keep;                  /* 0x0010 */
+        uint32_t    gameplay_dungeon_field_keep;    /* 0x0014 */
+        uint32_t    current_object;                 /* 0x0018 */
+        uint32_t    link_animetion;                 /* 0x001C */
+        uint32_t    unk_0x0020;                     /* 0x0020 */
+        uint32_t    unk_0x0024;                     /* 0x0024 */
+        uint32_t    current_mask;                   /* 0x0028 */
+        uint32_t    unk_0x002C;                     /* 0x002C */
+        uint32_t    unk_0x0030;                     /* 0x0030 */
+        uint32_t    unk_0x0034;                     /* 0x0034 */
+        uint32_t    z_buffer;                       /* 0x0038 */
+        uint32_t    frame_buffer;                   /* 0x003C */
+    };
+    uint32_t        segments[0x10];
 } z2_segment_t;                                 /* 0x0040 */
 
 typedef struct z2_arena_node    z2_arena_node_t;
 typedef struct z2_arena         z2_arena_t;
+
+/* english nodes are 0x10 bytes, jp 1.1 and 1.0 nodes are 0x30 bytes */
 
 struct z2_arena_node {
     uint16_t            magic;                  /* 0x0000 */
@@ -1227,7 +1256,20 @@ struct z2_arena_node {
     uint32_t            size;                   /* 0x0004 */
     z2_arena_node_t    *next;                   /* 0x0008 */
     z2_arena_node_t    *prev;                   /* 0x000C */
-};                                              /* 0x0010 */
+#if Z2_VERSION==NZSE
+    char                data[];                 /* 0x0010 */
+#else
+    char               *filename;               /* 0x0010 */
+    int32_t             line;                   /* 0x0014 */
+    OSId                thread_id;              /* 0x0018 */
+    z2_arena_t         *arena;                  /* 0x001C */
+    uint32_t            count_hi;               /* 0x0020 */
+    uint32_t            count_lo;               /* 0x0024 */
+    char                pad[0x8];               /* 0x0028 */
+    char                data[];                 /* 0x0030 */
+#endif
+
+};
 
 struct z2_arena {
     z2_arena_node_t    *first;                  /* 0x0000 */
@@ -1279,22 +1321,6 @@ typedef struct {
     uint32_t            prom_end;               /* 0x000C */
 } z2_file_table_t;                              /* 0x0010 */
 
-typedef struct
-{
-  /* file loading params */
-  uint32_t          vrom_addr;                  /* 0x0000 */
-  void             *dram_addr;                  /* 0x0004 */
-  uint32_t          size;                       /* 0x0008 */
-  /* debug stuff */
-  char             *filename;                   /* 0x000C */
-  int32_t           line;                       /* 0x0010 */
-  int32_t           unk_00_;                    /* 0x0014 */
-  /* completion notification params */
-  OSMesgQueue      *notify_mq;                  /* 0x0018 */
-  OSMesg            notify_msg;                 /* 0x001C */
-                                                /* 0x0020 */
-} z2_getfile_t;
-
 typedef struct{
     char        unk_0x00_[0x32];    /* 0x0000 */
     int16_t     time_speed;         /* 0x0032 */
@@ -1306,12 +1332,8 @@ typedef struct{
     int16_t     gravity;            /* 0x009C */
     char        unk_0x9E_[0x72];    /* 0x009E */
     uint16_t    update_rate;        /* 0x0110 */
-} z2_static_ctxt_t;
-
-typedef struct{
-    uint32_t    vrom_start;
-    uint32_t    vrom_end;
-} z2_obj_file_t;
+    char        unk_0x112[0x14CE];  /* 0x0112 */
+} z2_static_ctxt_t;                 /* 0x15E0 */
 
 typedef union {
     struct{
@@ -1349,168 +1371,272 @@ typedef union{
     uint16_t param_6;
 } z2_actorlist_param6_t;
 
+typedef struct {
+    uint32_t    text_size;              /* 0x0000 */
+    uint32_t    data_size;              /* 0x0004 */
+    uint32_t    rodata_size;            /* 0x0008 */
+    uint32_t    bss_size;               /* 0x000C */
+    uint32_t    reloc_cnt;              /* 0x0010 */
+} z2_overlay_hdr_t;                     /* 0x0014 */
+
+typedef struct {
+    uint32_t    vrom_start;             /* 0x0000 */
+    uint32_t    vrom_end;               /* 0x0004 */
+    uint16_t    entrance_message;       /* 0x0008 */
+    char        unk_0xA;                /* 0x000A */
+    uint8_t     scene_configuration;    /* 0x000B */
+    char        pad[0x4];               /* 0x000C */
+} z2_scene_table_ent_t;                 /* 0x0010 */
+
+typedef struct {
+    uint32_t        vrom_start;         /* 0x0000 */
+    uint32_t        vrom_end;           /* 0x0004 */
+    uint32_t        vram_start;         /* 0x0008 */
+    uint32_t        vram_end;           /* 0x000C */
+    void           *ram;                /* 0x0010 */
+    uint32_t        vram_ctor;          /* 0x0014 */
+    uint32_t        unk_0x18;           /* 0x0018 */
+} z2_particle_ovl_table_t;              /* 0x001C */
+
+typedef struct {
+    z2_xyzf_t       pos;                /* 0x0000 */
+    z2_xyzf_t       speed;              /* 0x000C */
+    z2_xyzf_t       acceleration;       /* 0x0018 */
+    void           *main;               /* 0x0024 */
+    void           *draw;               /* 0x0028 */
+    z2_xyzf_t       data;               /* 0x002C */
+    Gfx            *dlist;              /* 0x0038 */
+    int32_t         data_32;            /* 0x003C */
+    int16_t         data_16[14];        /* 0x0040 */
+    int16_t         time;               /* 0x005C */
+    uint8_t         priority;           /* 0x005E */
+    uint8_t         id;                 /* 0x005F */
+} z2_particle_t;                        /* 0x0060 */
+
+typedef struct{
+    z2_particle_t  *part_space;         /* 0x0000 */
+    uint32_t        part_cnt;           /* 0x0004 */
+    uint32_t        part_max;           /* 0x0008 */
+} z2_particle_info_t;                   /* 0x000C */
+
+typedef struct {
+    uint8_t         active;             /* 0x0000 */
+    char            data[0x4C7];        /* 0x0001 */
+} z2_dot_t;                             /* 0x04C8 */
+
+typedef struct {
+    uint8_t         active;             /* 0x0000 */
+    char            data[0x1AF];        /* 0x0001 */
+} z2_trail_t;                           /* 0x01B0 */
+
+typedef struct {
+    uint8_t         active;             /* 0x0000 */
+    char            data[0x1CB];        /* 0x0001 */
+} z2_spark_t;                           /* 0x01CC */
+
+typedef struct {
+    uint8_t         active;             /* 0x0000 */
+    char            data[0x60F];        /* 0x0001 */
+} z2_unk_part_t;                        /* 0x0610 */
+
+typedef struct {
+    z2_game_t      *game;               /* 0x0000 */
+    z2_dot_t        dots[3];            /* 0x0004 */
+    z2_trail_t      trails[25];         /* 0x0E5C */
+    z2_spark_t      sparks[3];          /* 0x388C */
+    z2_unk_part_t   unks[15];           /* 0x3DF0 */
+} z2_static_particle_ctxt_t;            /* 0x98E0 */
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
 #if Z2_VERSION==NZSE
-#define osSendMesg_addr             0x80087B10
-#define osRecvMesg_addr             0x80087ED0
-#define osWritebackDCache_addr      0x8008A5E0
-#define osEPiStartDma_addr          0x8008EE30
-#define osCreateMesgQueue_addr      0x8008F240
-#define osEPiReadIo_addr            0x800920B0
-#define osEPiWriteIo_addr           0x80093BB0
-#define z2_vi_counter_addr          0x80096B78
-#define z2_file_msgqueue_addr       0x8009B2C0
-#define z2_arena_addr               0x8009CD20
-#define z2_file_table_addr          0x8009F8B0
-#define z2_DrawActors_addr          0x800BA42C
-#define z2_SpawnActor_addr          0x800BAE14
-#define z2_DeleteActor_addr         0x800BB498
-#define z2_pause_persp_addr         0x800F4A10
-#define z2_btnupdate_addr           0x80112B40
-#define z2_LoadRoom_addr            0x8012E96C
-#define z2_DrawRoom_addr            0x8012EBA8
-#define z2_UnloadRoom_addr          0x8012EBF8
-#define z2_MotionBlur_addr          0x80165460
-#define z2_draw_room_1_hook_addr    0x80168940
-#define z2_draw_room_2_hook_addr    0x80168958
-#define z2_draw_actors_hook_addr    0x80168A20
-#define z2_motion_blur_hook_addr    0x80168B68
-#define z2_input_update_addr        0x80173754
-#define z2_main_hook_addr           0x801737A0
-#define z2_input_hook_addr          0x801744B8
-#define z2_kz_dma_addr              0x801748A0
-#define z2_set_heap_addr            0x80174C4C
-#define z2_DecodeArchiveFile_addr   0x80178DAC
-#define z2_dmaflashtoram_addr       0x80185968
-#define z2_dmaramtoflash_addr       0x80185B1C
-#define z2_actor_ovl_table_addr     0x801AEFD0
-#define z2_gamestate_table_addr     0x801BD910
-#define z2_restriction_table_addr   0x801C2410
-#define z2_link_form_obj_idx_addr   0x801C2730
-#define z2_object_table_addr        0x801C2740
-#define z2_stored_song_addr         0x801C6A7C
-#define z2_link_spawn_obj_addr      0x801D0B58
-#define z2_player_ovl_table_addr    0x801D0B70
-#define z2_file_addr                0x801EF670
-#define z2_game_arena_addr          0x801F5100
-#define z2_segment_addr             0x801F8180
-#define z2_cimg_addr                0x801FBB80
-#define z2_input_direct_addr        0x801FB870
-#define z2_pi_io_handle_addr        0x801FD080
-#define z2_disp_addr                0x80209EA0
-#define z2_static_ctxt_addr         0x803824D0
-#define z2_ctxt_addr                0x803E6B20
-#define z2_link_addr                0x803FFDB0
-#define z2_dpad_disable_offset      0x2F44
+#define z2_LoadOverlay_addr             0x8008501C
+#define osSendMesg_addr                 0x80087B10
+#define osRecvMesg_addr                 0x80087ED0
+#define osWritebackDCache_addr          0x8008A5E0
+#define osEPiStartDma_addr              0x8008EE30
+#define osCreateMesgQueue_addr          0x8008F240
+#define osEPiReadIo_addr                0x800920B0
+#define osEPiWriteIo_addr               0x80093BB0
+#define z2_vi_counter_addr              0x80096B78
+#define z2_file_msgqueue_addr           0x8009B2C0
+#define z2_arena_addr                   0x8009CD20
+#define z2_file_table_addr              0x8009F8B0
+#define z2_DrawActors_addr              0x800BA42C
+#define z2_SpawnActor_addr              0x800BAE14
+#define z2_DeleteActor_addr             0x800BB498
+#define z2_CreateStaticCollision_addr   0x800C3334
+#define z2_pause_persp_addr             0x800F4A10
+#define z2_btnupdate_addr               0x80112B40
+#define z2_LoadRoom_addr                0x8012E96C
+#define z2_DrawRoom_addr                0x8012EBA8
+#define z2_UnloadRoom_addr              0x8012EBF8
+#define z2_MotionBlur_addr              0x80165460
+#define z2_draw_room_1_hook_addr        0x80168940
+#define z2_draw_room_2_hook_addr        0x80168958
+#define z2_draw_actors_hook_addr        0x80168A20
+#define z2_motion_blur_hook_addr        0x80168B68
+#define z2_input_update_addr            0x80173754
+#define z2_main_hook_addr               0x801737A0
+#define z2_input_hook_addr              0x801744B8
+#define z2_kz_dma_addr                  0x801748A0
+#define z2_set_heap_addr                0x80174C4C
+#define z2_DecodeArchiveFile_addr       0x80178DAC
+#define z2_dmaflashtoram_addr           0x80185968
+#define z2_dmaramtoflash_addr           0x80185B1C
+#define z2_particle_info_addr           0x801AE3A0
+#define z2_particle_ovl_table_addr      0x801AE4A0
+#define z2_actor_ovl_table_addr         0x801AEFD0
+#define z2_hud_state_addr               0x801B9E08
+#define z2_event_state_1_addr           0x801B9E10
+#define z2_letter_box_timer_addr        0x801B9E58
+#define z2_gamestate_table_addr         0x801BD910
+#define z2_restriction_table_addr       0x801C2410
+#define z2_link_form_obj_idx_addr       0x801C2730
+#define z2_object_table_addr            0x801C2740
+#define z2_scene_table_addr             0x801C3CA0
+#define z2_stored_song_addr             0x801C6A7C
+#define z2_link_spawn_obj_addr          0x801D0B58
+#define z2_player_ovl_table_addr        0x801D0B70
+#define z2_static_particle_addr         0x801E3FB0
+#define z2_file_addr                    0x801EF670
+#define z2_game_arena_addr              0x801F5100
+#define z2_segment_addr                 0x801F8180
+#define z2_cimg_addr                    0x801FBB80
+#define z2_input_direct_addr            0x801FB870
+#define z2_pi_io_handle_addr            0x801FD080
+#define z2_disp_addr                    0x80209EA0
+#define z2_static_ctxt_addr             0x803824D0
+#define z2_ctxt_addr                    0x803E6B20
+#define z2_link_addr                    0x803FFDB0
+#define z2_dpad_disable_offset          0x2F44
 #elif Z2_VERSION==NZSJ
-#define osSendMesg_addr             0x80088A10
-#define osRecvMesg_addr             0x80088DD0
-#define osWritebackDCache_addr      0x8008B4E0
-#define osEPiStartDma_addr          0x8008FD30
-#define osCreateMesgQueue_addr      0x80090140
-#define osEPiReadIo_addr            0x80092FB0
-#define osEPiWriteIo_addr           0x80094AB0
-#define z2_vi_counter_addr          0x80097A98
-#define z2_file_msgqueue_addr       0x8009CE10
-#define z2_arena_addr               0x8009E860
-#define z2_file_table_addr          0x800A13F0
-#define z2_DrawActors_addr          0x800BBF4C
-#define z2_SpawnActor_addr          0x800BC934
-#define z2_DeleteActor_addr         0x800BCFB8
-#define z2_pause_persp_addr         0x800F6530
-#define z2_btnupdate_addr           0x801146F8
-#define z2_LoadRoom_addr            0x8013044C
-#define z2_DrawRoom_addr            0x80130688
-#define z2_UnloadRoom_addr          0x801306D8
-#define z2_MotionBlur_addr          0x80161010
-#define z2_draw_room_1_hook_addr    0x80164CB0
-#define z2_draw_room_2_hook_addr    0x80164CC8
-#define z2_draw_actors_hook_addr    0x80164D90
-#define z2_motion_blur_hook_addr    0x80164ED8
-#define z2_input_update_addr        0x8016F074
-#define z2_main_hook_addr           0x8016F0C0
-#define z2_input_hook_addr          0x8016FD40
-#define z2_kz_dma_addr              0x80170168
-#define z2_set_heap_addr            0x80170500
-#define z2_DecodeArchiveFile_addr   0x8017431C
-#define z2_dmaflashtoram_addr       0x80180e28
-#define z2_dmaramtoflash_addr       0x80180FDC
-#define z2_actor_ovl_table_addr     0x801AA0A0
-#define z2_gamestate_table_addr     0x801B89E0
-#define z2_restriction_table_addr   0x801BD534
-#define z2_link_form_obj_idx_addr   0x801BD850
-#define z2_object_table_addr        0x801BD860
-#define z2_stored_song_addr         0x801C1AFC
-#define z2_link_spawn_obj_addr      0x801CB528
-#define z2_player_ovl_table_addr    0x801CB540
-#define z2_file_addr                0x801EF710
-#define z2_game_arena_addr          0x801F5530
-#define z2_segment_addr             0x801F85A0
-#define z2_cimg_addr                0x801FBF90
-#define z2_input_direct_addr        0x801FBC90
-#define z2_pi_io_handle_addr        0x801FD490
-#define z2_disp_addr                0x8020A2B0
-#define z2_static_ctxt_addr         0x80382900
-#define z2_ctxt_addr                0x803E6FB0
-#define z2_link_addr                0x80400260
-#define z2_dpad_disable_offset      0x2F44
+#define z2_LoadOverlay_addr             0x80085768
+#define osSendMesg_addr                 0x80088A10
+#define osRecvMesg_addr                 0x80088DD0
+#define osWritebackDCache_addr          0x8008B4E0
+#define osEPiStartDma_addr              0x8008FD30
+#define osCreateMesgQueue_addr          0x80090140
+#define osEPiReadIo_addr                0x80092FB0
+#define osEPiWriteIo_addr               0x80094AB0
+#define z2_vi_counter_addr              0x80097A98
+#define z2_file_msgqueue_addr           0x8009CE10
+#define z2_arena_addr                   0x8009E860
+#define z2_file_table_addr              0x800A13F0
+#define z2_DrawActors_addr              0x800BBF4C
+#define z2_SpawnActor_addr              0x800BC934
+#define z2_DeleteActor_addr             0x800BCFB8
+#define z2_CreateStaticCollision_addr   0x800C4E54
+#define z2_pause_persp_addr             0x800F6530
+#define z2_btnupdate_addr               0x801146F8
+#define z2_LoadRoom_addr                0x8013044C
+#define z2_DrawRoom_addr                0x80130688
+#define z2_UnloadRoom_addr              0x801306D8
+#define z2_MotionBlur_addr              0x80161010
+#define z2_draw_room_1_hook_addr        0x80164CB0
+#define z2_draw_room_2_hook_addr        0x80164CC8
+#define z2_draw_actors_hook_addr        0x80164D90
+#define z2_motion_blur_hook_addr        0x80164ED8
+#define z2_input_update_addr            0x8016F074
+#define z2_main_hook_addr               0x8016F0C0
+#define z2_input_hook_addr              0x8016FD40
+#define z2_kz_dma_addr                  0x80170168
+#define z2_set_heap_addr                0x80170500
+#define z2_DecodeArchiveFile_addr       0x8017431C
+#define z2_dmaflashtoram_addr           0x80180e28
+#define z2_dmaramtoflash_addr           0x80180FDC
+#define z2_particle_info_addr           0x801A9470
+#define z2_particle_ovl_table_addr      0x801A9570
+#define z2_actor_ovl_table_addr         0x801AA0A0
+#define z2_hud_state_addr               0x801B4ED8
+#define z2_event_state_1_addr           0x801B4EE0
+#define z2_letter_box_timer_addr        0x801B4F28
+#define z2_gamestate_table_addr         0x801B89E0
+#define z2_restriction_table_addr       0x801BD534
+#define z2_link_form_obj_idx_addr       0x801BD850
+#define z2_object_table_addr            0x801BD860
+#define z2_scene_table_addr             0x801BEDC0
+#define z2_stored_song_addr             0x801C1AFC
+#define z2_link_spawn_obj_addr          0x801CB528
+#define z2_player_ovl_table_addr        0x801CB540
+#define z2_static_particle_addr         0x801E4050
+#define z2_file_addr                    0x801EF710
+#define z2_game_arena_addr              0x801F5530
+#define z2_segment_addr                 0x801F85A0
+#define z2_cimg_addr                    0x801FBF90
+#define z2_input_direct_addr            0x801FBC90
+#define z2_pi_io_handle_addr            0x801FD490
+#define z2_disp_addr                    0x8020A2B0
+#define z2_static_ctxt_addr             0x80382900
+#define z2_ctxt_addr                    0x803E6FB0
+#define z2_link_addr                    0x80400260
+#define z2_dpad_disable_offset          0x2F44
 #elif Z2_VERSION==NZSJ10
-#define osSendMesg_addr             0x80088AB0
-#define osRecvMesg_addr             0x80088E70
-#define osWritebackDCache_addr      0x8008B580
-#define osEPiStartDma_addr          0x8008FDD0
-#define osCreateMesgQueue_addr      0x800901E0
-#define osEPiReadIo_addr            0x80093050
-#define osEPiWriteIo_addr           0x80094B70
-#define z2_vi_counter_addr          0x80097B58
-#define z2_file_msgqueue_addr       0x8009CED0
-#define z2_arena_addr               0x8009E920
-#define z2_file_table_addr          0x800A14B0
-#define z2_DrawActors_addr          0x800BBFE8
-#define z2_SpawnActor_addr          0x800BC98C
-#define z2_DeleteActor_addr         0x800BD010
-#define z2_pause_persp_addr         0x800F6510
-#define z2_btnupdate_addr           0x801146B8
-#define z2_LoadRoom_addr            0x801303EC
-#define z2_DrawRoom_addr            0x80130628
-#define z2_UnloadRoom_addr          0x80130678
-#define z2_MotionBlur_addr          0x80160F20
-#define z2_draw_room_1_hook_addr    0x80164BC0
-#define z2_draw_room_2_hook_addr    0x80164BD8
-#define z2_draw_actors_hook_addr    0x80164CA0
-#define z2_motion_blur_hook_addr    0x80164DE8
-#define z2_input_update_addr        0x8016EF84
-#define z2_main_hook_addr           0x8016EFD0
-#define z2_input_hook_addr          0x8016FC50
-#define z2_kz_dma_addr              0x80170078
-#define z2_set_heap_addr            0x80170410
-#define z2_DecodeArchiveFile_addr   0x801740EC
-#define z2_dmaflashtoram_addr       0x80180BF8
-#define z2_dmaramtoflash_addr       0x80180DAC
-#define z2_actor_ovl_table_addr     0x801A9E60
-#define z2_gamestate_table_addr     0x801B87A0
-#define z2_restriction_table_addr   0x801BD324
-#define z2_link_form_obj_idx_addr   0x801BD640
-#define z2_object_table_addr        0x801BD650
-#define z2_stored_song_addr         0x801C18EC
-#define z2_link_spawn_obj_addr      0x801CB318
-#define z2_player_ovl_table_addr    0x801CB330
-#define z2_file_addr                0x801EF460
-#define z2_game_arena_addr          0x801F5280
-#define z2_segment_addr             0x801F82F0
-#define z2_input_direct_addr        0x801FB9E0
-#define z2_cimg_addr                0x801FBCD0
-#define z2_pi_io_handle_addr        0x801FD1D0
-#define z2_disp_addr                0x80209FF0
-#define z2_static_ctxt_addr         0x80382640
-#define z2_ctxt_addr                0x803E6CF0
-#define z2_link_addr                0x803FFFA0
-#define z2_dpad_disable_offset      0x2F20
+#define z2_LoadOverlay_addr             0x80085808
+#define osSendMesg_addr                 0x80088AB0
+#define osRecvMesg_addr                 0x80088E70
+#define osWritebackDCache_addr          0x8008B580
+#define osEPiStartDma_addr              0x8008FDD0
+#define osCreateMesgQueue_addr          0x800901E0
+#define osEPiReadIo_addr                0x80093050
+#define osEPiWriteIo_addr               0x80094B70
+#define z2_vi_counter_addr              0x80097B58
+#define z2_file_msgqueue_addr           0x8009CED0
+#define z2_arena_addr                   0x8009E920
+#define z2_file_table_addr              0x800A14B0
+#define z2_DrawActors_addr              0x800BBFE8
+#define z2_SpawnActor_addr              0x800BC98C
+#define z2_DeleteActor_addr             0x800BD010
+#define z2_CreateStaticCollision_addr   0x800C4EC4
+#define z2_pause_persp_addr             0x800F6510
+#define z2_btnupdate_addr               0x801146B8
+#define z2_LoadRoom_addr                0x801303EC
+#define z2_DrawRoom_addr                0x80130628
+#define z2_UnloadRoom_addr              0x80130678
+#define z2_MotionBlur_addr              0x80160F20
+#define z2_draw_room_1_hook_addr        0x80164BC0
+#define z2_draw_room_2_hook_addr        0x80164BD8
+#define z2_draw_actors_hook_addr        0x80164CA0
+#define z2_motion_blur_hook_addr        0x80164DE8
+#define z2_input_update_addr            0x8016EF84
+#define z2_main_hook_addr               0x8016EFD0
+#define z2_input_hook_addr              0x8016FC50
+#define z2_kz_dma_addr                  0x80170078
+#define z2_set_heap_addr                0x80170410
+#define z2_DecodeArchiveFile_addr       0x801740EC
+#define z2_dmaflashtoram_addr           0x80180BF8
+#define z2_dmaramtoflash_addr           0x80180DAC
+#define z2_particle_info_addr           0x801A9230
+#define z2_particle_ovl_table_addr      0x801A9330
+#define z2_actor_ovl_table_addr         0x801A9E60
+#define z2_hud_state_addr               0x801B4C98
+#define z2_event_state_1_addr           0x801B4CA0
+#define z2_letter_box_timer_addr        0x801B4CE8
+#define z2_gamestate_table_addr         0x801B87A0
+#define z2_restriction_table_addr       0x801BD324
+#define z2_link_form_obj_idx_addr       0x801BD640
+#define z2_object_table_addr            0x801BD650
+#define z2_scene_table_addr             0x801BEBB0
+#define z2_stored_song_addr             0x801C18EC
+#define z2_link_spawn_obj_addr          0x801CB318
+#define z2_player_ovl_table_addr        0x801CB330
+#define z2_static_particle_addr         0x801E3DA0
+#define z2_file_addr                    0x801EF460
+#define z2_game_arena_addr              0x801F5280
+#define z2_segment_addr                 0x801F82F0
+#define z2_input_direct_addr            0x801FB9E0
+#define z2_cimg_addr                    0x801FBCD0
+#define z2_pi_io_handle_addr            0x801FD1D0
+#define z2_disp_addr                    0x80209FF0
+#define z2_static_ctxt_addr             0x80382640
+#define z2_ctxt_addr                    0x803E6CF0
+#define z2_link_addr                    0x803FFFA0
+#define z2_dpad_disable_offset          0x2F20
 #endif
 
 /* Function Prototypes */
+typedef void (*z2_LoadOverlay_t)(uint32_t vrom_start, uint32_t vrom_end, uint32_t vram_start, uint32_t vram_end, void *dst);
 typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
 typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
 typedef void (*z2_LoadRoom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
@@ -1522,6 +1648,7 @@ typedef void (*z2_MotionBlur_t)(z2_ctxt_t *ctxt);
 typedef void (*z2_dmaflashtoram_t)(void *buf, uint32_t block, uint32_t block_cnt);
 typedef void (*z2_dmaramtoflash_t)(void *buf, uint32_t block, uint32_t block_cnt);
 typedef void (*z2_pause_persp_t)(z2_game_t *game);
+typedef void (*z2_CreateStaticCollision_t)(z2_col_ctxt_t *col_ctxt, z2_game_t *game, z2_col_lut_t *col_lut);
 typedef void (*z2_DrawRoom_t)(z2_game_t *game, z2_room_t *room, int a2);
 typedef void (*z2_DrawActors_t)(z2_game_t *game, z2_actor_ctxt_t *actor_ctx);
 typedef void (*z2_DeleteActor_t)(z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
@@ -1530,46 +1657,52 @@ typedef z2_actor_t *(*z2_SpawnActor_t)(z2_actor_ctxt_t *actor_ctx, z2_game_t *ga
                                         int16_t actor_variable, int camera_cmd_idx, int spawn_time_flags, void *param_13);
 
 /* Data */
-#define z2_game                 (*(z2_game_t*)              z2_ctxt_addr)
-#define z2_ctxt                 (*(z2_ctxt_t*)              z2_ctxt_addr)
-#define z2_file                 (*(z2_file_t*)              z2_file_addr)
-#define z2_link                 (*(z2_link_t*)              z2_link_addr)
-#define z2_segment              (*(z2_segment_t*)           z2_segment_addr)
-#define z2_arena                (*(z2_arena_t*)             z2_arena_addr)
-#define z2_game_arena           (*(z2_arena_t*)             z2_game_arena_addr)
-#define z2_gamestate_table      ((z2_gamestate_table_t*)    z2_gamestate_table_addr)
-#define z2_actor_ovl_table      ((z2_actor_ovl_table_t*)    z2_actor_ovl_table_addr)
-#define z2_player_ovl_table     ((z2_player_ovl_table_t*)   z2_player_ovl_table_addr)
-#define z2_file_table           ((z2_file_table_t*)         z2_file_table_addr)
-#define z2_file_msgqueue        (*(OSMesgQueue*)            z2_file_msgqueue_addr)
-#define z2_pi_io_handle         (*(OSPiHandle*)             z2_pi_io_handle_addr)
-#define z2_static_ctxt          (*(z2_static_ctxt_t*)       z2_static_ctxt_addr)
-#define z2_pi_io_handle         (*(OSPiHandle*)             z2_pi_io_handle_addr)
-#define z2_vi_counter           (*(int32_t*)                z2_vi_counter_addr)
-#define z2_input_direct         (*(z2_input_t*)             z2_input_direct_addr)
-#define z2_cimg                 ((uint32_t*)                z2_cimg_addr)
-#define z2_stored_song          (*(uint16_t*)               z2_stored_song_addr)
-#define z2_obj_table            ((z2_obj_file_t*)           z2_object_table_addr)
-#define z2_link_form_obj_idx    ((uint16_t*)                z2_link_form_obj_idx_addr)
-#define z2_link_spawn_obj       (*(uint16_t*)               z2_link_spawn_obj_addr)
+#define z2_game                 (*(z2_game_t*)                      z2_ctxt_addr)
+#define z2_ctxt                 (*(z2_ctxt_t*)                      z2_ctxt_addr)
+#define z2_file                 (*(z2_file_t*)                      z2_file_addr)
+#define z2_link                 (*(z2_link_t*)                      z2_link_addr)
+#define z2_segment              (*(z2_segment_t*)                   z2_segment_addr)
+#define z2_arena                (*(z2_arena_t*)                     z2_arena_addr)
+#define z2_game_arena           (*(z2_arena_t*)                     z2_game_arena_addr)
+#define z2_gamestate_table      ((z2_gamestate_table_t*)            z2_gamestate_table_addr)
+#define z2_actor_ovl_table      (*(z2_actor_ovl_table_t(*)[689])    z2_actor_ovl_table_addr)
+#define z2_player_ovl_table     (*(z2_player_ovl_table_t(*)[2])     z2_player_ovl_table_addr)
+#define z2_particle_ovl_table   (*(z2_particle_ovl_table_t(*)[38])  z2_particle_ovl_table_addr)
+#define z2_file_table           ((z2_file_table_t*)                 z2_file_table_addr)
+#define z2_file_msgqueue        (*(OSMesgQueue*)                    z2_file_msgqueue_addr)
+#define z2_pi_io_handle         (*(OSPiHandle*)                     z2_pi_io_handle_addr)
+#define z2_static_ctxt          (*(z2_static_ctxt_t*)               z2_static_ctxt_addr)
+#define z2_pi_io_handle         (*(OSPiHandle*)                     z2_pi_io_handle_addr)
+#define z2_vi_counter           (*(int32_t*)                        z2_vi_counter_addr)
+#define z2_input_direct         (*(z2_input_t*)                     z2_input_direct_addr)
+#define z2_cimg                 ((uint32_t*)                        z2_cimg_addr)
+#define z2_stored_song          (*(uint16_t*)                       z2_stored_song_addr)
+#define z2_obj_table            ((z2_rom_file_t*)                   z2_object_table_addr)
+#define z2_link_form_obj_idx    ((uint16_t*)                        z2_link_form_obj_idx_addr)
+#define z2_link_spawn_obj       (*(uint16_t*)                       z2_link_spawn_obj_addr)
+#define z2_scene_table          (*(z2_scene_table_ent_t(*)[113])    z2_scene_table_addr)
+#define z2_particle_info        (*(z2_particle_info_t*)             z2_particle_info_addr)
+#define z2_static_particle_ctxt (*(z2_static_particle_ctxt_t*)      z2_static_particle_addr)
 /* Functions */
-#define osEPiReadIo             ((osEPiReadIo_t)            osEPiReadIo_addr)
-#define osEPiWriteIo            ((osEPiWriteIo_t)           osEPiWriteIo_addr)
-#define osWritebackDCache       ((osWritebackDCache_t)      osWritebackDCache_addr)
-#define z2_btnupdate            ((z2_btnupdate_t)           z2_btnupdate_addr)
-#define z2_DecodeArchiveFile    ((z2_DecodeArchiveFile_t)   z2_DecodeArchiveFile_addr)
-#define osEPiStartDma           ((osEPiStartDma_t)          osEPiStartDma_addr)
-#define osSendMesg              ((osSendMesg_t)             osSendMesg_addr)
-#define osRecvMesg              ((osRecvMesg_t)             osRecvMesg_addr)
-#define osCreateMesgQueue       ((osCreateMesgQueue_t)      osCreateMesgQueue_addr)
-#define z2_LoadRoom             ((z2_LoadRoom_t)            z2_LoadRoom_addr)
-#define z2_UnloadRoom           ((z2_UnloadRoom_t)          z2_UnloadRoom_addr)
-#define z2_MotionBlur           ((z2_MotionBlur_t)          z2_MotionBlur_addr)
-#define z2_pause_persp          ((z2_pause_persp_t)         z2_pause_persp_addr)
-#define z2_dmaflashtoram        ((z2_dmaflashtoram_t)       z2_dmaflashtoram_addr)
-#define z2_dmaramtoflash        ((z2_dmaramtoflash_t)       z2_dmaramtoflash_addr)
-#define z2_DrawRoom             ((z2_DrawRoom_t)            z2_DrawRoom_addr)
-#define z2_DrawActors           ((z2_DrawActors_t)          z2_DrawActors_addr)
-#define z2_SpawnActor           ((z2_SpawnActor_t)          z2_SpawnActor_addr)
-#define z2_DeleteActor          ((z2_DeleteActor_t)         z2_DeleteActor_addr)
+#define osEPiReadIo                 ((osEPiReadIo_t)                osEPiReadIo_addr)
+#define osEPiWriteIo                ((osEPiWriteIo_t)               osEPiWriteIo_addr)
+#define osWritebackDCache           ((osWritebackDCache_t)          osWritebackDCache_addr)
+#define z2_btnupdate                ((z2_btnupdate_t)               z2_btnupdate_addr)
+#define z2_DecodeArchiveFile        ((z2_DecodeArchiveFile_t)       z2_DecodeArchiveFile_addr)
+#define osEPiStartDma               ((osEPiStartDma_t)              osEPiStartDma_addr)
+#define osSendMesg                  ((osSendMesg_t)                 osSendMesg_addr)
+#define osRecvMesg                  ((osRecvMesg_t)                 osRecvMesg_addr)
+#define osCreateMesgQueue           ((osCreateMesgQueue_t)          osCreateMesgQueue_addr)
+#define z2_LoadRoom                 ((z2_LoadRoom_t)                z2_LoadRoom_addr)
+#define z2_UnloadRoom               ((z2_UnloadRoom_t)              z2_UnloadRoom_addr)
+#define z2_MotionBlur               ((z2_MotionBlur_t)              z2_MotionBlur_addr)
+#define z2_pause_persp              ((z2_pause_persp_t)             z2_pause_persp_addr)
+#define z2_dmaflashtoram            ((z2_dmaflashtoram_t)           z2_dmaflashtoram_addr)
+#define z2_dmaramtoflash            ((z2_dmaramtoflash_t)           z2_dmaramtoflash_addr)
+#define z2_DrawRoom                 ((z2_DrawRoom_t)                z2_DrawRoom_addr)
+#define z2_DrawActors               ((z2_DrawActors_t)              z2_DrawActors_addr)
+#define z2_SpawnActor               ((z2_SpawnActor_t)              z2_SpawnActor_addr)
+#define z2_DeleteActor              ((z2_DeleteActor_t)             z2_DeleteActor_addr)
+#define z2_LoadOverlay              ((z2_LoadOverlay_t)             z2_LoadOverlay_addr)
+#define z2_CreateStaticCollision    ((z2_CreateStaticCollision_t)   z2_CreateStaticCollision_addr)
 #endif

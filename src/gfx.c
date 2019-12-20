@@ -13,6 +13,8 @@
 #define     GFX_SIZE 0x6500
 #endif
 
+#define TILE_SIZE(x,y,z)    ((x * y * G_SIZ_BITS(z) + 63) / 64 * 8)
+
 #define RDP_STACK_LEN 5
 
 static Gfx *gfx_disp;
@@ -251,12 +253,8 @@ void gfx_texture_desaturate(void *data, size_t len){
     }
 }
 
-inline size_t calc_tile_size(int width, int height, g_isiz_t size){
-    return (width * height * G_SIZ_BITS(size) + 63) / 64 * 8;
-}
-
 gfx_texture *gfx_load_item_texture(uint8_t item_id){
-    size_t size = calc_tile_size(32,32,G_IM_SIZ_32b);
+    size_t size = TILE_SIZE(32,32,G_IM_SIZ_32b);
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
         texture->tile_size = size;
@@ -278,7 +276,7 @@ static gfx_texture *gfx_load_archive(texture_loader *loader){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
         int tiles_cnt = loader->end_item - loader->start_item + 1;
-        size_t tile_size = calc_tile_size(loader->width,loader->height,loader->size);
+        size_t tile_size = TILE_SIZE(loader->width,loader->height,loader->size);
         texture->tile_size = tile_size;
         texture->img_fmt = loader->format;
         texture->img_size = loader->size;
@@ -305,9 +303,9 @@ static gfx_texture *gfx_load_archive(texture_loader *loader){
 static gfx_texture *gfx_load_from_rom(texture_loader *loader){
     gfx_texture *texture = malloc(sizeof(*texture));
     if(texture){
-        size_t tile_size = calc_tile_size(loader->width,loader->height,loader->size);
+        size_t tile_size = TILE_SIZE(loader->width,loader->height,loader->size);
         texture->tile_size = tile_size;
-        texture->data = memalign(64, (texture->tile_size * loader->num_tiles) * (loader->desaturate?2:1));
+        texture->data = malloc((texture->tile_size * loader->num_tiles) * (loader->desaturate?2:1));
         texture->img_fmt = loader->format;
         texture->img_size = loader->size;
         texture->tile_width = loader->width;
@@ -319,7 +317,7 @@ static gfx_texture *gfx_load_from_rom(texture_loader *loader){
         OSMesgQueue queue;
         OSMesg msg;
         osCreateMesgQueue(&queue,&msg,1);
-        z2_getfile_t getfile = {
+        z2_loadfile_t getfile = {
             z2_file_table[file].vrom_start, tempdata,
             z2_file_table[file].vrom_end - z2_file_table[file].vrom_start,
             NULL, 0, 0,
