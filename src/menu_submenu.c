@@ -1,17 +1,18 @@
 #include "menu.h"
 
-static void menu_submenu_activate(struct menu_item *item){
-    menu_enter(item->owner,(struct menu*)item->data);
+int menu_submenu_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
+    *event_data = handler->callback_data;
+    menu_trigger_event(item->owner, MENU_EVENT_ENTER, event_data);
+    return 1;
 }
 
-struct menu_item *menu_add_submenu(struct menu *menu, uint16_t x, uint16_t y, struct menu *submenu, char *name){
-    struct menu_item *item = menu_add(menu,x,y,name);
+menu_item_t *menu_submenu_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y, char *text, menu_t *submenu){
+    menu_item_t *item = menu_add(menu,cell_x,cell_y);
     if(item){
-        item->activate_proc = menu_submenu_activate;
-        item->data = submenu;
+        item->text = text;
         item->interactive = 1;
-        item->x = x;
-        item->y = y;
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE, menu_submenu_onactivate, submenu);
     }
     return item;
 }

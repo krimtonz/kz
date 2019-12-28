@@ -7,6 +7,7 @@
 #include "menu.h"
 #include "settings.h"
 #include "collision_view.h"
+#include "zu.h"
 
 #define KZ_MEMFILE_MAX 3
 #define KZ_POSITION_MAX 3
@@ -42,18 +43,6 @@ enum cheats {
     CHEAT_MAX
 };
 
-struct disp_p
-{
-    uint32_t    work_p;
-    uint32_t    work_d;
-    uint32_t    poly_opa_p;
-    uint32_t    poly_opa_d;
-    uint32_t    poly_xlu_p;
-    uint32_t    poly_xlu_d;
-    uint32_t    overlay_p;
-    uint32_t    overlay_d;
-};
-
 typedef struct{
     uint16_t    z2_version;
     uint16_t    timer_boundaries[3];
@@ -77,7 +66,7 @@ typedef struct  {
     struct list             watches;
     enum col_view_status    collision_view_status;
     enum col_view_status    hitbox_view_status;
-    struct menu             main_menu;
+    menu_t                  main_menu;
     uint8_t                 settings_profile;
     _Bool                   menu_active;
     int64_t                 cpu_cycle_counter;
@@ -90,7 +79,7 @@ typedef struct  {
     _Bool                   hide_actors;
     _Bool                   hide_room;
     int32_t                 pending_frames;
-    struct disp_p           disp_p;
+    zu_disp_ptr_t           disp_p;
     uint8_t                 memfile_slot;
     memfile_t             **memfile;
     uint8_t                 pos_slot;
@@ -104,16 +93,16 @@ typedef struct  {
 extern kz_ctxt_t kz;
 extern char restriction_table[0x23A];
 
-struct menu *create_warps_menu();
-struct menu *create_inventory_menu();
-struct menu *create_scene_menu();
-struct menu *create_watches_menu();
-struct menu *create_cheats_menu();
-struct menu *create_file_menu();
-struct menu *create_equips_menu();
-struct menu *create_settings_menu();
+menu_t *create_warps_menu();
+menu_t *create_inventory_menu();
+menu_t *create_scene_menu();
+menu_t *create_watches_menu();
+menu_t *create_cheats_menu();
+menu_t *create_file_menu();
+menu_t *create_equips_menu();
+menu_t *create_settings_menu();
 #ifndef LITE
-struct menu *create_debug_menu();
+menu_t *create_debug_menu();
 #endif
 void kz_log(const char *format, ...);
 

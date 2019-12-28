@@ -570,7 +570,7 @@ static uint32_t cluster_free_length(fat_ctxt_t *fat, uint32_t start, uint32_t pr
     }
     uint32_t len = 0;
     while(len < preferred_len && start < fat->max_cluster){
-        uint32_t value;
+        uint32_t value = 0;
         if(cluster_get(fat, start, &value)){
             return 0;
         }
@@ -614,7 +614,7 @@ static uint32_t cluster_find_free(fat_ctxt_t *fat, uint32_t start, uint32_t pref
 static int cluster_check_free_space(fat_ctxt_t *fat, uint32_t needed){
     uint32_t free_cnt = 0;
     for(uint32_t i = fat->blocks_free;i < fat->max_cluster && free_cnt < needed;i++){
-        uint32_t value;
+        uint32_t value = 0;
         if(cluster_get(fat,i,&value)){
             return -1;
         }
@@ -662,7 +662,7 @@ static uint32_t cluster_resize_chain(fat_ctxt_t *fat,uint32_t cluster,uint32_t c
     uint32_t alloc_cnt = 0;
     uint32_t new_cluster = 0;
     for(uint32_t i = 0;i < cluster_cnt || !end; i++){
-        uint32_t value;
+        uint32_t value = 0;
         if(cluster_get(fat,cluster,&value)){
             return -1;
         }
@@ -725,7 +725,7 @@ static int cluster_advance(fat_ctxt_t *fat, uint32_t *cluster){
             return 0;
         }
     }
-    uint32_t next;
+    uint32_t next = 0;
     if(cluster_get(fat,current,&next)){
         return -1;
     }

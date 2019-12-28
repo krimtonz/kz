@@ -1,252 +1,314 @@
-#include <stdlib.h>
 #include "menu.h"
-#include "input.h"
 #include "kz.h"
+#include "resource.h"
 
-z2_rgba32_t MENU_SELECTED_COLOR = {{0x80,0x80,0xFF,0xFF}};
-z2_rgba32_t MENU_DEFAULT_COLOR = {{0xFF,0xFF,0xFF,0xFF}};
+#define DEFAULT_CELL_SIZE 8
 
-static void item_enter(struct menu_item *item){
-    kz.tooltip = item->tooltip;
-}
+menu_sprite_t   *scroll_up_sprite = NULL;
+menu_sprite_t   *scroll_down_sprite = NULL;
 
-static void item_exit(struct menu_item *item){
-    kz.tooltip = NULL;
-}
-
-static int get_menu_x_pos(struct menu *menu){
-    int x_pos = menu->x;
-    if(menu->parent){
-        x_pos += get_menu_x_pos(menu->parent);
-    }
-    return x_pos;
-}
-
-static int get_menu_y_pos(struct menu *menu){
-    int y_pos = menu->y;
-    if(menu->parent){
-        y_pos += get_menu_y_pos(menu->parent);
-    }
-    return y_pos;
-}
-
-int get_item_x_pos(struct menu_item *item){
-    return get_menu_x_pos(item->owner) + (item->x * item->owner->cell_width) + (item->x * item->owner->x_padding) + item->x_offset;
-}
-
-int get_item_y_pos(struct menu_item *item){
-    return get_menu_y_pos(item->owner) + item->y * item->owner->cell_height + item->y * item->owner->y_padding + item->y_offset;
-}
-
-void set_item_offset(struct menu_item *item, int16_t x, int16_t y){
-    item->x_offset = x;
-    item->y_offset = y;
-}
-
-void menu_init(struct menu *menu){
-    list_init(&menu->items, sizeof(struct menu_item));
-    menu->child=NULL;
-    menu->parent=NULL;
-    menu->selected_item=NULL;
-    menu->callback_proc = NULL;
-    menu->cell_height = kfont->c_height;
-    menu->cell_width = kfont->c_width;
-    menu->x_padding = 0;
-    menu->y_padding = 0;
-}
-
-void menu_set_cell(struct menu *menu, uint16_t width, uint16_t height){
-    menu->cell_width = width;
-    menu->cell_height = height;
-}
-
-void menu_set_padding(struct menu *menu, uint16_t x, uint16_t y){
-    menu->x_padding = x;
-    menu->y_padding = y;
-}
-
-void menu_set_pos(struct menu *menu, uint16_t x, uint16_t y){
-    menu->x = x;
-    menu->y = y;
-}
-
-void menu_draw(struct menu *menu){
-    if(menu->child){
-        menu_draw(menu->child);
-        return;
-    }
-
-    for(struct menu_item *item = menu->items.first; item; item = list_next(item)){
-        if(!item->enabled) continue;
-        if(item->draw_proc){
-            item->draw_proc(item);
-            continue;
-        }
-        z2_rgba32_t color = MENU_DEFAULT_COLOR;
-        if(item == menu->selected_item){
-            color = MENU_SELECTED_COLOR;
-        }
-        gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color.color,"%s",item->text);
-    }
-}
-
-void menu_update(struct menu *menu){
-    if(menu->child){
-        menu_update(menu->child);
-        return;
-    }
-    for(struct menu_item *item = menu->items.first;item;item=list_next(item)){
-        if(item->update_proc){
-            item->update_proc(item);
-        }
-    }
-}
-
-struct menu_item *menu_add(struct menu *menu, uint16_t x, uint16_t y, char *text){
-    struct menu_item *item = list_push_back(&menu->items,NULL);
-    if(item){
-        item->text = text;
-        item->owner = menu;
-        item->interactive = 0;
-        item->enabled = 1;
-        item->x = x;
-        item->y = y;
-        item->x_offset = 0;
-        item->y_offset = 0;
-        item->draw_proc=NULL;
-        item->activate_proc=NULL;
-        item->navigate_proc=NULL;
-        item->update_proc=NULL;
-        item->tooltip=NULL;
-        item->enter_proc=item_enter;
-        item->exit_proc=item_exit;
-    }
-    return item;
-}
-
-void menu_item_remove(struct menu_item *item){
-    list_erase(&item->owner->items, item);
-}
-
-void menu_navigate(struct menu *menu, enum menu_nav nav){
-    if(nav==MENU_NAV_NONE) return;
+static void menu_navigate(menu_t *menu, menu_nav_t nav){
+    if(nav == MENU_NAV_NONE) return;
 
     if(menu->child){
         menu_navigate(menu->child,nav);
         return;
     }
 
-    if(menu->selected_item && menu->selected_item->navigate_proc && menu->selected_item->navigate_proc(menu->selected_item,nav))
+    if(menu->selected_item && menu_item_trigger_event(menu->selected_item, MENU_EVENT_NAVIGATE, (void*)nav))
         return;
 
-    int dir_horiz = nav == MENU_NAV_LEFT?-1:(nav == MENU_NAV_RIGHT?1:0);
-    int dir_vert = nav == MENU_NAV_UP?-1:(nav == MENU_NAV_DOWN?1:0);
+    int dir_horiz = nav == MENU_NAV_LEFT ? -1 : (nav == MENU_NAV_RIGHT ? 1 : 0);
+    int dir_vert = nav == MENU_NAV_UP ? -1 : (nav == MENU_NAV_DOWN ? 1 : 0);
 
     int ndist_pa = 0;
     int ndist_pe = 0;
     int fdist_pa = 0;
     int fdist_pe = 0;
-    int cur_x_pos = get_item_x_pos(menu->selected_item);
-    int cur_y_pos = get_item_y_pos(menu->selected_item);
+    int cur_x_pos = menu_item_x(menu->selected_item);
+    int cur_y_pos = menu_item_y(menu->selected_item);
 
-    struct menu_item *near = NULL;
-    struct menu_item *far = NULL;
+    menu_item_t *near = NULL;
+    menu_item_t *far = NULL;
 
-    for(struct menu_item *item = menu->items.first;item!=NULL;item=list_next(item)){
+    for(menu_item_t *item = menu->items.first;item;item = list_next(item)){
         if(!item->interactive || !item->enabled) continue;
-        int distance_x = get_item_x_pos(item) - cur_x_pos;
-        int distance_y = get_item_y_pos(item) - cur_y_pos;
+        int distance_x = menu_item_x(item) - cur_x_pos;
+        int distance_y = menu_item_y(item) - cur_y_pos;
 
-        int pa = dir_horiz?dir_horiz*distance_x:(dir_vert?dir_vert*distance_y:0);
-        int pe = dir_vert?distance_x:distance_y;
+        int pa = dir_horiz ? dir_horiz * distance_x : (dir_vert ? dir_vert * distance_y : 0);
+        int pe = dir_vert ? distance_x : distance_y;
 
-        if(pe<0) pe = -pe;
-
-        if(pa > 0 && (near == NULL || pe<ndist_pe || (pe==ndist_pe && pa<ndist_pa))){
-            ndist_pa=pa;
-            ndist_pe=pe;
-            near=item;
+        if(pe < 0){
+            pe = -pe;
         }
 
-        if(pa<0 && (far == NULL || -pa>fdist_pa || (-pa==fdist_pa && pe<fdist_pe))){
+        if(pa > 0 && (near == NULL || pe < ndist_pe || (pe == ndist_pe && pa < ndist_pa))){
+            ndist_pa = pa;
+            ndist_pe = pe;
+            near = item;
+        }
+
+        if(pa < 0 && (far == NULL || -pa > fdist_pa || (-pa == fdist_pa && pe < fdist_pe))){
             far = item;
             fdist_pa = -pa;
             fdist_pe = pe;
         }
     }
 
-    if((near || far) && menu->selected_item && menu->selected_item->exit_proc){
-        menu->selected_item->exit_proc(menu->selected_item);
+    void *event_data = NULL;
+    if((near || far) && menu->selected_item){
+        
+        menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, &event_data);
     }
 
     if(near){
-        if(near->enter_proc){
-            near->enter_proc(near);
-        }
+
+        menu_item_trigger_event(near, MENU_EVENT_ENTER, &event_data);
         menu->selected_item = near;
     }else if(far){
-        if(far->enter_proc){
-            far->enter_proc(far);
-        }
+        menu_item_trigger_event(far, MENU_EVENT_ENTER, &event_data);
         menu->selected_item = far;
     }
 }
 
-void menu_callback(struct menu *menu, enum menu_callback callback){
-    if(callback == MENU_CALLBACK_NONE){
-        return;
+void menu_static_sprites_init(){
+    static menu_sprite_t up_sprite = {
+        NULL,   0,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
+        8,      8,      NULL,   DEFAULT_COLOR,   0,
+        0,      NULL,
+    };
+
+    static menu_sprite_t down_sprite = {
+        NULL,   1,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
+        8,      8,      NULL,   DEFAULT_COLOR,   0,
+        0,      NULL,
+    };
+
+    up_sprite.texture = resource_get(R_KZ_ARROWS);
+    down_sprite.texture = resource_get(R_KZ_ARROWS);
+
+    scroll_up_sprite = &up_sprite;
+    scroll_down_sprite = &down_sprite;
+}
+
+void menu_init(menu_t *menu, int16_t x_offset, int16_t y_offset){
+    list_init(&menu->items,sizeof(menu_item_t));
+    list_init(&menu->events,sizeof(event_handler_t));
+    list_init(&menu->item_events,sizeof(event_handler_t));
+    menu->x_offset = x_offset;
+    menu->y_offset = y_offset;
+    menu->selected_item = NULL;
+    menu->child = NULL;
+    menu->parent = NULL;
+    menu->x_padding = 0;
+    menu->y_padding = 0;
+    menu->cell_width = DEFAULT_CELL_SIZE;
+    menu->cell_height = DEFAULT_CELL_SIZE;
+}
+
+int menu_x(menu_t *menu){
+    int x = 0;
+    menu_t *menu_p = menu;
+    while(menu_p){
+        x += menu_p->y_offset;
+        menu_p = menu_p->parent;
     }
+    return x;
+}
+
+int menu_y(menu_t *menu){
+    int y = 0;
+    menu_t *menu_p = menu;
+    while(menu_p){
+        y += menu_p->y_offset;
+        menu_p = menu_p->parent;
+    }
+    return y;
+}
+
+int menu_item_x(menu_item_t *item){
+    return menu_x(item->owner) + (item->x_cell * item->owner->cell_width) + (item->x_cell * item->owner->x_padding) + item->x_offset;
+}
+
+int menu_item_y(menu_item_t *item){
+    return menu_y(item->owner) + (item->y_cell * item->owner->cell_height) + (item->y_cell * item->owner->y_padding) + item->y_offset;
+}
+
+void menu_draw(menu_t *menu){
     if(menu->child){
-        menu_callback(menu->child,callback);
+        menu_draw(menu->child);
         return;
     }
-    if(callback == MENU_CALLBACK_RETURN){
-        if(menu->parent){
-            if(menu->callback_proc){
-                menu->callback_proc(MENU_CALLBACK_EXIT);
+    for(menu_item_t *item = menu->items.first;item;item = list_next(item)){
+        if(!item->enabled) continue;
+        if(item->draw_proc){
+            item->draw_proc(item);
+            continue;
+        }
+        uint32_t color = DEFAULT_COLOR;
+        if(item == menu->selected_item){
+            color = SELECTED_COLOR;
+        }
+        gfx_printf_color(menu_item_x(item), menu_item_y(item), color, "%s", item->text);
+    }
+}
+
+void menu_item_remove(menu_item_t *item){
+    menu_t *menu = item->owner;
+    event_handler_t *handler = menu->item_events.first;
+    if(handler){
+        event_handler_t *next = list_next(handler);
+        while(next){
+            if(handler->subscriber == item){
+                list_erase(&menu->item_events, handler);
             }
-            if(menu->selected_item->exit_proc){
-                menu->selected_item->exit_proc(menu->selected_item);
-            }
-            if(menu->parent->callback_proc){
-                menu->parent->callback_proc(MENU_CALLBACK_ENTER);
-            }
-            if(menu->parent->selected_item->enter_proc){
-                menu->parent->selected_item->enter_proc(menu->parent->selected_item);
-            }
-            menu->parent->child = NULL;
+            handler = next;
+            next = list_next(handler);
         }
     }
-    else if(menu->selected_item->activate_proc){
-        menu->selected_item->activate_proc(menu->selected_item);
+    if(item->remove_proc){
+        item->remove_proc(item);
+    }
+    list_erase(&menu->items, item);
+}
+
+/* event functions */
+event_handler_t *menu_register_event(menu_t *menu, menu_event_t event, menu_event_cb_t callback, void *callback_data){
+    event_handler_t *handler = list_push_back(&menu->events, NULL);
+    if(handler){
+        handler->event = event;
+        handler->callback = callback;
+        handler->callback_data = callback_data;
+        handler->subscriber = menu;
+    }
+    return handler;
+}
+
+event_handler_t *menu_item_register_event(menu_item_t *item, menu_event_t event, menu_item_event_cb_t callback, void *callback_data){
+    event_handler_t *handler = list_push_back(&item->owner->item_events, NULL);
+    if(handler){
+        handler->event = event;
+        handler->callback = callback;
+        handler->callback_data = callback_data;
+        handler->subscriber = item;
+    }
+    return handler;
+}
+
+int menu_item_trigger_event(menu_item_t *item, menu_event_t event, void **event_data){
+    // run all handlers for this event, and return if one of them considers it handled
+    for(event_handler_t *handler = item->owner->item_events.first;handler;handler = list_next(handler)){
+        if(handler->subscriber == item && (handler->event & event) == event && ((menu_item_event_cb_t)handler->callback)(handler, event, event_data)){
+            return true;
+        }
+    }
+
+    // default event handlers
+    switch(event){
+        case MENU_EVENT_ENTER:
+        kz.tooltip = item->tooltip;
+        return true;
+        case MENU_EVENT_EXIT:
+        kz.tooltip = NULL;
+        return true;
+        default:
+        return false;
     }
 }
 
-int menu_return(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        menu_callback(item->owner,MENU_CALLBACK_RETURN);
-        return 1;
+int menu_trigger_event(menu_t *menu, menu_event_t event, void **event_data){
+    // traverse menu tree and trigger events for children
+    if(menu->child && menu_trigger_event(menu->child, event, event_data)){
+        return true;
     }
-    return 0;
+    // run all handlers for this event, and return if the event is considered handled
+    for(event_handler_t *handler = menu->events.first;handler;handler = list_next(handler)){
+        if(handler->subscriber == menu && (handler->event & event) == event && ((menu_event_cb_t)handler->callback)(handler, event, event_data)){
+            return true;
+        }
+    }
+
+    // default event handlers
+    switch(event){
+        case MENU_EVENT_ACTIVATE:
+        menu_item_trigger_event(menu->selected_item, MENU_EVENT_ACTIVATE, event_data);
+        break;
+        case MENU_EVENT_ENTER: {
+            if(event_data){
+                menu_t *submenu = *event_data;
+                menu->child = submenu;
+                submenu->parent = menu;
+                menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, event_data);
+                menu_item_trigger_event(submenu->selected_item, MENU_EVENT_ENTER, event_data);
+                menu_trigger_event(menu, MENU_EVENT_EXIT, NULL);
+            }
+        }
+        break;
+        case MENU_EVENT_UPDATE:{
+            for(menu_item_t *item = menu->items.first;item;item = list_next(item)){
+                menu_item_trigger_event(item, MENU_EVENT_UPDATE, event_data);
+            }
+        }
+        break;
+        case MENU_EVENT_NAVIGATE:
+        if(menu_item_trigger_event(menu->selected_item, MENU_EVENT_NAVIGATE, event_data)){
+            return true;
+        }
+        menu_navigate(menu, (menu_nav_t)event_data);
+        break;
+        case MENU_EVENT_RETURN:{
+            if(menu->parent){
+                menu_trigger_event(menu, MENU_EVENT_EXIT, NULL);
+                menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, event_data);
+                menu_trigger_event(menu->parent, MENU_EVENT_ENTER, NULL);
+                menu_item_trigger_event(menu->parent->selected_item, MENU_EVENT_ENTER, event_data);
+                menu->parent->child = NULL;
+            }
+        }
+        break;
+        default:
+        return false;
+    }
+    return true;
 }
 
-void menu_enter(struct menu *menu, struct menu *submenu){
-    if(menu->child){
-        menu_enter(menu->child,submenu);
-        return;
+void menu_item_offset_set(menu_item_t *item, int16_t offset_x, int16_t offset_y){
+    item->x_offset = offset_x;
+    item->y_offset = offset_y;
+}
+
+int menu_return(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_trigger_event(&kz.main_menu, MENU_EVENT_RETURN, event_data);
+    return 1;
+}
+
+void menu_cell_set(menu_t *menu, uint16_t cell_width, uint16_t cell_height){
+    menu->cell_width = cell_width;
+    menu->cell_height = cell_height;
+}
+
+void menu_padding_set(menu_t *menu, uint16_t x_padding, uint16_t y_padding){
+    menu->x_padding = x_padding;
+    menu->y_padding = y_padding;
+}
+
+menu_item_t *menu_label_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y, void *text){
+    menu_item_t *item = list_push_back(&menu->items,NULL);
+    if(item){
+        item->owner = menu;
+        item->x_cell = cell_x;
+        item->y_cell = cell_y;
+        item->x_offset = 0;
+        item->y_offset = 0;
+        item->draw_proc = NULL;
+        item->remove_proc = NULL;
+        item->text = text;
+        item->tooltip = NULL;
+        item->data = NULL;
+        item->interactive = false;
+        item->enabled = true;
+        item->text = text;
     }
-    menu->child = submenu;
-    submenu->parent = menu;
-    if(menu->callback_proc){
-        menu->callback_proc(MENU_CALLBACK_EXIT);
-    }
-    if(menu->selected_item->exit_proc){
-        menu->selected_item->exit_proc(menu->selected_item);
-    }
-    if(submenu->callback_proc){
-        submenu->callback_proc(MENU_CALLBACK_ENTER);
-    }
-    if(submenu->selected_item->enter_proc){
-        submenu->selected_item->enter_proc(submenu->selected_item);
-    }
+    return item;
 }

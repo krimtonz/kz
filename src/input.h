@@ -32,9 +32,6 @@ uint16_t input_pressed_raw();
 int8_t input_x();
 int8_t input_y();
 
-struct menu_item *menu_add_bind(struct menu *menu, int x, int y, int cmd);
-void menu_set_bind(struct menu_item *item, int cmd);
-
 extern uint32_t button_colors[16];
 
 #endif

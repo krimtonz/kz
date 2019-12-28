@@ -78,6 +78,9 @@ static void rdp_mode_apply(enum rdp_mode mode){
 }
 
 void rdp_mode_set(enum rdp_mode mode, uint64_t val){
+    if(mode == RDP_MODE_ALL){
+        return;
+    }
     rdp_modes[mode] = val;
 }
 

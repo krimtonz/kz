@@ -311,7 +311,7 @@ void kz_hitbox_view(){
     }
     
     _Bool show = kz.hitbox_view_status == COL_VIEW_SHOW &&
-                 zu_ingame() &&
+                 zu_is_ingame() &&
                  z2_game.pause_ctx.state == 0;
 
     if(show){
@@ -461,7 +461,7 @@ void kz_col_view(){
     }
 
     _Bool show = kz.collision_view_status == COL_VIEW_SHOW &&
-                                             zu_ingame() &&
+                                             zu_is_ingame() &&
                                              z2_game.pause_ctx.state == 0;
 
     if(show){

@@ -3,135 +3,79 @@
 
 struct item_data {
     char                  **text;
-    void                   *values;
-    uint8_t                 value_size;
-    uint16_t                option_cnt;
+    int                     option_cnt;
     int                     selected_idx;
-    _Bool                   active;
-    void                   *data;
-    menu_list_callback      callback;
-    void                   *callback_data;
+    int                     active;
 };
 
-int get_option_index(struct menu_item *item, uint32_t value){
+static int menu_list_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
     struct item_data *data = item->data;
-    for(int i=0;i<data->option_cnt;i++){
-        uint32_t val;
-        switch(data->value_size){
-            case 1:
-                val = ((uint8_t*)(data->values))[i];
-                break;
-            case 2:
-                val = ((uint16_t*)(data->values))[i];
-                break;
-            case 4:
-            default:
-                val = ((uint32_t*)(data->values))[i];
+    if(event == MENU_EVENT_ACTIVATE){
+        if(data->active){
+            *event_data = (void*)data->selected_idx;
+            menu_item_trigger_event(item, MENU_EVENT_LIST, event_data);
         }
-        if(value == val){
-            return i;
-        }
+        data->active = !data->active;
+        *event_data = (void*)data->active;
+        return 0;
     }
-    return -1;
-}
-
- int option_nav(struct menu_item *item, enum menu_nav nav){
-    struct item_data *data = item->data;
-    if(data->active){
-        if(nav == MENU_NAV_UP){
-            data->selected_idx++;
-            data->selected_idx %= data->option_cnt;
-        }else if(nav == MENU_NAV_DOWN){
-            data->selected_idx += data->option_cnt - 1;
-            data->selected_idx %= data->option_cnt;
+    else if(event == MENU_EVENT_NAVIGATE){
+        menu_nav_t nav = (menu_nav_t)event_data;
+        if(data->active){
+            if(nav == MENU_NAV_UP){
+                data->selected_idx++;
+                data->selected_idx %= data->option_cnt;
+            }else if(nav == MENU_NAV_DOWN){
+                data->selected_idx += data->option_cnt - 1;
+                data->selected_idx %= data->option_cnt;
+            }
+            return 1;
         }
+        return 0;
+    }else if(event == MENU_EVENT_UPDATE && data->active){
         return 1;
     }
     return 0;
 }
 
-static void option_activate(struct menu_item *item){
+static void menu_list_draw(menu_item_t *item){
     struct item_data *data = item->data;
+    uint32_t color = DEFAULT_COLOR;
     if(data->active){
-        if(data->data){
-            switch(data->value_size){
-                case 1:
-                    *(uint8_t*)data->data = ((uint8_t*)data->values)[data->selected_idx];
-                    break;
-                case 2:
-                    *(uint16_t*)data->data = ((uint16_t*)data->values)[data->selected_idx];
-                    break;
-                case 4:
-                default:
-                    *(uint32_t*)data->data = ((uint32_t*)data->values)[data->selected_idx];
-                    break;
-            }
-        }
-        if(data->callback){
-            data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data,data->selected_idx);
-        }
+        color = COLOR_GREEN;
+    }else if(item->owner->selected_item == item){
+        color = SELECTED_COLOR;
     }
-    data->active = !data->active;
+    gfx_printf_color(menu_item_x(item), menu_item_y(item), color,
+                     "%s", data->text[data->selected_idx]);
 }
 
-static void option_update(struct menu_item *item){
+void menu_list_set(menu_item_t *item, int idx){
     struct item_data *data = item->data;
-    if(data->data){
-        if(!data->active){
-            uint32_t d; 
-            switch(data->value_size){
-                case 1:
-                    d = *(uint8_t*)data->data;
-                    break;
-                case 2:
-                    d = *(uint16_t*)data->data;
-                    break;
-                case 4:
-                default:
-                    d = *(uint32_t*)data->data;
-                    break;
-            }
-            int idx = get_option_index(item,d);
-            if(idx>=0){
-                data->selected_idx = idx;
-            }
-        }
-    }
-    if(data->callback){
-        data->callback(item, MENU_CALLBACK_UPDATE, NULL, -1);
-    }
+    if(idx < 0 || idx >= data->option_cnt) return;
+    data->selected_idx = idx;
 }
 
-static void option_draw(struct menu_item *item){
-    struct item_data *data = item->data;
-    z2_rgba32_t color = MENU_DEFAULT_COLOR;
-    if(data->active) color.color = COLOR_GREEN;
-    else if(item->owner->selected_item == item) color = MENU_SELECTED_COLOR;
-    gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color.color,"%s",data->text[data->selected_idx]);
+static void menu_list_remove(menu_item_t *item){
+    free(item->data);
+    item->data = NULL;
 }
 
-struct menu_item *menu_add_list(struct menu *menu, uint16_t x, uint16_t y,
-                                char **text, void *values,
-                                uint8_t value_size, uint16_t options, void *list_data,
-                                menu_list_callback callback, void *callback_data){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
+menu_item_t *menu_list_add(menu_t *menu, uint16_t x, uint16_t y,
+                           char **text, int option_cnt){
+    menu_item_t *item = menu_add(menu,x,y);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->text = text;
-        data->values = values;
-        data->value_size = value_size;
-        data->option_cnt = options;
+        data->option_cnt = option_cnt;
         data->selected_idx = 0;
-        data->data = list_data;
         data->active = 0;
-        data->callback = callback;
-        data->callback_data = callback_data;
-        item->draw_proc = option_draw;
-        item->navigate_proc = option_nav;
-        item->activate_proc = option_activate;
-        item->update_proc = option_update;
+        item->draw_proc = menu_list_draw;
+        item->remove_proc = menu_list_remove;
         item->data = data;
         item->interactive = 1;
+        menu_item_register_event(item, MENU_EVENT_NAVIGATE | MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, menu_list_event, NULL);
     }
     return item;
 }

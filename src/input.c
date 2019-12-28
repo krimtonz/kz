@@ -59,16 +59,18 @@ static int bind_get_component(uint16_t bind, int index){
 
 static uint16_t bind_get_bitmask(uint16_t bind){
     uint16_t p = 0;
-    for(int i=0;i<4;i++){
-        int c = bind_get_component(bind,i);
-        if(c==BIND_END) break;
-        p|= 1 << c;
+    for(int i = 0;i < 4;i++){
+        int c = bind_get_component(bind, i);
+        if(c==BIND_END){
+            break;
+        }
+        p |= 1 << c;
     }
     return p;
 }
 
 static int button_get_index(uint16_t button_mask){
-    for(int i=0;i<16;i++){
+    for(int i = 0;i < 16;i++){
         if(button_mask & (1 << i)) return i;
     }
     return -1;
@@ -76,20 +78,20 @@ static int button_get_index(uint16_t button_mask){
 
 uint16_t make_bind(int len, ...){
     va_list list;
-    va_start(list,len);
+    va_start(list, len);
     uint16_t ret = 0;
     uint16_t val = 0;
-    for(int i=0;i<len;i++){
-        val = va_arg(list,int);
-        for(int j=0;j<16;j++){
+    for(int i = 0;i < len;i++){
+        val = va_arg(list, int);
+        for(int j = 0;j < 16;j++){
             if(val & (1 << j)){
                 ret |= j << (i * 4);
             }
         }
     }
     va_end(list);
-    if(len<4){
-        ret |= 6 << (len*4);
+    if(len < 4){
+        ret |= 6 << (len * 4);
     }
     return ret;
 }
@@ -102,7 +104,7 @@ void input_update(){
     pad_released = (pad ^ z_pad) & ~z_pad;
     pad = z_pad;
     pad_pressed = 0;
-    for(int i=0;i<16;i++){
+    for(int i = 0;i < 16;i++){
         uint16_t p = 1 << i;
         if(pad & p){
             button_time[i]++;
@@ -115,25 +117,28 @@ void input_update(){
     }
     uint16_t bind_pad[KZ_CMD_MAX];
     _Bool bind_state[KZ_CMD_MAX];
-    for(int i=0;i<KZ_CMD_MAX;i++){
+    for(int i = 0;i < KZ_CMD_MAX;i++){
         uint16_t *b =  &settings->binds[i];
         bind_pad[i] = bind_get_bitmask(*b);
         int *cs = &bind_component_state[i];
-        int j;
-        uint16_t c;
-        if(((reserved & bind_pad[i]) && i!=0 && i!=KZ_CMD_RETURN) || !input_enabled){
+        int j = 0;
+        uint16_t c = BIND_END;
+        if(((reserved & bind_pad[i]) && i != 0 && i != KZ_CMD_RETURN) || !input_enabled){
             *cs = 0;
         }else{
             int css = *cs;
-            for(j=0;j<4;j++){
-                c = bind_get_component(*b,j);
-                if(c==BIND_END) break;
+            for(j = 0;j < 4;j++){
+                c = bind_get_component(*b, j);
+                if(c == BIND_END){
+                    break;
+                }
                 uint8_t csm = 1 << j;
                 if(*cs & csm){
-                    if(pad & (1 << c))
+                    if(pad & (1 << c)){
                         continue;
+                    }
                     else{
-                        if(*cs & ~((1 << (j+1))-1)){
+                        if(*cs & ~((1 << (j + 1)) - 1)){
                             *cs = 0;
                         }else{
                             *cs &= ~csm;
@@ -141,25 +146,26 @@ void input_update(){
                         break;
                     }
                 }
-                if((pad_released & (1 << c)) || (css!=0 && (pad_pressed_raw & ~bind_pad[i]))){
+                if((pad_released & (1 << c)) || (css != 0 && (pad_pressed_raw & ~bind_pad[i]))){
                     *cs = 0;
                     break;
                 }else if(pad_pressed_raw & (1 << c)){
                     *cs |= csm;
-                }else
-                {
+                }else{
                     break;
                 }
             }
         }
-        bind_state[i] = (*cs && (j==4 || c == BIND_END));
+        bind_state[i] = (*cs && (j == 4 || c == BIND_END));
     }
-    for(int i=0;i<KZ_CMD_MAX;i++){
+    for(int i = 0;i < KZ_CMD_MAX;i++){
         uint16_t pi = bind_pad[i];
         for(int j = 0;bind_state[i] && j < KZ_CMD_MAX;j++){
-            if(!bind_state[j]) continue;
+            if(!bind_state[j]){
+                continue;
+            }
             uint16_t pj = bind_pad[j];
-            if(pi!=pj && (pi & pj) == pi){
+            if(pi != pj && (pi & pj) == pi){
                 bind_component_state[i] = 0;
                 bind_state[i] = 0;
             }
@@ -175,7 +181,7 @@ void input_update(){
 }
 
 _Bool input_bind_held(int index){
-    return bind_time[index]>0;
+    return bind_time[index] > 0;
 }
 
 _Bool input_bind_pressed(int index){
@@ -195,7 +201,9 @@ void free_buttons(uint16_t button_bitmask){
 }
 
 uint16_t input_pressed(){
-    if(!input_enabled) return 0;
+    if(!input_enabled){
+        return 0;
+    }
     return pad_pressed;
 }
 
@@ -211,102 +219,101 @@ int8_t input_y(){
     return stick_y;
 }
 
-static void draw_bind(struct menu_item *item){
+static void bind_draw(menu_item_t *item){
     struct bind_item_data *data = item->data;
     uint16_t bind = settings->binds[data->cmd];
-    uint32_t color = 0xFFFFFFFF;
-    if(data->state!=BIND_STATE_NONE){
-        color= 0x00FF00FF;
+    uint32_t color = DEFAULT_COLOR;
+    int x = menu_item_x(item);
+    int y = menu_item_y(item);
+    if(data->state != BIND_STATE_NONE){
+        color = COLOR_GREEN;
     }else if(item->owner->selected_item == item){
-        color = MENU_SELECTED_COLOR.color;
+        color = SELECTED_COLOR;
     }
-    if(bind==BIND_END){
-        gfx_printf_color(get_item_x_pos(item),get_item_y_pos(item),color,"none");
+    if(bind == BIND_END){
+        gfx_printf_color(x, y, color, "none");
         return;
     }
     int i = 0;
     int b;
-    gfx_texture *t_button = resource_get(R_KZ_BUTTONS);
-    while((b=bind_get_component(bind,i))!=BIND_END){
-        z2_rgba32_t bcolor;
-        if(color==0xFFFFFFFF){
-            bcolor.color = button_colors[b];
-        }
-        else{
-            bcolor.color = color;
-        }
-        gfx_draw_sprite_color(t_button,get_item_x_pos(item) + (i++ * 10),get_item_y_pos(item),b,8,8,bcolor.color);
-        if(i==4) break;
+    gfx_texture *button_tex = resource_get(R_KZ_BUTTONS);
+    while((b = bind_get_component(bind, i)) != BIND_END){
+        color = button_colors[b];
+        gfx_draw_sprite_color(button_tex, x + (i++ * 10), y, b, 8, 8, color);
+        if(i == 4) break;
     }
 }
 
-static void bind_activate(struct menu_item *item){
+static int bind_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
     struct bind_item_data *data = item->data;
-    if(data->state == BIND_STATE_NONE){
-        data->state = BIND_STATE_BEGIN;
-        input_enabled = 0;
-    }
-}
-
-static void bind_update(struct menu_item *item){
-    struct bind_item_data *data = item->data;
-    uint16_t *bind = &settings->binds[data->cmd];
-    if(data->state==BIND_STATE_BEGIN){
-        if(!pad){
-            data->state = BIND_STATE_ACTION;
+    if(event == MENU_EVENT_UPDATE){
+        if(data->state == BIND_STATE_NONE){
+            return 0;
         }
-        else if(button_time[button_get_index(BUTTON_L)]>=INPUT_REPEAT){
-            input_enabled = 1;
-            *bind = make_bind(0);
-            data->state = BIND_STATE_NONE;
-        }
-    }
-    if (data->state == BIND_STATE_ACTION){
-        if(pad){
-            *bind = make_bind(0);
-            data->state = BIND_STATE_LISTENING;
-        }
-    }
-    if(data->state == BIND_STATE_LISTENING){
-        uint16_t p = bind_get_bitmask(*bind);
-        if(pad == 0){
-            data->state = 0;
-            input_enabled = 1;
-        }else{
-            uint16_t pressed = pad_pressed_raw & ~p;
-            for(int i=0;pressed && i<4;++i){
-                int btn = bind_get_component(*bind,i);
-                if(btn != BIND_END){
-                    continue;
-                }
-                btn = button_get_index(pressed);
-                *bind = (*bind & ~(0x000F << (i*4))) | (btn << (i*4));
-                if(i<3){
-                    *bind = (*bind & ~(0x000F << ((i+1)*4))) | (BIND_END << ((i+1)*4));
-                }
-                pressed &= ~(1 << btn);
+        uint16_t *bind = &settings->binds[data->cmd];
+        if(data->state == BIND_STATE_BEGIN){
+            if(!pad){
+                data->state = BIND_STATE_ACTION;
+            }
+            else if(button_time[button_get_index(BUTTON_L)] >= INPUT_REPEAT){
+                input_enabled = 1;
+                *bind = make_bind(0);
+                data->state = BIND_STATE_NONE;
             }
         }
+        if (data->state == BIND_STATE_ACTION){
+            if(pad){
+                *bind = make_bind(0);
+                data->state = BIND_STATE_LISTENING;
+            }
+        }
+        if(data->state == BIND_STATE_LISTENING){
+            uint16_t p = bind_get_bitmask(*bind);
+            if(pad == 0){
+                data->state = 0;
+                input_enabled = 1;
+            }else{
+                uint16_t pressed = pad_pressed_raw & ~p;
+                for(int i=0;pressed && i < 4;++i){
+                    int btn = bind_get_component(*bind,i);
+                    if(btn != BIND_END){
+                        continue;
+                    }
+                    btn = button_get_index(pressed);
+                    *bind = (*bind & ~(0x000F << (i * 4))) | (btn << (i * 4));
+                    if(i < 3){
+                        *bind = (*bind & ~(0x000F << ((i + 1) * 4))) | (BIND_END << ((i + 1) * 4));
+                    }
+                    pressed &= ~(1 << btn);
+                }
+            }
+        }
+    }else if(event == MENU_EVENT_ACTIVATE){
+        if(data->state == BIND_STATE_NONE){
+            data->state = BIND_STATE_BEGIN;
+            input_enabled = 0;
+        }
     }
+    return 1;
 }
 
-void menu_set_bind(struct menu_item *item, int cmd){
+void menu_bind_set(menu_item_t *item, int cmd){
     struct bind_item_data *data = item->data;
     data->cmd = cmd;
     data->state = BIND_STATE_NONE;
 }
 
-struct menu_item *menu_add_bind(struct menu *menu, int x, int y, int cmd){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
+menu_item_t *menu_bind_add(menu_t *menu, int x, int y, int cmd){
+    menu_item_t *item = menu_add(menu, x, y);
     if(item){
         struct bind_item_data *data = malloc(sizeof(*data));
         data->cmd = cmd;
         data->state = BIND_STATE_NONE;
         item->data = data;
         item->interactive = 1;
-        item->draw_proc = draw_bind;
-        item->activate_proc = bind_activate;
-        item->update_proc = bind_update;
+        item->draw_proc = bind_draw;
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, bind_event, NULL);
     }
     return item;
 }

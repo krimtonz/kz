@@ -1,3 +1,4 @@
+#ifndef LITE
 #ifndef _STATE_H
 #define _STATE_H
 
@@ -13,4 +14,5 @@ typedef struct{
 size_t save_state(void *state);
 void load_state(void *state);
 
+#endif
 #endif

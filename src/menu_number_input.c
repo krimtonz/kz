@@ -1,18 +1,15 @@
 #include <stdlib.h>
 #include "menu.h"
+#include "gfx.h"
 
-struct menu_data_number{
-    uint32_t                value; // 00
-    void                   *val_ptr; // 04
-    char                   *digits; // 08
-    void                   *callback_data; // 0c
-    menu_number_callback    callback; // 10
-    uint8_t                 base; // 14
-    uint8_t                 editing; // 15
-    uint8_t                 length; // 16
-    uint8_t                 edit_idx; // 17
-    uint8_t                 val_len; // 18
-    _Bool                   _signed; // 19
+struct item_data{
+    uint32_t                value;
+    char                   *digits;
+    uint8_t                 base;
+    int                     editing;
+    uint8_t                 length;
+    uint8_t                 edit_idx;
+    _Bool                   _signed;
 };
 
 static char int_to_char(int i){
@@ -27,81 +24,18 @@ static int char_to_int(char c){
     return c - ('a' - 0xA);
 }
 
-static uint32_t get_val(struct menu_data_number *data){
-    if(data->val_ptr){
-        switch(data->val_len){
-            case 1:
-                return *(uint8_t*)data->val_ptr;
-                break;
-            case 2:
-                return *(uint16_t*)data->val_ptr;
-                break;
-            case 4:
-            default:
-                return *(uint32_t*)data->val_ptr;
-                break;
-        }
-    }else{
-        return data->value;
-    }
+static uint32_t get_val(struct item_data *data){
+    return data->value;
 }
 
-static void set_val(struct menu_data_number *data, uint32_t new_val){
-    if(data->val_ptr){
-        switch(data->val_len){
-            case 1:
-                *(uint8_t*)data->val_ptr = (uint8_t)new_val;
-                break;
-            case 2:
-                *(uint16_t*)data->val_ptr = (uint16_t)new_val;
-                break;
-            case 4:
-            default:
-                *(uint32_t*)data->val_ptr = (uint32_t)new_val;
-                break;
-        }
-    }else{
-        data->value = new_val;
-    }
-}
-
-static void menu_number_activate_callback(struct menu_item *item){
-    struct menu_data_number *data = item->data;
-    if(data->editing){
-        data->editing = 0;
-        int mul = 1;
-        uint32_t val = 0;
-        for(int i=data->length-1;i>=0;i--){
-            if(data->_signed && i == 0) {
-                break;
-            }
-            else if(!data->_signed && i == data->length - 1){
-                continue;
-            }
-            val += (char_to_int(data->digits[i]) % data->base) * mul;
-            mul *= data->base;
-        }
-        if(data->_signed && data->digits[0] == '-') val *= -1;
-        data->value = val;
-        if(data->callback && data->callback(item, MENU_CALLBACK_ACTIVATE, data->callback_data, data->value)){
-            return;
-        }
-        if(data->val_ptr){
-            set_val(data,val);
-        }
-    }else{
-        data->editing = 1;
-    }
-}
-
-static void menu_number_draw(struct menu_item *item){
-    struct menu_data_number *data = item->data;
-    z2_rgba32_t color = MENU_DEFAULT_COLOR;
+static void menu_number_draw(menu_item_t *item){
+    struct item_data *data = item->data;
+    uint32_t color = DEFAULT_COLOR;
     if(item->owner->selected_item == item && !data->editing)
-        color = MENU_SELECTED_COLOR;
-    int x = get_item_x_pos(item) + (kfont->c_width * (data->length-1));
+        color = SELECTED_COLOR;
+    int x = menu_item_x(item) + (kfont->c_width * (data->length-1));
     if(!data->_signed) x -= kfont->c_width;
-    int y = get_item_y_pos(item);
+    int y = menu_item_y(item);
     uint32_t val = get_val(data);
     int sign = (data->_signed && data->digits[0] == '-') ? -1 : 1;
     val *= sign;
@@ -111,10 +45,10 @@ static void menu_number_draw(struct menu_item *item){
         }
         if(data->editing){
             if(data->edit_idx == i){
-                color.color = 0x00FF00FF;
+                color = COLOR_GREEN;
             }
             else{
-                color=MENU_DEFAULT_COLOR;
+                color = DEFAULT_COLOR;
             }
         }
         else{
@@ -132,75 +66,105 @@ static void menu_number_draw(struct menu_item *item){
                 val /= data->base;
             }
         }
-        gfx_printf_color(x,y,color.color,"%c",data->digits[i]);
+        gfx_printf_color(x, y, color, "%c", data->digits[i]);
         x -= kfont->c_width;
     }
 }
 
-static int menu_number_nav(struct menu_item *item, enum menu_nav nav){
-    struct menu_data_number *data = item->data;
-    if(!data->editing) return 0;
-    int v = char_to_int(data->digits[data->edit_idx]);
-    switch(nav){
-        case MENU_NAV_LEFT:
-            if(data->edit_idx == 0){
-                if(data->_signed){
-                    data->edit_idx = data->length - 1;
+static int menu_number_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
+    struct item_data *data = item->data;
+    if(event == MENU_EVENT_ACTIVATE){
+        if(data->editing){
+            data->editing = 0;
+            int mul = 1;
+            uint32_t val = 0;
+            for(int i = data->length-1;i >= 0;i--){
+                if(data->_signed && i == 0) {
+                    break;
+                }
+                else if(!data->_signed && i == data->length - 1){
+                    continue;
+                }
+                val += (char_to_int(data->digits[i]) % data->base) * mul;
+                mul *= data->base;
+            }
+            if(data->_signed && data->digits[0] == '-') val *= -1;
+            data->value = val;
+            *event_data = (void*)data->value;
+            menu_item_trigger_event(item, MENU_EVENT_NUMBER, event_data);
+        }else{
+            data->editing = 1;
+        }
+    }else if(event == MENU_EVENT_NAVIGATE){
+        if(!data->editing){
+            return 0;
+        }
+        menu_nav_t nav = (menu_nav_t)event_data;
+        int v = char_to_int(data->digits[data->edit_idx]);
+        switch(nav){
+            case MENU_NAV_LEFT:
+                if(data->edit_idx == 0){
+                    if(data->_signed){
+                        data->edit_idx = data->length - 1;
+                    }
+                    else{
+                        data->edit_idx = data->length - 2;
+                    }
                 }
                 else{
-                    data->edit_idx = data->length - 2;
+                    data->edit_idx--;
                 }
-            }
-            else{
-                data->edit_idx--;
-            }
-            break;
-        case MENU_NAV_RIGHT:
-            data->edit_idx++;
-            if(!data->_signed && data->edit_idx == data->length-1){
-                data->edit_idx = 0;
-            }
-            else if(data->edit_idx>=data->length){
-                data->edit_idx = 0;
-            }
-            break;
-        case MENU_NAV_UP:
+                break;
+            case MENU_NAV_RIGHT:
+                data->edit_idx++;
+                if(!data->_signed && data->edit_idx == data->length-1){
+                    data->edit_idx = 0;
+                }
+                else if(data->edit_idx>=data->length){
+                    data->edit_idx = 0;
+                }
+                break;
+            case MENU_NAV_UP:
+                if(data->_signed && data->edit_idx == 0){
+                    if(data->digits[0] == '+'){
+                        data->digits[0] = '-';
+                    }else{
+                        data->digits[0] = '+';
+                    }
+                }else{
+                    v++;
+                    v = (v + data->base) % data->base;
+                    data->digits[data->edit_idx] = int_to_char(v);
+                }
+                break;
+            case MENU_NAV_DOWN:
             if(data->_signed && data->edit_idx == 0){
-                if(data->digits[0] == '+'){
-                    data->digits[0] = '-';
+                    if(data->digits[0] == '+'){
+                        data->digits[0] = '-';
+                    }else{
+                        data->digits[0] = '+';
+                    }
                 }else{
-                    data->digits[0] = '+';
+                    v--;
+                    v = (v + data->base) % data->base;
+                    data->digits[data->edit_idx] = int_to_char(v);
                 }
-            }else{
-                v++;
-                v = (v + data->base) % data->base;
-                data->digits[data->edit_idx] = int_to_char(v);
-            }
-            break;
-        case MENU_NAV_DOWN:
-        if(data->_signed && data->edit_idx == 0){
-                if(data->digits[0] == '+'){
-                    data->digits[0] = '-';
-                }else{
-                    data->digits[0] = '+';
-                }
-            }else{
-                v--;
-                v = (v + data->base) % data->base;
-                data->digits[data->edit_idx] = int_to_char(v);
-            }
-            break;
-        default:
-            break;
+                break;
+            default:
+                break;
+        }
+        return 1;
+    }else if(event == MENU_EVENT_UPDATE && data->editing){
+        return 1;
     }
-
-    return 1;
+    return 0;
 }
 
-void menu_number_set(struct menu_item *item, uint32_t val){
-    struct menu_data_number *data = item->data;
+void menu_number_set(menu_item_t *item, uint32_t val){
+    struct item_data *data = item->data;
     data->value = val;
-    for(int i=data->length - 1;i>=0;i--){
+    for(int i = data->length - 1;i >= 0;i--){
         if(i == 0 && data->_signed){
             data->digits[i] = '+';
         }
@@ -215,27 +179,65 @@ void menu_number_set(struct menu_item *item, uint32_t val){
     }
 }
 
-static void menu_number_update_proc(struct menu_item *item){
-    struct menu_data_number *data = item->data;
-    if(!data->editing && data->callback){
-        data->callback(item, MENU_CALLBACK_UPDATE, data->callback_data, data->value);
+int menu_number_word_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    uint32_t *callback_data = handler->callback_data;
+    if(callback_data){
+        if(event == MENU_EVENT_NUMBER){
+            *callback_data = (uint32_t)*event_data;
+        }else if(event == MENU_EVENT_UPDATE){
+            menu_item_t *item = handler->subscriber;
+            struct item_data *data = item->data;
+            data->value = *callback_data;
+        }
     }
+    return 1;
 }
 
-struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t y,
-                                        menu_number_callback callback, void *callback_data,
-                                        int8_t base, uint8_t length, void *value,
-                                        uint8_t val_len){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
+int menu_number_halfword_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    uint16_t *callback_data = handler->callback_data;
+    if(callback_data){
+        if(event == MENU_EVENT_NUMBER){
+            *callback_data = ((uint32_t)*event_data) & 0xFFFF;
+        }else if(event == MENU_EVENT_UPDATE){
+            menu_item_t *item = handler->subscriber;
+            struct item_data *data = item->data;
+            data->value = *callback_data;
+        }
+    }
+    return 1;
+}
+
+int menu_number_byte_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    uint8_t *callback_data = handler->callback_data;
+    if(callback_data){
+        if(event == MENU_EVENT_NUMBER){
+            *callback_data = ((uint32_t)*event_data) & 0xFF;
+        }else if(event == MENU_EVENT_UPDATE){
+            menu_item_t *item = handler->subscriber;
+            struct item_data *data = item->data;
+            data->value = *callback_data;
+        }
+    }
+    return 1;
+}
+
+static void menu_number_remove(menu_item_t *item){
+    struct item_data *data = item->data;
+    free(data->digits);
+    data->digits = NULL;
+    free(data);
+    item->data = NULL;
+}
+
+menu_item_t *menu_number_input_add(menu_t* menu, uint16_t x, uint16_t y, int8_t base, uint8_t length){
+    menu_item_t *item = menu_add(menu,x,y);
     if(item){
-        struct menu_data_number *data = malloc(sizeof(*data));
-        item->activate_proc = menu_number_activate_callback;
-        item->update_proc = menu_number_update_proc;
+        struct item_data *data = malloc(sizeof(*data));
         item->draw_proc = menu_number_draw;
-        item->navigate_proc = menu_number_nav;
+        item->remove_proc = menu_number_remove;
         item->data = data;
         item->interactive = 1;
-        if(base<0){
+        if(base < 0){
             base = -base;
             data->_signed = 1;
         }else{
@@ -245,17 +247,9 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
         data->base = base;
         data->length = length;
         data->editing = 0;
-        data->val_ptr = value;
-        data->val_len = val_len;
-        if(value){
-            data->value = get_val(data);
-        }else{
-            data->value = 0;
-        }
+        data->value = 0;
         data->digits = malloc(length + 1);
         data->digits[length] = 0;
-        data->callback_data = callback_data;
-        data->callback = callback;
         int val = data->value;
         for(int i=data->length - 1;i>=0;i--){
             if(i == 0 && data->_signed){
@@ -276,6 +270,7 @@ struct menu_item *menu_add_number_input(struct menu* menu, uint16_t x, uint16_t 
         else{
             data->edit_idx = length - 2;
         }
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_NAVIGATE | MENU_EVENT_UPDATE, menu_number_event, NULL);
     }
     return item;
 }

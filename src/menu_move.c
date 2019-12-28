@@ -6,76 +6,76 @@
 struct item_data{
     int16_t *x;
     int16_t *y;
-    menu_generic_callback callback;
-    void *callback_data;
     _Bool active;
 };
 
-static void move_activate_proc(struct menu_item *item){
+static int menu_move_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
     struct item_data *data = item->data;
-    data->active = !data->active;
-    if(data->callback){
-        data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data);
+    if(event == MENU_EVENT_ACTIVATE){
+        data->active = !data->active;
+        return 1;
+    }else if(event == MENU_EVENT_NAVIGATE){
+        if(!data->active) return 0;
+        menu_nav_t nav = (menu_nav_t)event_data;
+        int dist = (input_pressed_raw() & BUTTON_Z) ? 3 : 1;
+        switch(nav){
+            case MENU_NAV_DOWN:
+            if(data->y){
+                *data->y += dist;
+            }
+            break;
+            case MENU_NAV_UP:
+            if(data->y){
+                *data->y -= dist;
+            }
+            break;
+            case MENU_NAV_LEFT:
+            if(data->x){
+                *data->x -= dist;
+            }
+            break;
+            case MENU_NAV_RIGHT:
+            if(data->x){
+                *data->x += dist;
+            }
+            default:
+            break;
+        }
+        return 1;
     }
+    return 0;
 }
 
-static int move_nav_proc(struct menu_item *item, enum menu_nav nav){
+static void menu_move_draw(menu_item_t *item){
     struct item_data *data = item->data;
-    if(!data->active) return 0;
-    int dist = (input_pressed_raw() & BUTTON_Z) ? 3 : 1;
-    switch(nav){
-        case MENU_NAV_DOWN:
-        if(data->y){
-            *data->y += dist;
-        }
-        break;
-        case MENU_NAV_UP:
-        if(data->y){
-            *data->y -= dist;
-        }
-        break;
-        case MENU_NAV_LEFT:
-        if(data->x){
-            *data->x -= dist;
-        }
-        break;
-        case MENU_NAV_RIGHT:
-        if(data->x){
-            *data->x += dist;
-        }
-        default:
-        break;
-    }
-    return 1;
-}
-
-static void move_draw_proc(struct menu_item *item){
-    struct item_data *data = item->data;
-    uint32_t color = 0xFFFFFFFF;
+    uint32_t color = DEFAULT_COLOR;
     if(data->active){
-        color = 0x00FF00FF;
+        color = COLOR_GREEN;
     }else if(item->owner->selected_item == item){
-        color = MENU_SELECTED_COLOR.color;
+        color = SELECTED_COLOR;
     }
-    gfx_draw_sprite_color(resource_get(R_KZ_ICON),get_item_x_pos(item),get_item_y_pos(item),2,8,8,color);
+    gfx_draw_sprite_color(resource_get(R_KZ_ICON), menu_item_x(item), menu_item_y(item),
+                          2, 8, 8, color);
 }
 
-struct menu_item *menu_add_move_button(struct menu *menu, uint16_t x, uint16_t y,
-                                       int16_t *move_x, int16_t *move_y,
-                                       menu_generic_callback callback, void *callback_data){    
-    struct menu_item *item = menu_add(menu,x,y,NULL);
+static void menu_move_remove(menu_item_t *item){
+    free(item->data);
+    item->data = NULL;
+}
+
+menu_item_t *menu_move_button_add(menu_t *menu, uint16_t x, uint16_t y, int16_t *move_x, int16_t *move_y){    
+    menu_item_t *item = menu_add(menu,x,y);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->x = move_x;
         data->y = move_y;
-        data->callback = callback;
-        data->callback_data = data;
         data->active = 0;
         item->data = data;
         item->interactive = 1;
-        item->draw_proc = move_draw_proc;
-        item->navigate_proc = move_nav_proc;
-        item->activate_proc = move_activate_proc;
+        item->draw_proc = menu_move_draw;
+        item->remove_proc = menu_move_remove;
+        menu_item_register_event(item, MENU_EVENT_NAVIGATE | MENU_EVENT_ACTIVATE, menu_move_event, NULL);
     }
     return item;
 }

@@ -1,3 +1,4 @@
+#ifndef LITE
 #include <stdint.h>
 #include <set/set.h>
 #include <mips.h>
@@ -61,7 +62,7 @@ _Bool load_overlay(void **src, void **tab_addr, uint32_t vrom_start, uint32_t vr
 }
 
 void relocate_col_hdr(uint32_t hdr){
-    z2_col_hdr_t *col_hdr = zu_segment_loc(hdr);
+    z2_col_hdr_t *col_hdr = zu_segment_find(hdr);
     zu_segment_reloc(&col_hdr->vtx);
     zu_segment_reloc(&col_hdr->poly);
     zu_segment_reloc(&col_hdr->type);
@@ -228,7 +229,7 @@ void load_state(void *state){
     if(scene_index != z2_game.scene_index){
         z2_scene_table_ent_t *scene_ent = &z2_scene_table[z2_game.scene_index];
         size_t size = scene_ent->vrom_end - scene_ent->vrom_start;
-        zu_getfile(scene_ent->vrom_start,z2_game.scene_addr,size);
+        zu_file_get(scene_ent->vrom_start,z2_game.scene_addr,size);
         relocate_col_hdr((uint32_t)z2_game.col_ctxt.col_hdr);
         z2_game.col_ctxt.stc_list_pos = 0;
         z2_CreateStaticCollision(&z2_game.col_ctxt,&z2_game,z2_game.col_ctxt.stc_lut);
@@ -248,7 +249,7 @@ void load_state(void *state){
         if(c_ptr && c_id != -1 && (p_id != c_id || z2_game.scene_index != scene_index || p_ptr != c_ptr)){
             uint32_t start = z2_game.room_list[c_id].vrom_start;
             uint32_t end = z2_game.room_list[c_id].vrom_end;
-            zu_getfile(start, c_ptr, end - start);
+            zu_file_get(start, c_ptr, end - start);
         }
     }
 
@@ -267,7 +268,7 @@ void load_state(void *state){
         if(c_id != 0 && (c_id!=p_id || c_ptr!=p_ptr)){
             uint32_t start = z2_obj_table[c_id].vrom_start;
             uint32_t end = z2_obj_table[c_id].vrom_end;
-            zu_getfile(start,c_ptr,end-start);
+            zu_file_get(start,c_ptr,end-start);
         }
         z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(c_ptr);
         switch(c_id){
@@ -426,3 +427,4 @@ size_t save_state(void *state){
     
     return (char*)p - (char*)state;
 }
+#endif

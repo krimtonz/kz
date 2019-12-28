@@ -4,8 +4,6 @@
 #include <stdarg.h>
 #include "z2.h"
 
-#define COLOR_GREEN GPACK_RGBA8888(0x00,0xFF,0x00,0xFF)
-
 #define gfx_push(...)   {Gfx gfx__[]={__VA_ARGS__};     \
                         gfx_append(gfx__,sizeof(gfx__));}
 

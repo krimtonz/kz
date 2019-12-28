@@ -24,7 +24,7 @@ RESDESC		= res.json
 ADDRESS     = 0x80800060
 ADDRESS_LITE	= 0x806E0060
 ADDRESS_LDR	= 0x80080000
-ALL_CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -O1 -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
+ALL_CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
 ALL_CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS)
 ALL_LDFLAGS     = -T gl-n64.ld -nostartfiles -specs=nosys.specs $(LDFLAGS)
 
@@ -123,4 +123,8 @@ $(KZ-NZSE)  	: CPPFLAGS	?=	-DZ2_VERSION=NZSE
 $(KZ-NZSJ)		: CPPFLAGS	?=	-DZ2_VERSION=NZSJ
 $(KZ-NZSJ10)	: CPPFLAGS	?=	-DZ2_VERSION=NZSJ10
 $(KZ-FULL)		: CPPFLAGS	+=	-DKZ_VERSION=KZ_FULL
+$(KZ-FULL)		: CFLAGS	?=  -O3 -flto -ffat-lto-objects
+$(KZ-FULL)		: LDFLAGS	?=	-O3 -flto
 $(KZ-LITE)		: CPPFLAGS	+=	-DLITE -DKZ_VERSION=KZ_LITE
+$(KZ-LITE)		: CFLAGS	?=  -Os
+$(KZ-LITE)		: LDFLAGS	?=	-Os

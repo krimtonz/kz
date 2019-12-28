@@ -12,29 +12,29 @@
 
 #define FILE_ROWS 13
 
-static struct menu file_menu;
-static struct menu_item *file_menu_rows[FILE_ROWS];
-static struct menu_item *file_menu_location = NULL;
-static struct menu_item *file_menu_text_entry = NULL;
-static struct menu_item *file_menu_accept_button = NULL;
-static struct menu_item *file_menu_clear_button = NULL;
-static struct menu_item *file_menu_down_button = NULL;
-static struct menu_item *file_menu_up_button = NULL;
-static int file_menu_offset = 0;
-static const char *file_menu_default = NULL;
-static const char *file_menu_extension = NULL;
-static enum file_mode file_menu_mode;
-static int file_menu_extension_len = 0;
-static get_file_callback_t file_menu_callback = NULL;
-static void *file_menu_callback_data = NULL;
-static struct set dir_files;
-static _Bool file_menu_ready = 0;
-static char *file_menu_text_value;
+static menu_t               file_menu;
+static menu_item_t         *file_menu_rows[FILE_ROWS];
+static menu_item_t         *file_menu_location = NULL;
+static menu_item_t         *file_menu_text_entry = NULL;
+static menu_item_t         *file_menu_accept_button = NULL;
+static menu_item_t         *file_menu_clear_button = NULL;
+static menu_item_t         *file_menu_down_button = NULL;
+static menu_item_t         *file_menu_up_button = NULL;
+static int                  file_menu_offset = 0;
+static const char          *file_menu_default = NULL;
+static const char          *file_menu_extension = NULL;
+static file_mode_t          file_menu_mode;
+static int                  file_menu_extension_len = 0;
+static get_file_callback_t  file_menu_callback = NULL;
+static void                *file_menu_callback_data = NULL;
+static struct set           dir_files;
+static _Bool                file_menu_ready = 0;
+static char                *file_menu_text_value;
 
 typedef struct{
-    char name[256];
-    _Bool isdir;
-    char text[32];
+    char    name[256];
+    _Bool   isdir;
+    char    text[32];
 } dir_entry_t;
 
 static _Bool stricmp(const char *a, const char *b){
@@ -108,8 +108,8 @@ static void update_view(){
             file_menu_text_entry->enabled = 1;
             y = 5;
         }
-        file_menu_up_button->y = y;
-        file_menu_down_button->y = y + FILE_ROWS - 1;
+        file_menu_up_button->y_cell = y;
+        file_menu_down_button->y_cell = y + FILE_ROWS - 1;
         if(dir_files.container.size > FILE_ROWS){
             file_menu_up_button->enabled = 1;
             file_menu_down_button->enabled = 1;
@@ -117,9 +117,9 @@ static void update_view(){
             file_menu_up_button->enabled = 0;
             file_menu_down_button->enabled = 0;
         }
-        for(int i = 0; i<FILE_ROWS;i++){
-            struct menu_item *item = file_menu_rows[i];
-            item->y = y++;
+        for(int i = 0; i < FILE_ROWS;i++){
+            menu_item_t *item = file_menu_rows[i];
+            item->y_cell = y++;
             if(i < dir_files.container.size){
                 item->enabled = 1;
             }else{
@@ -206,46 +206,39 @@ static _Bool dir_ent_comp(void *a, void *b){
 
 static void return_path(char *path){
     char *ret = malloc(4096);
-    if(getcwd(ret,4096)){
+    if(getcwd(ret, 4096)){
         int dl = strlen(ret);
         int nl = strlen(path);
-        if(dl+1 + nl + file_menu_extension_len < 4096){
+        if(dl + 1 + nl + file_menu_extension_len < 4096){
             ret[dl] = '/';
-            strcpy(&ret[dl+1],path);
-            strcpy(&ret[dl+1+nl],file_menu_extension);
+            strcpy(&ret[dl + 1], path);
+            strcpy(&ret[dl + 1 + nl], file_menu_extension);
         }
-        file_menu_callback(ret,file_menu_callback_data);
-        menu_callback(&file_menu,MENU_CALLBACK_RETURN);
+        file_menu_callback(ret, file_menu_callback_data);
+        menu_trigger_event(&file_menu, MENU_EVENT_RETURN, NULL);
     }
     free(ret);
 }
 
-static int reset_disk_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        reset_disk();
-        update_view();
-        file_menu_offset = 0;
-        return 1;
-    }
-    return 0;
+static int reset_disk_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    reset_disk();
+    update_view();
+    file_menu_offset = 0;
+    return 1;
 }
 
-static int accept_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        return_path(file_menu_text_value);
-        return 1;
-    }
-    return 0;
+static int accept_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    return_path(file_menu_text_value);
+    return 1;
 }
 
-static int clear_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        return 1;
-    }
-    return 0;
+static int clear_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    memset(file_menu_text_value, 0, 32);
+    return 1;
 }
 
-static void file_activate(struct menu_item *item){
+static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
     int data = (int)item->data;
     dir_entry_t *dirent = (dir_entry_t*)set_at(&dir_files,(int)data + file_menu_offset);
     if(dirent->isdir){
@@ -265,12 +258,13 @@ static void file_activate(struct menu_item *item){
         }
         free(path);
     }
+    return 1;
 }
 
-static void file_draw(struct menu_item *item){
+static void menu_file_row_draw(menu_item_t *item){
     dir_entry_t *ent = set_at(&dir_files,(int)item->data + file_menu_offset);
-    int x = get_item_x_pos(item);
-    int y = get_item_y_pos(item);
+    int x = menu_item_x(item);
+    int y = menu_item_y(item);
     int tile = 0;
     char *text = ent->text;
     if(strcmp(ent->text,"..") == 0){
@@ -280,76 +274,64 @@ static void file_draw(struct menu_item *item){
     else if(ent->isdir){
         tile = 1;
     }
-    uint32_t color = 0xFFFFFFFF;
+    uint32_t color = DEFAULT_COLOR;
     if(item->owner->selected_item == item){
-        color = MENU_SELECTED_COLOR.color;
+        color = SELECTED_COLOR;
     }
-    gfx_draw_sprite_color(resource_get(R_KZ_FILES),x,y,tile,8,8,color);
+    gfx_draw_sprite_color(resource_get(R_KZ_FILES), x, y, tile, 8, 8, color);
     gfx_printf_color(x + 10, y,color,"%s",text);
 }
 
-static int file_menu_up_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        if(file_menu_offset == 0){
-            file_menu_offset = dir_files.container.size - FILE_ROWS;
-        }else{
-            file_menu_offset--;
-        }
-        return 1;
+static int file_menu_up_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(file_menu_offset == 0){
+        file_menu_offset = dir_files.container.size - FILE_ROWS;
+    }else{
+        file_menu_offset--;
     }
-    return 0;
+    return 1;
 }
 
-static int file_menu_down_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        if(file_menu_offset >= dir_files.container.size - FILE_ROWS){
-            file_menu_offset = 0;
-        }else{
-            file_menu_offset++;
-        }
-        return 1;
+static int file_menu_down_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(file_menu_offset >= dir_files.container.size - FILE_ROWS){
+        file_menu_offset = 0;
+    }else{
+        file_menu_offset++;
     }
-    return 0;
+    return 1;
 }
 
-static void init_file_menu(){
+static void menu_file_init(){
     if(file_menu_ready){
         return;
     }
     set_init(&dir_files,sizeof(dir_entry_t),dir_ent_comp);
-    menu_init(&file_menu);
-    file_menu.selected_item = menu_add_button(&file_menu,0,0,"return",menu_return,NULL);
-    menu_add_button(&file_menu,0,1,"reset disk",reset_disk_callback,NULL);
-    file_menu_location = menu_add(&file_menu,0,2,"");
+    menu_init(&file_menu, 0, 0);
+    file_menu.selected_item = menu_button_add(&file_menu, 0, 0, "return", menu_return, NULL);
+    menu_button_add(&file_menu, 0, 1, "reset disk", reset_disk_onactivate, NULL);
+    file_menu_location = menu_label_add(&file_menu,0,2,"");
     file_menu_text_value = malloc(32);
-    file_menu_text_entry = menu_add_text_input(&file_menu,0,3,"untitled",&file_menu_text_value,32);
-    file_menu_accept_button = menu_add_button(&file_menu,0,4,"accept",accept_callback,NULL);
-    file_menu_clear_button = menu_add_button(&file_menu,8,4,"clear",clear_callback,NULL);
+    file_menu_text_entry = menu_text_input_add(&file_menu, 0, 3, "untitled", &file_menu_text_value, 32);
+    file_menu_accept_button = menu_button_add(&file_menu, 0, 4, "accept", accept_onactivate, NULL);
+    file_menu_clear_button = menu_button_add(&file_menu, 8, 4, "clear", clear_onactivate, NULL);
     int y = 3;
-
-    draw_info_t scroll_draw = {
-        NULL, 0,0,1.0f, 1.0f, 8,8,{{0xFF,0xFF,0xFF,0xFF}}, {{0xFF,0xFF,0xFF,0xFF}}, 1, NULL
-    };
-    scroll_draw.texture = resource_get(R_KZ_ARROWS);
-
-    file_menu_up_button = menu_add_gfx_button(&file_menu,0,y,file_menu_up_callback,NULL,&scroll_draw);
-    scroll_draw.on_tile = 1;
-    file_menu_down_button = menu_add_gfx_button(&file_menu,0,y + FILE_ROWS - 1,file_menu_down_callback,NULL,&scroll_draw);
+    
+    file_menu_up_button = menu_gfx_button_add(&file_menu, 0, y, scroll_up_sprite, file_menu_up_onactivate, NULL);
+    file_menu_down_button = menu_gfx_button_add(&file_menu, 0, y + FILE_ROWS - 1, scroll_down_sprite, file_menu_down_onactivate, NULL);
 
     for(int i=0;i<FILE_ROWS;i++){
-        struct menu_item *item = menu_add(&file_menu,1,y++,NULL);
+        menu_item_t *item = menu_add(&file_menu,1,y++);
         item->data = (void*)i;
-        item->activate_proc = file_activate;
-        item->draw_proc = file_draw;
+        item->draw_proc = menu_file_row_draw;
         item->interactive = 1;
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE, menu_file_onactivate, NULL);
         file_menu_rows[i] = item;
     }
     file_menu_ready = 1;
 }
 
-void menu_get_file(enum file_mode mode, const char *default_fn, const char *extension, get_file_callback_t callback, void *callback_data){
+void menu_file_get(file_mode_t mode, const char *default_fn, const char *extension, get_file_callback_t callback, void *callback_data){
     if(!file_menu_ready){
-        init_file_menu();
+        menu_file_init();
     }
     file_menu.selected_item = file_menu.items.first;
     file_menu_default = default_fn;
@@ -360,10 +342,11 @@ void menu_get_file(enum file_mode mode, const char *default_fn, const char *exte
     file_menu_mode = mode;
     file_menu_offset = 0;
     if(default_fn){
-        strncpy(file_menu_text_value,default_fn,31);
+        strncpy(file_menu_text_value, default_fn, 31);
         file_menu_text_value[31] = 0;
     }
-    menu_enter(&kz.main_menu,&file_menu);
+    void *menu = &file_menu;
+    menu_trigger_event(&kz.main_menu, MENU_EVENT_ENTER, &menu);
     update_view();
 }
 

@@ -3,21 +3,18 @@
 #include "resource.h"
 
 struct item_data {
-    menu_generic_callback   callback;
-    void                   *callback_data;
     gfx_texture            *on_texture;
     gfx_texture            *off_texture;
     uint32_t                on_color;
     uint32_t                off_color;
     int                     width;
     int                     height;
-    _Bool                   status;
+    int                     status;
     uint8_t                 on_tile;
     uint8_t                 off_tile;
 };
 
-static void draw_switch_proc(struct menu_item *item){
-    
+static void menu_switch_draw(menu_item_t *item){
     struct item_data *data = item->data;
     gfx_texture *texture = data->on_texture;
     int tile = data->on_tile;
@@ -29,47 +26,35 @@ static void draw_switch_proc(struct menu_item *item){
        tile = data->off_tile;
        color = data->off_color;
     }
-    int x = get_item_x_pos(item);
-    int y = get_item_y_pos(item);
+    int x = menu_item_x(item);
+    int y = menu_item_y(item);
     if(item->owner->selected_item == item){
-        gfx_draw_rectangle(x,y,data->width,data->height,MENU_SELECTED_COLOR.color);
+        gfx_draw_rectangle(x, y, data->width, data->height, SELECTED_COLOR);
     }
 
-    gfx_draw_sprite_color(texture,x,y,
-                                tile,data->width,data->height, color);
+    gfx_draw_sprite_color(texture, x, y, tile,data->width, data->height, color);
 }
 
-static void activate_switch_proc(struct menu_item *item){
+static int menu_switch_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_item_t *item = handler->subscriber;
     struct item_data *data = item->data;
     data->status = !data->status;
-    if(data->callback){
-        data->callback(item,MENU_CALLBACK_ACTIVATE,data->callback_data);
-    }
+    return 0;
 }
 
-static void update_switch_proc(struct menu_item *item){
-    struct item_data *data = item->data;
-    if(data->callback){
-        data->callback(item,MENU_CALLBACK_UPDATE,data->callback_data);
-    }
-}
-
-void menu_switch_set(struct menu_item *item, _Bool status){
+void menu_switch_set(menu_item_t *item, int status){
     struct item_data *data = item->data;
     data->status = status;
 }
 
-struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
-                                  menu_generic_callback callback, void *callback_data,
+menu_item_t *menu_switch_add(menu_t *menu, uint16_t x, uint16_t y,
                                   gfx_texture *on_texture, gfx_texture *off_texture,
                                   uint32_t on_color, uint32_t off_color,
                                   uint8_t on_tile, uint8_t off_tile,
                                   int width, int height, char *tooltip){
-    struct menu_item *item = menu_add(menu,x,y,NULL);
+    menu_item_t *item = menu_add(menu,x,y);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
-        data->callback = callback;
-        data->callback_data = callback_data;
         data->on_texture = on_texture;
         data->off_texture = off_texture;
         data->on_color = on_color;
@@ -82,9 +67,8 @@ struct menu_item *menu_add_switch(struct menu *menu, uint16_t x, uint16_t y,
         item->data = data;
         item->interactive = 1;
         item->tooltip = tooltip;
-        item->draw_proc = draw_switch_proc;
-        item->activate_proc = activate_switch_proc;
-        item->update_proc = update_switch_proc;
+        item->draw_proc = menu_switch_draw;
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE, menu_switch_onactivate, NULL);
     }
     return item;
 }

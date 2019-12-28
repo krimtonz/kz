@@ -3,23 +3,20 @@
 #include "gfx.h"
 #include "resource.h"
 
-struct item_data{
+struct item_data {
     gfx_texture    *texture;
     uint16_t        width;
     uint16_t        height;
     uint16_t        tile;
 };
 
-static void draw_menu_gfx(struct menu_item *item){
+static void menu_gfx_draw(menu_item_t *item){
     struct item_data *data = item->data;
-    gfx_draw_sprite(data->texture,get_item_x_pos(item),get_item_y_pos(item),data->tile,data->width,data->height);
+    gfx_draw_sprite(data->texture, menu_item_x(item), menu_item_y(item), data->tile, data->width, data->height);
 }
 
-struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y, 
-                               gfx_texture *texture, int tile,
-                               int width, int height){
-
-    struct menu_item *item = menu_add(menu,x,y,NULL);
+menu_item_t *menu_gfx_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, gfx_texture *texture, int tile, int width, int height){
+    menu_item_t *item = menu_add(menu,x_cell, y_cell);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         if(data){
@@ -29,7 +26,7 @@ struct menu_item *menu_add_gfx(struct menu *menu, uint16_t x, uint16_t y,
             data->tile = tile;
             item->data = data;
         }
-        item->draw_proc = draw_menu_gfx;
+        item->draw_proc = menu_gfx_draw;
         item->interactive = 0;
     }
     return item;

@@ -12,9 +12,14 @@
 #include "commands.h"
 #include "settings.h"
 #include "resource.h"
-#include "keyboard.h"
 #include "zu.h"
 #include "state.h"
+
+#ifdef WIIVC
+#define CPU_COUNTER 46777500
+#else
+#define CPU_COUNTER 46875000
+#endif
 
 __attribute__((section(".data")))
 kz_ctxt_t kz = {
@@ -22,95 +27,6 @@ kz_ctxt_t kz = {
 };
 
 char restriction_table[0x23A];
-
-void save_disp_p(struct disp_p *disp_p){
-    z2_gfx_t *gfx = z2_game.common.gfx;
-    disp_p->work_p = gfx->work.p - gfx->work.buf;
-    disp_p->work_d = gfx->work.d - gfx->work.buf;
-    disp_p->poly_opa_p = gfx->poly_opa.p - gfx->poly_opa.buf;
-    disp_p->poly_opa_d = gfx->poly_opa.d - gfx->poly_opa.buf;
-    disp_p->poly_xlu_p = gfx->poly_xlu.p - gfx->poly_xlu.buf;
-    disp_p->poly_xlu_d = gfx->poly_xlu.d - gfx->poly_xlu.buf;
-    disp_p->overlay_p = gfx->overlay.p - gfx->overlay.buf;
-    disp_p->overlay_d = gfx->overlay.d - gfx->overlay.buf;
-}
-
-void load_disp_p(struct disp_p *disp_p){
-    z2_gfx_t *gfx = z2_game.common.gfx;
-    gfx->work.p = disp_p->work_p + gfx->work.buf;
-    gfx->work.d = disp_p->work_d + gfx->work.buf;
-    gfx->poly_opa.p = disp_p->poly_opa_p + gfx->poly_opa.buf;
-    gfx->poly_opa.d = disp_p->poly_opa_d + gfx->poly_opa.buf;
-    gfx->poly_xlu.p = disp_p->poly_xlu_p + gfx->poly_xlu.buf;
-    gfx->poly_xlu.d = disp_p->poly_xlu_d + gfx->poly_xlu.buf;
-    gfx->overlay.p = disp_p->overlay_p + gfx->overlay.buf;
-    gfx->overlay.d = disp_p->overlay_d + gfx->overlay.buf;
-}
-
-void gfx_reloc(int src_disp_idx, int src_cimg_idx){
-    z2_gfx_t *gfx = z2_game.common.gfx;
-    uint32_t src_gfx = z2_disp_addr + src_disp_idx * Z2_DISP_SIZE;
-    uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
-    uint32_t src_cimg = z2_cimg[src_cimg_idx];
-    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
-    
-    z2_disp_buf_t segment_setup;
-    segment_setup.buf = (Gfx*)(dst_gfx + 0x140);
-    segment_setup.p = segment_setup.buf + 21;
-
-    z2_disp_buf_t primary;
-    primary.buf = (Gfx*)(dst_gfx + 0x02A8);
-    primary.p = primary.buf + 12;
-    
-    z2_disp_buf_t *new_disp[6] = {
-        &gfx->work,
-        &gfx->poly_opa,
-        &gfx->poly_xlu,
-        &gfx->overlay,
-        &primary,
-        &segment_setup,
-    };
-    for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
-        z2_disp_buf_t *dbuf = new_disp[i];
-        for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
-            switch(p->hi >> 24){
-                case G_VTX: break;
-                case G_DMA_IO: break;
-                case G_MTX: break;
-                case G_MOVEWORD:
-                switch((p->hi>>16) & 0xFF){
-                    case G_MW_SEGMENT: break;
-                    default: continue;
-                }
-                case G_MOVEMEM: break;
-                case G_LOAD_UCODE: break;
-                case G_DL: break;
-                case G_RDPHALF_1:
-                switch(p[1].hi>>24){
-                    case G_BRANCH_Z: break;
-                    case G_LOAD_UCODE: break;
-                    default: continue;
-                }
-                case G_SETTIMG: break;
-                case G_SETZIMG: break;
-                case G_SETCIMG: break;
-                case G_BG_1CYC: {
-                    p->lo = 0;
-                    p->hi = 0;
-                    continue;
-                }
-                case G_BG_COPY: break;
-                default: continue;
-            }
-            if(p->lo >=src_gfx && p->lo<src_gfx + Z2_DISP_SIZE){
-                p->lo += dst_gfx - src_gfx;
-            }
-            if(p->lo >=src_cimg && p->lo<src_cimg + Z2_CIMG_SIZE){
-                p->lo = dst_cimg;
-            }
-        }
-    }
-}
 
 static void cpu_counter(){
     static uint32_t count = 0;
@@ -122,38 +38,35 @@ static void cpu_counter(){
     count = new_count;
 }
 
+#ifndef LITE
 static void *state = NULL;
-static int save_state_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        if(state){
-            free(state);
-        }
-        state = malloc(768 * 1024);
-        kz_state_hdr_t *kz_state = state;
-        kz_state->size = save_state(state);
-        kz_state->z2_version = Z2_VERSION;
-        kz_state->settings_version = 0;
-        state = realloc(state,kz_state->size);
-        return 1;
+static int save_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(state){
+        free(state);
     }
-    return 0;
+    state = malloc(768 * 1024);
+    kz_state_hdr_t *kz_state = state;
+    kz_state->size = save_state(state);
+    kz_state->z2_version = Z2_VERSION;
+    kz_state->settings_version = 0;
+    state = realloc(state,kz_state->size);
+    return 1;
 }
 
-static int load_state_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        if(state){
-            load_state(state);
-        }
-        return 1;
+static int load_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(state){
+        load_state(state);
     }
-    return 0;
+    return 1;
 }
+#endif
 
 static void kz_main(void) {
     cpu_counter();
     gfx_begin();
 
     input_update();
+
     // Emergency settings reset, konami code
     {
         static uint16_t settings_reset[] = {
@@ -177,10 +90,10 @@ static void kz_main(void) {
         }
     }
 
-    save_disp_p(&kz.disp_p);
+    zu_disp_ptr_save(&kz.disp_p);
     
     /* Disable DPad on Pause Screen */
-    if(z2_player_ovl_table[0].ram!=NULL){
+    if(z2_player_ovl_table[0].ram != NULL){
         *((uint32_t*)z2_player_ovl_table[0].ram + z2_dpad_disable_offset) = 0x00001025; // or v0, r0, r0
     }
 
@@ -189,21 +102,21 @@ static void kz_main(void) {
         if(settings->input_display){
             int x = settings->id_x;
             int y = settings->id_y;
-            gfx_printf(x,y,"%4i %4i",input_x(),input_y());
-            gfx_texture *t_btn = resource_get(R_KZ_BUTTONS);
+            gfx_printf(x, y, "%4i %4i", input_x(), input_y());
+            gfx_texture *btn_tex = resource_get(R_KZ_BUTTONS);
             static const int8_t btns[] = { 15, 14, 12, 13, 3, 2, 0, 1, 5, 4, 11, 10, 8, 9}; 
             uint16_t pad = input_pressed_raw();
-            for(int i = 0;i<sizeof(btns)/sizeof(*btns);i++){
+            for(int i = 0;i < sizeof(btns) / sizeof(*btns);i++){
                 int8_t btn = btns[i];
                 if(!(pad & (1 << btn))) continue;
-                gfx_draw_sprite_color(t_btn,x + 80 + (i*10), y, btn,8,8,button_colors[btn]);
+                gfx_draw_sprite_color(btn_tex, x + 80 + (i*10), y, btn, 8, 8, button_colors[btn]);
             }
         }
     }
 
     /* draw floating watches */
     {
-        for(watch_t *watch=kz.watches.first;watch;watch = list_next(watch)){
+        for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
             if(watch->floating){
                 watch_printf(watch);
             }
@@ -212,7 +125,7 @@ static void kz_main(void) {
 
     if(settings->lag_counter){
         int32_t lag_frames = z2_vi_counter + kz.frames_offset - kz.frames;
-        gfx_printf(settings->lag_x,settings->lag_y,"%d",lag_frames);
+        gfx_printf(settings->lag_x, settings->lag_y, "%d", lag_frames);
     }
 
     kz.frames += z2_static_ctxt.update_rate;
@@ -223,14 +136,14 @@ static void kz_main(void) {
     kz.cpu_prev = kz.cpu_cycle_counter;
     if(settings->timer){
         int64_t count = kz.cpu_cycle_counter + kz.cpu_offset;
-        int tenths = count / 4677750;
+        int tenths = count / (CPU_COUNTER / 10);
         int seconds = tenths / 10;
         int minutes = seconds / 60;
         int hours = minutes / 60;
         tenths %= 10;
         seconds %= 60;
         minutes %= 60;
-        gfx_printf(settings->timer_x,settings->timer_y,"%d:%02d:%02d.%d",hours,minutes,seconds,tenths);
+        gfx_printf(settings->timer_x, settings->timer_y, "%d:%02d:%02d.%d", hours, minutes, seconds, tenths);
     }
 
     /* activate cheats */
@@ -240,10 +153,10 @@ static void kz_main(void) {
         if(settings->cheats & (1 << CHEAT_ISG))
             z2_link.sword_active = 0x01;
         if(settings->cheats & (1 << CHEAT_ARROWS)){
-            uint8_t arrow_cap[] = { 1, 30, 40, 50, 1, 20, 30, 40 };
+            static uint8_t arrow_cap[] = { 1, 30, 40, 50, 1, 20, 30, 40 };
             z2_file.ammo[Z2_SLOT_BOW] = arrow_cap[z2_file.quiver];
         }
-        uint8_t bomb_cap[] = { 1, 20, 30, 40, 1, 1, 1, 1 };
+        static uint8_t bomb_cap[] = { 1, 20, 30, 40, 1, 1, 1, 1 };
         if(settings->cheats & (1 << CHEAT_BOMBS)){
             z2_file.ammo[Z2_SLOT_BOMB] = bomb_cap[z2_file.bomb_bag];
         }
@@ -254,11 +167,11 @@ static void kz_main(void) {
             z2_file.ammo[Z2_SLOT_POWDER_KEG] = 0x01;
         }
         if(settings->cheats & (1 << CHEAT_NUTS)){
-            uint8_t nut_cap[] = { 1, 20, 30, 40, 1, 99, 1, 99};
+            static uint8_t nut_cap[] = { 1, 20, 30, 40, 1, 99, 1, 99};
             z2_file.ammo[Z2_SLOT_NUT] = nut_cap[z2_file.nut_upgrade];
         }
         if(settings->cheats & (1 << CHEAT_STICKS)){
-            uint8_t stick_cap[] = { 1, 10, 20, 30, 1, 20, 30, 40};
+            static uint8_t stick_cap[] = { 1, 10, 20, 30, 1, 20, 30, 40};
             z2_file.ammo[Z2_SLOT_STICK] = stick_cap[z2_file.stick_upgade];
         }
         if(settings->cheats & (1 << CHEAT_HEALTH)){
@@ -268,20 +181,20 @@ static void kz_main(void) {
             z2_file.current_magic = z2_file.magic_level * 0x30;
         }
         if(settings->cheats & (1 << CHEAT_RUPEES)){
-            uint16_t rupee_cap[] = { 99, 200, 500, 500 };
+            static uint16_t rupee_cap[] = { 99, 200, 500, 500 };
             z2_file.rupees = rupee_cap[z2_file.wallet_upgrade];
         }
         if(settings->cheats & (1 << CHEAT_TURBO)){
-            z2_link.linear_velocity=18.0f;
-            gfx_printf_color(Z2_SCREEN_WIDTH-60, Z2_SCREEN_HEIGHT-60,0x00FF00FF,"t");
+            z2_link.linear_velocity = 18.0f;
+            gfx_printf_color(Z2_SCREEN_WIDTH - 60, Z2_SCREEN_HEIGHT - 60, COLOR_GREEN, "t");
         }
         if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){
             z2_file.timespeed = -z2_static_ctxt.time_speed;
         }
         if(settings->cheats & (1 << CHEAT_RESTRICTION)){
-            memset(&z2_game.hud_ctx.restriction_flags,0,0xC);
-            for(int i=0;i<4;i++){
-                for(int j=0;j<4;j++){
+            memset(&z2_game.hud_ctx.restriction_flags, 0, 0xC);
+            for(int i = 0;i < 4;i++){
+                for(int j = 0;j < 4;j++){
                     if(z2_file.form_button_item[i].button_item[j] == Z2_MASK_FIERCE_DEITY){
                         z2_file.restriction_flags[j] = 0;
                         //z2_game.hud_ctx.alphas[2 + j] = 0xFF;
@@ -299,43 +212,44 @@ static void kz_main(void) {
 
     /* handle menu */
     {
+        void *event_data = NULL;
         if(kz.menu_active){
-            struct menu *kz_menu = &kz.main_menu;
+            menu_t *kz_menu = &kz.main_menu;
             if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)){
-                kz.menu_active=0;
+                kz.menu_active = 0;
                 if(!kz.debug_active){
                     free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
                 }
             }else if(input_bind_pressed(KZ_CMD_RETURN)){
-                menu_callback(kz_menu,MENU_CALLBACK_RETURN);
+                menu_trigger_event(kz_menu, MENU_EVENT_RETURN, &event_data);
             }else{
                 uint16_t pressed = input_pressed();
                 if(pressed & BUTTON_D_DOWN){
-                    menu_navigate(kz_menu,MENU_NAV_DOWN);
+                    menu_trigger_event(kz_menu, MENU_EVENT_NAVIGATE, (void*)MENU_NAV_DOWN);
                 }
                 if(pressed & BUTTON_D_UP){
-                    menu_navigate(kz_menu,MENU_NAV_UP);
+                    menu_trigger_event(kz_menu, MENU_EVENT_NAVIGATE, (void*)MENU_NAV_UP);
                 }
                 if(pressed & BUTTON_D_LEFT){
-                    menu_navigate(kz_menu,MENU_NAV_LEFT);
+                    menu_trigger_event(kz_menu, MENU_EVENT_NAVIGATE, (void*)MENU_NAV_LEFT);
                 }
                 if(pressed & BUTTON_D_RIGHT){
-                    menu_navigate(kz_menu,MENU_NAV_RIGHT);
+                    menu_trigger_event(kz_menu, MENU_EVENT_NAVIGATE, (void*)MENU_NAV_RIGHT);
                 }
                 if(pressed & BUTTON_L){
-                    menu_callback(kz_menu,MENU_CALLBACK_ACTIVATE);
+                    menu_trigger_event(kz_menu, MENU_EVENT_ACTIVATE, &event_data);
                 }
             }
-            menu_update(&kz.main_menu);
+            menu_trigger_event(kz_menu, MENU_EVENT_UPDATE, &event_data);
             menu_draw(kz_menu);
         }else if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)){
-            kz.menu_active=1;
+            kz.menu_active = 1;
             reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
         }
     }
     /* handle command bindings */
     {
-        for(int i=0;i<KZ_CMD_MAX;i++){
+        for(int i = 0;i < KZ_CMD_MAX;i++){
             _Bool activate = 0;
             switch(kz_commands[i].type){
                 case COMMAND_HOLD:
@@ -353,9 +267,9 @@ static void kz_main(void) {
 
     /* print frame advance status */
     if(kz.pending_frames == 0){
-        gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,3,20,20);
+        gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
     }else if(kz.pending_frames>0){
-        gfx_draw_sprite(resource_get(R_KZ_ICON),Z2_SCREEN_WIDTH-40,20,4,20,20);
+        gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
     }
 
     /* print logo */
@@ -363,11 +277,11 @@ static void kz_main(void) {
 #define MAKESTRING_(S) #S
     {
         static uint16_t logo_time = 0x100;
-        if(logo_time>0){
+        if(logo_time > 0){
             const char *name = MAKESTRING(PACKAGE);
             const char *url = MAKESTRING(URL);
             gfx_printf_color(10, Z2_SCREEN_HEIGHT - 32 - kfont->c_height, COLOR_GREEN, name);
-            gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 32 - kfont->c_height,COLOR_GREEN,url);
+            gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 32 - kfont->c_height, COLOR_GREEN, url);
             logo_time--;
         }
 
@@ -376,19 +290,21 @@ static void kz_main(void) {
 #undef MAKESTRING
 
     if(kz.tooltip && kz.menu_active){
-        gfx_printf(kz.main_menu.x, Z2_SCREEN_HEIGHT - 40,"%s",kz.tooltip);
+        gfx_printf(kz.main_menu.x_offset, Z2_SCREEN_HEIGHT - 40, "%s", kz.tooltip);
     }
 
-    for(int i = KZ_LOG_MAX-1;i>=0;i--){
+    for(int i = KZ_LOG_MAX-1;i >= 0;i--){
         const int fade_start = 20;
         const int fade_len = 20;
         struct log *log_entry = &kz.log[i];
         uint8_t alpha;
-        if(!log_entry->mesg) continue;
+        if(!log_entry->mesg){
+            continue;
+        }
         log_entry->time++;
         if(log_entry->time > (fade_start + fade_len)){
             free(log_entry->mesg);
-            log_entry->mesg=NULL;
+            log_entry->mesg = NULL;
             continue;
         }
         else if(log_entry->time > fade_start){
@@ -398,21 +314,23 @@ static void kz_main(void) {
         }
         int x = Z2_SCREEN_WIDTH - 10 - strlen(log_entry->mesg) * 8;
         int y = Z2_SCREEN_HEIGHT - 40;
-        gfx_printf_color(x,y - (i*10),GPACK_RGB24A8(0xFFFFFF,alpha),"%s",log_entry->mesg);
+        gfx_printf_color(x, y - (i * 10), GPACK_RGB24A8(0xFFFFFF,alpha), "%s", log_entry->mesg);
     }
 
     // Release Debug Menu Bindings
-    if(z2_game.pause_ctx.state==0 && !kz.menu_active && kz.debug_active){
+    if(z2_game.pause_ctx.state == 0 && !kz.menu_active && kz.debug_active){
         free_buttons(BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP | BUTTON_L);
         kz.debug_active = 0;
     }
     
 #ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);
-    for(int i=0;i<Z2_ITEM_END;i++){
-        if(!textures[i].texture || !textures[i].release) continue;
+    for(int i = 0;i < Z2_ITEM_END;i++){
+        if(!textures[i].texture || !textures[i].release){
+            continue;
+        }
         textures[i].last_access_counter++;
-        if(textures[i].last_access_counter>=60){
+        if(textures[i].last_access_counter >= 60){
             gfx_destroy_texture(textures[i].texture);
             textures[i].texture = NULL;
         }
@@ -422,13 +340,10 @@ static void kz_main(void) {
     gfx_finish();
 }
 
-static int main_menu_return(struct menu_item *item, enum menu_callback callback, void *data){
-    if(callback == MENU_CALLBACK_ACTIVATE){
-        free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
-        kz.menu_active = 0;
-        return 1;
-    }
-    return 0;
+static int main_menu_return_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
+    kz.menu_active = 0;
+    return 1;
 }
 
 void init() {
@@ -449,50 +364,50 @@ void init() {
     kz.collision_view_status = COL_VIEW_NONE;
     kz.hitbox_view_status = COL_VIEW_NONE;
     kz.hide_actors = 0;
+    kz.hide_room = 0;
 
-    list_init(&kz.watches,sizeof(watch_t));
+    list_init(&kz.watches, sizeof(watch_t));
 
-    kz.pending_frames=-1;
+    kz.pending_frames = -1;
     kz.prev_timespeed = 0x80000000;
 
     kz.settings_profile = 0;
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
 
-    memset(&kz.log,0,sizeof(kz.log));
+    memset(&kz.log, 0, sizeof(kz.log));
 
     kz.menu_active = 0;
-    menu_init(&kz.main_menu);
-    menu_set_pos(&kz.main_menu, settings->menu_x, settings->menu_y);
-    kz.main_menu.selected_item = menu_add_button(&kz.main_menu,0,0,"return",main_menu_return,NULL);
+    menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
+    kz.main_menu.selected_item = menu_button_add(&kz.main_menu, 0, 0, "return", main_menu_return_onactivate, NULL);
 
-    menu_add_submenu(&kz.main_menu,0,1,create_warps_menu(),"warps");
-    menu_add_submenu(&kz.main_menu,0,2,create_cheats_menu(),"cheats");
-    menu_add_submenu(&kz.main_menu,0,3,create_scene_menu(),"scene");
-    menu_add_submenu(&kz.main_menu,0,4,create_watches_menu(),"watches");
-    menu_add_submenu(&kz.main_menu,0,5,create_inventory_menu(),"inventory");
-    menu_add_submenu(&kz.main_menu,0,6,create_equips_menu(),"equips");
-    menu_add_submenu(&kz.main_menu,0,7,create_file_menu(),"file");
+    menu_static_sprites_init();
+
+    menu_submenu_add(&kz.main_menu, 0, 1, "warps", create_warps_menu());
+    menu_submenu_add(&kz.main_menu, 0, 2, "cheats", create_cheats_menu());
+    menu_submenu_add(&kz.main_menu, 0, 3, "scene", create_scene_menu());
+    menu_submenu_add(&kz.main_menu, 0, 4, "watches", create_watches_menu());
+    menu_submenu_add(&kz.main_menu, 0, 5, "inventory", create_inventory_menu());
+    menu_submenu_add(&kz.main_menu, 0, 6, "equips", create_equips_menu());
+    menu_submenu_add(&kz.main_menu, 0, 7, "file", create_file_menu());
     #ifndef LITE
-    menu_add_submenu(&kz.main_menu,0,8,create_debug_menu(),"debug");
-    menu_add_submenu(&kz.main_menu,0,9,create_settings_menu(),"settings");
-    menu_add_button(&kz.main_menu,0,10,"save state",save_state_callback,NULL);
-    menu_add_button(&kz.main_menu,0,11,"load state",load_state_callback,NULL);
+    menu_submenu_add(&kz.main_menu, 0, 8, "debug", create_debug_menu());
+    menu_submenu_add(&kz.main_menu, 0, 9, "settings", create_settings_menu());
+    menu_button_add(&kz.main_menu, 0, 10, "save state", save_state_onactivate, NULL);
+    menu_button_add(&kz.main_menu, 0, 11, "load state", load_state_onactivate, NULL);
     #else
-    menu_add_submenu(&kz.main_menu,0,8,create_settings_menu(),"settings");
+    menu_submenu_add(&kz.main_menu, 0, 8, "settings", create_settings_menu());
     #endif
 
-    init_kz_keyboard();
-
     kz.memfile = malloc(sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
-    memset(kz.memfile,0,sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
+    memset(kz.memfile, 0, sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
     kz.memfile_slot = 0;
 
     kz.position_save = malloc(sizeof(*kz.position_save) * KZ_POSITION_MAX);
-    memset(kz.position_save,0,sizeof(*kz.position_save) * KZ_POSITION_MAX);
+    memset(kz.position_save, 0, sizeof(*kz.position_save) * KZ_POSITION_MAX);
     kz.pos_slot = 0;
     
-    memcpy(restriction_table,(void*)z2_restriction_table_addr,sizeof(restriction_table));
+    memcpy(restriction_table, (void*)z2_restriction_table_addr, sizeof(restriction_table));
 
     kz.ready = 1;
 }
@@ -502,39 +417,41 @@ void kz_log(const char *format, ...){
     if(log_entry->mesg){
         free(log_entry->mesg);
     }
-    for(int i=KZ_LOG_MAX-1;i>0;i--){
+    for(int i = KZ_LOG_MAX - 1;i > 0;i--){
         kz.log[i] = kz.log[i-1];
     }
     va_list va;
-    va_start(va,format);
-    int l = vsnprintf(NULL,0,format,va);
+    va_start(va, format);
+    int l = vsnprintf(NULL, 0, format, va);
     va_end(va);
 
     log_entry = &kz.log[0];
     log_entry->mesg = malloc(l + 1);
-    if(!log_entry->mesg) return;
-    va_start(va,format);
-    vsprintf(log_entry->mesg,format,va);
+    if(!log_entry->mesg){
+        return;
+    }
+    va_start(va, format);
+    vsprintf(log_entry->mesg, format, va);
     va_end(va);
     log_entry->time = 0;
 }
 
 void game_state_main(){
-    if(kz.pending_frames!=0){
-        if(kz.pending_frames>0){
+    if(kz.pending_frames != 0){
+        if(kz.pending_frames > 0){
             kz.pending_frames--;
         }
         z2_ctxt.gamestate_update(&z2_ctxt);
     }else{
         z2_gfx_t *gfx = z2_game.common.gfx;
-        if(z2_ctxt.gamestate_frames!=0){
+        if(z2_ctxt.gamestate_frames != 0){
             if(gfx->frame_cnt_1 & 1){
-                memcpy(((void*)z2_disp_addr + Z2_DISP_SIZE),(void*)z2_disp_addr,Z2_DISP_SIZE);
+                memcpy(((void*)z2_disp_addr + Z2_DISP_SIZE), (void*)z2_disp_addr, Z2_DISP_SIZE);
             }else{
-                memcpy((void*)z2_disp_addr,(void*)(z2_disp_addr + Z2_DISP_SIZE),Z2_DISP_SIZE);
+                memcpy((void*)z2_disp_addr, (void*)(z2_disp_addr + Z2_DISP_SIZE), Z2_DISP_SIZE);
             }
-            load_disp_p(&kz.disp_p);
-            gfx_reloc(1-(gfx->frame_cnt_1 & 1),1-(gfx->frame_cnt_2 & 1));
+            zu_disp_ptr_load(&kz.disp_p);
+            zu_gfx_reloc(1 - (gfx->frame_cnt_1 & 1), 1 - (gfx->frame_cnt_2 & 1));
         }
         z2_game.common.gamestate_frames--;
     }
@@ -558,7 +475,7 @@ static void kz_stack(void (*kzfunc)(void)) {
 }
 
 HOOK void input_hook(void){
-    if(kz.pending_frames!=0){
+    if(kz.pending_frames != 0){
         void (*z2_input_update)(z2_game_t *game);
         z2_input_update = (void*)z2_input_update_addr;
         z2_input_update(&z2_game);
@@ -566,17 +483,17 @@ HOOK void input_hook(void){
 }
 
 HOOK void motion_blur_hook(void){
-    if(kz.pending_frames!=0){
+    if(kz.pending_frames != 0){
         z2_MotionBlur(&z2_ctxt);
     }
 }
 
 HOOK void draw_actors_hook(void){
     if(kz.hide_actors){
-        struct disp_p disp_p;
-        save_disp_p(&disp_p);
+        zu_disp_ptr_t disp_p;
+        zu_disp_ptr_save(&disp_p);
         z2_DrawActors(&z2_game,&z2_game.actor_ctxt);
-        load_disp_p(&disp_p);
+        zu_disp_ptr_load(&disp_p);
     }else{
         z2_DrawActors(&z2_game,&z2_game.actor_ctxt);
     }
@@ -584,10 +501,10 @@ HOOK void draw_actors_hook(void){
 
 HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room, int a2){
     if(kz.hide_room){
-        struct disp_p disp_p;
-        save_disp_p(&disp_p);
+        zu_disp_ptr_t disp_p;
+        zu_disp_ptr_save(&disp_p);
         z2_DrawRoom(game,room,a2);
-        load_disp_p(&disp_p);
+        zu_disp_ptr_load(&disp_p);
     }else{
         z2_DrawRoom(game,room,a2);
     }

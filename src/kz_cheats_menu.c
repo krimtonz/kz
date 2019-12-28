@@ -2,7 +2,7 @@
 #include "kz.h"
 #include "resource.h"
 
-struct cheat_item{
+struct cheat_item {
     enum cheats mask;
     char       *name;
 };
@@ -23,9 +23,9 @@ static struct cheat_item cheat_table[] = {
     { CHEAT_FREEZE_TIME, "freeze time"},
 };
 
-static int cheat_callback(struct menu_item *item, enum menu_callback callback, void *data){
-    enum cheats cheat = (enum cheats)data;
-    if(callback == MENU_CALLBACK_ACTIVATE){
+static int cheat_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    enum cheats cheat = (enum cheats)handler->callback_data;
+    if(event == MENU_EVENT_ACTIVATE){
         settings->cheats = settings->cheats ^ (1 << cheat);
         if(cheat == CHEAT_RESTRICTION){
             if(settings->cheats & (1 << CHEAT_RESTRICTION)){
@@ -45,23 +45,22 @@ static int cheat_callback(struct menu_item *item, enum menu_callback callback, v
                 kz.prev_timespeed = 0x80000000;
             }
         }
-        return 1;
-    }else if(callback == MENU_CALLBACK_UPDATE){
-        menu_checkbox_set(item,((settings->cheats & (1 << cheat)) > 0));
+    }else if(event == MENU_EVENT_UPDATE){
+        menu_checkbox_set((menu_item_t*)handler->subscriber, (settings->cheats & (1 << cheat)) > 0);
     }
-    return 0;
+    return 1;
 }
 
-struct menu *create_cheats_menu(){
-    static struct menu cheats;
-    menu_init(&cheats);
-    menu_set_padding(&cheats,0,2);
-    cheats.selected_item = menu_add_button(&cheats,0,0,"return",menu_return,NULL);
-    struct menu_item *item = NULL;
-    for(int i=0;i<sizeof(cheat_table)/sizeof(*cheat_table);i++){
-        item = menu_add_checkbox(&cheats,0,i+1,cheat_callback,(void*)cheat_table[i].mask,NULL);
-        cheat_callback(item,MENU_CALLBACK_UPDATE,(void*)cheat_table[i].mask);
-        menu_add(&cheats,2,i+1,cheat_table[i].name);
+menu_t *create_cheats_menu(){
+    static menu_t cheats;
+    menu_init(&cheats, 0, 0);
+    menu_padding_set(&cheats, 0, 2);
+    cheats.selected_item = menu_button_add(&cheats, 0, 0, "return", menu_return, NULL);
+    menu_item_t *item = NULL;
+    for(int i = 0;i < sizeof(cheat_table) / sizeof(*cheat_table);i++){
+        item = menu_checkbox_add(&cheats, 0, i + 1);
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, cheat_event, (void*)cheat_table[i].mask);
+        menu_label_add(&cheats, 2, i + 1, cheat_table[i].name);
     }
     return &cheats;
 }

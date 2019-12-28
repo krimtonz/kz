@@ -321,10 +321,10 @@ typedef struct {
     char            unk_0x48_[0x04];                /* 0x0048 */
     union {
         struct{
-            int8_t b;
-            int8_t cleft;
-            int8_t cdown;
-            int8_t cright;
+            int8_t  b;
+            int8_t  cleft;
+            int8_t  cdown;
+            int8_t  cright;
         };
         int8_t button_item[4];
     }               form_button_item[0x04];         /* 0x004C */
