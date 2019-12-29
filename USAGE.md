@@ -303,8 +303,9 @@ kz implements the following commands
 * reload scene - reloads the current scene at the last entrance
 * void out - activates a void out
 * break free - breaks out of a cutscene
-* pause - pauses the game at the current frame
-* advance - advances a single frame 
+* pause - pauses the game at the current frame. see [frame advancing](#8-frame-advancing)
+* advance - advances a single frame. see [frame advancing](#8-frame-advancing)
+* toggle input - toggles whether or not the game will receive input. see [frame advancing](#8-frame-advancing)
 * reset lag counter - resets the lag counter to 0
 * start/stop timer - starts or stops the timer
 * reset timer - sets the timer to 0
@@ -355,3 +356,8 @@ When a memfile is loaded from a different scene that the memfile was saved from,
 There are also a few other options for memfile loading that are confirgurable in the [settings menu](#29-settings) including the ability to load a position when loading a memfile, and voiding out when loading a memfile.  
 
 Memfiles are exportable and importable in versions that allow [sd features](#6-sd-features)
+
+## 8 Frame Advancing
+When the game is paused using the `pause` or `advance` commands, the game will stop frame execution at this point.  Use the `advance` command to advance to the next frame.  When the `advance` command is used when the game is not currently paused, the resulting action is the same as if you used the `pause` command.
+
+When the `pause` command is used, inputs to the game will be disabled, this will be indicated by a red `i` in the bottom right hand corner of the screen.  When the game is unpaused with the `pause` command, the inputs will be re-enabled.  To enable inputs while the game is paused use the `toggle input` command.  This will allow you to buffer in inputs to the next frame.

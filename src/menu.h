@@ -24,6 +24,7 @@
 #define SELECTED_COLOR  0x8080FFFF
 #define DEFAULT_COLOR   0xFFFFFFFF
 #define COLOR_GREEN     0x00FF00FF
+#define COLOR_RED       0xFF0000FF
 
 typedef enum {
     MENU_NAV_NONE = -1,

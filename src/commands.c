@@ -17,6 +17,7 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"break free",          COMMAND_PRESS,  command_break},
     {"pause",               COMMAND_PRESS,  command_pause},
     {"advance",             COMMAND_PRESS,  command_advance},
+    {"toggle input",        COMMAND_PRESS,  command_toggle_input},
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
@@ -80,19 +81,26 @@ void command_reloadarea(){
 }
 
 void command_pause(){
-    if(kz.pending_frames==0){
-        kz.pending_frames=-1;
+    if(kz.pending_frames == 0){
+        kz.pending_frames = -1;
+        kz.z2_input_enabled = 1;
+
     }else{
-        kz.pending_frames=0;
+        kz.pending_frames = 0;
+        kz.z2_input_enabled = 0;
     }
 }
 
 void command_advance(){
-    if(kz.pending_frames==0){
+    if(kz.pending_frames == 0){
         kz.pending_frames++;
     }else{
         command_pause();
     }
+}
+
+void command_toggle_input(){
+    kz.z2_input_enabled = !kz.z2_input_enabled;
 }
 
 void command_lag_reset(){

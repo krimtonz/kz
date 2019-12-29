@@ -78,6 +78,7 @@ typedef struct  {
     _Bool                   lag_counter;
     _Bool                   hide_actors;
     _Bool                   hide_room;
+    _Bool                   z2_input_enabled;
     int32_t                 pending_frames;
     zu_disp_ptr_t           disp_p;
     uint8_t                 memfile_slot;

@@ -271,6 +271,9 @@ static void kz_main(void) {
     }else if(kz.pending_frames>0){
         gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
     }
+    if(!kz.z2_input_enabled){
+        gfx_printf_color(Z2_SCREEN_WIDTH - 68, Z2_SCREEN_HEIGHT - 60, COLOR_RED, "i");
+    }
 
     /* print logo */
 #define MAKESTRING(S) MAKESTRING_(S)
@@ -369,6 +372,7 @@ void init() {
     list_init(&kz.watches, sizeof(watch_t));
 
     kz.pending_frames = -1;
+    kz.z2_input_enabled = 1;
     kz.prev_timespeed = 0x80000000;
 
     kz.settings_profile = 0;
@@ -475,7 +479,7 @@ static void kz_stack(void (*kzfunc)(void)) {
 }
 
 HOOK void input_hook(void){
-    if(kz.pending_frames != 0){
+    if(kz.pending_frames != 0 && kz.z2_input_enabled){
         void (*z2_input_update)(z2_game_t *game);
         z2_input_update = (void*)z2_input_update_addr;
         z2_input_update(&z2_game);
