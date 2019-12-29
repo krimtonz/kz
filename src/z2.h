@@ -1510,7 +1510,6 @@ typedef struct {
 #define z2_static_ctxt_addr             0x803824D0
 #define z2_ctxt_addr                    0x803E6B20
 #define z2_link_addr                    0x803FFDB0
-#define z2_dpad_disable_offset          0x2F44
 #elif Z2_VERSION==NZSJ
 #define z2_LoadOverlay_addr             0x80085768
 #define osSendMesg_addr                 0x80088A10
@@ -1571,7 +1570,6 @@ typedef struct {
 #define z2_static_ctxt_addr             0x80382900
 #define z2_ctxt_addr                    0x803E6FB0
 #define z2_link_addr                    0x80400260
-#define z2_dpad_disable_offset          0x2F44
 #elif Z2_VERSION==NZSJ10
 #define z2_LoadOverlay_addr             0x80085808
 #define osSendMesg_addr                 0x80088AB0
@@ -1632,7 +1630,6 @@ typedef struct {
 #define z2_static_ctxt_addr             0x80382640
 #define z2_ctxt_addr                    0x803E6CF0
 #define z2_link_addr                    0x803FFFA0
-#define z2_dpad_disable_offset          0x2F20
 #endif
 
 /* Function Prototypes */

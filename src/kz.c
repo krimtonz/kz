@@ -91,11 +91,6 @@ static void kz_main(void) {
     }
 
     zu_disp_ptr_save(&kz.disp_p);
-    
-    /* Disable DPad on Pause Screen */
-    if(z2_player_ovl_table[0].ram != NULL){
-        *((uint32_t*)z2_player_ovl_table[0].ram + z2_dpad_disable_offset) = 0x00001025; // or v0, r0, r0
-    }
 
     /* input display */
     {
@@ -483,6 +478,11 @@ HOOK void input_hook(void){
         void (*z2_input_update)(z2_game_t *game);
         z2_input_update = (void*)z2_input_update_addr;
         z2_input_update(&z2_game);
+        z2_input_t *input = &z2_ctxt.input[0];
+        uint16_t mask = ~(BUTTON_D_DOWN | BUTTON_D_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
+        input->raw.pad &=  mask;
+        input->pad_pressed &= mask;
+        input->pad_released &= mask;
     }
 }
 
