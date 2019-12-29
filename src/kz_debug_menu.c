@@ -253,16 +253,27 @@ static void actor_info_draw(menu_item_t *item){
     for(int i = 0;i < actor_info.actor_idx;i++){
         actor = actor->next;
     }
+
+    int x = menu_item_x(item);
+
     if(!actor){
         strcpy(data->actor_button->text, "<none>");
+        gfx_printf(x, menu_item_y(item), "id:       n/a");
+        item->y_cell++;
+        gfx_printf(x, menu_item_y(item), "variable: n/a");
     }else{
         sprintf(data->actor_button->text, "%08" PRIx32 , (uint32_t)actor);
+        gfx_printf(x, menu_item_y(item), "id:       %04x", actor->id);
+        item->y_cell++;
+        gfx_printf(x, menu_item_y(item), "variable: %04x", actor->variable);
     }
-    int x = menu_item_x(data->actor_button) + item->owner->cell_width * 10;
+
+    item->y_cell--;
+
+    x = menu_item_x(data->actor_button) + item->owner->cell_width * 10;
     int actor_cnt = z2_game.actor_ctxt.actor_list[actor_info.actor_type].count;
     int actor_idx = actor_cnt == 0 ? 0 : actor_info.actor_idx + 1;
     gfx_printf(x, menu_item_y(data->actor_button), "(%02d/%02d)", actor_idx, actor_cnt);
-
 }
 
 static menu_item_t *menu_actor_info_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, struct actor_info_data *data){
@@ -359,6 +370,23 @@ static int delete_actor_onactivate(event_handler_t *handler, menu_event_t event,
         }
     }
     return 1;
+}
+
+static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
+    for(int i = 0;i < actor_info.actor_idx;i++){
+        actor = actor->next;
+    }
+    if(actor){
+        actor_id = actor->id;
+        actor_var = actor->variable;
+        actor_pos[0] = actor->pos_2.x;
+        actor_pos[1] = actor->pos_2.y;
+        actor_pos[2] = actor->pos_2.z;
+        actor_rot[0] = actor->rot_2.x;
+        actor_rot[1] = actor->rot_2.y;
+        actor_rot[2] = actor->rot_2.z;
+    }
 }
 
 static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -563,41 +591,43 @@ menu_t *create_debug_menu(){
         menu_button_add(&actors, 3, 2, ">", actor_inc_onactivate,NULL);
         actor_info.actor_button = menu_button_add(&actors, 0, 3, actor_button_text, actor_button_onactivate, NULL);
 
-        menu_actor_info_add(&actors, 0, 0, &actor_info);
+        menu_actor_info_add(&actors, 0, 4, &actor_info);
         
-        menu_button_add(&actors, 0, 4, "go to", goto_actor_onactivate, NULL);
-        item = menu_label_add(&actors, 6, 4, "view");
+        menu_button_add(&actors, 0, 6, "go to", goto_actor_onactivate, NULL);
+        item = menu_label_add(&actors, 6, 6, "view");
         item->interactive = 1;
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, view_actor_event, NULL);
         
-        menu_button_add(&actors, 11, 4, "delete", delete_actor_onactivate, NULL);
+        menu_button_add(&actors, 11, 6, "delete", delete_actor_onactivate, NULL);
 
-        menu_label_add(&actors, 0, 6, "actor id");
-        item = menu_number_input_add(&actors, 9, 6, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_id);
-        
-        menu_label_add(&actors, 0, 7, "variable");
-        item = menu_number_input_add(&actors, 9, 7, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_var);
+        menu_button_add(&actors, 18, 6, "copy", copy_actor_onactivate, NULL);
 
-        menu_label_add(&actors, 0, 8, "position");
+        menu_label_add(&actors, 0, 8, "actor id");
         item = menu_number_input_add(&actors, 9, 8, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_pos[0]);
-        item = menu_number_input_add(&actors, 14, 8, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_pos[1]);
-        item = menu_number_input_add(&actors, 19, 8, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_pos[2]);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_id);
 
-        menu_label_add(&actors, 0, 9, "rotation");
+        menu_label_add(&actors, 0, 9, "variable");
         item = menu_number_input_add(&actors, 9, 9, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_pos[0]);
-        item = menu_number_input_add(&actors, 14, 9, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_rot[1]);
-        item = menu_number_input_add(&actors, 19, 9, 16, 4);
-        menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &actor_rot[2]);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_var);
 
-        menu_button_add(&actors, 0, 10, "spawn", actor_spawn_onactivate, NULL);
-        menu_button_add(&actors, 7, 10, "fetch from link", actor_fetch_link_onactivate, NULL);
+        menu_label_add(&actors, 0, 10, "position");
+        item = menu_number_input_add(&actors, 9, 10, 16, 4);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_pos[0]);
+        item = menu_number_input_add(&actors, 14, 10, 16, 4);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_pos[1]);
+        item = menu_number_input_add(&actors, 19, 10, 16, 4);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_pos[2]);
+
+        menu_label_add(&actors, 0, 11, "rotation");
+        item = menu_number_input_add(&actors, 9, 11, 16, 4);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_rot[0]);
+        item = menu_number_input_add(&actors, 14, 11, 16, 4);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_rot[1]);
+        item = menu_number_input_add(&actors, 19, 11, 16, 4);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &actor_rot[2]);
+
+        menu_button_add(&actors, 0, 12, "spawn", actor_spawn_onactivate, NULL);
+        menu_button_add(&actors, 7, 12, "fetch from link", actor_fetch_link_onactivate, NULL);
     }
 
     {
