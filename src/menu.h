@@ -32,6 +32,7 @@
 #define COLOR_GREEN     0x00FF00FF
 #define COLOR_RED       0xFF0000FF
 #define COLOR_FADED     0x999999FF
+#define COLOR_BLACK     0x000000FF
 
 typedef enum {
     MENU_NAV_NONE = -1,

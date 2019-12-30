@@ -67,7 +67,7 @@ struct log {
     int     time;
 };
 
-typedef struct  {
+typedef struct {
     _Bool                   ready;
     struct list             watches;
     enum col_view_status    collision_view_status;

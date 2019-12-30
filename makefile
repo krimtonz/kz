@@ -24,9 +24,9 @@ RESDESC		= res.json
 ADDRESS     = 0x80800060
 ADDRESS_LITE	= 0x806E0060
 ADDRESS_LDR	= 0x80080000
-ALL_CFLAGS      = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
+ALL_CFLAGS      = -g -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
 ALL_CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS)
-ALL_LDFLAGS     = -T gl-n64.ld -nostartfiles -specs=nosys.specs $(LDFLAGS)
+ALL_LDFLAGS     = -T gl-n64.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
 
 KZ 			= $(foreach v,$(KZ_VERSIONS),kz-$(v))
 KZ_LITE		= $(foreach v,$(KZ_VERSIONS),kz-lite-$(v))

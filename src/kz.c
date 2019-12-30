@@ -28,7 +28,7 @@ kz_ctxt_t kz = {
 
 char restriction_table[0x23A];
 
-static void cpu_counter(){
+static void cpu_counter(void){
     static uint32_t count = 0;
     uint32_t new_count;
     __asm__ volatile("mfc0 $t0, $9;"
@@ -344,7 +344,7 @@ static int main_menu_return_onactivate(event_handler_t *handler, menu_event_t ev
     return 1;
 }
 
-void init() {
+static void init(void) {
     clear_bss();
     do_global_ctors();
     gfx_init();
@@ -435,7 +435,7 @@ void kz_log(const char *format, ...){
     log_entry->time = 0;
 }
 
-void game_state_main(){
+static void game_state_main(void){
     if(kz.pending_frames != 0){
         if(kz.pending_frames > 0){
             kz.pending_frames--;
@@ -454,23 +454,6 @@ void game_state_main(){
         }
         z2_game.common.gamestate_frames--;
     }
-}
-
-// Uses kz's stack instead of graph stack.
-static void kz_stack(void (*kzfunc)(void)) {
-    static _Alignas(8) __attribute__((section(".stack")))
-    char stack[0x2000];
-    __asm__ volatile(   "la     $t0, %1;"
-                        "sw     $sp, -0x04($t0);"
-                        "sw     $ra, -0x08($t0);"
-                        "addiu  $sp, $t0, -0x08;"
-                        "jalr   %0;"
-                        "nop;"
-                        "lw     $ra, 0($sp);"
-                        "lw     $sp, 4($sp);"
-                        ::
-                        "r"(kzfunc),
-                        "i"(&stack[sizeof(stack)]));
 }
 
 HOOK void input_hook(void){
@@ -512,6 +495,26 @@ HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room, int a2){
     }else{
         z2_DrawRoom(game,room,a2);
     }
+}
+
+// Uses kz's stack instead of graph stack.
+static void kz_stack(void (*kzfunc)(void)) {
+    static _Alignas(8) __attribute__((section(".stack")))
+    char stack[0x2000];
+    __asm__ volatile(   "la     $t0, %1;"
+                        "sw     $sp, -0x04($t0);"
+                        "sw     $ra, -0x08($t0);"
+                        "addiu  $sp, $t0, -0x08;"
+                        "jalr   %0;\n"
+                        "lw     $ra, 0($sp);"
+                        "lw     $sp, 4($sp);"
+                        ::
+                        "r"(kzfunc),
+                        "i"(&stack[sizeof(stack)])
+                        :
+                        "$v0", "$v1",
+                        "$a0", "$a1", "$a2", "$a3",
+                        "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9");
 }
 
 /* Entry Point of KZ executable */

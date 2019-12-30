@@ -247,8 +247,8 @@ static void menu_item_list_draw(menu_item_t *item){
         if(data->ovl_values){
             int ovl_tile = data->ovl_values[idx];
             if(ovl_tile >= 0){
-                gfx_draw_sprite_scale(resource_get(R_KZ_AMOUNTS), menu_item_x(item) + 8, menu_item_y(item) + 11,
-                                      ovl_tile, 16, 8, 0.5f, 0.5f);
+                gfx_draw_sprite(resource_get(R_KZ_AMOUNTS), menu_item_x(item) + 8, menu_item_y(item) + 11,
+                                      ovl_tile, 8, 4);
             }
         }
     }else if(data->draw_info->null_texture){

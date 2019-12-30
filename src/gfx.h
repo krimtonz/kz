@@ -61,28 +61,22 @@ typedef struct{
 void            gfx_init                    ();
 void            gfx_begin                   ();
 void            gfx_finish                  ();
+
 void           *gfx_data_push               (void *data, size_t size);
+void            gfx_append                  (Gfx *gfx, size_t size);
+
 void            gfx_printf                  (uint16_t,uint16_t,const char*,...);
 void            gfx_printf_color            (uint16_t,uint16_t,uint32_t,const char*,...);
-void            gfx_printf_scale            (uint16_t,uint16_t,float,float,const char*,...);
-void            gfx_printf_color_scale      (uint16_t,uint16_t,uint32_t,float,float,const char*,...);
-void            gfx_printf_va_color_scale   (uint16_t,uint16_t,uint32_t,float,float,const char*,va_list);
-void            gfx_printchars              (gfx_font *, uint16_t, uint16_t, uint32_t, const char *, size_t, float, float);
+
 void            gfx_draw_sprite             (gfx_texture *texture, int x, int y, int tile, int width, int height);
 void            gfx_draw_sprite_color       (gfx_texture *texture, int x, int y, int tile, int width, int height, uint32_t color);
-void            gfx_draw_sprite_scale       (gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale);
-void            gfx_draw_sprite_scale_color (gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale, uint32_t color);
 void            gfx_draw_rectangle          (int x, int y, int width, int height, uint32_t color);
-void            gfx_destroy_texture         (gfx_texture *texture);
+
 void            gfx_load_tile               (gfx_texture *texture, uint16_t tilenum);
+
 gfx_texture    *gfx_load                    (texture_loader *loader);
 void            gfx_texture_desaturate      (void *data, size_t len);
 gfx_texture    *gfx_load_item_texture       (uint8_t item_id);
-void            gfx_append                  (Gfx *gfx, size_t size);
-void            rdp_mode_set                (enum rdp_mode mode, uint64_t val);
-void            rdp_mode_replace            (enum rdp_mode mode, uint64_t val);
-void            rdp_mode_set_apply          (enum rdp_mode mode, uint64_t val);
-void            rdp_mode_pop                (enum rdp_mode mode);
 
 extern gfx_font *kfont;
 

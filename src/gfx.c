@@ -40,6 +40,8 @@ static Gfx kzgfx[] = {
     gsSPEndDisplayList()
 };
 
+/* rdp mode functions */
+
 static inline void rdp_sync(){
     if(!rdp_synced){
         gDPPipeSync(gfx_disp_p++);
@@ -77,14 +79,14 @@ static void rdp_mode_apply(enum rdp_mode mode){
     }
 }
 
-void rdp_mode_set(enum rdp_mode mode, uint64_t val){
+static void rdp_mode_set(enum rdp_mode mode, uint64_t val){
     if(mode == RDP_MODE_ALL){
         return;
     }
     rdp_modes[mode] = val;
 }
 
-void rdp_mode_set_apply(enum rdp_mode mode, uint64_t val){
+static void rdp_mode_set_apply(enum rdp_mode mode, uint64_t val){
     rdp_mode_set(mode,val);
     rdp_mode_apply(mode);
 }
@@ -103,7 +105,7 @@ static void rdp_mode_push(enum rdp_mode mode){
     }
 }
 
-void rdp_mode_pop(enum rdp_mode mode){
+static void rdp_mode_pop(enum rdp_mode mode){
     if(mode == RDP_MODE_ALL){
         for(int i =0;i<RDP_MODE_ALL;i++){
             int *p = &rdp_stack_pos[i];
@@ -118,48 +120,13 @@ void rdp_mode_pop(enum rdp_mode mode){
     rdp_mode_apply(mode);
 }
 
-void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
+static void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
     rdp_mode_push(mode);
     rdp_mode_set(mode,val);
     rdp_mode_apply(mode);
 }
 
-void gfx_printf(uint16_t left, uint16_t top, const char *format, ...){
-    va_list args;
-    va_start(args,format);
-    gfx_printf_va_color_scale(left,top,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),1.0f,1.0f,format,args);
-    va_end(args);
-}
-
-void gfx_printf_scale(uint16_t left, uint16_t top, float x_scale, float y_scale, const char *format, ...){
-    va_list args;
-    va_start(args,format);
-    gfx_printf_va_color_scale(left,top,GPACK_RGBA8888(0xFF,0xFF,0xFF,0xFF),x_scale,y_scale,format,args);
-    va_end(args);
-}
-
-void gfx_printf_color_scale(uint16_t left, uint16_t top, uint32_t color, float x_scale, float y_scale, const char *format, ...){
-    va_list args;
-    va_start(args,format);
-    gfx_printf_va_color_scale(left,top,color,x_scale,y_scale,format,args);
-    va_end(args);
-}
-
-void gfx_printf_color(uint16_t left, uint16_t top, uint32_t color, const char *format, ...){
-    va_list args;
-    va_start(args,format);
-    gfx_printf_va_color_scale(left,top,color,1.0f,1.0f,format,args);
-    va_end(args);
-}
-
-void gfx_printf_va_color_scale(uint16_t left, uint16_t top, uint32_t color,float x_scale, float y_scale, const char *format, va_list va){
-    const size_t max_len = 1024;
-    char buf[max_len];
-    int l = vsnprintf(buf,max_len,format,va);
-    if(l>max_len-1) l=max_len-1;
-
-    gfx_printchars(kfont, left, top, color, buf, l, x_scale, y_scale);
-}
+/* start/finish kz gfx processing functions */
 
 void gfx_init(){
     gfx_disp = malloc(GFX_SIZE * sizeof(*gfx_disp));
@@ -190,6 +157,8 @@ void gfx_finish(){
     gfx_disp_p = gfx_disp;
     gfx_disp_d = gfx_disp + (GFX_SIZE + sizeof(*gfx_disp) - 1) / sizeof(*gfx_disp);
 }
+
+/* Custom display list functions */
 
 void gfx_append(Gfx *gfx, size_t size){
     memcpy(gfx_disp_p,gfx,size);
@@ -225,6 +194,8 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
     }
     rdp_synced = 1;
 }
+
+/* texture loading functions */
 
 void gfx_texture_desaturate(void *data, size_t len){
     struct rgba{
@@ -352,12 +323,14 @@ gfx_texture *gfx_load(texture_loader *loader){
     }
 }
 
-void gfx_draw_sprite_scale_color(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale, uint32_t color){
+/* sprite drawing functions */
+
+void gfx_draw_sprite_color(gfx_texture *texture, int x, int y, int tile, int width, int height, uint32_t color){
     gfx_load_tile(texture, tile);
     rdp_mode_set_apply(RDP_MODE_COLOR,color);
     rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
-    float x_scale_calc = ((float)width / (float)texture->tile_width) * x_scale;
-    float y_scale_calc = ((float)height / (float)texture->tile_height) * y_scale;
+    float x_scale_calc = ((float)width / (float)texture->tile_width);
+    float y_scale_calc = ((float)height / (float)texture->tile_height);
     if(x_scale_calc != 1.f || y_scale_calc != 1.f){
         rdp_mode_replace(RDP_MODE_FILTER,G_TF_BILERP);
     }else{
@@ -377,16 +350,8 @@ void gfx_draw_sprite_scale_color(gfx_texture *texture, int x, int y, int tile, i
     rdp_synced = 0;
 }
 
-void gfx_draw_sprite_scale(gfx_texture *texture, int x, int y, int tile, int width, int height, float x_scale, float y_scale){
-    gfx_draw_sprite_scale_color(texture,x,y,tile,width,height,x_scale,y_scale,0xFFFFFFFF);
-}
-
-void gfx_draw_sprite_color(gfx_texture *texture, int x, int y, int tile, int width, int height, uint32_t color){
-    gfx_draw_sprite_scale_color(texture,x,y,tile,width,height,1.f,1.f,color);
-}
-
 void gfx_draw_sprite(gfx_texture *texture, int x, int y, int tile, int width, int height){
-    gfx_draw_sprite_scale(texture,x,y,tile,width,height,1.f,1.f);
+    gfx_draw_sprite_color(texture, x, y, tile, width, height, DEFAULT_COLOR);
 }
 
 void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
@@ -399,64 +364,82 @@ void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
     rdp_mode_pop(RDP_MODE_COMBINE);
 }
 
-void gfx_destroy_texture(gfx_texture *texture){
-    if(texture){
-        if(texture->data) free(texture->data);
-        free(texture);
-    }
-}
+/* text printing functions */
 
-void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt, float x_scale, float y_scale){
-    rdp_mode_set_apply(RDP_MODE_COLOR,color);
-    rdp_mode_replace(RDP_MODE_COMBINE,G_CC_MODE(G_CC_MODULATEIA_PRIM,G_CC_MODULATEIA_PRIM));
+static void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, uint32_t color, const char *chars, size_t charcnt){
+    rdp_mode_set_apply(RDP_MODE_COLOR, color);
+    rdp_mode_replace(RDP_MODE_COMBINE, G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
     int chars_per_tile = font->cx_tile * font->cy_tile;
 
-    for(int i=0;i<font->texture->x_tiles * font->texture->y_tiles;i++){
-        int tile_start = chars_per_tile*i;
+    for(int i = 0;i<font->texture->x_tiles * font->texture->y_tiles;i++){
+        int tile_start = chars_per_tile * i;
         int tile_end = tile_start + chars_per_tile;
-        gfx_load_tile(font->texture,i);
+        gfx_load_tile(font->texture, i);
         int char_x = 0;
-        rdp_mode_replace(RDP_MODE_COLOR,GPACK_RGB24A8(0x000000,color & 0xFF));
-        for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
+        rdp_mode_replace(RDP_MODE_COLOR, COLOR_BLACK);
+        for(int j=0;j<charcnt;j++, char_x += font->c_width){
             char c = chars[j];
-            if(c<33) continue;
-            c-=33;
-            if(c<tile_start || c>=tile_end) continue;
-            c-=tile_start;
+            if(c < 33) continue;
+            c -= 33;
+            if(c < tile_start || c >= tile_end) continue;
+            c -= tile_start;
 
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x + 1 ),
                          qs102(y + 1),
-                         qs102(x + char_x + font->c_width*x_scale + 1),
-                         qs102(y + font->c_height*y_scale + 1),
+                         qs102(x + char_x + font->c_width + 1),
+                         qs102(y + font->c_height + 1),
                          G_TX_RENDERTILE,
                          qu105(c % font->cx_tile *
                                font->c_width),
                          qu105(c / font->cx_tile *
                                font->c_height),
-                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));
+                         qu510(1.0f), qu510(1.0f));
         }
         rdp_mode_pop(RDP_MODE_COLOR);
         rdp_sync();
-        char_x=0;
-        for(int j=0;j<charcnt;j++, char_x += font->c_width*x_scale){
+        char_x = 0;
+        for(int j = 0;j < charcnt;j++, char_x += font->c_width){
             char c = chars[j];
-            if(c<33) continue;
-            c-=33;
-            if(c<tile_start || c>=tile_end) continue;
-            c-=tile_start;
+            if(c < 33) continue;
+            c -= 33;
+            if(c < tile_start || c >= tile_end) continue;
+            c -= tile_start;
             gSPScisTextureRectangle(gfx_disp_p++,
                          qs102(x + char_x),
                          qs102(y),
-                         qs102(x + char_x + font->c_width*x_scale),
-                         qs102(y + font->c_height*y_scale),
+                         qs102(x + char_x + font->c_width),
+                         qs102(y + font->c_height),
                          G_TX_RENDERTILE,
                          qu105(c % font->cx_tile *
                                font->c_width),
                          qu105(c / font->cx_tile *
                                font->c_height),
-                         qu510(1.0f/x_scale), qu510(1.0f/y_scale));
+                         qu510(1.0f), qu510(1.0f));
         }
         rdp_synced = 0;
     }
+}
+
+static void gfx_printf_va_color(uint16_t left, uint16_t top, uint32_t color, const char *format, va_list va){
+    const size_t max_len = 1024;
+    char buf[max_len];
+    int l = vsnprintf(buf,max_len,format,va);
+    if(l>max_len-1) l=max_len-1;
+
+    gfx_printchars(kfont, left, top, color, buf, l);
+}
+
+void gfx_printf(uint16_t left, uint16_t top, const char *format, ...){
+    va_list args;
+    va_start(args, format);
+    gfx_printf_va_color(left, top, DEFAULT_COLOR, format, args);
+    va_end(args);
+}
+
+void gfx_printf_color(uint16_t left, uint16_t top, uint32_t color, const char *format, ...){
+    va_list args;
+    va_start(args, format);
+    gfx_printf_va_color(left, top, color, format, args);
+    va_end(args);
 }
