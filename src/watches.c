@@ -2,7 +2,7 @@
 #include "watches.h"
 #include "gfx.h"
 
-void watch_printf(watch_t *watch){
+void watch_printf(watch_t *watch, uint32_t color){
     char buf[16] = {0};
     switch(watch->type){
         case WATCH_TYPE_U8:
@@ -36,8 +36,8 @@ void watch_printf(watch_t *watch){
             sprintf(buf,"%g",*(float*)watch->address);
             break;
     }
-    gfx_printf(watch->x,watch->y,"%s",buf);
+    gfx_printf_color(watch->x, watch->y, color, "%s", buf);
     if(watch->label && watch->floating){
-        gfx_printf(watch->x + ((strlen(buf) + 1) * 8),watch->y,"%s",watch->label);
+        gfx_printf_color(watch->x + ((strlen(buf) + 1) * 8), watch->y, color, "%s", watch->label);
     }
 }

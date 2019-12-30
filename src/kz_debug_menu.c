@@ -212,7 +212,7 @@ static void objects_view_draw(menu_item_t *item){
     int y = menu_item_y(item);
     for(int i = 0; i < z2_game.obj_ctx.obj_cnt;i++){
         z2_obj_t *obj = &z2_game.obj_ctx.obj[i];
-        gfx_printf(x, y,"%04" PRIx16 " %08" PRIx32, obj->id, obj->data);
+        gfx_printf_color(x, y, COLOR_FADED, "%04" PRIx16 " %08" PRIx32, obj->id, obj->data);
         x += 112;
         if(i & 1){
             x = orig_x;
@@ -258,14 +258,14 @@ static void actor_info_draw(menu_item_t *item){
 
     if(!actor){
         strcpy(data->actor_button->text, "<none>");
-        gfx_printf(x, menu_item_y(item), "id:       n/a");
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       n/a");
         item->y_cell++;
-        gfx_printf(x, menu_item_y(item), "variable: n/a");
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: n/a");
     }else{
         sprintf(data->actor_button->text, "%08" PRIx32 , (uint32_t)actor);
-        gfx_printf(x, menu_item_y(item), "id:       %04x", actor->id);
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       %04x", actor->id);
         item->y_cell++;
-        gfx_printf(x, menu_item_y(item), "variable: %04x", actor->variable);
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: %04x", actor->variable);
     }
 
     item->y_cell--;
@@ -387,6 +387,7 @@ static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, v
         actor_rot[1] = actor->rot_2.y;
         actor_rot[2] = actor->rot_2.z;
     }
+    return 1;
 }
 
 static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){

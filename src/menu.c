@@ -146,7 +146,7 @@ void menu_draw(menu_t *menu){
             item->draw_proc(item);
             continue;
         }
-        uint32_t color = DEFAULT_COLOR;
+        uint32_t color = item->color;
         if(item == menu->selected_item){
             color = SELECTED_COLOR;
         }
@@ -309,6 +309,7 @@ menu_item_t *menu_label_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y, void
         item->interactive = false;
         item->enabled = true;
         item->text = text;
+        item->color = DEFAULT_COLOR;
     }
     return item;
 }

@@ -25,6 +25,7 @@
 #define DEFAULT_COLOR   0xFFFFFFFF
 #define COLOR_GREEN     0x00FF00FF
 #define COLOR_RED       0xFF0000FF
+#define COLOR_FADED     0x999999FF
 
 typedef enum {
     MENU_NAV_NONE = -1,
@@ -75,13 +76,14 @@ struct menu_item_s {
     char               *text;               /* 0x000C */
     char               *tooltip;            /* 0x0010 */
     item_data_t         data;               /* 0x0014 */
-    uint16_t            x_cell;             /* 0x0018 */
-    uint16_t            y_cell;             /* 0x001A */
-    int16_t             x_offset;           /* 0x001C */
-    int16_t             y_offset;           /* 0x001E */
-    bool                interactive;        /* 0x0020 */
-    bool                enabled;            /* 0x0021 */
-};                                          /* 0x0022 */
+    uint32_t            color;              /* 0x0018 */
+    uint16_t            x_cell;             /* 0x001C */
+    uint16_t            y_cell;             /* 0x001E */
+    int16_t             x_offset;           /* 0x0020 */
+    int16_t             y_offset;           /* 0x0022 */
+    bool                interactive;        /* 0x0024 */
+    bool                enabled;            /* 0x0025 */
+};                                          /* 0x0026 */
 
 struct menu_sprite_s {
     gfx_texture    *texture;

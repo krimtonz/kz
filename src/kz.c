@@ -113,7 +113,7 @@ static void kz_main(void) {
     {
         for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
             if(watch->floating){
-                watch_printf(watch);
+                watch_printf(watch, DEFAULT_COLOR);
             }
         }
     }

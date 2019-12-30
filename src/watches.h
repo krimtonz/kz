@@ -36,7 +36,7 @@ typedef struct {
     char               *label;
 } watch_t;
 
-void watch_printf(watch_t *watch);
+void watch_printf(watch_t *watch, uint32_t color);
 void clear_watches();
 void init_watch_rows();
 

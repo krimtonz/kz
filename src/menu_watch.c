@@ -9,13 +9,13 @@ struct item_data{
 };
 
 static void menu_watch_draw(menu_item_t *item){
-    struct item_data *watch_data = (struct item_data*)item->data;
-    watch_t *watch = watch_data->watch;
+    struct item_data *data = (struct item_data*)item->data;
+    watch_t *watch = data->watch;
     // floating watches is handled in kz_main
     if(watch->floating) return;
     watch->x = menu_item_x(item);
     watch->y = menu_item_y(item);
-    watch_printf(watch);
+    watch_printf(watch, item->color);
 }
 
 static void menu_watch_remove(menu_item_t *item){

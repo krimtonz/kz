@@ -147,18 +147,22 @@ menu_t *create_scene_menu(){
         menu_label_add(&collision, 2, 8, "hide actors");
     }
 
-    menu_label_add(&scene, 0, 2, "current room");
+    item = menu_label_add(&scene, 0, 2, "current room");
+    item->color = COLOR_FADED;
     static watch_t cur_room;
     cur_room.address = &z2_game.room_ctx.rooms[0].idx;
     cur_room.type = WATCH_TYPE_U8;
     cur_room.floating=0;
-    menu_watch_add(&scene, 13, 2, &cur_room, 1);
-    menu_label_add(&scene, 0, 3, "num rooms");
+    item = menu_watch_add(&scene, 13, 2, &cur_room, 1);
+    item->color = COLOR_FADED;
+    item = menu_label_add(&scene, 0, 3, "num rooms");
+    item->color = COLOR_FADED;
     static watch_t num_rooms;
     num_rooms.address = &z2_game.room_ctx.transition_cnt;
     num_rooms.type = WATCH_TYPE_U8;
     num_rooms.floating = 0;
-    menu_watch_add(&scene, 13, 3, &num_rooms, 1);
+    item = menu_watch_add(&scene, 13, 3, &num_rooms, 1);
+    item->color = COLOR_FADED;
 
     menu_button_add(&scene, 0, 4, "unload room", unload_room_onactivate, NULL);
     menu_button_add(&scene, 0, 5, "load room", load_room_onactivate, NULL);
