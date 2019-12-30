@@ -6,6 +6,7 @@
 
 #include "fat.h"
 #include "sys.h"
+#include "hb.h"
 
 enum sfn_case{
     SFN_CASE_ANY,
@@ -352,7 +353,7 @@ static int cache_flush(fat_ctxt_t *fat, enum fat_cache_type type){
     if(!cache->valid || !cache->dirty){
         return 0;
     }
-    if(fat->write(cache->data,cache->load_lba,cache->sector_cnt)){
+    if(hb_sd_write(cache->data, cache->load_lba, cache->sector_cnt)){
         errno = EIO;
         return -1;
     }
@@ -375,7 +376,7 @@ static void *cache_prep(fat_ctxt_t *fat, enum fat_cache_type type, uint32_t lba,
         if(lba + cache->sector_cnt > cache->max_lba){
             cache->sector_cnt = cache->max_lba - lba;
         }
-        if(fat->read(cache->data,lba,cache->sector_cnt)){
+        if(hb_sd_read(cache->data, lba, cache->sector_cnt)){
             cache->valid = 0;
             errno = EIO;
             return NULL;
@@ -405,7 +406,7 @@ static void *cache_load(fat_ctxt_t *fat, enum fat_cache_type type, uint32_t lba)
     if(lba + cache->sector_cnt > cache->max_lba){
         cache->sector_cnt = cache->max_lba - lba;
     }
-    fat->read(cache->data,lba,cache->sector_cnt);
+    hb_sd_read(cache->data, lba, cache->sector_cnt);
     cache->valid = 1;
     cache->dirty = 0;
     cache->load_lba = lba;
@@ -1029,9 +1030,9 @@ static uint32_t cluster_rw(fat_file_t *file, enum fat_io rw, void *buf, uint32_t
         uint32_t byte_cnt = block_cnt * fat->bytes_per_sector;
         int e;
         if(rw == FAT_READ){
-            e = fat->read(p,lba,block_cnt);
+            e = hb_sd_read(p, lba, block_cnt);
         }else{
-            e = fat->write(p,lba,block_cnt);
+            e = hb_sd_write(p, lba, block_cnt);
         }
         if(e){
             break;
@@ -1644,9 +1645,7 @@ int fat_resize(fat_entry_t *entry, uint32_t size, fat_file_t *file){
     return 0;
 }
 
-int fat_init(fat_ctxt_t *fat, fat_io_proc read, fat_io_proc write){
-    fat->read = read;
-    fat->write = write;
+int fat_init(fat_ctxt_t *fat){
     for(int i = 0;i < FAT_CACHE_MAX;i++){
         fat->cache[i].valid = 0;
         fat->cache[i].max_lba = -1;

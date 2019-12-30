@@ -1,3 +1,9 @@
+/*
+* menu_file.h
+*
+* definitions for the file list menu items
+*/
+
 #ifndef LITE
 #ifndef _MENU_FILE_H
 #define _MENU_FILE_H

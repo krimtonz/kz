@@ -1,3 +1,9 @@
+/*
+* scenes.h
+*
+* defintions for the game's scenes
+*/
+
 #ifndef _SCENES_H
 #define _SCENES_H
 #include <stdint.h>

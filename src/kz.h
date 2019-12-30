@@ -1,3 +1,9 @@
+/*
+* kz.h
+*
+* definitions for the main kz system
+*/
+
 #ifndef _KZ_H
 #define _KZ_H
 
@@ -91,20 +97,20 @@ typedef struct  {
     int                     prev_timespeed;
 } kz_ctxt_t;
 
+menu_t *create_warps_menu       ();
+menu_t *create_inventory_menu   ();
+menu_t *create_scene_menu       ();
+menu_t *create_watches_menu     ();
+menu_t *create_cheats_menu      ();
+menu_t *create_file_menu        ();
+menu_t *create_equips_menu      ();
+menu_t *create_settings_menu    ();
+#ifndef LITE
+menu_t *create_debug_menu       ();
+#endif
+void    kz_log                  (const char *format, ...);
+
 extern kz_ctxt_t kz;
 extern char restriction_table[0x23A];
-
-menu_t *create_warps_menu();
-menu_t *create_inventory_menu();
-menu_t *create_scene_menu();
-menu_t *create_watches_menu();
-menu_t *create_cheats_menu();
-menu_t *create_file_menu();
-menu_t *create_equips_menu();
-menu_t *create_settings_menu();
-#ifndef LITE
-menu_t *create_debug_menu();
-#endif
-void kz_log(const char *format, ...);
 
 #endif

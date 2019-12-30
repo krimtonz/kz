@@ -1,3 +1,9 @@
+/*
+* fat.h
+*
+* definitions for the fat file system
+*/
+
 #ifndef LITE
 #ifndef _FAT_H
 #define _FAT_H
@@ -20,7 +26,6 @@ enum fat_io {
     FAT_READ,
     FAT_WRITE,
 };
-
 
 enum fat_type {
     FAT12,
@@ -45,11 +50,7 @@ typedef struct {
     char        data[0x800];
 } fat_cache_t;
 
-typedef int (*fat_io_proc)(void *buf, uint32_t lba, uint32_t block_cnt);
-
 typedef struct{
-    fat_io_proc         read;
-    fat_io_proc         write;
     enum fat_type       type;
     uint32_t            partition_lba;
     uint32_t            partition_sectors;
@@ -102,21 +103,21 @@ typedef struct{
     uint32_t    size;
 } fat_entry_t;
 
-int fat_init(fat_ctxt_t *fat, fat_io_proc read, fat_io_proc write);
-fat_entry_t *fat_path_target(fat_path_t *fat_path);
-fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const char **tail);
-void fat_rewind(fat_file_t *file);
-void fat_begin(fat_entry_t *entry, fat_file_t *file);
-fat_path_t *fat_create_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, uint8_t attributes);
-int fat_create(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, uint8_t attributes, fat_entry_t *entry);
-void fat_free(fat_path_t *fp);
-int fat_resize(fat_entry_t *entry, uint32_t size, fat_file_t *file);
-void fat_root(fat_ctxt_t *fat, fat_file_t *file);
-int fat_dir(fat_file_t *dir, fat_entry_t *entry);
-uint32_t fat_advance(fat_file_t *file, uint32_t byte_cnt, _Bool *eof);
-uint32_t fat_rw(fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt, fat_file_t *new_file, _Bool *eof);
-int fat_flush(fat_ctxt_t *fat);
-int dir_find(fat_ctxt_t *fat, uint32_t cluster, const char *name, fat_entry_t *entry);
+int             fat_init        (fat_ctxt_t *fat);
+fat_entry_t    *fat_path_target (fat_path_t *fat_path);
+fat_path_t     *fat_path        (fat_ctxt_t *fat, fat_path_t *dir, const char *path, const char **tail);
+void            fat_rewind      (fat_file_t *file);
+void            fat_begin       (fat_entry_t *entry, fat_file_t *file);
+fat_path_t     *fat_create_path (fat_ctxt_t *fat, fat_path_t *dir, const char *path, uint8_t attributes);
+int             fat_create      (fat_ctxt_t *fat, fat_entry_t *dir, const char *path, uint8_t attributes, fat_entry_t *entry);
+void            fat_free        (fat_path_t *fp);
+int             fat_resize      (fat_entry_t *entry, uint32_t size, fat_file_t *file);
+void            fat_root        (fat_ctxt_t *fat, fat_file_t *file);
+int             fat_dir         (fat_file_t *dir, fat_entry_t *entry);
+uint32_t        fat_advance     (fat_file_t *file, uint32_t byte_cnt, _Bool *eof);
+uint32_t        fat_rw          (fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt, fat_file_t *new_file, _Bool *eof);
+int             fat_flush       (fat_ctxt_t *fat);
+int             dir_find        (fat_ctxt_t *fat, uint32_t cluster, const char *name, fat_entry_t *entry);
 
 #endif
 #endif

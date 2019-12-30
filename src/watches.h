@@ -1,3 +1,9 @@
+/*
+* watches.h
+*
+* Memory watch definitions
+*/
+
 #ifndef _WATCHES_H
 #define _WATCHES_H
 

@@ -1,3 +1,9 @@
+/*
+* commands.h
+*
+* definitions for kz commands
+*/
+
 #ifndef _COMMANDS_H
 #define _COMMANDS_H
 
@@ -40,27 +46,27 @@ struct command {
     void              (*proc)();
 };
 
-void command_levitate();
-void command_void();
-void command_reloadarea();
-void command_fall();
-void command_turbo();
-void command_break();
-void command_pause();
-void command_advance();
-void command_return();
-void command_lag_reset();
-void command_timer();
-void command_timer_reset();
-void command_save_memfile();
-void command_load_memfile();
-void command_next_memfile();
-void command_prev_memfile();
-void command_save_position();
-void command_load_position();
-void command_next_position();
-void command_prev_position();
-void command_toggle_input();
+void    command_levitate        ();
+void    command_void            ();
+void    command_reloadarea      ();
+void    command_fall            ();
+void    command_turbo           ();
+void    command_break           ();
+void    command_pause           ();
+void    command_advance         ();
+void    command_return          ();
+void    command_lag_reset       ();
+void    command_timer           ();
+void    command_timer_reset     ();
+void    command_save_memfile    ();
+void    command_load_memfile    ();
+void    command_next_memfile    ();
+void    command_prev_memfile    ();
+void    command_save_position   ();
+void    command_load_position   ();
+void    command_next_position   ();
+void    command_prev_position   ();
+void    command_toggle_input    ();
 
 extern struct command kz_commands[KZ_CMD_MAX];
 

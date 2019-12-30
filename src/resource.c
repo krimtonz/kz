@@ -180,7 +180,7 @@ static void *resource_load_items(enum resource resource){
     struct item_texture *textures = malloc(sizeof(*textures) * Z2_ITEM_END);
     memset(textures,0,sizeof(*textures) * Z2_ITEM_END);
 #ifndef LITE
-    for(int i=0;i<Z2_ITEM_END;i++){
+    for(int i = 0;i < Z2_ITEM_END;i++){
         textures[i].texture = gfx_load_item_texture(i);
     }
 #endif
@@ -189,40 +189,41 @@ static void *resource_load_items(enum resource resource){
 
 static void *resource_load_buttons(enum resource resource){
     texture_loader loader = {
-        32, 32, BUTTONS_FILE, G_IM_FMT_IA, G_IM_SIZ_8b,
-        0, 0, 1, SOURCE_FILE,
-        0xF60, 5
+        0xF60,          32,             32, BUTTONS_FILE,
+        G_IM_FMT_IA,    G_IM_SIZ_8b,    0,  0,
+        1,              5,              SOURCE_FILE,
     };
     return gfx_load(&loader);
 }
 
 static void *resource_load_note(enum resource resource){
     texture_loader loader = {
-        16, 24, ICON_ITEM_STATIC, G_IM_FMT_IA, G_IM_SIZ_8b,
-        NOTE_INDEX, NOTE_INDEX, 0, SOURCE_ARCHIVE,
-        0, 0
+        0,              16,             24,         ICON_ITEM_STATIC,
+        G_IM_FMT_IA,    G_IM_SIZ_8b,    NOTE_INDEX, NOTE_INDEX,
+        0,              0,              SOURCE_ARCHIVE,
     };
     return gfx_load(&loader);
 }
 
 static void *resource_load_owl(enum resource resource){
     texture_loader loader = {
-        24, 12, OWL_FILE, G_IM_FMT_RGBA, G_IM_SIZ_32b,
-        0, 0, 1, SOURCE_FILE,
-        OWL_OFFSET, 1
+        OWL_OFFSET,     24,             12,         OWL_FILE,
+        G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          0,
+        1,              1,              SOURCE_FILE,
     };
     return gfx_load(&loader);
 }
 
 static void *resource_load_dungeon_items(enum resource resource){
     texture_loader loader = {
-        24, 24, DUNGEON_FILE, G_IM_FMT_RGBA, G_IM_SIZ_32b,
 #if Z2_VERSION==NZSE
-        0, 13, 1, SOURCE_ARCHIVE,
-        0, 0
+        0,              24,             24,         DUNGEON_FILE,
+        G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          13,
+        1,              0,              SOURCE_ARCHIVE,
 #else
-        0, 0, 1, SOURCE_FILE,
-        DUNGEON_OFFSET, 13
+        DUNGEON_OFFSET, 24,             24,         DUNGEON_FILE,
+        G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          0,
+        1,              13,             SOURCE_FILE,
 #endif
     };
     return gfx_load(&loader);

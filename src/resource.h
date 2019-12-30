@@ -1,3 +1,9 @@
+/*
+* resource.h
+*
+* definitions for loading graphic resources
+*/
+
 #ifndef _RESOURCE_H
 #define _RESOURCE_H
 #include "gfx.h"
@@ -42,8 +48,7 @@ struct item_texture{
 #endif
 };
 
-void *resource_get(enum resource resource);
-gfx_texture *get_item_texture(uint8_t item_id, _Bool release);
-void resource_destroy(enum resource resource);
+void           *resource_get(enum resource resource);
+gfx_texture    *get_item_texture(uint8_t item_id, _Bool release);
 
 #endif

@@ -2,7 +2,6 @@
 #include <malloc.h>
 
 #include "menu.h"
-#include "menu_keyboard.h"
 #include "kz.h"
 
 struct item_data {

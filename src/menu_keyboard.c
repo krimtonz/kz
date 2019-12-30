@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdbool.h>
-#include "menu_keyboard.h"
 #include "input.h"
 #include "kz.h"
 #include "resource.h"

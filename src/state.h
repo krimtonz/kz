@@ -1,3 +1,9 @@
+/*
+* state.h
+*
+* defintions for save state functionality
+*/
+
 #ifndef LITE
 #ifndef _STATE_H
 #define _STATE_H

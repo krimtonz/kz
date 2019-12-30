@@ -1,3 +1,9 @@
+/*
+* z2.h
+*
+* Majora's Mask related information, addresses, and structure definitions
+*/
+
 #ifndef _Z2_H
 #define _Z2_H
 #include <n64.h>

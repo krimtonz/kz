@@ -1,3 +1,9 @@
+/*
+* settings.h
+*
+* defintions for storing kz-related save data to flash ram
+*/
+
 #ifndef _SETTINGS_H
 #define _SETTINGS_H
 

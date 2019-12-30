@@ -1,3 +1,9 @@
+/*
+* menu.h
+*
+* definitions for menu elements
+*/
+
 #ifndef _MENU_H
 #define _MENU_H
 #include <list/list.h>
@@ -153,6 +159,7 @@ void                menu_number_set             (menu_item_t *item, uint32_t val
 void                menu_list_set               (menu_item_t *item, int idx);
 void                menu_bind_set               (menu_item_t *item, int cmd);
 menu_sprite_t      *menu_button_sprite_get      (menu_item_t *item);
+void                menu_keyboard_get           (menu_item_t *item, char **dest);
 
 int                 menu_number_word_event      (event_handler_t *handler, menu_event_t event, void **event_data);
 int                 menu_number_halfword_event  (event_handler_t *handler, menu_event_t event, void **event_data);

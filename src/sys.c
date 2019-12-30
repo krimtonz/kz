@@ -49,34 +49,6 @@ time_t time(time_t *tloc)
     return 0;
 }
 
-static int read_sd(void *buf, uint32_t lba, uint32_t block_cnt){
-    switch(device_type){
-        case DEVICE_HOMEBOY:
-            if(hb_sd_read(buf,lba,block_cnt)){
-                errno = EIO;
-                return -1;
-            }
-            return 0;
-        default:
-            errno = ENODEV;
-            return -1;
-    }
-}
-
-static int write_sd(void *buf, uint32_t lba, uint32_t block_cnt){
-    switch(device_type){
-        case DEVICE_HOMEBOY:
-            if(hb_sd_write(buf,lba,block_cnt)){
-                errno = EIO;
-                return -1;
-            }
-            return 0;
-        default:
-            errno = ENODEV;
-            return -1;
-    }
-}
-
 static int init_fat(){
     if(fat_ready){
         return 0;
@@ -87,7 +59,7 @@ static int init_fat(){
         errno = ENODEV;
         return -1;
     }
-    if(fat_init(&fat,read_sd, write_sd)){
+    if(fat_init(&fat)){
         return -1;
     }
     wd = fat_path(&fat, NULL, "", NULL);

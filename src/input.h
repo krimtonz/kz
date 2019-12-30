@@ -1,3 +1,9 @@
+/*
+* input.h
+*
+* definitions for input handling
+*/
+
 #ifndef _INPUT_H
 #define _INPUT_H
 
@@ -20,17 +26,17 @@
 
 #define BIND_END 6
 
-uint16_t make_bind(int len, ...);
-void input_update();
-_Bool input_bind_held(int index);
-_Bool input_bind_pressed(int index);
-_Bool input_bind_pressed_raw(int index);
-void reserve_buttons(uint16_t button_bitmask);
-void free_buttons(uint16_t button_bitmask);
-uint16_t input_pressed();
-uint16_t input_pressed_raw();
-int8_t input_x();
-int8_t input_y();
+uint16_t    make_bind               (int len, ...);
+void        input_update            ();
+_Bool       input_bind_held         (int index);
+_Bool       input_bind_pressed      (int index);
+_Bool       input_bind_pressed_raw  (int index);
+void        reserve_buttons         (uint16_t button_bitmask);
+void        free_buttons            (uint16_t button_bitmask);
+uint16_t    input_pressed           ();
+uint16_t    input_pressed_raw       ();
+int8_t      input_x                 ();
+int8_t      input_y                 ();
 
 extern uint32_t button_colors[16];
 
