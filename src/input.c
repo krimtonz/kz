@@ -238,7 +238,9 @@ static void bind_draw(menu_item_t *item){
     int b;
     gfx_texture *button_tex = resource_get(R_KZ_BUTTONS);
     while((b = bind_get_component(bind, i)) != BIND_END){
-        color = button_colors[b];
+        if(color == DEFAULT_COLOR){
+            color = button_colors[b];
+        }
         gfx_draw_sprite_color(button_tex, x + (i++ * 10), y, b, 8, 8, color);
         if(i == 4) break;
     }
