@@ -323,6 +323,13 @@ gfx_texture *gfx_load(texture_loader *loader){
     }
 }
 
+void gfx_destroy_texture(gfx_texture *texture){
+    if(texture){
+        if(texture->data) free(texture->data);
+        free(texture);
+    }
+}
+
 /* sprite drawing functions */
 
 void gfx_draw_sprite_color(gfx_texture *texture, int x, int y, int tile, int width, int height, uint32_t color){

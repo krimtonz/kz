@@ -77,6 +77,7 @@ void            gfx_load_tile               (gfx_texture *texture, uint16_t tile
 gfx_texture    *gfx_load                    (texture_loader *loader);
 void            gfx_texture_desaturate      (void *data, size_t len);
 gfx_texture    *gfx_load_item_texture       (uint8_t item_id);
+void            gfx_destroy_texture         (gfx_texture *texture);
 
 extern gfx_font *kfont;
 
