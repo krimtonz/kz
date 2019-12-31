@@ -49,8 +49,14 @@ clean       :
 	rm -rf $(OBJDIR) $(BINDIR) $(PATCHDIR)
 distclean 	: clean
 	rm -rf build/*.z64 build/*.wad
+clean-vc        :
+	cd $(VCDIR) && make clean
+clean-homeboy   :
+	cd $(HOMEBOYDIR) && make clean
+clean-all       : clean clean-vc clean-homeboy
+distclean-all   : distclean clean-vc clean-homeboy
 
-.PHONY		: all clean distclean
+.PHONY		: all clean distclean clean-vc clean-homeboy clean-all distclean-all
 
 define bin_template
 SRCDIR-$(1)      = $(5)
