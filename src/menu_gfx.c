@@ -12,7 +12,7 @@ struct item_data {
 
 static void menu_gfx_draw(menu_item_t *item){
     struct item_data *data = item->data;
-    gfx_draw_sprite(data->texture, menu_item_x(item), menu_item_y(item), data->tile, data->width, data->height);
+    gfx_draw_sprite_color(data->texture, menu_item_x(item), menu_item_y(item), data->tile, data->width, data->height, item->color);
 }
 
 menu_item_t *menu_gfx_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, gfx_texture *texture, int tile, int width, int height){
@@ -25,6 +25,7 @@ menu_item_t *menu_gfx_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, gfx_te
             data->height = height;
             data->tile = tile;
             item->data = data;
+            item->color = DEFAULT_COLOR;
         }
         item->draw_proc = menu_gfx_draw;
         item->interactive = 0;

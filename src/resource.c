@@ -151,6 +151,7 @@ static const char *resource_names[R_END] = {
     "flags",
     "arrows",
     "files",
+    NULL,
 };
 
 static void *resource_load_kz_texture(enum resource resource){
@@ -229,6 +230,15 @@ static void *resource_load_dungeon_items(enum resource resource){
     return gfx_load(&loader);
 }
 
+static void *resource_load_rupee_texture(enum resource resource){
+    texture_loader loader = {
+        RUPEE_OFFSET,   16,             16,         RUPEE_FILE,
+        G_IM_FMT_IA,    G_IM_SIZ_8b,    0,          0,
+        0,              1,              SOURCE_FILE
+    };
+    return gfx_load(&loader);
+}
+
 static void *resource_table[R_END] = {NULL};
 static void *(*resource_ctors[R_END])(enum resource) = {
     resource_load_items,
@@ -244,6 +254,7 @@ static void *(*resource_ctors[R_END])(enum resource) = {
     resource_load_kz_texture,
     resource_load_kz_texture,
     resource_load_kz_texture,
+    resource_load_rupee_texture,
 };
 
 void *resource_get(enum resource resource){

@@ -711,8 +711,14 @@ menu_t *create_inventory_menu(){
         menu_item_offset_set(item, 5, 2);
         
         menu_gfx_add(&amounts,6,3,dungeon_tex,1,12,12);
-        item = menu_number_input_add(&amounts, 7, 3, 10, 5);
+        item = menu_number_input_add(&amounts, 7, 3, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.current_health);
+        menu_item_offset_set(item, 5, 2);
+
+        item = menu_gfx_add(&amounts, 0, 4, resource_get(R_Z2_RUPEE), 0, 12, 12);
+        item->color = 0xC8FF64FF;
+        item = menu_number_input_add(&amounts, 1, 4, 10, 3);
+        menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.rupees);
         menu_item_offset_set(item, 5, 2);
     }
     
