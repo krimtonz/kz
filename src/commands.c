@@ -21,6 +21,7 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
+    {"title screen",        COMMAND_PRESS,  command_title_screen},
     {"save memfile",        COMMAND_PRESS,  command_save_memfile},
     {"load memfile",        COMMAND_PRESS,  command_load_memfile},
     {"next memfile",        COMMAND_PRESS,  command_next_memfile},
@@ -78,6 +79,12 @@ void command_reloadarea(){
     z2_game.common.execute_state = 0;
     z2_game.common.gamestate_ctor = z2_gamestate_table[3].vram_ctor;
     z2_game.common.ctxt_size = z2_gamestate_table[3].alloc_size;
+}
+
+void command_title_screen(){
+    z2_ctxt.execute_state = 0;
+    z2_ctxt.gamestate_ctor = z2_gamestate_table[4].vram_ctor;
+    z2_ctxt.ctxt_size = z2_gamestate_table[4].alloc_size;
 }
 
 void command_pause(){

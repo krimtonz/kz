@@ -20,9 +20,11 @@ enum{
     KZ_CMD_BREAK,
     KZ_CMD_PAUSE,
     KZ_CMD_ADVANCE,
+    KZ_CMD_TOGGLE_INPUT,
     KZ_CMD_RESET_LAG,
     KZ_CMD_TIMER,
     KZ_CMD_TIMER_RESET,
+    KZ_CMD_TITLE_SCREEN,
     KZ_CMD_SAVE_MEMFILE,
     KZ_CMD_LOAD_MEMFILE,
     KZ_CMD_NEXT_MEMFILE,
@@ -31,7 +33,6 @@ enum{
     KZ_CMD_LOAD_POSITION,
     KZ_CMD_NEXT_POSITION,
     KZ_CMD_PREV_POSITION,
-    KZ_CMD_TOGGLE_INPUT,
     KZ_CMD_MAX
 };
 
@@ -67,6 +68,7 @@ void    command_load_position   ();
 void    command_next_position   ();
 void    command_prev_position   ();
 void    command_toggle_input    ();
+void    command_title_screen    ();
 
 extern struct command kz_commands[KZ_CMD_MAX];
 

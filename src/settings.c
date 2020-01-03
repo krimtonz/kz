@@ -29,14 +29,15 @@ void load_default_settings(){
     settings->binds[KZ_CMD_RESET_LAG] = BIND_END;
     settings->binds[KZ_CMD_TIMER] = BIND_END;
     settings->binds[KZ_CMD_TIMER_RESET] = BIND_END;
-    settings->binds[KZ_CMD_LOAD_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_LEFT);
-    settings->binds[KZ_CMD_SAVE_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_RIGHT);
+    settings->binds[KZ_CMD_SAVE_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_LEFT);
+    settings->binds[KZ_CMD_LOAD_MEMFILE] = make_bind(2, BUTTON_C_RIGHT, BUTTON_D_RIGHT);
     settings->binds[KZ_CMD_NEXT_MEMFILE] = BIND_END;
     settings->binds[KZ_CMD_PREV_MEMFILE] = BIND_END;
     settings->binds[KZ_CMD_SAVE_POSITION] = make_bind(2, BUTTON_C_LEFT, BUTTON_D_LEFT);
     settings->binds[KZ_CMD_LOAD_POSITION] = make_bind(2, BUTTON_C_LEFT, BUTTON_D_RIGHT);
     settings->binds[KZ_CMD_NEXT_POSITION] = BIND_END;
     settings->binds[KZ_CMD_PREV_POSITION] = BIND_END;
+    settings->binds[KZ_CMD_TITLE_SCREEN] = BIND_END;
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 20;

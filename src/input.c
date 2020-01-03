@@ -235,10 +235,11 @@ static void bind_draw(menu_item_t *item){
         return;
     }
     int i = 0;
+    _Bool do_color = (color == DEFAULT_COLOR);
     int b;
     gfx_texture *button_tex = resource_get(R_KZ_BUTTONS);
     while((b = bind_get_component(bind, i)) != BIND_END){
-        if(color == DEFAULT_COLOR){
+        if(do_color){
             color = button_colors[b];
         }
         gfx_draw_sprite_color(button_tex, x + (i++ * 10), y, b, 8, 8, color);
