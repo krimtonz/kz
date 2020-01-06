@@ -5,6 +5,7 @@
 #include "z2.h"
 #include "state.h"
 #include "zu.h"
+#include "resource.h"
 
 void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
@@ -139,8 +140,6 @@ void load_state(void *state){
     st_read(&p,&z2_game,sizeof(z2_game));
     st_read(&p,&z2_file,sizeof(z2_file));
     st_read(&p,&z2_static_ctxt,sizeof(z2_static_ctxt));
-    st_read(&p,(void*)z2_disp_addr,Z2_DISP_SIZE);
-    st_read(&p,(void*)(z2_disp_addr + Z2_DISP_SIZE),Z2_DISP_SIZE);
     st_read(&p,&z2_segment,sizeof(z2_segment));
     st_read(&p,&z2_game_arena,sizeof(z2_game_arena));
     z2_arena_node_t *node = z2_game_arena.first;
@@ -229,7 +228,7 @@ void load_state(void *state){
     if(scene_index != z2_game.scene_index){
         z2_scene_table_ent_t *scene_ent = &z2_scene_table[z2_game.scene_index];
         size_t size = scene_ent->vrom_end - scene_ent->vrom_start;
-        zu_file_get(scene_ent->vrom_start,z2_game.scene_addr,size);
+        zu_file_load(scene_ent->vrom_start,z2_game.scene_addr,size);
         relocate_col_hdr((uint32_t)z2_game.col_ctxt.col_hdr);
         z2_game.col_ctxt.stc_list_pos = 0;
         z2_CreateStaticCollision(&z2_game.col_ctxt,&z2_game,z2_game.col_ctxt.stc_lut);
@@ -239,7 +238,7 @@ void load_state(void *state){
     z2_room_trans_actor_t *trans = z2_game.room_ctx.transition_list;
     st_read(&p,trans,sizeof(*trans) * trans_cnt);
 
-    for(int i=0;i<2;i++){
+    for(int i = 0;i < 2;i++){
         struct alloc *room = &rooms[i];
         z2_room_t *c_room = &z2_game.room_ctx.rooms[i];
         int p_id = room->id;
@@ -249,13 +248,13 @@ void load_state(void *state){
         if(c_ptr && c_id != -1 && (p_id != c_id || z2_game.scene_index != scene_index || p_ptr != c_ptr)){
             uint32_t start = z2_game.room_list[c_id].vrom_start;
             uint32_t end = z2_game.room_list[c_id].vrom_end;
-            zu_file_get(start, c_ptr, end - start);
+            zu_file_load(start, c_ptr, end - start);
         }
     }
 
     osSendMesg(&z2_file_msgqueue, &z2_game.room_ctx.loadfile, OS_MESG_NOBLOCK);
 
-    for(int i = 0;i<35;i++){
+    for(int i = 0;i < 35;i++){
         struct alloc *p_obj = &objects[i];
         z2_obj_t *c_obj = &z2_game.obj_ctx.obj[i];
         int p_id = p_obj->id;
@@ -268,10 +267,13 @@ void load_state(void *state){
         if(c_id != 0 && (c_id!=p_id || c_ptr!=p_ptr)){
             uint32_t start = z2_obj_table[c_id].vrom_start;
             uint32_t end = z2_obj_table[c_id].vrom_end;
-            zu_file_get(start,c_ptr,end-start);
+            zu_file_load(start,c_ptr,end-start);
         }
         z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(c_ptr);
         switch(c_id){
+            case 0x0001:
+                relocate_col_hdr(0x040118D8);
+                break;
             case 0x0197:
                 relocate_col_hdr(0x060012B0);
                 relocate_col_hdr(0x06001590);
@@ -290,6 +292,53 @@ void load_state(void *state){
     }
 
     set_destroy(&ovl_set);
+
+    z2_col_hdr_t *col_hdr = z2_game.col_ctxt.col_hdr;
+    st_read(&p, &col_hdr->n_water, sizeof(col_hdr->n_water));
+    st_read(&p, &col_hdr->water, sizeof(*col_hdr->water) * col_hdr->n_water);
+
+    z2_col_ctxt_t *col = &z2_game.col_ctxt;
+    st_read(&p, &col->dyn.list, sizeof(*col->dyn.list) * col->dyn_list_max);
+    st_read(&p, &col->dyn_poly, sizeof(*col->dyn_poly) * col->dyn_poly_max);
+    st_read(&p, &col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
+
+    z2_CreateSkyboxGfx(&z2_game.skybox_ctx, 5);
+
+    zu_file_idx_load(RUPEE_FILE, z2_game.hud_ctx.parameter_static);
+    if(z2_file.form_button_item[z2_file.current_form == 4 ? 0 : z2_file.current_form].b != Z2_ITEM_NULL){
+        z2_btnupdate(&z2_game, 0);
+    }
+    for(int i = 1;i < 4;i++){
+        if(z2_file.form_button_item[0].button_item[i] != Z2_ITEM_NULL){
+            z2_btnupdate(&z2_game, i);
+        }
+    }
+
+    z2_ActionLabelUpdate(&z2_game.hud_ctx, z2_game.hud_ctx.action, 0);
+    z2_ActionLabelUpdate(&z2_game.hud_ctx, z2_game.hud_ctx.action, 1);
+
+    z2_gfx_t *gfx = z2_ctxt.gfx;
+    zu_disp_ptr_t disp_ptr;
+    st_read(&p, &disp_ptr, sizeof(disp_ptr));
+    zu_disp_ptr_load(&disp_ptr);
+    z2_disp_buf_t *z2_dlist[4] = {
+        &gfx->work,
+        &gfx->poly_opa,
+        &gfx->poly_xlu,
+        &gfx->overlay,
+    };
+    for(int i = 0;i < 4;i++){
+        z2_disp_buf_t *dlist = z2_dlist[i];
+        size_t len = sizeof(Gfx);
+        Gfx *end = dlist->buf + dlist->size / len;
+        st_read(&p, dlist->buf, (dlist->p - dlist->buf) * len);
+        st_read(&p, dlist->d, (end - dlist->d) * len);
+    }
+    uint32_t frame_cnt_1;
+    uint32_t frame_cnt_2;
+    st_read(&p, &frame_cnt_1, sizeof(frame_cnt_1));
+    st_read(&p, &frame_cnt_2, sizeof(frame_cnt_2));
+    zu_gfx_reloc(frame_cnt_1 & 1, frame_cnt_2 & 1);
 }
 
 _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end){
@@ -358,8 +407,6 @@ size_t save_state(void *state){
     st_write(&p,&z2_game,sizeof(z2_game));
     st_write(&p,&z2_file,sizeof(z2_file));
     st_write(&p,&z2_static_ctxt,sizeof(z2_static_ctxt));
-    st_write(&p,(void*)z2_disp_addr,Z2_DISP_SIZE);
-    st_write(&p,(void*)(z2_disp_addr + Z2_DISP_SIZE),Z2_DISP_SIZE);
     st_write(&p,&z2_segment,sizeof(z2_segment));
     st_write(&p,&z2_game_arena,sizeof(z2_game_arena));
     for(z2_arena_node_t *node = z2_game_arena.first;node;node=node->next){
@@ -424,7 +471,36 @@ size_t save_state(void *state){
     int trans_cnt = z2_game.room_ctx.transition_cnt;
     z2_room_trans_actor_t *trans = z2_game.room_ctx.transition_list;
     st_write(&p,trans,sizeof(*trans) * trans_cnt);
+
+    z2_col_hdr_t *col_hdr = z2_game.col_ctxt.col_hdr;
+    st_write(&p, &col_hdr->n_water, sizeof(col_hdr->n_water));
+    st_write(&p, &col_hdr->water, sizeof(*col_hdr->water) * col_hdr->n_water);
     
+    z2_col_ctxt_t *dynamic_col = &z2_game.col_ctxt;
+    st_write(&p, &dynamic_col->dyn.list, sizeof(*dynamic_col->dyn.list) * dynamic_col->dyn_list_max);
+    st_write(&p, &dynamic_col->dyn_poly, sizeof(*dynamic_col->dyn_poly) * dynamic_col->dyn_poly_max);
+    st_write(&p, &dynamic_col->dyn_vtx, sizeof(*dynamic_col->dyn_vtx) * dynamic_col->dyn_vtx_max);
+
+    z2_gfx_t *gfx = z2_ctxt.gfx;
+    zu_disp_ptr_t disp_ptr;
+    zu_disp_ptr_save(&disp_ptr);
+    st_write(&p, &disp_ptr, sizeof(disp_ptr));
+    z2_disp_buf_t *z2_dlist[4] = {
+        &gfx->work,
+        &gfx->poly_opa,
+        &gfx->poly_xlu,
+        &gfx->overlay
+    };
+    for(int i = 0;i < 4;i++){
+        z2_disp_buf_t *dlist = z2_dlist[i];
+        size_t len = sizeof(Gfx);
+        Gfx *end = dlist->buf + dlist->size / len;
+        st_write(&p, dlist->buf, (dlist->p - dlist->buf) * len);
+        st_write(&p, dlist->d, (end - dlist->d) * len);
+    }
+    st_write(&p, &gfx->frame_cnt_1, sizeof(gfx->frame_cnt_1));
+    st_write(&p, &gfx->frame_cnt_2, sizeof(gfx->frame_cnt_2));
+
     return (char*)p - (char*)state;
 }
 #endif

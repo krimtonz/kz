@@ -6,7 +6,7 @@ int zu_is_ingame(){
     return z2_ctxt.gamestate_dtor == z2_gamestate_table[3].vram_dtor;
 }
 
-void zu_file_get(uint32_t vrom_addr, void *ram, size_t size){
+void zu_file_load(uint32_t vrom_addr, void *ram, size_t size){
     OSMesgQueue queue;
     OSMesg mesg;
     osCreateMesgQueue(&queue, &mesg, 1);
@@ -18,6 +18,10 @@ void zu_file_get(uint32_t vrom_addr, void *ram, size_t size){
 
     osSendMesg(&z2_file_msgqueue, &file, OS_MESG_NOBLOCK);
     osRecvMesg(&queue, NULL, OS_MESG_BLOCK);
+}
+
+void zu_file_idx_load(int idx, void *ram){
+    zu_file_load(z2_file_table[idx].vrom_start, ram, z2_file_table[idx].vrom_end - z2_file_table[idx].vrom_start);
 }
 
 void *zu_segment_reloc(void *phy_seg_addr){
@@ -69,21 +73,21 @@ void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx){
     uint32_t src_cimg = z2_cimg[src_cimg_idx];
     uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
     
-    z2_disp_buf_t segment_setup;
-    segment_setup.buf = (Gfx*)(dst_gfx + 0x140);
-    segment_setup.p = segment_setup.buf + 21;
+    //z2_disp_buf_t segment_setup;
+    //segment_setup.buf = (Gfx*)(dst_gfx + 0x140);
+    //segment_setup.p = segment_setup.buf + 21;
 
-    z2_disp_buf_t primary;
-    primary.buf = (Gfx*)(dst_gfx + 0x02A8);
-    primary.p = primary.buf + 12;
+    //z2_disp_buf_t primary;
+    //primary.buf = (Gfx*)(dst_gfx + 0x02A8);
+    //primary.p = primary.buf + 12;
     
-    z2_disp_buf_t *new_disp[6] = {
+    z2_disp_buf_t *new_disp[4] = {
         &gfx->work,
         &gfx->poly_opa,
         &gfx->poly_xlu,
         &gfx->overlay,
-        &primary,
-        &segment_setup,
+        //&primary,
+        //&segment_setup,
     };
     for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
         z2_disp_buf_t *dbuf = new_disp[i];

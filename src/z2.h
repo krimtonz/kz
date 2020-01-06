@@ -1077,7 +1077,9 @@ typedef struct{
     uint32_t    action_rom_addr;                /* 0x0184 */
     void       *action_ram;                     /* 0x0188 */
     uint32_t    action_size;                    /* 0x018C */
-    char        unk_0x190[0xD4];                /* 0x0190 */
+    char        unk_0x190[0x84];                /* 0x0190 */
+    uint16_t    action;                         /* 0x0214 */
+    char        unk_0x216[0x4E];                /* 0x0216 */
     union{
         struct{
             uint16_t    fadeout_alpha;          /* 0x0264 */
@@ -1164,6 +1166,16 @@ typedef struct {
     z2_hitbox_t                *other[50];          /* 0x01C4 */
 } z2_hitbox_ctxt_t;                                 /* 0x028C */
 
+typedef struct {
+    char                unk_0x00[0x168];            /* 0x0000 */
+    void               *texture[2];                 /* 0x0168 */
+    char                unk_0x170[0x8];             /* 0x0170 */
+    void               *unk_0x178;                  /* 0x0178 */
+    Gfx                *dlist[2];                   /* 0x017C */
+    Vtx                *vtx;                        /* 0x0184 */
+    char                unk_0x188[0x98];            /* 0x0188 */
+} z2_skybox_ctxt_t;                                 /* 0x0220 */
+
 typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     z2_ctxt_t           common;                     /* 0x00000 */
     uint16_t            scene_index;                /* 0x000A4 */
@@ -1182,7 +1194,9 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     char                unk_0x1F24[0x04];           /* 0x01F24 */
     void               *cutscene_ptr;               /* 0x01F28 */
     int8_t              cutscene_state;             /* 0x01F2C */
-    char                unk_0x1F2D[0x148FD];        /* 0x01F2D */
+    char                unk_0x1F2D[0x27B3];         /* 0x01F2D */
+    z2_skybox_ctxt_t    skybox_ctx;                 /* 0x046E0 */
+    char                unk_0x4900[0x11F2A];        /* 0x04900 */
     uint8_t             message_state_1;            /* 0x1682A */
     char                unk_0x1682B[0xFD];          /* 0x1682B */
     uint8_t             message_state_2;            /* 0x16928 */
@@ -1199,7 +1213,8 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     z2_room_ctxt_t      room_ctx;                   /* 0x186E0 */   /* 0x186C0 */
     char                unk_0x18768[0xE4];          /* 0x18768 */   /* 0x18748 */
     z2_rom_file_t      *room_list;                  /* 0x1884C */   /* 0x1882C */
-    char                unk_0x18850[0x25];          /* 0x18850 */   /* 0x18830 */
+    char                unk_0x18850[0x24];          /* 0x18850 */   /* 0x18830 */
+    uint8_t             skybox_type;                /* 0x18874 */   /* 0x18854 */
     uint8_t             scene_load_flag;            /* 0x18875 */   /* 0x18855 */
     char                unk_0x18876[0x04];          /* 0x18876 */   /* 0x18856 */
     uint16_t            entrance_index;             /* 0x1887A */   /* 0x1885A */
@@ -1475,9 +1490,11 @@ typedef struct {
 #define z2_CreateStaticCollision_addr   0x800C3334
 #define z2_pause_persp_addr             0x800F4A10
 #define z2_btnupdate_addr               0x80112B40
+#define z2_ActionLabelUpdate_addr       0x80115428 // need jp
 #define z2_LoadRoom_addr                0x8012E96C
 #define z2_DrawRoom_addr                0x8012EBA8
 #define z2_UnloadRoom_addr              0x8012EBF8
+#define z2_CreateSkyboxGfx_addr         0x80143148 // need jp
 #define z2_MotionBlur_addr              0x80165460
 #define z2_draw_room_1_hook_addr        0x80168940
 #define z2_draw_room_2_hook_addr        0x80168958
@@ -1639,73 +1656,76 @@ typedef struct {
 #endif
 
 /* Function Prototypes */
-typedef void (*z2_LoadOverlay_t)(uint32_t vrom_start, uint32_t vrom_end, uint32_t vram_start, uint32_t vram_end, void *dst);
-typedef void (*osEPiReadIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t *dest);
-typedef void (*osEPiWriteIo_t)(OSPiHandle *handle, uint32_t cart, uint32_t data);
-typedef void (*z2_LoadRoom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
-typedef void (*z2_UnloadRoom_t)(z2_game_t *game, z2_room_ctxt_t *room_ctxt);
-typedef void (*z2_DecodeArchiveFile_t)(uint32_t rom, uint8_t tile, void *ram);
-typedef void (*z2_gamesate_update_t)(z2_game_t *game);
-typedef void (*z2_btnupdate_t)(z2_game_t *game, uint8_t btn_idx);
-typedef void (*z2_MotionBlur_t)(z2_ctxt_t *ctxt);
-typedef void (*z2_dmaflashtoram_t)(void *buf, uint32_t block, uint32_t block_cnt);
-typedef void (*z2_dmaramtoflash_t)(void *buf, uint32_t block, uint32_t block_cnt);
-typedef void (*z2_pause_persp_t)(z2_game_t *game);
-typedef void (*z2_CreateStaticCollision_t)(z2_col_ctxt_t *col_ctxt, z2_game_t *game, z2_col_lut_t *col_lut);
-typedef void (*z2_DrawRoom_t)(z2_game_t *game, z2_room_t *room, int a2);
-typedef void (*z2_DrawActors_t)(z2_game_t *game, z2_actor_ctxt_t *actor_ctx);
-typedef void (*z2_DeleteActor_t)(z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
-typedef z2_actor_t *(*z2_SpawnActor_t)(z2_actor_ctxt_t *actor_ctx, z2_game_t *game, uint16_t actor_id,
-                                        float x, float y, float z, z2_angle_t rx, z2_angle_t ry, z2_angle_t rz,
-                                        int16_t actor_variable, int camera_cmd_idx, int spawn_time_flags, void *param_13);
+typedef void        (*z2_LoadOverlay_t)             (uint32_t vrom_start, uint32_t vrom_end, uint32_t vram_start, uint32_t vram_end, void *dst);
+typedef void        (*osEPiReadIo_t)                (OSPiHandle *handle, uint32_t cart, uint32_t *dest);
+typedef void        (*osEPiWriteIo_t)               (OSPiHandle *handle, uint32_t cart, uint32_t data);
+typedef void        (*z2_DrawActors_t)              (z2_game_t *game, z2_actor_ctxt_t *actor_ctx);
+typedef z2_actor_t *(*z2_SpawnActor_t)              (z2_actor_ctxt_t *actor_ctx, z2_game_t *game, uint16_t actor_id,
+                                                     float x, float y, float z, z2_angle_t rx, z2_angle_t ry, z2_angle_t rz,
+                                                     int16_t actor_variable, int camera_cmd_idx, int spawn_time_flags, void *param_13);
+typedef void        (*z2_DeleteActor_t)             (z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
+typedef void        (*z2_CreateStaticCollision_t)   (z2_col_ctxt_t *col_ctxt, z2_game_t *game, z2_col_lut_t *col_lut);
+typedef void        (*z2_pause_persp_t)             (z2_game_t *game);
+typedef void        (*z2_btnupdate_t)               (z2_game_t *game, uint8_t btn_idx);
+typedef void        (*z2_ActionLabelUpdate_t)       (z2_hud_ctxt_t *hud, uint16_t action, int btn);
+typedef void        (*z2_LoadRoom_t)                (z2_game_t *game, z2_room_ctxt_t *room_ctxt, uint8_t room_id);
+typedef void        (*z2_DrawRoom_t)                (z2_game_t *game, z2_room_t *room, int a2);
+typedef void        (*z2_UnloadRoom_t)              (z2_game_t *game, z2_room_ctxt_t *room_ctxt);
+typedef void        (*z2_CreateSkyboxGfx_t)         (z2_skybox_ctxt_t *ctxt, int type);
+typedef void        (*z2_MotionBlur_t)              (z2_ctxt_t *ctxt);
+typedef void        (*z2_DecodeArchiveFile_t)       (uint32_t rom, uint8_t tile, void *ram);
+typedef void        (*z2_dmaflashtoram_t)           (void *buf, uint32_t block, uint32_t block_cnt);
+typedef void        (*z2_dmaramtoflash_t)           (void *buf, uint32_t block, uint32_t block_cnt);
+typedef void        (*z2_gamesate_update_t)         (z2_game_t *game);
 
 /* Data */
-#define z2_game                 (*(z2_game_t*)                      z2_ctxt_addr)
-#define z2_ctxt                 (*(z2_ctxt_t*)                      z2_ctxt_addr)
-#define z2_file                 (*(z2_file_t*)                      z2_file_addr)
-#define z2_link                 (*(z2_link_t*)                      z2_link_addr)
-#define z2_segment              (*(z2_segment_t*)                   z2_segment_addr)
-#define z2_arena                (*(z2_arena_t*)                     z2_arena_addr)
-#define z2_game_arena           (*(z2_arena_t*)                     z2_game_arena_addr)
-#define z2_gamestate_table      ((z2_gamestate_table_t*)            z2_gamestate_table_addr)
-#define z2_actor_ovl_table      (*(z2_actor_ovl_table_t(*)[689])    z2_actor_ovl_table_addr)
-#define z2_player_ovl_table     (*(z2_player_ovl_table_t(*)[2])     z2_player_ovl_table_addr)
-#define z2_particle_ovl_table   (*(z2_particle_ovl_table_t(*)[38])  z2_particle_ovl_table_addr)
-#define z2_file_table           ((z2_file_table_t*)                 z2_file_table_addr)
-#define z2_file_msgqueue        (*(OSMesgQueue*)                    z2_file_msgqueue_addr)
-#define z2_pi_io_handle         (*(OSPiHandle*)                     z2_pi_io_handle_addr)
-#define z2_static_ctxt          (*(z2_static_ctxt_t*)               z2_static_ctxt_addr)
-#define z2_pi_io_handle         (*(OSPiHandle*)                     z2_pi_io_handle_addr)
-#define z2_vi_counter           (*(int32_t*)                        z2_vi_counter_addr)
-#define z2_input_direct         (*(z2_input_t*)                     z2_input_direct_addr)
-#define z2_cimg                 ((uint32_t*)                        z2_cimg_addr)
-#define z2_stored_song          (*(uint16_t*)                       z2_stored_song_addr)
-#define z2_obj_table            ((z2_rom_file_t*)                   z2_object_table_addr)
-#define z2_link_form_obj_idx    ((uint16_t*)                        z2_link_form_obj_idx_addr)
-#define z2_link_spawn_obj       (*(uint16_t*)                       z2_link_spawn_obj_addr)
-#define z2_scene_table          (*(z2_scene_table_ent_t(*)[113])    z2_scene_table_addr)
-#define z2_particle_info        (*(z2_particle_info_t*)             z2_particle_info_addr)
-#define z2_static_particle_ctxt (*(z2_static_particle_ctxt_t*)      z2_static_particle_addr)
+#define z2_vi_counter               (*(int32_t*)                        z2_vi_counter_addr)
+#define z2_file_msgqueue            (*(OSMesgQueue*)                    z2_file_msgqueue_addr)
+#define z2_arena                    (*(z2_arena_t*)                     z2_arena_addr)
+#define z2_file_table               ((z2_file_table_t*)                 z2_file_table_addr)
+#define z2_particle_info            (*(z2_particle_info_t*)             z2_particle_info_addr)
+#define z2_particle_ovl_table       (*(z2_particle_ovl_table_t(*)[38])  z2_particle_ovl_table_addr)
+#define z2_actor_ovl_table          (*(z2_actor_ovl_table_t(*)[689])    z2_actor_ovl_table_addr)
+#define z2_gamestate_table          ((z2_gamestate_table_t*)            z2_gamestate_table_addr)
+#define z2_link_form_obj_idx        ((uint16_t*)                        z2_link_form_obj_idx_addr)
+#define z2_obj_table                ((z2_rom_file_t*)                   z2_object_table_addr)
+#define z2_scene_table              (*(z2_scene_table_ent_t(*)[113])    z2_scene_table_addr)
+#define z2_stored_song              (*(uint16_t*)                       z2_stored_song_addr)
+#define z2_link_spawn_obj           (*(uint16_t*)                       z2_link_spawn_obj_addr)
+#define z2_player_ovl_table         (*(z2_player_ovl_table_t(*)[2])     z2_player_ovl_table_addr)
+#define z2_static_particle_ctxt     (*(z2_static_particle_ctxt_t*)      z2_static_particle_addr)
+#define z2_file                     (*(z2_file_t*)                      z2_file_addr)
+#define z2_game_arena               (*(z2_arena_t*)                     z2_game_arena_addr)
+#define z2_segment                  (*(z2_segment_t*)                   z2_segment_addr)
+#define z2_cimg                     ((uint32_t*)                        z2_cimg_addr)
+#define z2_input_direct             (*(z2_input_t*)                     z2_input_direct_addr)
+#define z2_pi_io_handle             (*(OSPiHandle*)                     z2_pi_io_handle_addr)
+#define z2_static_ctxt              (*(z2_static_ctxt_t*)               z2_static_ctxt_addr)
+#define z2_ctxt                     (*(z2_ctxt_t*)                      z2_ctxt_addr)
+#define z2_game                     (*(z2_game_t*)                      z2_ctxt_addr)
+#define z2_link                     (*(z2_link_t*)                      z2_link_addr)
 /* Functions */
-#define osEPiReadIo                 ((osEPiReadIo_t)                osEPiReadIo_addr)
-#define osEPiWriteIo                ((osEPiWriteIo_t)               osEPiWriteIo_addr)
-#define osWritebackDCache           ((osWritebackDCache_t)          osWritebackDCache_addr)
-#define z2_btnupdate                ((z2_btnupdate_t)               z2_btnupdate_addr)
-#define z2_DecodeArchiveFile        ((z2_DecodeArchiveFile_t)       z2_DecodeArchiveFile_addr)
-#define osEPiStartDma               ((osEPiStartDma_t)              osEPiStartDma_addr)
-#define osSendMesg                  ((osSendMesg_t)                 osSendMesg_addr)
-#define osRecvMesg                  ((osRecvMesg_t)                 osRecvMesg_addr)
-#define osCreateMesgQueue           ((osCreateMesgQueue_t)          osCreateMesgQueue_addr)
-#define z2_LoadRoom                 ((z2_LoadRoom_t)                z2_LoadRoom_addr)
-#define z2_UnloadRoom               ((z2_UnloadRoom_t)              z2_UnloadRoom_addr)
-#define z2_MotionBlur               ((z2_MotionBlur_t)              z2_MotionBlur_addr)
-#define z2_pause_persp              ((z2_pause_persp_t)             z2_pause_persp_addr)
-#define z2_dmaflashtoram            ((z2_dmaflashtoram_t)           z2_dmaflashtoram_addr)
-#define z2_dmaramtoflash            ((z2_dmaramtoflash_t)           z2_dmaramtoflash_addr)
-#define z2_DrawRoom                 ((z2_DrawRoom_t)                z2_DrawRoom_addr)
-#define z2_DrawActors               ((z2_DrawActors_t)              z2_DrawActors_addr)
-#define z2_SpawnActor               ((z2_SpawnActor_t)              z2_SpawnActor_addr)
-#define z2_DeleteActor              ((z2_DeleteActor_t)             z2_DeleteActor_addr)
-#define z2_LoadOverlay              ((z2_LoadOverlay_t)             z2_LoadOverlay_addr)
-#define z2_CreateStaticCollision    ((z2_CreateStaticCollision_t)   z2_CreateStaticCollision_addr)
+#define z2_LoadOverlay              ((z2_LoadOverlay_t)                 z2_LoadOverlay_addr)
+#define osSendMesg                  ((osSendMesg_t)                     osSendMesg_addr)
+#define osRecvMesg                  ((osRecvMesg_t)                     osRecvMesg_addr)
+#define osWritebackDCache           ((osWritebackDCache_t)              osWritebackDCache_addr)
+#define osEPiStartDma               ((osEPiStartDma_t)                  osEPiStartDma_addr)
+#define osCreateMesgQueue           ((osCreateMesgQueue_t)              osCreateMesgQueue_addr)
+#define osEPiReadIo                 ((osEPiReadIo_t)                    osEPiReadIo_addr)
+#define osEPiWriteIo                ((osEPiWriteIo_t)                   osEPiWriteIo_addr)
+#define z2_DrawActors               ((z2_DrawActors_t)                  z2_DrawActors_addr)
+#define z2_SpawnActor               ((z2_SpawnActor_t)                  z2_SpawnActor_addr)
+#define z2_DeleteActor              ((z2_DeleteActor_t)                 z2_DeleteActor_addr)
+#define z2_CreateStaticCollision    ((z2_CreateStaticCollision_t)       z2_CreateStaticCollision_addr)
+#define z2_pause_persp              ((z2_pause_persp_t)                 z2_pause_persp_addr)
+#define z2_btnupdate                ((z2_btnupdate_t)                   z2_btnupdate_addr)
+#define z2_ActionLabelUpdate        ((z2_ActionLabelUpdate_t)           z2_ActionLabelUpdate_addr)
+#define z2_LoadRoom                 ((z2_LoadRoom_t)                    z2_LoadRoom_addr)
+#define z2_DrawRoom                 ((z2_DrawRoom_t)                    z2_DrawRoom_addr)
+#define z2_UnloadRoom               ((z2_UnloadRoom_t)                  z2_UnloadRoom_addr)
+#define z2_CreateSkyboxGfx          ((z2_CreateSkyboxGfx_t)             z2_CreateSkyboxGfx_addr)
+#define z2_MotionBlur               ((z2_MotionBlur_t)                  z2_MotionBlur_addr)
+#define z2_DecodeArchiveFile        ((z2_DecodeArchiveFile_t)           z2_DecodeArchiveFile_addr)
+#define z2_dmaflashtoram            ((z2_dmaflashtoram_t)               z2_dmaflashtoram_addr)
+#define z2_dmaramtoflash            ((z2_dmaramtoflash_t)               z2_dmaramtoflash_addr)
 #endif

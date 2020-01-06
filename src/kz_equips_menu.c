@@ -40,7 +40,7 @@ static int b_button_event(event_handler_t *handler, menu_event_t event, void **e
 }
 
 static int c_button_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    z2_btnupdate(&z2_game,(uint32_t)handler->callback_data);
+    z2_btnupdate(&z2_game, (uint32_t)handler->callback_data);
     return 1;
 }
 

@@ -259,7 +259,7 @@ static gfx_texture *gfx_load_archive(texture_loader *loader){
         texture->x_tiles = 1;
         texture->y_tiles = tiles_cnt * (loader->desaturate?2:1);
 
-        texture->data = memalign(64, (tile_size * tiles_cnt) * (loader->desaturate?2:1));
+        texture->data = malloc((tile_size * tiles_cnt) * (loader->desaturate?2:1));
         int i;
         uint8_t j;
         for(i=0,j=loader->start_item;i<tiles_cnt;i++,j++){
