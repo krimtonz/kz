@@ -32,27 +32,31 @@ static int debug_menu_onactivate(event_handler_t *handler, menu_event_t event, v
     return 1;
 }
 
-static int time_of_day_onnumber(event_handler_t *handler, menu_event_t event, void **event_data){
+static int time_of_day_event(event_handler_t *handler, menu_event_t event, void **event_data){
     uint16_t value = (uint16_t)((uint32_t)*event_data);
-    z2_file.time_of_day = value;
-    for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
-        if(actor->id == 0x15A){
-            if(z2_file.daynight == 1 && (value >= 0xC000 || value < 0x4000)){
-                z2_file.daynight = 0;
-            }else if(z2_file.daynight == 0 && (value <= 0xC000 || value >= 0x4000)){
-                z2_file.daynight = 1;
+    if(event == MENU_EVENT_NUMBER){
+        z2_file.time_of_day = value;
+        for(z2_actor_t *actor = z2_game.actor_ctxt.actor_list[0].first;actor;actor=actor->next){
+            if(actor->id == 0x15A){
+                if(z2_file.daynight == 1 && (value >= 0xC000 || value < 0x4000)){
+                    z2_file.daynight = 0;
+                }else if(z2_file.daynight == 0 && (value <= 0xC000 || value >= 0x4000)){
+                    z2_file.daynight = 1;
+                }
+                z2_timer_t *timer = (z2_timer_t*)actor;
+                timer->daynight = z2_file.daynight;
+                timer->timer_boundaries[0] = value;
+                if(value < 0x4000){
+                    timer->timer_boundaries[1] = 0x4000;
+                }else{
+                    timer->timer_boundaries[1] = 0xC000;
+                }
+                timer->timer_boundaries[2] = value;
+                break;
             }
-            z2_timer_t *timer = (z2_timer_t*)actor;
-            timer->daynight = z2_file.daynight;
-            timer->timer_boundaries[0] = value;
-            if(value < 0x4000){
-                timer->timer_boundaries[1] = 0x4000;
-            }else{
-                timer->timer_boundaries[1] = 0xC000;
-            }
-            timer->timer_boundaries[2] = value;
-            break;
         }
+    }else{
+        menu_number_set(handler->subscriber, z2_file.time_of_day);
     }
     return 1;
 }
@@ -126,14 +130,14 @@ menu_t *create_file_menu(){
     
     menu_label_add(&file, 0, 6, "current day");
     item = menu_number_input_add(&file, 12, 6, 10, 1);
-    menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_word_event, &z2_file.day);
+    menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_word_event, &z2_file.day);
     
     menu_label_add(&file, 0, 7, "time of day");
     item = menu_number_input_add(&file, 12, 7, 16, 4);
-    menu_item_register_event(item, MENU_EVENT_NUMBER, time_of_day_onnumber, NULL);
+    menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, time_of_day_event, NULL);
     
     menu_label_add(&file, 0, 8, "time speed");
     item = menu_number_input_add(&file, 12, 8, -10, 2);
-    menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_word_event, &z2_file.timespeed);
+    menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_word_event, &z2_file.timespeed);
     return &file;
 }
