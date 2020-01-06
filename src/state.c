@@ -165,6 +165,9 @@ void load_state(void *state){
         node = node->next;
     }
 
+    st_read(&p, &z2_mtx_stack, sizeof(z2_mtx_stack));
+    st_read(&p, &z2_mtx_stack_top, sizeof(z2_mtx_stack_top));
+
     st_read(&p,&z2_particle_info,sizeof(z2_particle_info));
     st_read(&p,&next_ent,sizeof(next_ent));
     for(int i=0;i<z2_particle_info.part_max;i++){
@@ -224,6 +227,8 @@ void load_state(void *state){
             unk->active = 0;
         }
     }
+
+    st_read(&p, (void*)z2_cutscene_state_addr, 8);
 
     if(scene_index != z2_game.scene_index){
         z2_scene_table_ent_t *scene_ent = &z2_scene_table[z2_game.scene_index];
@@ -305,6 +310,7 @@ void load_state(void *state){
     z2_CreateSkyboxGfx(&z2_game.skybox_ctx, 5);
 
     zu_file_idx_load(RUPEE_FILE, z2_game.hud_ctx.parameter_static);
+
     if(z2_file.form_button_item[z2_file.current_form == 4 ? 0 : z2_file.current_form].b != Z2_ITEM_NULL){
         z2_btnupdate(&z2_game, 0);
     }
@@ -316,6 +322,10 @@ void load_state(void *state){
 
     z2_ActionLabelUpdate(&z2_game.hud_ctx, z2_game.hud_ctx.action, 0);
     z2_ActionLabelUpdate(&z2_game.hud_ctx, z2_game.hud_ctx.action, 1);
+
+    uint32_t vrom = z2_file_table[1127].vrom_start + (z2_file.day - 1) * 0x510;
+    void *ram = (char*)z2_game.hud_ctx.do_action_static + 0x780;
+    zu_file_load(vrom, ram, 0x510);
 
     z2_gfx_t *gfx = z2_ctxt.gfx;
     zu_disp_ptr_t disp_ptr;
@@ -421,6 +431,9 @@ size_t save_state(void *state){
     st_write(&p,&ent_end,sizeof(ent_end));
     set_destroy(&node_set);
 
+    st_write(&p, &z2_mtx_stack, sizeof(z2_mtx_stack));
+    st_write(&p, &z2_mtx_stack_top, sizeof(z2_mtx_stack_top));
+
     st_write(&p,&z2_particle_info,sizeof(z2_particle_info));
     for(int i=0;i<z2_particle_info.part_max;i++){
         z2_particle_t *particle = &z2_particle_info.part_space[i];
@@ -467,6 +480,8 @@ size_t save_state(void *state){
         }
     }
     st_write(&p,&ent_end,sizeof(ent_end));
+
+    st_write(&p, (void*)z2_cutscene_state_addr, 8);
 
     int trans_cnt = z2_game.room_ctx.transition_cnt;
     z2_room_trans_actor_t *trans = z2_game.room_ctx.transition_list;

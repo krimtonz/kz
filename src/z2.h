@@ -1514,6 +1514,7 @@ typedef struct {
 #define z2_hud_state_addr               0x801B9E08
 #define z2_event_state_1_addr           0x801B9E10
 #define z2_letter_box_timer_addr        0x801B9E58
+#define z2_cutscene_state_addr          0x801BD8B0 // need jp
 #define z2_gamestate_table_addr         0x801BD910
 #define z2_restriction_table_addr       0x801C2410
 #define z2_link_form_obj_idx_addr       0x801C2730
@@ -1528,6 +1529,8 @@ typedef struct {
 #define z2_segment_addr                 0x801F8180
 #define z2_cimg_addr                    0x801FBB80
 #define z2_input_direct_addr            0x801FB870
+#define z2_mtx_stack_addr               0x801FBE00 // need jp
+#define z2_mtx_stack_top_addr           0x801FBE04 // need jp
 #define z2_pi_io_handle_addr            0x801FD080
 #define z2_disp_addr                    0x80209EA0
 #define z2_static_ctxt_addr             0x803824D0
@@ -1699,6 +1702,8 @@ typedef void        (*z2_gamesate_update_t)         (z2_game_t *game);
 #define z2_segment                  (*(z2_segment_t*)                   z2_segment_addr)
 #define z2_cimg                     ((uint32_t*)                        z2_cimg_addr)
 #define z2_input_direct             (*(z2_input_t*)                     z2_input_direct_addr)
+#define z2_mtx_stack                (*(MtxF(**)[20])                    z2_mtx_stack_addr)
+#define z2_mtx_stack_top            (*(MtxF**)                          z2_mtx_stack_top_addr)
 #define z2_pi_io_handle             (*(OSPiHandle*)                     z2_pi_io_handle_addr)
 #define z2_static_ctxt              (*(z2_static_ctxt_t*)               z2_static_ctxt_addr)
 #define z2_ctxt                     (*(z2_ctxt_t*)                      z2_ctxt_addr)
