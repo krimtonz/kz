@@ -53,14 +53,6 @@ typedef struct
     z2_angle_t  z;
 } z2_rot_t;
 
-#if Z2_VERSION==NZSE
-#define ICON_ITEM_STATIC 19
-#define ICON_ITEM_DUNGEON 20
-#else
-#define ICON_ITEM_STATIC 18
-#define ICON_ITEM_DUNGEON 19
-#endif
-
 typedef enum {
     Z2_ITEM_NULL = -1,
     Z2_ITEM_OCARINA,
@@ -1490,11 +1482,11 @@ typedef struct {
 #define z2_CreateStaticCollision_addr   0x800C3334
 #define z2_pause_persp_addr             0x800F4A10
 #define z2_btnupdate_addr               0x80112B40
-#define z2_ActionLabelUpdate_addr       0x80115428 // need jp
+#define z2_ActionLabelUpdate_addr       0x80115428
 #define z2_LoadRoom_addr                0x8012E96C
 #define z2_DrawRoom_addr                0x8012EBA8
 #define z2_UnloadRoom_addr              0x8012EBF8
-#define z2_CreateSkyboxGfx_addr         0x80143148 // need jp
+#define z2_CreateSkyboxGfx_addr         0x80143148
 #define z2_MotionBlur_addr              0x80165460
 #define z2_draw_room_1_hook_addr        0x80168940
 #define z2_draw_room_2_hook_addr        0x80168958
@@ -1514,7 +1506,7 @@ typedef struct {
 #define z2_hud_state_addr               0x801B9E08
 #define z2_event_state_1_addr           0x801B9E10
 #define z2_letter_box_timer_addr        0x801B9E58
-#define z2_cutscene_state_addr          0x801BD8B0 // need jp
+#define z2_cutscene_state_addr          0x801BD8B0
 #define z2_gamestate_table_addr         0x801BD910
 #define z2_restriction_table_addr       0x801C2410
 #define z2_link_form_obj_idx_addr       0x801C2730
@@ -1529,8 +1521,8 @@ typedef struct {
 #define z2_segment_addr                 0x801F8180
 #define z2_cimg_addr                    0x801FBB80
 #define z2_input_direct_addr            0x801FB870
-#define z2_mtx_stack_addr               0x801FBE00 // need jp
-#define z2_mtx_stack_top_addr           0x801FBE04 // need jp
+#define z2_mtx_stack_addr               0x801FBE00
+#define z2_mtx_stack_top_addr           0x801FBE04
 #define z2_pi_io_handle_addr            0x801FD080
 #define z2_disp_addr                    0x80209EA0
 #define z2_static_ctxt_addr             0x803824D0
@@ -1555,9 +1547,11 @@ typedef struct {
 #define z2_CreateStaticCollision_addr   0x800C4E54
 #define z2_pause_persp_addr             0x800F6530
 #define z2_btnupdate_addr               0x801146F8
+#define z2_ActionLabelUpdate_addr       0x80116FB0
 #define z2_LoadRoom_addr                0x8013044C
 #define z2_DrawRoom_addr                0x80130688
 #define z2_UnloadRoom_addr              0x801306D8
+#define z2_CreateSkyboxGfx_addr         0x80147618
 #define z2_MotionBlur_addr              0x80161010
 #define z2_draw_room_1_hook_addr        0x80164CB0
 #define z2_draw_room_2_hook_addr        0x80164CC8
@@ -1577,6 +1571,7 @@ typedef struct {
 #define z2_hud_state_addr               0x801B4ED8
 #define z2_event_state_1_addr           0x801B4EE0
 #define z2_letter_box_timer_addr        0x801B4F28
+#define z2_cutscene_state_addr          0x801B8980
 #define z2_gamestate_table_addr         0x801B89E0
 #define z2_restriction_table_addr       0x801BD534
 #define z2_link_form_obj_idx_addr       0x801BD850
@@ -1591,6 +1586,8 @@ typedef struct {
 #define z2_segment_addr                 0x801F85A0
 #define z2_cimg_addr                    0x801FBF90
 #define z2_input_direct_addr            0x801FBC90
+#define z2_mtx_stack_addr               0x801FC210
+#define z2_mtx_stack_top_addr           0x801FC214
 #define z2_pi_io_handle_addr            0x801FD490
 #define z2_disp_addr                    0x8020A2B0
 #define z2_static_ctxt_addr             0x80382900
@@ -1615,9 +1612,11 @@ typedef struct {
 #define z2_CreateStaticCollision_addr   0x800C4EC4
 #define z2_pause_persp_addr             0x800F6510
 #define z2_btnupdate_addr               0x801146B8
+#define z2_ActionLabelUpdate_addr       0x80116F58
 #define z2_LoadRoom_addr                0x801303EC
 #define z2_DrawRoom_addr                0x80130628
 #define z2_UnloadRoom_addr              0x80130678
+#define z2_CreateSkyboxGfx_addr         0x801475B8
 #define z2_MotionBlur_addr              0x80160F20
 #define z2_draw_room_1_hook_addr        0x80164BC0
 #define z2_draw_room_2_hook_addr        0x80164BD8
@@ -1637,6 +1636,7 @@ typedef struct {
 #define z2_hud_state_addr               0x801B4C98
 #define z2_event_state_1_addr           0x801B4CA0
 #define z2_letter_box_timer_addr        0x801B4CE8
+#define z2_cutscene_state_addr          0x801B8740
 #define z2_gamestate_table_addr         0x801B87A0
 #define z2_restriction_table_addr       0x801BD324
 #define z2_link_form_obj_idx_addr       0x801BD640
@@ -1650,12 +1650,29 @@ typedef struct {
 #define z2_game_arena_addr              0x801F5280
 #define z2_segment_addr                 0x801F82F0
 #define z2_input_direct_addr            0x801FB9E0
+#define z2_mtx_stack_addr               0x801FBF50
+#define z2_mtx_stack_top_addr           0x801FBF54
 #define z2_cimg_addr                    0x801FBCD0
 #define z2_pi_io_handle_addr            0x801FD1D0
 #define z2_disp_addr                    0x80209FF0
 #define z2_static_ctxt_addr             0x80382640
 #define z2_ctxt_addr                    0x803E6CF0
 #define z2_link_addr                    0x803FFFA0
+#endif
+
+// File indcies
+#if Z2_VERSION==NZSE
+#define z2_icon_item_field_static       10
+#define z2_item_icon_archive            19
+#define z2_icon_item_24_static          20
+#define z2_parameter_static             1126
+#define z2_clock_face_days              1127
+#else
+#define z2_icon_item_24_static          9
+#define z2_icon_item_field_static       10
+#define z2_item_icon_archive            18
+#define z2_parameter_static             1125
+#define z2_clock_face_days              1126
 #endif
 
 /* Function Prototypes */

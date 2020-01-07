@@ -10,20 +10,13 @@
 #include "menu.h"
 
 #define     OWL_OFFSET      0x14668
-#define     OWL_FILE        10
 #define     RUPEE_OFFSET    0xE50
 
 #if Z2_VERSION==NZSE
-    #define DUNGEON_FILE    20
-    #define BUTTONS_FILE    1126
     #define NOTE_INDEX      98
-    #define RUPEE_FILE      1126
 #else
     #define DUNGEON_OFFSET  0
-    #define DUNGEON_FILE    9
-    #define BUTTONS_FILE    1125
     #define NOTE_INDEX      130
-    #define RUPEE_FILE      1125
 #endif
 
 enum resource{

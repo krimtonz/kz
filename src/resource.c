@@ -190,7 +190,7 @@ static void *resource_load_items(enum resource resource){
 
 static void *resource_load_buttons(enum resource resource){
     texture_loader loader = {
-        0xF60,          32,             32, BUTTONS_FILE,
+        0xF60,          32,             32, z2_parameter_static,
         G_IM_FMT_IA,    G_IM_SIZ_8b,    0,  0,
         1,              5,              SOURCE_FILE,
     };
@@ -199,7 +199,7 @@ static void *resource_load_buttons(enum resource resource){
 
 static void *resource_load_note(enum resource resource){
     texture_loader loader = {
-        0,              16,             24,         ICON_ITEM_STATIC,
+        0,              16,             24,         z2_item_icon_archive,
         G_IM_FMT_IA,    G_IM_SIZ_8b,    NOTE_INDEX, NOTE_INDEX,
         0,              0,              SOURCE_ARCHIVE,
     };
@@ -208,7 +208,7 @@ static void *resource_load_note(enum resource resource){
 
 static void *resource_load_owl(enum resource resource){
     texture_loader loader = {
-        OWL_OFFSET,     24,             12,         OWL_FILE,
+        OWL_OFFSET,     24,             12,         z2_icon_item_field_static,
         G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          0,
         1,              1,              SOURCE_FILE,
     };
@@ -218,11 +218,11 @@ static void *resource_load_owl(enum resource resource){
 static void *resource_load_dungeon_items(enum resource resource){
     texture_loader loader = {
 #if Z2_VERSION==NZSE
-        0,              24,             24,         DUNGEON_FILE,
+        0,              24,             24,         z2_icon_item_24_static,
         G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          13,
         1,              0,              SOURCE_ARCHIVE,
 #else
-        DUNGEON_OFFSET, 24,             24,         DUNGEON_FILE,
+        DUNGEON_OFFSET, 24,             24,         z2_icon_item_24_static,
         G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          0,
         1,              13,             SOURCE_FILE,
 #endif
@@ -232,7 +232,7 @@ static void *resource_load_dungeon_items(enum resource resource){
 
 static void *resource_load_rupee_texture(enum resource resource){
     texture_loader loader = {
-        RUPEE_OFFSET,   16,             16,         RUPEE_FILE,
+        RUPEE_OFFSET,   16,             16,         z2_parameter_static,
         G_IM_FMT_IA,    G_IM_SIZ_8b,    0,          0,
         0,              1,              SOURCE_FILE
     };

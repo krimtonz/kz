@@ -239,7 +239,7 @@ gfx_texture *gfx_load_item_texture(uint8_t item_id){
         texture->img_fmt = G_IM_FMT_RGBA;
         texture->img_size = G_IM_SIZ_32b;
         texture->data = memalign(64,size * 2);
-        z2_DecodeArchiveFile(z2_file_table[ICON_ITEM_STATIC].prom_start,item_id,texture->data);
+        z2_DecodeArchiveFile(z2_file_table[z2_item_icon_archive].prom_start,item_id,texture->data);
         memcpy((char*)texture->data + size,(char*)texture->data,size);
         gfx_texture_desaturate((char*)texture->data + size, size);
     }
