@@ -54,7 +54,9 @@ struct item_data {
 static int8_t get_option_idx(struct item_data *data){
     if(data->options){
         for(int i = 0;i < data->option_cnt;i++){
-            if(data->options[i] == *(data->value_ptr)) return i;
+            if(data->options[i] == *(data->value_ptr)){
+                return i;
+            }
         }
     }else{
         return *data->value_ptr;
@@ -74,7 +76,9 @@ static int8_t get_item_id(struct item_data *data, int idx){
 static _Bool has_null(struct item_data *data){
     if(data->options){
         for(int i = 0;i<data->option_cnt;i++){
-            if(data->options[i] == Z2_ITEM_NULL) return 1;
+            if(data->options[i] == Z2_ITEM_NULL){
+                return 1;
+            }
         }
     }else{
         return data->start_tile == Z2_ITEM_NULL;
@@ -118,15 +122,21 @@ static void draw_item(struct item_data *data, int item, float rot){
     }
     guMtxF2L(&mf,&m);
 
-    Mtx *p_mtx = gfx_data_push(&m,sizeof(m));
-    gfx_push(gsSPMatrix(p_mtx,G_MTX_MODELVIEW | G_MTX_LOAD),
+    Mtx *p_mtx = gfx_data_push(&m, sizeof(m));
+    gfx_push(gsSPMatrix(p_mtx, G_MTX_MODELVIEW | G_MTX_LOAD),
              gsSPVertex(&mesh, 8, 0));
     gfx_texture *texture;
     if(item >= 0){
         int ovl_idx = item;
-        if(has_null(data)) ovl_idx++;
-        if(item<data->start_tile) item = item + data->start_tile;
-        if(data->tiles_cnt > 0 && item>data->tiles_cnt) item = data->start_tile;
+        if(has_null(data)){
+            ovl_idx++;
+        }
+        if(item<data->start_tile){
+            item = item + data->start_tile;
+        }
+        if(data->tiles_cnt > 0 && item>data->tiles_cnt){
+            item = data->start_tile;
+        }
         texture = get_item_texture(item, 1);
         gfx_load_tile(texture, 0);
         gfx_push(gsSP2Triangles(0, 1, 2, 0, 2, 1, 3, 0));
@@ -142,14 +152,17 @@ static void draw_item(struct item_data *data, int item, float rot){
 
 static void draw_wheel(menu_item_t *item){
     struct item_data *data = item->data;
-    if(!data->active) return;
+    if(!data->active){
+        return;
+    }
+
     gfx_push(gsDisplayList(&wheel_state, 0));
 
     Mtx m;
     MtxF mf;
     MtxF mt;
-        
-    guPerspectiveF(&mf, NULL, M_PI / 4.f,(float)Z2_SCREEN_WIDTH / (float)Z2_SCREEN_HEIGHT,1.f, 100.f, 1.f);
+
+    guPerspectiveF(&mf, NULL, M_PI / 4.f, (float)Z2_SCREEN_WIDTH / (float)Z2_SCREEN_HEIGHT, 1.f, 100.f, 1.f);
     guTranslateF(&mt, 0.f, 0.f, 1.f - (Z2_SCREEN_WIDTH / 32.f * 2.f + data->option_cnt / M_PI));
     guMtxCatF(&mt, &mf, &mf);
     guMtxF2L(&mf, &m);
@@ -159,9 +172,10 @@ static void draw_wheel(menu_item_t *item){
     wheel_scroll(data, 1.f / 3.f);
     int n = (lroundf(-data->wheel_rotation / (M_PI * 2.f) * data->option_cnt) +
            (data->option_cnt + 3) / 4) % data->option_cnt;
-    
-    if (n < 0)
+
+    if (n < 0){
         n += data->option_cnt;
+    }
 
     for(int i = 0;i < data->option_cnt;i++){
         float rota = data->wheel_rotation + M_PI * 2.f / data->option_cnt * n;
@@ -195,14 +209,14 @@ static void draw_wheel(menu_item_t *item){
 
 static void create_wheel(menu_t *menu, struct item_data *data){
     if(data->wheel == NULL){
-        menu_item_t *item = menu_add(menu,0,0);
+        menu_item_t *item = menu_add(menu, 0, 0);
         item->data = data;
         item->draw_proc = draw_wheel;
         item->data = data;
         data->wheel = item;
         data->wheel_rotation = 0.f;
     }
-    wheel_scroll(data,1.f);
+    wheel_scroll(data, 1.f);
 }
 #endif
 
@@ -288,13 +302,15 @@ static int menu_item_list_event(event_handler_t *handler, menu_event_t event, vo
         *event_data = (void*)data->active;
         return 0;
     }else if(event == MENU_EVENT_NAVIGATE){
-        if(!data->active) return 0;
+        if(!data->active){
+            return 0;
+        }
         menu_nav_t nav = (menu_nav_t)event_data;
 #ifdef LITE
-            if(nav==MENU_NAV_DOWN || nav == MENU_NAV_LEFT){
+            if(nav == MENU_NAV_DOWN || nav == MENU_NAV_LEFT){
                 data->selected_idx += data->option_cnt - 1;
                 data->selected_idx %= data->option_cnt;
-            }else if(nav==MENU_NAV_UP || nav == MENU_NAV_RIGHT){
+            }else if(nav == MENU_NAV_UP || nav == MENU_NAV_RIGHT){
                 data->selected_idx++;
                 data->selected_idx %= data->option_cnt;
             }
@@ -306,10 +322,10 @@ static int menu_item_list_event(event_handler_t *handler, menu_event_t event, vo
     return 0;
 }
 
-menu_item_t *menu_item_list_add(menu_t *menu, uint16_t x, uint16_t y, uint16_t start_tile, int8_t *options,
+menu_item_t *menu_item_list_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, uint16_t start_tile, int8_t *options,
                                 uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
                                 menu_sprite_t *sprite, char *tooltip){
-    menu_item_t *item = menu_add(menu,x,y);
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->selected_idx = 0;

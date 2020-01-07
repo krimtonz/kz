@@ -19,7 +19,7 @@
     #define NOTE_INDEX      130
 #endif
 
-enum resource{
+enum resource {
     R_Z2_ITEMS,
     R_Z2_BUTTONS,
     R_Z2_OWL,
@@ -37,7 +37,7 @@ enum resource{
     R_END
 };
 
-struct item_texture{
+struct item_texture {
     gfx_texture *texture;
 #ifdef LITE
     int last_access_counter;
@@ -45,7 +45,7 @@ struct item_texture{
 #endif
 };
 
-void           *resource_get(enum resource resource);
-gfx_texture    *get_item_texture(uint8_t item_id, _Bool release);
+void           *resource_get        (enum resource resource);
+gfx_texture    *get_item_texture    (uint8_t item_id, _Bool release);
 
 #endif

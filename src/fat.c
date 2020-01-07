@@ -39,7 +39,7 @@ static size_t name_trim(const char *s, size_t len){
 }
 
 static void name_split(const char *s, const char **name, const char **ext, int *name_len, int *ext_len){
-    const char *end = s + name_trim(s,strlen(s));
+    const char *end = s + name_trim(s, strlen(s));
     const char *dot = NULL;
     for(const char *c = end - 1;c >= s;c--){
         if(*c == '.'){
@@ -91,7 +91,7 @@ static int convert_long_name_to_short_name(const char *s, int s_len, char *buf, 
     for(int i = 0;i < s_len && p < buf_len;i++){
         char c = s[i];
         if(c >= 'a' && c <= 'z'){
-            c+='A' - 'a';
+            c += 'A' - 'a';
         }else if(c == '.' || c == ' '){
             continue;
         }else if(!char_is_short_file_name(c,NULL)){
@@ -100,14 +100,14 @@ static int convert_long_name_to_short_name(const char *s, int s_len, char *buf, 
         buf[p++] = c;
     }
     int len = p;
-    while(p<buf_len){
+    while(p < buf_len){
         buf[p++] = ' ';
     }
     return len;
 }
 
 static void convert_upper(char *s, int len){
-    while(len-->0){
+    while(len-- > 0){
         if(*s >= 'a' && *s <= 'z'){
             *s += 'A' -'a';
         }
@@ -116,8 +116,8 @@ static void convert_upper(char *s, int len){
 }
 
 static void convert_lower(char *s, int len){
-    while(len-->0){
-        if(*s >= 'A' && *s<='Z'){
+    while(len-- > 0){
+        if(*s >= 'A' && *s <= 'Z'){
             *s += 'a' - 'A';
         }
         s++;
@@ -126,9 +126,9 @@ static void convert_lower(char *s, int len){
 
 static void convert_83(const char *s, char *short_file_name){
     memset(short_file_name, ' ', 11);
-    if(strcmp(s,".") == 0){
+    if(strcmp(s, ".") == 0){
         short_file_name[0] = '.';
-    }else if(strcmp(s,"..") == 0){
+    }else if(strcmp(s, "..") == 0){
         short_file_name[0] = '.';
         short_file_name[1] = '.';
     }else{
@@ -136,10 +136,10 @@ static void convert_83(const char *s, char *short_file_name){
         const char *ext;
         int name_len;
         int ext_len;
-        name_split(s,&name, &ext, &name_len,&ext_len);
-        memcpy(&short_file_name[0],name,name_len);
-        memcpy(&short_file_name[8],ext,ext_len);
-        convert_upper(short_file_name,11);
+        name_split(s, &name, &ext, &name_len, &ext_len);
+        memcpy(&short_file_name[0], name, name_len);
+        memcpy(&short_file_name[8], ext, ext_len);
+        convert_upper(short_file_name, 11);
         if(short_file_name[0] == '\xE5'){
             short_file_name[0] = '\x05';
         }
@@ -219,7 +219,7 @@ static _Bool validate_short_file_name(const char *short_file_name){
     }
     enum sfn_case cse = SFN_CASE_UPPER;
     for(int i = 0;i < 11;i++){
-        if(!char_is_short_file_name(short_file_name[i],&cse)){
+        if(!char_is_short_file_name(short_file_name[i], &cse)){
             return 0;
         }
     }
@@ -231,21 +231,21 @@ static int generate_short_file_name(fat_ctxt_t *fat, uint32_t cluster, const cha
     const char *ext;
     int name_len;
     int ext_len;
-    name_split(long_file_name,&name, &ext, &name_len, &ext_len);
-    int short_file_name_len = convert_long_name_to_short_name(name,name_len,&short_file_name[0],8);
-    int short_file_name_ext_len = convert_long_name_to_short_name(ext,ext_len,&short_file_name[8],3);
-    for(int i = 1;i<1000000;i++){
+    name_split(long_file_name, &name, &ext, &name_len, &ext_len);
+    int short_file_name_len = convert_long_name_to_short_name(name, name_len, &short_file_name[0], 8);
+    int short_file_name_ext_len = convert_long_name_to_short_name(ext, ext_len, &short_file_name[8], 3);
+    for(int i = 1;i < 1000000;i++){
         char short_file_name_disc[8];
-        sprintf(short_file_name_disc,"%i",i);
+        sprintf(short_file_name_disc, "%i", i);
         int short_file_name_disc_len = strlen(short_file_name_disc);
         int short_file_name_nd_len = 7 - short_file_name_len;
         if(short_file_name_nd_len > short_file_name_len){
             short_file_name_nd_len = short_file_name_len;
         }
         char name_buf[13];
-        sprintf(name_buf,"%.*s~%s.%.*s",short_file_name_nd_len,&short_file_name[0],short_file_name_disc,short_file_name_ext_len,&short_file_name[8]);
+        sprintf(name_buf,"%.*s~%s.%.*s", short_file_name_nd_len, &short_file_name[0], short_file_name_disc, short_file_name_ext_len, &short_file_name[8]);
         int e = errno;
-        if(dir_find(fat,cluster,name_buf,NULL) == 0){
+        if(dir_find(fat, cluster, name_buf, NULL) == 0){
             continue;
         }
         else if(errno != ENOENT){
@@ -253,7 +253,7 @@ static int generate_short_file_name(fat_ctxt_t *fat, uint32_t cluster, const cha
         }
         errno = e;
         short_file_name[short_file_name_nd_len] = '~';
-        memcpy(&short_file_name[short_file_name_nd_len+1],short_file_name_disc,short_file_name_disc_len);
+        memcpy(&short_file_name[short_file_name_nd_len+1], short_file_name_disc, short_file_name_disc_len);
         return 0;
     }
     errno = EEXIST;
@@ -269,7 +269,7 @@ static int get_short_file_name(const char *short_name, char *buf, int *name_len,
     while(el > 0 && short_name[8 + el - 1] == ' '){
         el--;
     }
-    memcpy(&buf[0],&short_name[0],nl);
+    memcpy(&buf[0], &short_name[0], nl);
     int l = nl;
     if(el > 0){
         buf[nl] = '.';
@@ -287,7 +287,7 @@ static int get_short_file_name(const char *short_name, char *buf, int *name_len,
 }
 
 static _Bool name_is_short(const char *s, _Bool *lower_name, _Bool *lower_extension){
-    if(strcmp(s,".") == 0 || strcmp(s,"..") == 0){
+    if(strcmp(s, ".") == 0 || strcmp(s, "..") == 0){
         if(lower_name){
             *lower_name = 0;
         }
@@ -300,7 +300,7 @@ static _Bool name_is_short(const char *s, _Bool *lower_name, _Bool *lower_extens
     const char *extension;
     int name_len;
     int extension_len;
-    name_split(s,&name,&extension,&name_len,&extension_len);
+    name_split(s, &name, &extension, &name_len, &extension_len);
     if(name_len == 0 || name_len > 8 || (extension && extension_len > 3)){
         return 0;
     }
@@ -309,13 +309,13 @@ static _Bool name_is_short(const char *s, _Bool *lower_name, _Bool *lower_extens
     }
     enum sfn_case name_cse = SFN_CASE_ANY;
     enum sfn_case ext_cse = SFN_CASE_ANY;
-    for(int i=0;i<name_len;i++){
-        if(!char_is_short_file_name(name[i],&name_cse)){
+    for(int i = 0;i < name_len;i++){
+        if(!char_is_short_file_name(name[i], &name_cse)){
             return 0;
         }
     }
-    for(int i=0;i<extension_len;i++){
-        if(!char_is_short_file_name(extension[i],&ext_cse)){
+    for(int i = 0;i < extension_len;i++){
+        if(!char_is_short_file_name(extension[i], &ext_cse)){
             return 0;
         }
     }
@@ -368,7 +368,7 @@ static void *cache_prep(fat_ctxt_t *fat, enum fat_cache_type type, uint32_t lba,
         uint32_t offset = fat->bytes_per_sector * (cache->prep_lba - cache->load_lba);
         return &cache->data[offset];
     }
-    if(cache_flush(fat,type)){
+    if(cache_flush(fat, type)){
         return NULL;
     }
     if(load){
@@ -401,7 +401,7 @@ static void *cache_load(fat_ctxt_t *fat, enum fat_cache_type type, uint32_t lba)
         return &cache->data[offset];
     }
 
-    cache_flush(fat,type);
+    cache_flush(fat, type);
     cache->sector_cnt = 4;
     if(lba + cache->sector_cnt > cache->max_lba){
         cache->sector_cnt = cache->max_lba - lba;
@@ -418,7 +418,7 @@ static void cache_read(fat_ctxt_t *fat, int index, uint32_t offset, void *dst, u
     fat_cache_t *cache = &fat->cache[index];
     offset += fat->bytes_per_sector * (cache->prep_lba - cache->load_lba);
     if(dst){
-        memcpy(dst,&cache->data[offset],len);
+        memcpy(dst, &cache->data[offset], len);
     }
 }
 
@@ -426,10 +426,10 @@ static void cache_write(fat_ctxt_t *fat, int index, uint32_t offset, const void 
     fat_cache_t *cache = &fat->cache[index];
     offset += fat->bytes_per_sector * (cache->prep_lba - cache->load_lba);
     if(src){
-        memcpy(&cache->data[offset],src,len);
+        memcpy(&cache->data[offset], src, len);
     }
     else{
-        memset(&cache->data[offset],0,len);
+        memset(&cache->data[offset], 0, len);
     }
     cache->dirty = 1;
 }
@@ -460,26 +460,26 @@ static int file_sector(fat_file_t *file, _Bool load){
     else{
         cluster_lba = fat->data_lba + (file->p_cluster - 2) * fat->sectors_per_cluster;
     }
-    if(!cache_prep(fat,FAT_CACHE_DATA,cluster_lba + file->p_cluster_sector,load)){
+    if(!cache_prep(fat, FAT_CACHE_DATA, cluster_lba + file->p_cluster_sector, load)){
         return -1;
     }
     return 0;
 }
 
 static int find_partition(fat_ctxt_t *fat){
-    void *mbr = cache_load(fat,FAT_CACHE_DATA,0);
-    if(get_word(mbr,0x1FE,2)!=0xAA55){
+    void *mbr = cache_load(fat, FAT_CACHE_DATA, 0);
+    if(get_word(mbr, 0x1FE, 2) != 0xAA55){
         errno = ENOENT;
         return -1;
     }
-    uint8_t partition_type = get_word(mbr,0x1C2,1);
+    uint8_t partition_type = get_word(mbr, 0x1C2, 1);
     if(partition_type != 0x01 && partition_type != 0x04 && partition_type != 0x06 &&
        partition_type != 0x0E && partition_type != 0x0B && partition_type != 0x0C){
            errno = ENOENT;
            return -1;
        }
-    fat->partition_lba = get_word(mbr,0x1C6,4);
-    fat->partition_sectors = get_word(mbr,0x1CA,4);
+    fat->partition_lba = get_word(mbr, 0x1C6, 4);
+    fat->partition_sectors = get_word(mbr, 0x1CA, 4);
     if(fat->partition_lba == 0 || fat->partition_lba == 0 || fat->partition_sectors == 0){
         errno = ENOENT;
         return -1;
@@ -488,32 +488,28 @@ static int find_partition(fat_ctxt_t *fat){
 }
 
 static void make_root(fat_ctxt_t *fat, fat_entry_t *entry){
-    memset(entry,0,sizeof(*entry));
+    memset(entry, 0, sizeof(*entry));
     entry->fat_ctxt = fat;
     entry->attributes = FAT_ATTRIBUTE_DIRECTORY;
-    if(fat->type!=FAT32){
+    if(fat->type != FAT32){
         entry->size = fat->entry_cnt * 0x20;
     }
 }
 
 static int cluster_get(fat_ctxt_t *fat, uint32_t cluster, uint32_t *value){
-    if(cluster>=fat->max_cluster){
+    if(cluster >= fat->max_cluster){
         errno = EOVERFLOW;
         return -1;
-    }
-    if(fat->type == FAT12){
-        // TODO
-        return 0;
     }
     uint32_t entry_size = fat->type == FAT16 ? 2 : 4;
     uint32_t lba = cluster / (fat->bytes_per_sector / entry_size);
     uint32_t offset = cluster % (fat->bytes_per_sector / entry_size) * entry_size;
-    void *block = cache_prep(fat,FAT_CACHE_FAT,fat->fat_lba + lba,1);
+    void *block = cache_prep(fat, FAT_CACHE_FAT, fat->fat_lba + lba, 1);
     if(!block){
         return -1;
     }
     if(fat->type == FAT16){
-        *value = get_word(block,offset,2);
+        *value = get_word(block, offset, 2);
         if(*value >= 0xFFF7){
             *value |= 0x0FFF0000;
         }
@@ -532,29 +528,25 @@ static int cluster_set(fat_ctxt_t *fat, uint32_t cluster, uint32_t value){
         errno = EOVERFLOW;
         return -1;
     }
-    if(fat->type==FAT12){
-        //TODO
-        return 0;
-    }
     uint32_t entry_size = fat->type == FAT16 ? 2 : 4;
     uint32_t lba = cluster / (fat->bytes_per_sector / entry_size);
     uint32_t offset = cluster % (fat->bytes_per_sector / entry_size) * entry_size;
-    void *block = cache_prep(fat,FAT_CACHE_FAT,fat->fat_lba + lba,1);
+    void *block = cache_prep(fat, FAT_CACHE_FAT, fat->fat_lba + lba, 1);
     if(!block){
         return -1;
     }
     if(fat->type == FAT16){
         value &= 0x0000FFFF;
-        set_word(block,offset,2,value);
+        set_word(block, offset, 2, value);
     }else{
         value &= 0x0FFFFFFF;
-        set_word(block,offset,4,value);
+        set_word(block, offset, 4, value);
     }
-    cache_dirty(fat,FAT_CACHE_FAT);
+    cache_dirty(fat, FAT_CACHE_FAT);
     if(cluster < fat->blocks_free && value == 0){
         fat->blocks_free = cluster;
     }
-    else if(cluster == fat->blocks_free && value!=0){
+    else if(cluster == fat->blocks_free && value != 0){
         fat->blocks_free++;
     }
     return 0;
@@ -575,7 +567,7 @@ static uint32_t cluster_free_length(fat_ctxt_t *fat, uint32_t start, uint32_t pr
         if(cluster_get(fat, start, &value)){
             return 0;
         }
-        if(value!=0){
+        if(value != 0){
             break;
         }
         len++;
@@ -616,7 +608,7 @@ static int cluster_check_free_space(fat_ctxt_t *fat, uint32_t needed){
     uint32_t free_cnt = 0;
     for(uint32_t i = fat->blocks_free;i < fat->max_cluster && free_cnt < needed;i++){
         uint32_t value = 0;
-        if(cluster_get(fat,i,&value)){
+        if(cluster_get(fat, i, &value)){
             return -1;
         }
         if(value == 0x00000000){
@@ -630,7 +622,7 @@ static int cluster_check_free_space(fat_ctxt_t *fat, uint32_t needed){
     return 0;
 }
 
-static int cluster_link(fat_ctxt_t *fat,uint32_t cluster,uint32_t next,_Bool end){
+static int cluster_link(fat_ctxt_t *fat, uint32_t cluster, uint32_t next, _Bool end){
     if(cluster < 2){
         if(fat->type == FAT32){
             cluster = fat->root_cluster;
@@ -639,18 +631,18 @@ static int cluster_link(fat_ctxt_t *fat,uint32_t cluster,uint32_t next,_Bool end
             return -1;
         }
     }
-    if(cluster_set(fat,cluster,next)){
+    if(cluster_set(fat, cluster, next)){
         return -1;
     }
     if(end){
-        if(cluster_set(fat,next,0x0FFFFFFF)){
+        if(cluster_set(fat, next, 0x0FFFFFFF)){
             return -1;
         }
     }
     return 0;
 }
 
-static uint32_t cluster_resize_chain(fat_ctxt_t *fat,uint32_t cluster,uint32_t cluster_cnt,uint32_t chunk_len){
+static uint32_t cluster_resize_chain(fat_ctxt_t *fat, uint32_t cluster, uint32_t cluster_cnt, uint32_t chunk_len){
     if(cluster < 2){
         if(fat->type == FAT32){
             cluster = fat->root_cluster;
@@ -664,38 +656,38 @@ static uint32_t cluster_resize_chain(fat_ctxt_t *fat,uint32_t cluster,uint32_t c
     uint32_t new_cluster = 0;
     for(uint32_t i = 0;i < cluster_cnt || !end; i++){
         uint32_t value = 0;
-        if(cluster_get(fat,cluster,&value)){
+        if(cluster_get(fat, cluster, &value)){
             return -1;
         }
         if((!end && value >= 0x0FFFFFF8) || value < 2){
-            if(cluster_set(fat,cluster,0x0FFFFFFF)){
+            if(cluster_set(fat, cluster, 0x0FFFFFFF)){
                 return -1;
             }
-            if(cluster_cnt > i+1){
+            if(cluster_cnt > i + 1){
                 alloc_cnt = cluster_cnt - (i + 1);
-                if(cluster_check_free_space(fat,alloc_cnt)){
+                if(cluster_check_free_space(fat, alloc_cnt)){
                     return -1;
                 }
             }
             end = 1;
         }
         if(i >= cluster_cnt){
-            if(cluster_set(fat,cluster,0x00000000)){
+            if(cluster_set(fat, cluster, 0x00000000)){
                 return -1;
             }
             cluster = value;
         }
         else if (i == cluster_cnt - 1){
-            if(cluster_set(fat,cluster,0x0FFFFFFF)){
+            if(cluster_set(fat, cluster, 0x0FFFFFFF)){
                 return -1;
             }
             cluster = value;
         }
         else if(end){
             if(chunk_len == 0){
-                new_cluster = cluster_find_free(fat,new_cluster,alloc_cnt,&chunk_len);
+                new_cluster = cluster_find_free(fat, new_cluster, alloc_cnt, &chunk_len);
                 if(new_cluster == cluster){
-                    new_cluster = cluster_find_free(fat, cluster + 1,alloc_cnt,&chunk_len);
+                    new_cluster = cluster_find_free(fat, cluster + 1, alloc_cnt, &chunk_len);
                 }
                 if(new_cluster == 0){
                     return -1;
@@ -704,7 +696,7 @@ static uint32_t cluster_resize_chain(fat_ctxt_t *fat,uint32_t cluster,uint32_t c
             }else{
                 new_cluster = cluster + 1;
             }
-            if(cluster_link(fat,cluster,new_cluster,0)){
+            if(cluster_link(fat, cluster, new_cluster, 0)){
                 return -1;
             }
             chunk_len--;
@@ -727,7 +719,7 @@ static int cluster_advance(fat_ctxt_t *fat, uint32_t *cluster){
         }
     }
     uint32_t next = 0;
-    if(cluster_get(fat,current,&next)){
+    if(cluster_get(fat, current, &next)){
         return -1;
     }
     if(next < 2 || next >= 0x0FFFFFF8 || next == current){
@@ -739,7 +731,7 @@ static int cluster_advance(fat_ctxt_t *fat, uint32_t *cluster){
 
 static void dir_begin(fat_ctxt_t *fat, fat_file_t *file, uint32_t cluster){
     if(cluster < 2){
-        fat_root(fat,file);
+        fat_root(fat, file);
     }
     else{
         file->fat_ctxt = fat;
@@ -752,20 +744,20 @@ static void dir_begin(fat_ctxt_t *fat, fat_file_t *file, uint32_t cluster){
 
 int dir_find(fat_ctxt_t *fat, uint32_t cluster, const char *name, fat_entry_t *entry){
     fat_file_t pos;
-    dir_begin(fat,&pos,cluster);
-    _Bool is_short = name_is_short(name,NULL,NULL);
+    dir_begin(fat, &pos, cluster);
+    _Bool is_short = name_is_short(name, NULL, NULL);
     fat_entry_t ent;
     int e = errno;
     errno = 0;
-    while(fat_dir(&pos,&ent) == 0){
+    while(fat_dir(&pos, &ent) == 0){
         if(ent.attributes & FAT_ATTRIBUTE_LABEL){
             continue;
         }
         _Bool is_match;
         if(is_short){
-            is_match = name_compare(name,ent.short_name);
+            is_match = name_compare(name, ent.short_name);
         }else{
-            is_match = name_compare(name,ent.long_name);
+            is_match = name_compare(name, ent.long_name);
         }
         if(is_match){
             if(entry){
@@ -788,8 +780,8 @@ static int dir_insert(fat_ctxt_t *fat, uint32_t dir_cluster, const char *name, t
     int pent_cnt = 1;
     _Bool lower_name;
     _Bool lower_ext;
-    if(name_is_short(name,&lower_name,&lower_ext)){
-        convert_83(name,&short_file_name_buf[0x00]);
+    if(name_is_short(name, &lower_name, &lower_ext)){
+        convert_83(name, &short_file_name_buf[0x00]);
         uint8_t cse = 0x00;
         if(lower_name){
             cse |= 0x08;
@@ -797,46 +789,46 @@ static int dir_insert(fat_ctxt_t *fat, uint32_t dir_cluster, const char *name, t
         if(lower_ext){
             cse |= 0x10;
         }
-        set_word(short_file_name_buf,0x0C,1,cse);
+        set_word(short_file_name_buf, 0x0C, 1, cse);
     }
     else{
         pent_cnt += (name_len + 12) / 13;
-        if(generate_short_file_name(fat,dir_cluster,name,&short_file_name_buf[0x00])){
+        if(generate_short_file_name(fat, dir_cluster, name, &short_file_name_buf[0x00])){
             return -1;
         }
-        set_word(short_file_name_buf,0x0C,1,0x00);
-        set_word(long_file_name_buf,0x0B, 1,0x0F);
-        set_word(long_file_name_buf,0x0C,1,0x00);
-        set_word(long_file_name_buf,0x0D,1,compute_long_checksum(&short_file_name_buf[0x00]));
-        set_word(long_file_name_buf,0x1A,2,0x0000);
+        set_word(short_file_name_buf, 0x0C, 1, 0x00);
+        set_word(long_file_name_buf, 0x0B, 1, 0x0F);
+        set_word(long_file_name_buf, 0x0C, 1, 0x00);
+        set_word(long_file_name_buf, 0x0D, 1, compute_long_checksum(&short_file_name_buf[0x00]));
+        set_word(long_file_name_buf, 0x1A, 2, 0x0000);
     }
     fat_file_t start;
     fat_file_t pos;
-    dir_begin(fat,&pos,dir_cluster);
+    dir_begin(fat, &pos, dir_cluster);
     for(int free_cnt = 0;free_cnt < pent_cnt;){
         fat_file_t ent_p = pos;
         _Bool ate;
-        if(fat_advance(&pos,0x20,&ate) != 0x20){
+        if(fat_advance(&pos, 0x20, &ate) != 0x20){
             if(!ate){
                 return -1;  
             }
             pos = ent_p;
-            uint32_t new_cluster = cluster_find_free(fat,0,1,NULL);
+            uint32_t new_cluster = cluster_find_free(fat, 0, 1, NULL);
             if(new_cluster == 0){
                 return -1;
             }
-            if(cluster_link(fat,pos.p_cluster,new_cluster,1)){
+            if(cluster_link(fat, pos.p_cluster, new_cluster, 1)){
                 return -1;
             }
             fat_file_t cluster_pos;
-            dir_begin(fat,&cluster_pos,new_cluster);
-            if(fat_rw(&cluster_pos,FAT_WRITE,NULL,fat->bytes_per_cluster,NULL,NULL)!=fat->bytes_per_cluster){
+            dir_begin(fat, &cluster_pos, new_cluster);
+            if(fat_rw(&cluster_pos, FAT_WRITE, NULL, fat->bytes_per_cluster, NULL, NULL) != fat->bytes_per_cluster){
                 return -1;
             }
             continue;
         }
         uint8_t mark;
-        if(fat_rw(&ent_p,FAT_READ,&mark,1,NULL,&ate) != 1){
+        if(fat_rw(&ent_p, FAT_READ, &mark, 1, NULL, &ate) != 1){
             if(ate){
                 errno = EINVAL;
             }
@@ -857,7 +849,7 @@ static int dir_insert(fat_ctxt_t *fat, uint32_t dir_cluster, const char *name, t
         if(i == 0){
             seq |= 0x40;
         }
-        set_word(long_file_name_buf,0x00,1,seq);
+        set_word(long_file_name_buf, 0x00, 1, seq);
         for(int j = 0;j < 13;j++){
             uint32_t p = 1 + j * 2;
             if(j >= 5){
@@ -875,57 +867,57 @@ static int dir_insert(fat_ctxt_t *fat, uint32_t dir_cluster, const char *name, t
             }else{
                 c = (uint8_t)name[n];
             }
-            set_word(long_file_name_buf,p,2,c);
+            set_word(long_file_name_buf, p, 2, c);
         }
         _Bool ate;
-        if(fat_rw(&pos, FAT_WRITE, long_file_name_buf,0x20, &pos, &ate)!=0x20){
+        if(fat_rw(&pos, FAT_WRITE, long_file_name_buf, 0x20, &pos, &ate) != 0x20){
             if(ate){
                 errno = EINVAL;
             }
             return -1;
         }    
     }
-    set_word(short_file_name_buf,0x0B,1,attributes);
+    set_word(short_file_name_buf, 0x0B, 1, attributes);
     cms += (create_time % 2) * 1000;
     create_time -= create_time % 2;
     create_time += cms / 2000;
     cms %= 2000;
     uint16_t dos_create_date;
     uint16_t dos_create_time;
-    unix2dos(create_time,&dos_create_date,&dos_create_time);
-    set_word(short_file_name_buf,0x0D,1,cms/10);
-    set_word(short_file_name_buf,0x0E,2,dos_create_time);
-    set_word(short_file_name_buf, 0x10,2,dos_create_time);
+    unix2dos(create_time, &dos_create_date, &dos_create_time);
+    set_word(short_file_name_buf, 0x0D, 1, cms / 10);
+    set_word(short_file_name_buf, 0x0E, 2, dos_create_time);
+    set_word(short_file_name_buf, 0x10, 2, dos_create_time);
     uint16_t dos_access_date;
-    unix2dos(access_time,&dos_access_date,NULL);
-    set_word(short_file_name_buf,0x12,2,dos_access_date);
-    set_word(short_file_name_buf,0x14,2, cluster >> 16);
-    set_word(short_file_name_buf,0x1A,2,cluster);
+    unix2dos(access_time, &dos_access_date, NULL);
+    set_word(short_file_name_buf, 0x12, 2, dos_access_date);
+    set_word(short_file_name_buf, 0x14, 2, cluster >> 16);
+    set_word(short_file_name_buf, 0x1A, 2, cluster);
     uint16_t dos_modify_date;
     uint16_t dos_modify_time;
-    unix2dos(create_time,&dos_modify_date,&dos_modify_time);
-    set_word(short_file_name_buf,0x16,2,dos_modify_time);
-    set_word(short_file_name_buf,0x18,2,dos_modify_date);
-    set_word(short_file_name_buf,0x1C,4,size);
+    unix2dos(create_time, &dos_modify_date, &dos_modify_time);
+    set_word(short_file_name_buf, 0x16, 2, dos_modify_time);
+    set_word(short_file_name_buf, 0x18, 2, dos_modify_date);
+    set_word(short_file_name_buf, 0x1C, 4, size);
     fat_file_t eot_pos;
     _Bool ate;
-    if(fat_rw(&pos, FAT_WRITE, short_file_name_buf,0x20, &eot_pos, &ate)!=0x20){
+    if(fat_rw(&pos, FAT_WRITE, short_file_name_buf, 0x20, &eot_pos, &ate) != 0x20){
         if(ate){
             errno = EINVAL;
         }
         return -1;
     }
     if(entry){
-        get_short_file_name(&short_file_name_buf[0],entry->short_name,NULL,NULL);
-        memcpy(entry->long_name,name,name_len);
+        get_short_file_name(&short_file_name_buf[0], entry->short_name, NULL, NULL);
+        memcpy(entry->long_name, name, name_len);
         entry->long_name[name_len] = 0;
         entry->fat_ctxt = fat;
         entry->first = start;
         entry->last = pos;
-        entry->create = dos2unix(dos_create_date,dos_create_time);
+        entry->create = dos2unix(dos_create_date, dos_create_time);
         entry->cms = cms;
-        entry->access_time = dos2unix(dos_access_date,0);
-        entry->modify_time = dos2unix(dos_modify_date,dos_modify_time);
+        entry->access_time = dos2unix(dos_access_date, 0);
+        entry->modify_time = dos2unix(dos_modify_date, dos_modify_time);
         entry->attributes = attributes;
         entry->cluster = cluster;
         entry->size = size;
@@ -935,7 +927,7 @@ static int dir_insert(fat_ctxt_t *fat, uint32_t dir_cluster, const char *name, t
 
 int fat_flush(fat_ctxt_t *fat){
     for(int i = 0;i < FAT_CACHE_MAX;i++){
-        if(cache_flush(fat,i)){
+        if(cache_flush(fat, i)){
             return -1;
         }
     }
@@ -965,7 +957,7 @@ uint32_t fat_advance(fat_file_t *file, uint32_t byte_cnt, _Bool *eof){
         uint32_t cluster_seq = file->p_cluster_seq;
         uint32_t new_cluster_seq = new_offset / fat->bytes_per_cluster;
         while(cluster_seq < new_cluster_seq){
-            int e = cluster_advance(fat,&cluster);
+            int e = cluster_advance(fat, &cluster);
             if(e == -1){
                 if(eof){
                     *eof = 0;
@@ -1003,10 +995,10 @@ uint32_t fat_advance(fat_file_t *file, uint32_t byte_cnt, _Bool *eof){
 static uint32_t cluster_rw(fat_file_t *file, enum fat_io rw, void *buf, uint32_t cluster_cnt, _Bool *eof){
     fat_ctxt_t *fat = file->fat_ctxt;
     char *p = buf;
-    if(cache_flush(fat,FAT_CACHE_DATA)){
+    if(cache_flush(fat, FAT_CACHE_DATA)){
         return 0;
     }
-    cache_invalidate(fat,FAT_CACHE_DATA);
+    cache_invalidate(fat, FAT_CACHE_DATA);
     uint32_t cluster = file->p_cluster;
     if(cluster < 2){
         cluster = fat->root_cluster;
@@ -1017,7 +1009,7 @@ static uint32_t cluster_rw(fat_file_t *file, enum fat_io rw, void *buf, uint32_t
         uint32_t chunk_len = 1;
         while(1){
             uint32_t p_cluster = cluster;
-            if(cluster_get(fat,cluster,&cluster)){
+            if(cluster_get(fat, cluster, &cluster)){
                 return copy_cnt;
             }
             if(cluster >= 0x0FFFFFF7 || cluster != p_cluster + 1 || chunk_len >= cluster_cnt){
@@ -1051,7 +1043,7 @@ static uint32_t cluster_rw(fat_file_t *file, enum fat_io rw, void *buf, uint32_t
         }
         else{
             file->p_cluster = cluster;
-            p+= byte_cnt;
+            p += byte_cnt;
         }
     }
     return copy_cnt;
@@ -1063,7 +1055,7 @@ static int fat_find(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, fat_ent
         ent = *dir;
     }
     else{
-        make_root(fat,&ent);
+        make_root(fat, &ent);
     }
     if(!path){
         if(entry){
@@ -1086,7 +1078,7 @@ static int fat_find(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, fat_ent
             }
             e++;
         }
-        size_t name_len = name_trim(s, e-s);
+        size_t name_len = name_trim(s, e - s);
         if(name_len == 0){
             while(s[name_len] == '.'){
                 name_len++;
@@ -1100,12 +1092,12 @@ static int fat_find(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, fat_ent
             continue;
         }
         char name[256];
-        memcpy(name,s,name_len);
+        memcpy(name, s, name_len);
         name[name_len] = 0;
-        if(strcmp(name,".") == 0){
+        if(strcmp(name, ".") == 0){
             continue;
         }
-        if(dir_find(fat,ent.cluster,name,&ent)){
+        if(dir_find(fat, ent.cluster, name, &ent)){
             return -1;
         }
     }
@@ -1115,7 +1107,7 @@ static int fat_find(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, fat_ent
     return 0;
 }
 
-uint32_t fat_rw(fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt, fat_file_t *new_file, _Bool *eof){
+uint32_t fat_rw(fat_file_t *file, enum fat_io rw, void *buf, uint32_t byte_cnt, fat_file_t *new_file, _Bool *eof){
     if(byte_cnt == 0){
         if(eof){
             *eof = 0;
@@ -1136,14 +1128,14 @@ uint32_t fat_rw(fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt,
             byte_cnt = file->size - file->p_offset;
         }
     }
-    _Bool no_cluster = fat->type !=FAT32 && file->cluster < 2;
+    _Bool no_cluster = fat->type != FAT32 && file->cluster < 2;
     fat_file_t pos = *file;
     char *p = buf;
     uint32_t copy_cnt = 0;
     while(byte_cnt > 0){
         if(!no_cluster && byte_cnt >= fat->bytes_per_cluster && pos.p_cluster_sector == 0 && pos.p_sector_offset == 0){
             uint32_t cluster_cnt = byte_cnt / fat->bytes_per_cluster;
-            uint32_t copy_cluster_cnt = cluster_rw(&pos,rw,p,cluster_cnt,&ate);
+            uint32_t copy_cluster_cnt = cluster_rw(&pos, rw, p, cluster_cnt, &ate);
             uint32_t byte_cluster_cnt = copy_cluster_cnt * fat->bytes_per_cluster;
             if(p){
                 p += byte_cluster_cnt;
@@ -1162,7 +1154,7 @@ uint32_t fat_rw(fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt,
         }
         uint32_t p_sector_offset = pos.p_sector_offset;
         if(chunk_size > 0){
-            if(file_sector(&pos,rw == FAT_READ || chunk_size != fat->bytes_per_sector)){
+            if(file_sector(&pos, rw == FAT_READ || chunk_size != fat->bytes_per_sector)){
                 break;
             }
         }
@@ -1171,9 +1163,9 @@ uint32_t fat_rw(fat_file_t * file, enum fat_io rw, void *buf, uint32_t byte_cnt,
         uint32_t advance = fat_advance(&pos, chunk_size, &ate);
         if(advance > 0){
             if(rw == FAT_READ){
-                cache_read(fat, FAT_CACHE_DATA, p_sector_offset,p,advance);
+                cache_read(fat, FAT_CACHE_DATA, p_sector_offset, p, advance);
             }else{
-                cache_write(fat,FAT_CACHE_DATA,p_sector_offset,p,advance);
+                cache_write(fat, FAT_CACHE_DATA, p_sector_offset, p, advance);
             }
             if(p){
                 p += advance;
@@ -1213,14 +1205,14 @@ int fat_dir(fat_file_t *dir, fat_entry_t *entry){
     char ent_buf[0x20];
     fat_file_t dir_next;
     while(fat_rw(dir, FAT_READ, ent_buf, 0x20, &dir_next, NULL) == 0x20){
-        uint8_t mark = get_word(ent_buf, 0x00,1);
+        uint8_t mark = get_word(ent_buf, 0x00, 1);
         fat_file_t ent_p = *dir;
         *dir = dir_next;
         if(mark == 0x00 || mark == 0xe5){
             long_file_name_seq = -1;
             continue;
         }
-        uint8_t attribute = get_word(ent_buf,0x0B, 1);
+        uint8_t attribute = get_word(ent_buf, 0x0B, 1);
         if(attribute == 0x0F){
             uint8_t seq = mark & 0x1F;
             if(seq < 0x01 || seq > 0x14){
@@ -1232,7 +1224,7 @@ int fat_dir(fat_file_t *dir, fat_entry_t *entry){
                 long_file_name_seq = seq;
                 long_p = ent_p;
                 long_checksum = checksum;
-                memset(long_file_name_buf,0,sizeof(long_file_name_buf));
+                memset(long_file_name_buf, 0, sizeof(long_file_name_buf));
             }
             else{
                 if(seq!=long_file_name_seq - 1 || checksum != long_checksum){
@@ -1250,7 +1242,7 @@ int fat_dir(fat_file_t *dir, fat_entry_t *entry){
                 if(j >= 11){
                     p += 2;
                 }
-                uint16_t c = get_word(ent_buf,p,2);
+                uint16_t c = get_word(ent_buf, p, 2);
                 if(c > 0xFF){
                     c = 0x7F;
                 }
@@ -1271,19 +1263,19 @@ int fat_dir(fat_file_t *dir, fat_entry_t *entry){
             }
             int name_len;
             int ext_len;
-            if(get_short_file_name(&ent_buf[0],entry->short_name, &name_len, &ext_len)==0){
+            if(get_short_file_name(&ent_buf[0], entry->short_name, &name_len, &ext_len) == 0){
                 continue;
             }
             if(entry->short_name[0] == '\x05'){
                 entry->short_name[0] = '\xE5';
             }
             if(have_long_file_name){
-                strcpy(entry->long_name,long_file_name_buf);
+                strcpy(entry->long_name, long_file_name_buf);
                 entry->first = long_p;
             }else{
                 strcpy(entry->long_name, entry->short_name);
                 entry->first = ent_p;
-                uint8_t cse = get_word(ent_buf, 0x0C,1);
+                uint8_t cse = get_word(ent_buf, 0x0C, 1);
                 if(cse & 0x08){
                     convert_lower(&entry->long_name[0], name_len);
                 }
@@ -1292,19 +1284,19 @@ int fat_dir(fat_file_t *dir, fat_entry_t *entry){
                 }
             }
             entry->last = ent_p;
-            entry->create = dos2unix(get_word(ent_buf,0x10,2), get_word(ent_buf, 0x0E,2));
-            entry->cms = get_word(ent_buf,0x0D,1) * 10;
+            entry->create = dos2unix(get_word(ent_buf, 0x10, 2), get_word(ent_buf, 0x0E, 2));
+            entry->cms = get_word(ent_buf, 0x0D, 1) * 10;
             entry->create += entry->cms / 1000;
             entry->cms %= 1000;
-            entry->access_time = dos2unix(get_word(ent_buf,0x12,2),0);
-            entry->modify_time = dos2unix(get_word(ent_buf,0x18,2),get_word(ent_buf,0x16,2));
+            entry->access_time = dos2unix(get_word(ent_buf, 0x12, 2), 0);
+            entry->modify_time = dos2unix(get_word(ent_buf, 0x18, 2), get_word(ent_buf, 0x16, 2));
             entry->attributes = attribute;
             if(entry->attributes & FAT_ATTRIBUTE_LABEL){
                 entry->cluster = 0;
             }else{
-                entry->cluster = get_word(ent_buf,0x1A,2);
+                entry->cluster = get_word(ent_buf, 0x1A, 2);
                 if(fat->type == FAT32){
-                    entry->cluster |= get_word(ent_buf,0x14,2) << 16;
+                    entry->cluster |= get_word(ent_buf, 0x14, 2) << 16;
                 
                     if(entry->cluster == fat->root_cluster){
                         entry->cluster = 0;
@@ -1319,7 +1311,7 @@ int fat_dir(fat_file_t *dir, fat_entry_t *entry){
             }else if(entry->attributes & (FAT_ATTRIBUTE_LABEL | FAT_ATTRIBUTE_DIRECTORY)){
                 entry->size = 0;
             }else{
-                entry->size = get_word(ent_buf,0x1C, 4);
+                entry->size = get_word(ent_buf, 0x1C, 4);
             }
             entry->fat_ctxt = dir->fat_ctxt;
             return 0;
@@ -1380,10 +1372,10 @@ fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const c
         errno = ENOMEM;
         return NULL;
     }
-    list_init(&ret->entry_list,sizeof(fat_entry_t));
+    list_init(&ret->entry_list, sizeof(fat_entry_t));
     if(dir){
-        for(fat_entry_t *ent = dir->entry_list.first;ent;ent=list_next(ent)){
-            if(!list_push_back(&ret->entry_list,ent)){
+        for(fat_entry_t *ent = dir->entry_list.first;ent;ent = list_next(ent)){
+            if(!list_push_back(&ret->entry_list, ent)){
                 errno = ENOMEM;
                 fat_free(ret);
                 return NULL;
@@ -1391,13 +1383,13 @@ fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const c
         }
     }
     else{
-        fat_entry_t *entry = list_push_back(&ret->entry_list,NULL);
+        fat_entry_t *entry = list_push_back(&ret->entry_list, NULL);
         if(!entry){
             errno = ENOMEM;
             fat_free(ret);
             return NULL;
         }
-        make_root(fat,entry);
+        make_root(fat, entry);
     }
     fat_entry_t *ent = ret->entry_list.last;
     const char *p_path = path;
@@ -1413,21 +1405,25 @@ fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const c
         }
         size_t namelen = name_trim(s, e - s);
         if(namelen == 0){
-            while(s[namelen] == '.') namelen++;
+            while(s[namelen] == '.'){
+                namelen++;
+            }
         }
-        if(namelen>255){
+        if(namelen > 255){
             errno = ENAMETOOLONG;
             break;
         }
-        if(namelen == 0) continue;
+        if(namelen == 0){
+            continue;
+        }
         char name[256];
-        memcpy(name,s,namelen);
+        memcpy(name, s, namelen);
         name[namelen] = 0;
-        if(strcmp(name,".") == 0){
+        if(strcmp(name, ".") == 0){
             continue;
         }
         fat_entry_t directory_entry;
-        if(dir_find(fat,ent->cluster,name,&directory_entry)){
+        if(dir_find(fat, ent->cluster,  name,&directory_entry)){
             if(errno == ENOENT && tail){
                 *tail = s;
             }
@@ -1439,8 +1435,8 @@ fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const c
                 if(exist){
                     fat_entry_t *t = entry;
                     entry = list_prev(entry);
-                    list_erase(&ret->entry_list,t);
-                }else if(entry->attributes & FAT_ATTRIBUTE_DIRECTORY && entry->cluster==directory_entry.cluster){
+                    list_erase(&ret->entry_list, t);
+                }else if(entry->attributes & FAT_ATTRIBUTE_DIRECTORY && entry->cluster == directory_entry.cluster){
                     ent = entry;
                     exist = 1;
                 }
@@ -1449,7 +1445,7 @@ fat_path_t *fat_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, const c
                 continue;
             }
         }
-        ent = list_push_back(&ret->entry_list,&directory_entry);
+        ent = list_push_back(&ret->entry_list, &directory_entry);
         if(!ent){
             errno = ENOMEM;
             break;
@@ -1462,20 +1458,20 @@ fat_path_t *fat_create_path(fat_ctxt_t *fat, fat_path_t *dir, const char *path, 
     int e = errno;
     errno = 0;
     const char *tail;
-    fat_path_t *dest_fp = fat_path(fat,dir, path, &tail);
+    fat_path_t *dest_fp = fat_path(fat, dir, path, &tail);
     if(errno == 0){
         errno = EEXIST;
         goto error;
     }
     else{
-        if(errno == ENOENT && strlen(tail) > 0 && !strchr(tail,'/') && !strchr(tail, '\\')){
+        if(errno == ENOENT && strlen(tail) > 0 && !strchr(tail, '/') && !strchr(tail, '\\')){
             errno = e;
         }else{
             goto error;
         }
     }
     fat_entry_t entry;
-    if(fat_create(fat, fat_path_target(dest_fp), tail, attributes,&entry)){
+    if(fat_create(fat, fat_path_target(dest_fp), tail, attributes, &entry)){
         goto error;
     }
     if(!list_push_back(&dest_fp->entry_list, &entry)){
@@ -1501,7 +1497,7 @@ int fat_create(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, uint8_t attr
     size_t dir_len;
     const char *file_s;
     size_t file_len;
-    const char *end = path + name_trim(path,strlen(path));
+    const char *end = path + name_trim(path, strlen(path));
     const char *slash = NULL;
     for(const char *p = end;p >= path;p--){
         if(*p == '\\' || *p == '/'){
@@ -1534,20 +1530,20 @@ int fat_create(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, uint8_t attr
             errno = ENOMEM;
             return -1;
         }
-        memcpy(dir_path,dir_s,dir_len);
+        memcpy(dir_path, dir_s, dir_len);
         dir_path[dir_len] = 0;
-        int e = fat_find(fat,dir,dir_path,&dir_ent);
+        int e = fat_find(fat, dir, dir_path, &dir_ent);
         free(dir_path);
         if(e){
             return -1;
         }
     }else{
-        if(fat_find(fat,dir,NULL,&dir_ent)){
+        if(fat_find(fat,dir, NULL, &dir_ent)){
             return -1;
         }
     }
     int e = errno;
-    if(fat_find(fat,&dir_ent,file_s,NULL) == 0){
+    if(fat_find(fat, &dir_ent, file_s, NULL) == 0){
         errno = EEXIST;
         return -1;
     }
@@ -1558,30 +1554,30 @@ int fat_create(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, uint8_t attr
 
     uint32_t cluster = 0;
     if(is_dir){
-        cluster = cluster_find_free(fat,0,1,NULL);
+        cluster = cluster_find_free(fat, 0, 1, NULL);
         if(cluster < 2){
             return -1;
         }
-        if(cluster_set(fat,cluster,0x0FFFFFFF)){
+        if(cluster_set(fat, cluster, 0x0FFFFFFF)){
             return -1;
         }
     }
     uint32_t dir_cluster = dir_ent.cluster;
     time_t t = time(NULL);
     char name[256];
-    memcpy(name,file_s,file_len);
+    memcpy(name, file_s, file_len);
     name[file_len] = 0;
-    if(dir_insert(fat,dir_cluster,name,t,0,t,t,attributes,cluster, 0, entry)){
+    if(dir_insert(fat, dir_cluster, name, t, 0, t, t, attributes, cluster, 0, entry)){
         return -1;
     }
     if(is_dir){
         fat_file_t cluster_pos;
-        dir_begin(fat,&cluster_pos,cluster);
-        if(fat_rw(&cluster_pos,FAT_WRITE,NULL,fat->bytes_per_cluster,NULL,NULL)!=fat->bytes_per_cluster){
+        dir_begin(fat, &cluster_pos, cluster);
+        if(fat_rw(&cluster_pos, FAT_WRITE, NULL, fat->bytes_per_cluster, NULL, NULL) != fat->bytes_per_cluster){
             return -1;
         }
-        int d = dir_insert(fat,cluster, ".",t,0,t,t,FAT_ATTRIBUTE_DIRECTORY,cluster,0,NULL);
-        int dd = dir_insert(fat,cluster,"..",t,0,t,t,FAT_ATTRIBUTE_DIRECTORY,dir_cluster,0,NULL);
+        int d = dir_insert(fat, cluster, ".", t, 0, t, t, FAT_ATTRIBUTE_DIRECTORY, cluster, 0, NULL);
+        int dd = dir_insert(fat, cluster, "..", t, 0, t, t, FAT_ATTRIBUTE_DIRECTORY, dir_cluster, 0, NULL);
         if(d || dd){
             return -1;
         }
@@ -1612,8 +1608,8 @@ int fat_resize(fat_entry_t *entry, uint32_t size, fat_file_t *file){
         }
         chunk_len--;
     }
-    if(cluster>=2){
-        if(cluster_resize_chain(fat,cluster,cluster_cnt,chunk_len)){
+    if(cluster >= 2){
+        if(cluster_resize_chain(fat, cluster, cluster_cnt, chunk_len)){
             return -1;
         }
     }
@@ -1622,15 +1618,15 @@ int fat_resize(fat_entry_t *entry, uint32_t size, fat_file_t *file){
     }
     entry->cluster = cluster;
     entry->size = size;
-    if(file_sector(&entry->last,1)){
+    if(file_sector(&entry->last, 1)){
         return -1;
     }
     void *data = file_data(&entry->last);
     if(fat->type == FAT32){
         set_word(data, 0x14, 2, entry->cluster >> 16);
     }
-    set_word(data,0x1A,2,entry->cluster);
-    set_word(data,0x1C,4,entry->size);
+    set_word(data, 0x1A, 2, entry->cluster);
+    set_word(data, 0x1C, 4, entry->size);
     cache_dirty(fat, FAT_CACHE_DATA);
     if(file){
         file->size = entry->size;
@@ -1654,19 +1650,19 @@ int fat_init(fat_ctxt_t *fat){
         fat->partition_lba = 0;
         fat->partition_sectors = 0;
     }
-    void *partition = cache_load(fat,FAT_CACHE_DATA,fat->partition_lba);
-    fat->bytes_per_sector = get_word(partition,0xB,2);
-    fat->sectors_per_cluster = get_word(partition, 0xD,1);
-    fat->reserved_sectors = get_word(partition,0xE,2);
-    fat->number_of_fat = get_word(partition,0x10,1);
-    fat->entry_cnt = get_word(partition,0x11,2);
-    fat->fs_sector_cnt = get_word(partition,0x13,2);
+    void *partition = cache_load(fat, FAT_CACHE_DATA, fat->partition_lba);
+    fat->bytes_per_sector = get_word(partition, 0xB, 2);
+    fat->sectors_per_cluster = get_word(partition, 0xD, 1);
+    fat->reserved_sectors = get_word(partition, 0xE, 2);
+    fat->number_of_fat = get_word(partition, 0x10, 1);
+    fat->entry_cnt = get_word(partition, 0x11, 2);
+    fat->fs_sector_cnt = get_word(partition, 0x13, 2);
     if(fat->fs_sector_cnt == 0){
-        fat->fs_sector_cnt = get_word(partition,0x20,4);
+        fat->fs_sector_cnt = get_word(partition, 0x20, 4);
     }
-    fat->fat_sector_cnt = get_word(partition,0x16,2);
+    fat->fat_sector_cnt = get_word(partition, 0x16, 2);
     if(fat->fat_sector_cnt == 0){
-        fat->fat_sector_cnt = get_word(partition,0x24,4);
+        fat->fat_sector_cnt = get_word(partition, 0x24, 4);
     }
     fat->fat_lba = fat->partition_lba + fat->reserved_sectors;
     fat->root_lba = fat->fat_lba + fat->number_of_fat * fat->fat_sector_cnt;
@@ -1683,7 +1679,9 @@ int fat_init(fat_ctxt_t *fat){
         fat->type = FAT16;
     }else{
         fat->type = FAT32;
-        if(fat->max_cluster > 0xFFFFFFF7) fat->max_cluster = 0xFFFFFFF7;
+        if(fat->max_cluster > 0xFFFFFFF7){
+            fat->max_cluster = 0xFFFFFFF7;
+        }
     }
     uint32_t fat_clusters = fat->fat_sector_cnt * fat->bytes_per_sector;
     if(fat->type == FAT12){
@@ -1697,8 +1695,8 @@ int fat_init(fat_ctxt_t *fat){
         fat->max_cluster = fat_clusters;
     }
     if(fat->type == FAT32){
-        fat->root_cluster = get_word(partition,0x2C,4);
-        fat->fsis_lba = get_word(partition,0x30,2);
+        fat->root_cluster = get_word(partition, 0x2C, 4);
+        fat->fsis_lba = get_word(partition, 0x30, 2);
     }else{
         fat->root_cluster = 0;
         fat->fsis_lba = 0;

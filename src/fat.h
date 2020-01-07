@@ -50,7 +50,7 @@ typedef struct {
     char        data[0x800];
 } fat_cache_t;
 
-typedef struct{
+typedef struct {
     enum fat_type       type;
     uint32_t            partition_lba;
     uint32_t            partition_sectors;
@@ -72,7 +72,7 @@ typedef struct{
     fat_cache_t         cache[FAT_CACHE_MAX];
 } fat_ctxt_t;
 
-typedef struct{
+typedef struct {
     fat_ctxt_t *fat_ctxt;
     uint32_t    cluster;
     uint32_t    size;
@@ -84,11 +84,11 @@ typedef struct{
     uint32_t    p_sector_offset;
 } fat_file_t;
 
-typedef struct{
+typedef struct {
     struct list entry_list;
 } fat_path_t;
 
-typedef struct{
+typedef struct {
     fat_ctxt_t *fat_ctxt;
     fat_file_t  first;
     fat_file_t  last;

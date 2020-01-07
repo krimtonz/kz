@@ -71,7 +71,7 @@ static char                *size_text[] = {
 static menu_t               flags;
 static menu_item_t         *flags_item_cells[256] = {0};
 static struct flags_data    flags_data;
-static char *flag_region_names[] = {
+static char                *flag_region_names[] = {
     "week_event_reg", "event_inf", "mask_mask_bit",
     "switch","chest","clear","collect",
 };
@@ -121,7 +121,7 @@ static int memory_cell_event(event_handler_t *handler, menu_event_t event, void 
     return 1;
 }
 
-static void memory_table_update(){
+static void memory_table_update(void){
     int idx = 0;
     for(int i = 0;i < 10;i++){
         for (int j = 0;j < 8;j++){
@@ -167,10 +167,11 @@ static void memory_view_draw(menu_item_t *item){
         gfx_printf(x, y, "%02"PRIx8, ((memory_start_addr + (i * memory_view_size)) & 0xFF));
         x += (2 * memory_view_size) + (memory_view_size * 16);
     }
+
     x = orig_x;
     y += 13;
     for(int i = 0;i < 10;i++){
-        gfx_printf(x, y, "%08x", memory_start_addr + (i * 8));
+        gfx_printf(x, y, "%08x"PRIx32, memory_start_addr + (i * 8));
         y += 13;
     }
 }
@@ -202,7 +203,7 @@ static menu_item_t *menu_memory_view_add(menu_t *menu, uint16_t x_cell, uint16_t
     if(item){
         item->draw_proc = memory_view_draw;
     }
-    memory_table_update(menu);
+    memory_table_update();
     return item;
 }
 
@@ -230,7 +231,9 @@ static menu_item_t *menu_objects_view_add(menu_t *menu, uint16_t x_cell, uint16_
 }
 
 static int object_push_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(obj_id == 0) return 1;
+    if(obj_id == 0){
+        return 1;
+    }
     int idx = z2_game.obj_ctx.obj_cnt++;
     z2_obj_t *obj = z2_game.obj_ctx.obj;
     obj[idx].id = -obj_id;
@@ -263,9 +266,9 @@ static void actor_info_draw(menu_item_t *item){
         gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: n/a");
     }else{
         sprintf(data->actor_button->text, "%08" PRIx32 , (uint32_t)actor);
-        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       %04x", actor->id);
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       %04x"PRIx16, actor->id);
         item->y_cell++;
-        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: %04x", actor->variable);
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: %04x"PRIx16, actor->variable);
     }
 
     item->y_cell--;
@@ -276,10 +279,10 @@ static void actor_info_draw(menu_item_t *item){
     gfx_printf(x, menu_item_y(data->actor_button), "(%02d/%02d)", actor_idx, actor_cnt);
 }
 
-static menu_item_t *menu_actor_info_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, struct actor_info_data *data){
+static menu_item_t *menu_actor_info_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
-        item->data = data;
+        item->data = &actor_info;
         item->draw_proc = actor_info_draw;
     }
     return item;
@@ -289,16 +292,16 @@ static int actor_spawn_onactivate(event_handler_t *handler, menu_event_t event, 
     if(actor_id == 0){
         z2_link_spawn_obj = z2_link_form_obj_idx[z2_file.current_form];
     }
-    z2_SpawnActor(&z2_game.actor_ctxt, &z2_game, actor_id, (float)actor_pos[0], (float)actor_pos[1], (float)actor_pos[2],
+    z2_SpawnActor(&z2_game.actor_ctxt, &z2_game, actor_id, actor_pos[0], actor_pos[1], actor_pos[2],
                   actor_rot[0], actor_rot[1], actor_rot[2],
                   actor_var, 0x7F, 0x3FF, NULL);
     return 1;
 }
 
 static int actor_fetch_link_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    actor_pos[0] = (int16_t)z2_link.common.pos_2.x;
-    actor_pos[1] = (int16_t)z2_link.common.pos_2.y;
-    actor_pos[2] = (int16_t)z2_link.common.pos_2.z;
+    actor_pos[0] = z2_link.common.pos_2.x;
+    actor_pos[1] = z2_link.common.pos_2.y;
+    actor_pos[2] = z2_link.common.pos_2.z;
     actor_rot[0] = z2_link.common.rot_2.x;
     actor_rot[1] = z2_link.common.rot_2.y;
     actor_rot[2] = z2_link.common.rot_2.z;
@@ -324,7 +327,7 @@ static int actor_type_event(event_handler_t *handler, menu_event_t event, void *
 
 static int goto_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
     z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-    for(int i = 0;i<actor_info.actor_idx;i++){
+    for(int i = 0;i < actor_info.actor_idx;i++){
         actor = actor->next;
     }
     if(actor){
@@ -353,7 +356,9 @@ static int view_actor_event(event_handler_t *handler, menu_event_t event, void *
             z2_game.active_cameras[0]->focus = &z2_link.common;
             hasviewed = 0;
         }
-        if(viewing) viewing--;
+        if(viewing){
+            viewing--;
+        }
     }
     return 1;
 }
@@ -427,7 +432,7 @@ static int actor_button_onactivate(event_handler_t *handler, menu_event_t event,
     return 1;
 }
 
-static void refresh_flags_table(){
+static void refresh_flags_table(void){
     int idx = 0;
     for(int i = 0;i < 16;i++){
         for(int j = 0;j < 16;j++){
@@ -451,7 +456,9 @@ static void flags_draw(menu_item_t *item){
     y += 8;
     for(int i = 0;i < 16; i++){
         uint32_t offset = flags_data.offset + (i * 2);
-        if(offset > flag_sizes[flags_data.region]-1) break;
+        if(offset > flag_sizes[flags_data.region]-1){
+            break;
+        }
         gfx_printf(x, y, "0x%04" PRIx16, offset);
         y += 8;
     }
@@ -524,7 +531,7 @@ static int flags_inc_onactivate(event_handler_t *callback, menu_event_t event, v
     return 1;
 }
 
-menu_t *create_debug_menu(){
+menu_t *create_debug_menu(void){
     static menu_t debug;
     static menu_t objects;
     static menu_t actors;
@@ -545,7 +552,7 @@ menu_t *create_debug_menu(){
         menu_number_set(item, 0x80000000);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, memory_start_event, NULL);
 
-        item = menu_list_add(&memory, 10, 1,size_text, sizeof(size_values) / sizeof(*size_values));
+        item = menu_list_add(&memory, 10, 1, size_text, sizeof(size_values) / sizeof(*size_values));
         menu_item_register_event(item, MENU_EVENT_LIST, memory_size_onlist, NULL);
 
         menu_gfx_button_add(&memory, 0, 3, scroll_up_sprite, memory_dec_onactivate, NULL);
@@ -592,7 +599,7 @@ menu_t *create_debug_menu(){
         menu_button_add(&actors, 3, 2, ">", actor_inc_onactivate,NULL);
         actor_info.actor_button = menu_button_add(&actors, 0, 3, actor_button_text, actor_button_onactivate, NULL);
 
-        menu_actor_info_add(&actors, 0, 4, &actor_info);
+        menu_actor_info_add(&actors, 0, 4);
         
         menu_button_add(&actors, 0, 6, "go to", goto_actor_onactivate, NULL);
         item = menu_label_add(&actors, 6, 6, "view");

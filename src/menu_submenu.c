@@ -8,7 +8,7 @@ int menu_submenu_onactivate(event_handler_t *handler, menu_event_t event, void *
 }
 
 menu_item_t *menu_submenu_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y, char *text, menu_t *submenu){
-    menu_item_t *item = menu_add(menu,cell_x,cell_y);
+    menu_item_t *item = menu_add(menu, cell_x, cell_y);
     if(item){
         item->text = text;
         item->interactive = 1;

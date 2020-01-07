@@ -27,8 +27,8 @@ menu_sprite_t *menu_button_sprite_get(menu_item_t *item){
     return (menu_sprite_t*)item->data;
 }
 
-menu_item_t *menu_gfx_button_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y, menu_sprite_t *sprite, menu_item_event_cb_t on_activate, void *activate_data){
-    menu_item_t *item = menu_add(menu, cell_x, cell_y);
+menu_item_t *menu_gfx_button_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, menu_sprite_t *sprite, menu_item_event_cb_t on_activate, void *activate_data){
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         item->interactive = 1;
         item->data = sprite;

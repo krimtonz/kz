@@ -22,7 +22,7 @@
 #define NZSJ10  0x02
 
 typedef union{
-    struct{
+    struct {
         uint8_t r;
         uint8_t g;
         uint8_t b;
@@ -318,7 +318,7 @@ typedef struct {
     };
     char            unk_0x48_[0x04];                /* 0x0048 */
     union {
-        struct{
+        struct {
             int8_t  b;
             int8_t  cleft;
             int8_t  cdown;
@@ -638,7 +638,7 @@ typedef struct {
 typedef struct z2_ctxt z2_ctxt_t;
 typedef void (*game_update_t)(z2_ctxt_t* ctxt);
 
-struct z2_ctxt{
+struct z2_ctxt {
     z2_gfx_t       *gfx;                    /* 0x0000 */
     game_update_t   gamestate_update;       /* 0x0004 */
     void           *gamestate_dtor;         /* 0x0008 */
@@ -860,7 +860,7 @@ typedef struct
     z2_xyz_t        min;                        /* 0x0000 */
     z2_xyz_t        max;                        /* 0x0006 */
     uint16_t        n_vtx;                      /* 0x000C */
-    uint16_t        pad;                        /* 0x000E */  
+    uint16_t        pad;                        /* 0x000E */
     z2_xyz_t       *vtx;                        /* 0x0010 */
     uint16_t        n_poly;                     /* 0x0014 */
     uint16_t        pad_0x16;                   /* 0x0016 */
@@ -949,12 +949,12 @@ typedef struct /* z2_col_ctxt_t */
     uint32_t            unk_0x146C;             /* 0x146C */
 } z2_col_ctxt_t;                                /* 0x1470 */
 
-typedef struct{
+typedef struct {
     uint32_t    vrom_start;     /* 0x0000 */
     uint32_t    vrom_end;       /* 0x0004 */
 } z2_rom_file_t;                /* 0x0008 */
 
-typedef struct{
+typedef struct {
     uint32_t            vrom_addr;              /* 0x0000 */
     void               *dram;                   /* 0x0004 */
     uint32_t            size;                   /* 0x0008 */
@@ -965,7 +965,7 @@ typedef struct{
     OSMesg              notify_msg;             /* 0x001C */
 } z2_loadfile_t;                                /* 0x0020 */
 
-typedef struct{
+typedef struct {
     int16_t             id;                     /* 0x0000 */
     char                pad_0x02[0x02];         /* 0x0002 */
     void               *data;                   /* 0x0004 */
@@ -974,7 +974,7 @@ typedef struct{
     OSMesg              load_msg;               /* 0x0040 */
 } z2_obj_t;                                     /* 0x0044 */
 
-typedef struct{
+typedef struct {
     void               *obj_space_start;        /* 0x0000 */
     void               *obj_space_end;          /* 0x0004 */
     uint8_t             obj_cnt;                /* 0x0008 */
@@ -995,7 +995,7 @@ typedef struct {
     int16_t     variable;   /* 0x000E */
 } z2_room_trans_actor_t;    /* 0x0010 */
 
-typedef struct{
+typedef struct {
     uint8_t             idx;                    /* 0x0000 */
     char                unk_0x01[0x03];         /* 0x0001 */
     uint8_t             echo;                   /* 0x0004 */
@@ -1006,7 +1006,7 @@ typedef struct{
     char                unk_0x10[0x04];         /* 0x0010 */
 } z2_room_t;                                    /* 0x0014 */
 
-typedef struct{
+typedef struct {
     z2_room_t           rooms[2];               /* 0x0000 */
     void               *room_space_start;       /* 0x0028 */
     void               *room_space_end;         /* 0x002C */
@@ -1023,7 +1023,7 @@ typedef struct{
     void               *transition_list;        /* 0x0084 */
 } z2_room_ctxt_t;                               /* 0x0088 */
 
-typedef struct{
+typedef struct {
     char        unk_0x00[0x168];                /* 0x0000 */
     void       *icon_item_static;               /* 0x0168 */
     void       *icon_item_24;                   /* 0x016C */
@@ -1059,7 +1059,7 @@ typedef struct{
     uint16_t    mask_cell;                      /* 0x026E */
 } z2_pause_ctxt_t;                              /* 0x0270 */
 
-typedef struct{
+typedef struct {
     char        unk_0x00[0x170];                /* 0x0000 */
     void       *parameter_static;               /* 0x0170 */
     void       *do_action_static;               /* 0x0174 */
@@ -1073,7 +1073,7 @@ typedef struct{
     uint16_t    action;                         /* 0x0214 */
     char        unk_0x216[0x4E];                /* 0x0216 */
     union{
-        struct{
+        struct {
             uint16_t    fadeout_alpha;          /* 0x0264 */
             uint16_t    a_alpha;                /* 0x0266 */
             uint16_t    b_alpha;                /* 0x0268 */
@@ -1084,7 +1084,7 @@ typedef struct{
             uint16_t    rupees_alpha;           /* 0x0272 */
         };
         uint16_t        alphas[0x08];           /* 0x0264 */
-    };               
+    };
     char        unk_0x0274[0x9A];               /* 0x0274 */
     uint8_t     restriction_flags[0xC];         /* 0x030E */
     char        unk_0x031A[0x2E];               /* 0x031A */
@@ -1215,7 +1215,7 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     char                unk_0x18B10[0x748];         /* 0x18B10 */   /* 0x18910 */
 } z2_game_t;                                        /* 0x19258 */   /* 0x19238 */
 
-typedef struct{
+typedef struct {
     z2_actor_t          common;                     /* 0x0000 */
     char                unk_0x144[0x928];           /* 0x0144 */
     uint32_t            state_flags_1;              /* 0x0A6C */
@@ -1229,7 +1229,7 @@ typedef struct{
     uint16_t            blast_mask_timer;           /* 0x0B60 */
 } z2_link_t;                                        /* 0x0B62 */
 
-typedef struct{
+typedef struct {
     z2_actor_t          common;                     /* 0x0000 */
     uint8_t             daynight;                   /* 0x0144 */
     char                unk_0x145;                  /* 0x0145 */
@@ -1237,7 +1237,7 @@ typedef struct{
 } z2_timer_t;
 
 typedef union{
-    struct{
+    struct {
         uint32_t    direct_reference;               /* 0x0000 */
         uint32_t    nintendo_logo;                  /* 0x0004 */
         uint32_t    current_scene;                  /* 0x0008 */
@@ -1334,7 +1334,7 @@ typedef struct {
     uint32_t            prom_end;               /* 0x000C */
 } z2_file_table_t;                              /* 0x0010 */
 
-typedef struct{
+typedef struct {
     char        unk_0x00_[0x32];    /* 0x0000 */
     int16_t     time_speed;         /* 0x0032 */
     char        unk_0x34_[0x06];    /* 0x0034 */
@@ -1349,7 +1349,7 @@ typedef struct{
 } z2_static_ctxt_t;                 /* 0x15E0 */
 
 typedef union {
-    struct{
+    struct {
         uint16_t    no_y_rot    : 1;
         uint16_t    no_x_rot    : 1;
         uint16_t    no_z_rot    : 1;
@@ -1360,7 +1360,7 @@ typedef union {
 } z2_actorlist_param0_t;
 
 typedef union{
-    struct{
+    struct {
         uint16_t    x_rot               : 9;
         uint16_t                        : 4;
         uint16_t    spawn_time_flags_hi : 3;
@@ -1369,7 +1369,7 @@ typedef union{
 } z2_actorlist_param4_t;
 
 typedef union{
-    struct{
+    struct {
         uint16_t    y_rot       : 9;
         uint16_t    camera_idx  : 7;
     };
@@ -1377,7 +1377,7 @@ typedef union{
 } z2_actorlist_param5_t;
 
 typedef union{
-    struct{
+    struct {
         uint16_t    z_rot               : 9;
         uint16_t    spawn_time_flags_lo : 7;
     };
@@ -1426,7 +1426,7 @@ typedef struct {
     uint8_t         id;                 /* 0x005F */
 } z2_particle_t;                        /* 0x0060 */
 
-typedef struct{
+typedef struct {
     z2_particle_t  *part_space;         /* 0x0000 */
     uint32_t        part_cnt;           /* 0x0004 */
     uint32_t        part_max;           /* 0x0008 */

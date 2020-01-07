@@ -9,7 +9,7 @@
 
 #include "z2.h"
 
-enum{
+enum {
     KZ_CMD_TOGGLE_MENU,
     KZ_CMD_RETURN,
     KZ_CMD_LEVITATE,
@@ -36,7 +36,7 @@ enum{
     KZ_CMD_MAX
 };
 
-enum command_type{
+enum command_type {
     COMMAND_HOLD,
     COMMAND_PRESS
 };
@@ -47,28 +47,28 @@ struct command {
     void              (*proc)();
 };
 
-void    command_levitate        ();
-void    command_void            ();
-void    command_reloadarea      ();
-void    command_fall            ();
-void    command_turbo           ();
-void    command_break           ();
-void    command_pause           ();
-void    command_advance         ();
-void    command_return          ();
-void    command_lag_reset       ();
-void    command_timer           ();
-void    command_timer_reset     ();
-void    command_save_memfile    ();
-void    command_load_memfile    ();
-void    command_next_memfile    ();
-void    command_prev_memfile    ();
-void    command_save_position   ();
-void    command_load_position   ();
-void    command_next_position   ();
-void    command_prev_position   ();
-void    command_toggle_input    ();
-void    command_title_screen    ();
+void    command_levitate        (void);
+void    command_void            (void);
+void    command_reloadarea      (void);
+void    command_fall            (void);
+void    command_turbo           (void);
+void    command_break           (void);
+void    command_pause           (void);
+void    command_advance         (void);
+void    command_return          (void);
+void    command_lag_reset       (void);
+void    command_timer           (void);
+void    command_timer_reset     (void);
+void    command_save_memfile    (void);
+void    command_load_memfile    (void);
+void    command_next_memfile    (void);
+void    command_prev_memfile    (void);
+void    command_save_position   (void);
+void    command_load_position   (void);
+void    command_next_position   (void);
+void    command_prev_position   (void);
+void    command_toggle_input    (void);
+void    command_title_screen    (void);
 
 extern struct command kz_commands[KZ_CMD_MAX];
 

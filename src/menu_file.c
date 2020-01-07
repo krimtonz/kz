@@ -31,7 +31,7 @@ static struct set           dir_files;
 static _Bool                file_menu_ready = 0;
 static char                *file_menu_text_value;
 
-typedef struct{
+typedef struct {
     char    name[256];
     _Bool   isdir;
     char    text[32];
@@ -41,10 +41,10 @@ static _Bool stricmp(const char *a, const char *b){
     while(*a && *b){
         char ca = *a++;
         char cb = *b++;
-        if(ca>='a' && ca<='z'){
-            ca+= 'A' - 'a';
+        if(ca >= 'a' && ca <= 'z'){
+            ca += 'A' - 'a';
         }
-        if(cb>='a' && cb<='z'){
+        if(cb >= 'a' && cb <= 'z'){
             cb += 'A' - 'a';
         }
         if(ca != cb){
@@ -59,19 +59,19 @@ static _Bool update_file_list(void){
     DIR *dir = opendir(".");
     if(!dir){
         if(errno == ENODEV){
-            strcpy(file_menu_location->text,"no disk");
+            strcpy(file_menu_location->text, "no disk");
         }else if(errno == ENOENT){
-            strcpy(file_menu_location->text,"no filesystem");
+            strcpy(file_menu_location->text, "no filesystem");
         }else{
-            strncpy(file_menu_location->text,strerror(errno),31);
+            strncpy(file_menu_location->text, strerror(errno), 31);
         }
         return 0;
     }
-    getcwd(file_menu_location->text,32);
+    getcwd(file_menu_location->text, 32);
     file_menu_location->text[31] = 0;
     dirent_t *dirent;
     while((dirent = readdir(dir))){
-        if((dirent->dir_name[0] == '.' && strcmp(dirent->dir_name, ".."))!=0 || 
+        if((dirent->dir_name[0] == '.' && strcmp(dirent->dir_name, "..")) !=0 || 
             !(dirent->mode & S_IRUSR)){
             continue;
         }
@@ -81,10 +81,10 @@ static _Bool update_file_list(void){
             continue;
         }
         dir_entry_t ent;
-        strcpy(ent.name,dirent->dir_name);
+        strcpy(ent.name, dirent->dir_name);
         ent.isdir = isdir;
 
-        memcpy(ent.text,dirent->dir_name,32);
+        memcpy(ent.text, dirent->dir_name, 32);
         if(name_len > 31){
             strcpy(&ent.text[28],"...");
         }
@@ -94,7 +94,7 @@ static _Bool update_file_list(void){
     return 1;
 }
 
-static void update_view(){
+static void update_view(void){
     int y = 0;
     if(update_file_list()){
         if(file_menu_mode == FILE_MODE_LOAD){
@@ -132,7 +132,7 @@ static void update_view(){
         file_menu_accept_button->enabled = 0;
         file_menu_clear_button->enabled = 0;
         file_menu_text_entry->enabled = 0;
-        for(int i = 0; i<FILE_ROWS;i++){
+        for(int i = 0; i < FILE_ROWS;i++){
             file_menu_rows[i]->enabled = 0;
         }
     }
@@ -141,7 +141,7 @@ static void update_view(){
 static _Bool dir_ent_comp(void *a, void *b){
     dir_entry_t *dir_a = a;
     dir_entry_t *dir_b = b;
-    if(strcmp(dir_a->name,"..")==0){
+    if(strcmp(dir_a->name, "..") == 0){
         return 1;
     }
     if(dir_a->isdir && !dir_b->isdir){
@@ -156,42 +156,50 @@ static _Bool dir_ent_comp(void *a, void *b){
     while(*a_name && *b_name){
         char ac = *a_name++;
         char bc = *b_name++;
-        if(ac>='0' && ac<='9' && bc>='0' && bc<='9'){
+        if(ac >= '0' && ac <= '9' && bc >= '0' && bc <= '9'){
             char *na = a_name - 1;
             char *nb = b_name - 1;
-            while(*na =='0') na++;
-            while(*nb == '0') nb++;
-            while(*a_name>='0' && *a_name<='9')a_name++;
-            while(*b_name>='0' && *b_name<='9')b_name++;
+            while(*na =='0'){
+                na++;
+            }
+            while(*nb == '0'){
+                nb++;
+            }
+            while(*a_name>='0' && *a_name<='9'){
+                a_name++;
+            }
+            while(*b_name>='0' && *b_name<='9'){
+                b_name++;
+            }
             d = (a_name - na) - (b_name - nb);
-            if(d<0){
+            if(d < 0){
                 return 1;
             }
-            if(d>0){
+            if(d > 0){
                 return 0;
             }
-            while(na!=a_name && nb!= b_name){
+            while(na != a_name && nb != b_name){
                 d = *na++ - *nb++;
-                if(d<0){
+                if(d < 0){
                     return 1;
                 }
-                if(d>0){
+                if(d > 0){
                     return 0;
                 }
             }
             continue;
         }
-        if(ac>='a' && ac<='z'){
+        if(ac >= 'a' && ac <= 'z'){
             ac += 'A' - 'a';
         }
-        if(bc>='a' && bc<='z'){
+        if(bc >= 'a' && bc <= 'z'){
             bc += 'A' - 'a';
         }
         d = ac - bc;
-        if(d<0){
+        if(d < 0){
             return 1;
         }
-        if(d>0){
+        if(d > 0){
             return 0;
         }
     }
@@ -240,17 +248,17 @@ static int clear_onactivate(event_handler_t *handler, menu_event_t event, void *
 static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
     menu_item_t *item = handler->subscriber;
     int data = (int)item->data;
-    dir_entry_t *dirent = (dir_entry_t*)set_at(&dir_files,(int)data + file_menu_offset);
+    dir_entry_t *dirent = set_at(&dir_files, data + file_menu_offset);
     if(dirent->isdir){
         chdir(dirent->name);
         update_view();
     }else{
         int len = strlen(dirent->name) - file_menu_extension_len;
         char *path = malloc(len + 1);
-        memcpy(path,dirent->name,len);
+        memcpy(path, dirent->name, len);
         path[len] = 0;
         if(file_menu_mode == FILE_MODE_SAVE){
-            strncpy(file_menu_text_value,path,31);
+            strncpy(file_menu_text_value, path, 31);
             file_menu_text_value[31] = 0;
             file_menu.selected_item = file_menu_accept_button;
         }else{
@@ -262,12 +270,12 @@ static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, vo
 }
 
 static void menu_file_row_draw(menu_item_t *item){
-    dir_entry_t *ent = set_at(&dir_files,(int)item->data + file_menu_offset);
+    dir_entry_t *ent = set_at(&dir_files, (int)item->data + file_menu_offset);
     int x = menu_item_x(item);
     int y = menu_item_y(item);
     int tile = 0;
     char *text = ent->text;
-    if(strcmp(ent->text,"..") == 0){
+    if(strcmp(ent->text, "..") == 0){
         tile = 2;
         text = "back";
     }
@@ -300,15 +308,15 @@ static int file_menu_down_onactivate(event_handler_t *handler, menu_event_t even
     return 1;
 }
 
-static void menu_file_init(){
+static void menu_file_init(void){
     if(file_menu_ready){
         return;
     }
-    set_init(&dir_files,sizeof(dir_entry_t),dir_ent_comp);
+    set_init(&dir_files, sizeof(dir_entry_t), dir_ent_comp);
     menu_init(&file_menu, 0, 0);
     file_menu.selected_item = menu_button_add(&file_menu, 0, 0, "return", menu_return, NULL);
     menu_button_add(&file_menu, 0, 1, "reset disk", reset_disk_onactivate, NULL);
-    file_menu_location = menu_label_add(&file_menu,0,2,"");
+    file_menu_location = menu_label_add(&file_menu, 0, 2, "");
     file_menu_text_value = malloc(32);
     file_menu_text_entry = menu_text_input_add(&file_menu, 0, 3, "untitled", &file_menu_text_value, 32);
     file_menu_accept_button = menu_button_add(&file_menu, 0, 4, "accept", accept_onactivate, NULL);
@@ -318,8 +326,8 @@ static void menu_file_init(){
     file_menu_up_button = menu_gfx_button_add(&file_menu, 0, y, scroll_up_sprite, file_menu_up_onactivate, NULL);
     file_menu_down_button = menu_gfx_button_add(&file_menu, 0, y + FILE_ROWS - 1, scroll_down_sprite, file_menu_down_onactivate, NULL);
 
-    for(int i=0;i<FILE_ROWS;i++){
-        menu_item_t *item = menu_add(&file_menu,1,y++);
+    for(int i = 0;i < FILE_ROWS;i++){
+        menu_item_t *item = menu_add(&file_menu, 1, y++);
         item->data = (void*)i;
         item->draw_proc = menu_file_row_draw;
         item->interactive = 1;

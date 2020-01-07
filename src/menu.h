@@ -115,7 +115,7 @@ event_handler_t    *menu_item_register_event(menu_item_t *item, menu_event_t eve
 void                menu_item_unregister_event(menu_item_t *item, menu_event_t event);
 int                 menu_item_trigger_event(menu_item_t *item, menu_event_t event, void **event_data);
 
-void                menu_static_sprites_init    ();
+void                menu_static_sprites_init    (void);
 void                menu_init                   (menu_t *menu, int16_t x_offset, int16_t y_offset);
 void                menu_draw                   (menu_t *menu);
 int                 menu_return                 (event_handler_t *handler, menu_event_t event, void **event_data);

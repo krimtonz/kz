@@ -47,12 +47,12 @@ void menu_switch_set(menu_item_t *item, int status){
     data->status = status;
 }
 
-menu_item_t *menu_switch_add(menu_t *menu, uint16_t x, uint16_t y,
+menu_item_t *menu_switch_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell,
                                   gfx_texture *on_texture, gfx_texture *off_texture,
                                   uint32_t on_color, uint32_t off_color,
                                   uint8_t on_tile, uint8_t off_tile,
                                   int width, int height, char *tooltip){
-    menu_item_t *item = menu_add(menu,x,y);
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->on_texture = on_texture;

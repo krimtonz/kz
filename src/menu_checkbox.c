@@ -38,9 +38,10 @@ void menu_checkbox_set(menu_item_t *item, int set){
     item->data = (void*)set;
 }
 
-menu_item_t *menu_checkbox_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y){
-    menu_item_t *item = menu_add(menu, cell_x, cell_y);
+menu_item_t *menu_checkbox_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
+        item->data = (void*)0;
         item->draw_proc = menu_checkbox_draw;
         item->interactive = 1;
         menu_item_register_event(item, MENU_EVENT_ACTIVATE, menu_checkbox_onactivate, (void*)false);

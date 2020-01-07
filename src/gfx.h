@@ -13,19 +13,19 @@
 #define gfx_push(...)   {Gfx gfx__[]={__VA_ARGS__};     \
                         gfx_append(gfx__,sizeof(gfx__));}
 
-enum loader_source{
+enum loader_source {
     SOURCE_ARCHIVE,
     SOURCE_FILE,
 };
 
-enum rdp_mode{
+enum rdp_mode {
     RDP_MODE_COLOR,
     RDP_MODE_COMBINE,
     RDP_MODE_FILTER,
     RDP_MODE_ALL
 };
 
-typedef struct{
+typedef struct {
     void       *data;                   /* 0x0000 */
     uint16_t    tile_width;             /* 0x0004 */
     uint16_t    tile_height;            /* 0x0006 */
@@ -36,7 +36,7 @@ typedef struct{
     g_isiz_t    img_size;               /* 0x0011 */
 } gfx_texture;                          /* 0x0012 */
 
-typedef struct{
+typedef struct {
     gfx_texture    *texture;            /* 0x0000 */
     uint16_t        c_width;            /* 0x0004 */
     uint16_t        c_height;           /* 0x0006 */
@@ -44,7 +44,7 @@ typedef struct{
     uint16_t        cy_tile;            /* 0x000A */
 } gfx_font;                             /* 0x000C */
 
-typedef struct{
+typedef struct {
     uint32_t            offset;         /* 0x0000 */
     uint16_t            width;          /* 0x0004 */
     uint16_t            height;         /* 0x0006 */
@@ -58,9 +58,9 @@ typedef struct{
     enum loader_source  source;         /* 0x0010 */
 } texture_loader;                       /* 0x0014 */
 
-void            gfx_init                    ();
-void            gfx_begin                   ();
-void            gfx_finish                  ();
+void            gfx_init                    (void);
+void            gfx_begin                   (void);
+void            gfx_finish                  (void);
 
 void           *gfx_data_push               (void *data, size_t size);
 void            gfx_append                  (Gfx *gfx, size_t size);

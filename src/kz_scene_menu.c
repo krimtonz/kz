@@ -13,7 +13,7 @@ static int collision_gen_event(event_handler_t *handler, menu_event_t event, voi
             kz.collision_view_status = COL_VIEW_KILL;
         }
     }else if (event == MENU_EVENT_UPDATE){
-        menu_checkbox_set((menu_item_t*)handler->subscriber, kz.collision_view_status == COL_VIEW_SHOW);
+        menu_checkbox_set(handler->subscriber, kz.collision_view_status == COL_VIEW_SHOW);
     }
     return 1;
 }
@@ -41,7 +41,7 @@ static int collision_switch_event(event_handler_t *handler, menu_event_t event, 
         }else{
             set = settings->col_view_upd;
         }
-        menu_checkbox_set((menu_item_t*)handler->subscriber, set);
+        menu_checkbox_set(handler->subscriber, set);
     }
     return 1;
 }
@@ -54,7 +54,7 @@ static int hitbox_gen_event(event_handler_t *handler, menu_event_t event, void *
             kz.hitbox_view_status = COL_VIEW_KILL;
         }
     }else if(event == MENU_EVENT_UPDATE){
-        menu_checkbox_set((menu_item_t*)handler->subscriber,kz.hitbox_view_status == COL_VIEW_SHOW);
+        menu_checkbox_set(handler->subscriber,kz.hitbox_view_status == COL_VIEW_SHOW);
     }
     return 1;
 }
@@ -63,29 +63,33 @@ static int hitbox_opaque_event(event_handler_t *handler, menu_event_t event, voi
     if(event == MENU_EVENT_ACTIVATE){
         settings->hit_view_opq = !settings->hit_view_opq;
     }else if(event == MENU_EVENT_UPDATE){
-        menu_checkbox_set((menu_item_t*)handler->subscriber,settings->hit_view_opq);
+        menu_checkbox_set(handler->subscriber,settings->hit_view_opq);
     }
     return 1;
 }
 
 static int unload_room_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    z2_game.room_ctx.rooms[0].idx=-1;
+    z2_game.room_ctx.rooms[0].idx = -1;
     z2_game.room_ctx.rooms[0].file = NULL;
-    z2_UnloadRoom(&z2_game,&z2_game.room_ctx);
-    z2_game.room_ctx.rooms[0].idx=-1;
+    z2_UnloadRoom(&z2_game, &z2_game.room_ctx);
+    z2_game.room_ctx.rooms[0].idx = -1;
     z2_game.room_ctx.rooms[0].file = NULL;
     return 1;
 }
 
 static int load_room_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(room_idx == z2_game.room_ctx.rooms[0].idx) return unload_room_onactivate(handler, event, event_data);
-    if(room_idx >= z2_game.room_ctx.transition_cnt) return 1;
+    if(room_idx == z2_game.room_ctx.rooms[0].idx){
+        return unload_room_onactivate(handler, event, event_data);
+    }
+    if(room_idx >= z2_game.room_ctx.transition_cnt){
+        return 1;
+    }
     z2_game.room_ctx.rooms[0].idx = room_idx;
     z2_game.room_ctx.rooms[0].file = NULL;
-    z2_UnloadRoom(&z2_game,&z2_game.room_ctx);
-    z2_game.room_ctx.rooms[0].idx=room_idx;
+    z2_UnloadRoom(&z2_game, &z2_game.room_ctx);
+    z2_game.room_ctx.rooms[0].idx = room_idx;
     z2_game.room_ctx.rooms[0].file = NULL;
-    z2_LoadRoom(&z2_game,&z2_game.room_ctx,room_idx);
+    z2_LoadRoom(&z2_game, &z2_game.room_ctx, room_idx);
     return 1;
 }
 
@@ -99,13 +103,13 @@ static int hide_room_onactivate(event_handler_t *handler, menu_event_t event, vo
     return 1;
 }
 
-menu_t *create_scene_menu(){
+menu_t *create_scene_menu(void){
     static menu_t scene;
     static menu_t collision;
     menu_init(&scene, 0, 0);
     menu_padding_set(&scene,0,2);
     scene.selected_item = menu_button_add(&scene, 0, 0, "return", menu_return, NULL);
-    
+
     menu_submenu_add(&scene, 0, 1, "collision", &collision);
 
     menu_item_t *item;
@@ -129,7 +133,7 @@ menu_t *create_scene_menu(){
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)2);
             menu_label_add(&collision, 4, 4, "update on scene change");
         }
-        item = menu_checkbox_add(&collision,0,5);
+        item = menu_checkbox_add(&collision, 0, 5);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE, hide_room_onactivate, NULL);
         menu_label_add(&collision, 2, 5, "hide room");
 
@@ -152,7 +156,7 @@ menu_t *create_scene_menu(){
     static watch_t cur_room;
     cur_room.address = &z2_game.room_ctx.rooms[0].idx;
     cur_room.type = WATCH_TYPE_U8;
-    cur_room.floating=0;
+    cur_room.floating = 0;
     item = menu_watch_add(&scene, 13, 2, &cur_room, 1);
     item->color = COLOR_FADED;
     item = menu_label_add(&scene, 0, 3, "num rooms");

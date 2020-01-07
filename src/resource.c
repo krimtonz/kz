@@ -157,10 +157,12 @@ static const char *resource_names[R_END] = {
 static void *resource_load_kz_texture(enum resource resource){
     if(resource_names[resource]){
         gfx_texture *kztext = malloc(sizeof(*kztext));
-        if(!kztext) return kztext;
-        memset(kztext,0,sizeof(*kztext));
+        if(!kztext){
+            return kztext;
+        }
+        memset(kztext, 0, sizeof(*kztext));
         void *grctexture;
-        if(!grc_resource_get(resource_names[resource],&grctexture,NULL)){
+        if(!grc_resource_get(resource_names[resource], &grctexture, NULL)){
             return kztext;
         }
         struct grc_texture *gtext = grctexture;
@@ -179,7 +181,7 @@ static void *resource_load_kz_texture(enum resource resource){
 
 static void *resource_load_items(enum resource resource){
     struct item_texture *textures = malloc(sizeof(*textures) * Z2_ITEM_END);
-    memset(textures,0,sizeof(*textures) * Z2_ITEM_END);
+    memset(textures, 0, sizeof(*textures) * Z2_ITEM_END);
 #ifndef LITE
     for(int i = 0;i < Z2_ITEM_END;i++){
         textures[i].texture = gfx_load_item_texture(i);
@@ -239,7 +241,7 @@ static void *resource_load_rupee_texture(enum resource resource){
     return gfx_load(&loader);
 }
 
-static void *resource_table[R_END] = {NULL};
+static void *resource_table[R_END] = { NULL };
 static void *(*resource_ctors[R_END])(enum resource) = {
     resource_load_items,
     resource_load_buttons,
@@ -267,7 +269,7 @@ void *resource_get(enum resource resource){
 }
 
 gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
-#if Z2_VERSION!=NZSE 
+#if Z2_VERSION!=NZSE
     item_id = texture_map[item_id];
 #endif
     struct item_texture *item = (struct item_texture*)resource_get(R_Z2_ITEMS) + item_id;
@@ -275,7 +277,9 @@ gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
     item->last_access_counter = 0;
     item->release = release;
 #endif
-    if(item->texture) return item->texture;
+    if(item->texture){
+        return item->texture;
+    }
     item->texture = gfx_load_item_texture(item_id);
     return item->texture;
 }

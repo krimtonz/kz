@@ -49,7 +49,7 @@ enum cheats {
     CHEAT_MAX
 };
 
-typedef struct{
+typedef struct {
     uint16_t    z2_version;
     uint16_t    timer_boundaries[3];
     z2_file_t   file;
@@ -57,7 +57,7 @@ typedef struct{
     uint16_t    scene;
 } memfile_t;
 
-typedef struct{
+typedef struct {
     z2_xyzf_t   pos;
     z2_rot_t    rot;
 } position_t;
@@ -97,20 +97,20 @@ typedef struct {
     int                     prev_timespeed;
 } kz_ctxt_t;
 
-menu_t *create_warps_menu       ();
-menu_t *create_inventory_menu   ();
-menu_t *create_scene_menu       ();
-menu_t *create_watches_menu     ();
-menu_t *create_cheats_menu      ();
-menu_t *create_file_menu        ();
-menu_t *create_equips_menu      ();
-menu_t *create_settings_menu    ();
+menu_t *create_warps_menu       (void);
+menu_t *create_inventory_menu   (void);
+menu_t *create_scene_menu       (void);
+menu_t *create_watches_menu     (void);
+menu_t *create_cheats_menu      (void);
+menu_t *create_file_menu        (void);
+menu_t *create_equips_menu      (void);
+menu_t *create_settings_menu    (void);
 #ifndef LITE
-menu_t *create_debug_menu       ();
+menu_t *create_debug_menu       (void);
 #endif
 void    kz_log                  (const char *format, ...);
 
-extern kz_ctxt_t kz;
-extern char restriction_table[0x23A];
+extern kz_ctxt_t    kz;
+extern char         restriction_table[0x23A];
 
 #endif

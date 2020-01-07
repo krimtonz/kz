@@ -6,14 +6,14 @@
 static _Alignas(128) struct settings settings_info;
 struct settings_data *settings = &settings_info.data;
 
-void load_default_settings(){
+void load_default_settings(void){
     settings_info.header.magic[0] = 'k';
     settings_info.header.magic[1] = 'z';
     settings_info.header.magic[2] = 'k';
     settings_info.header.magic[3] = 'z';
     settings_info.header.version = FULL_SETTINGS;
     list_destroy(&kz.watches);
-    list_init(&kz.watches,sizeof(watch_t));
+    list_init(&kz.watches, sizeof(watch_t));
     settings->watch_cnt = 0;
     settings->binds[KZ_CMD_TOGGLE_MENU] = make_bind(2, BUTTON_R, BUTTON_L);
     settings->binds[KZ_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
@@ -58,7 +58,7 @@ void load_default_settings(){
 void save_settings_to_flashram(int profile){
     settings->watch_cnt = kz.watches.size;
     if(kz.watches.first){
-        int i=0;
+        int i = 0;
         for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
             settings->watch_addresses[i] = (uint32_t)watch->address;
             settings->watch_x[i] = watch->x;
@@ -66,26 +66,26 @@ void save_settings_to_flashram(int profile){
             settings->watch_info[i].floating = watch->floating;
             settings->watch_info[i].type = watch->type;
             if(watch->label){
-                memcpy(settings->watch_labels[i],watch->label,20);
+                memcpy(settings->watch_labels[i], watch->label, 20);
             }
             i++;
         }
     }
     struct settings *settings_temp = malloc(sizeof(*settings_temp) * SETTINGS_MAX);
-    z2_dmaflashtoram(settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR),SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
-    memcpy(settings_temp + profile,&settings_info,sizeof(settings_info));
-    z2_dmaramtoflash(settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR),SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
-    kz_log("saved settings profile %d",profile);
+    z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
+    memcpy(settings_temp + profile, &settings_info, sizeof(settings_info));
+    z2_dmaramtoflash(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
+    kz_log("saved settings profile %d", profile);
     free(settings_temp);
 }
 
 void load_settings_from_flashram(int profile){
     struct settings *settings_temp = malloc(sizeof(*settings_temp) * SETTINGS_MAX);
-    z2_dmaflashtoram(settings_temp,SIZE_TO_BLOCK(SETTINGS_ADDR),SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
+    z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
     struct settings *settings_profile = &settings_temp[profile];
-    if(settings_profile->header.version>0 && settings_profile->header.version == FULL_SETTINGS){
-        if(settings_profile->header.magic[0] == 'k' && settings_profile->header.magic[1]=='z' && settings_profile->header.magic[2] == 'k' && settings_profile->header.magic[3] == 'z'){
-            memcpy((void*)&settings_info,(void*)settings_profile,sizeof(*settings_profile));
+    if(settings_profile->header.version > 0 && settings_profile->header.version == FULL_SETTINGS){
+        if(settings_profile->header.magic[0] == 'k' && settings_profile->header.magic[1] == 'z' && settings_profile->header.magic[2] == 'k' && settings_profile->header.magic[3] == 'z'){
+            memcpy((void*)&settings_info, (void*)settings_profile, sizeof(*settings_profile));
             kz_log("loaded settings profile %d",profile);
         }else{
             load_default_settings();
@@ -93,7 +93,7 @@ void load_settings_from_flashram(int profile){
         }
     }else{
         // if settings version is not the same as the current version, delete the profile from the save file, and load default settings
-        // in the future might provide an update path? 
+        // in the future might provide an update path?
         load_default_settings();
         save_settings_to_flashram(profile);
         kz_log("invalid settings version");
@@ -101,19 +101,19 @@ void load_settings_from_flashram(int profile){
     free(settings_temp);
 }
 
-void kz_apply_settings(){
+void kz_apply_settings(void){
     if(kz.ready){
         clear_watches();
     }
-    for(int i=0;i<settings->watch_cnt;i++){
-        watch_t *watch = list_push_back(&kz.watches,NULL);
+    for(int i = 0;i < settings->watch_cnt;i++){
+        watch_t *watch = list_push_back(&kz.watches, NULL);
         watch->address = (void*)settings->watch_addresses[i];
         watch->x = settings->watch_x[i];
         watch->y = settings->watch_y[i];
         watch->floating = settings->watch_info[i].floating;
         watch->type = settings->watch_info[i].type;
         watch->label = malloc(21);
-        memcpy(watch->label,settings->watch_labels[i],20);
+        memcpy(watch->label, settings->watch_labels[i], 20);
         watch->label[20] = 0;
     }
     if(kz.ready){

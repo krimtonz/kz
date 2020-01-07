@@ -30,12 +30,12 @@
 #define TURBO_TOGGLE        0
 #define TURBO_HOLD          1
 
-struct settings_header{
+struct settings_header {
     char        magic[4];
     uint32_t    version;
 };
 
-struct settings_data{
+struct settings_data {
     uint32_t            watch_addresses[WATCHES_MAX];
     uint16_t            watch_x[WATCHES_MAX];
     uint16_t            watch_y[WATCHES_MAX];
@@ -43,7 +43,7 @@ struct settings_data{
     char                watch_labels[WATCHES_MAX][20];
     uint32_t            cheats;
     union{
-        struct{
+        struct {
             uint32_t                    : 22;
             uint32_t    hit_view_opq    : 1;
             uint32_t    col_view_upd    : 1;
@@ -75,11 +75,11 @@ struct settings {
     char                    pad[SETTINGS_PAD];
 };
 
-void save_settings_to_flashram(int profile);
-void load_settings_from_flashram(int profile);
-void load_default_settings();
-void kz_apply_settings();
+void    save_settings_to_flashram   (int profile);
+void    load_settings_from_flashram (int profile);
+void    load_default_settings       (void);
+void    kz_apply_settings           (void);
 
-extern struct settings_data *settings;
+extern struct settings_data    *settings;
 
 #endif

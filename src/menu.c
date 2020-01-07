@@ -8,15 +8,18 @@ menu_sprite_t   *scroll_up_sprite = NULL;
 menu_sprite_t   *scroll_down_sprite = NULL;
 
 static void menu_navigate(menu_t *menu, menu_nav_t nav){
-    if(nav == MENU_NAV_NONE) return;
+    if(nav == MENU_NAV_NONE){
+        return;
+    }
 
     if(menu->child){
         menu_navigate(menu->child,nav);
         return;
     }
 
-    if(menu->selected_item && menu_item_trigger_event(menu->selected_item, MENU_EVENT_NAVIGATE, (void*)nav))
+    if(menu->selected_item && menu_item_trigger_event(menu->selected_item, MENU_EVENT_NAVIGATE, (void*)nav)){
         return;
+    }
 
     int dir_horiz = nav == MENU_NAV_LEFT ? -1 : (nav == MENU_NAV_RIGHT ? 1 : 0);
     int dir_vert = nav == MENU_NAV_UP ? -1 : (nav == MENU_NAV_DOWN ? 1 : 0);
@@ -32,7 +35,9 @@ static void menu_navigate(menu_t *menu, menu_nav_t nav){
     menu_item_t *far = NULL;
 
     for(menu_item_t *item = menu->items.first;item;item = list_next(item)){
-        if(!item->interactive || !item->enabled) continue;
+        if(!item->interactive || !item->enabled){
+            continue;
+        }
         int distance_x = menu_item_x(item) - cur_x_pos;
         int distance_y = menu_item_y(item) - cur_y_pos;
 
@@ -58,12 +63,10 @@ static void menu_navigate(menu_t *menu, menu_nav_t nav){
 
     void *event_data = NULL;
     if((near || far) && menu->selected_item){
-        
         menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, &event_data);
     }
 
     if(near){
-
         menu_item_trigger_event(near, MENU_EVENT_ENTER, &event_data);
         menu->selected_item = near;
     }else if(far){
@@ -72,7 +75,7 @@ static void menu_navigate(menu_t *menu, menu_nav_t nav){
     }
 }
 
-void menu_static_sprites_init(){
+void menu_static_sprites_init(void){
     static menu_sprite_t up_sprite = {
         NULL,   0,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
         8,      8,      NULL,   DEFAULT_COLOR,   0,
@@ -93,9 +96,9 @@ void menu_static_sprites_init(){
 }
 
 void menu_init(menu_t *menu, int16_t x_offset, int16_t y_offset){
-    list_init(&menu->items,sizeof(menu_item_t));
-    list_init(&menu->events,sizeof(event_handler_t));
-    list_init(&menu->item_events,sizeof(event_handler_t));
+    list_init(&menu->items, sizeof(menu_item_t));
+    list_init(&menu->events, sizeof(event_handler_t));
+    list_init(&menu->item_events, sizeof(event_handler_t));
     menu->x_offset = x_offset;
     menu->y_offset = y_offset;
     menu->selected_item = NULL;
@@ -141,7 +144,9 @@ void menu_draw(menu_t *menu){
         return;
     }
     for(menu_item_t *item = menu->items.first;item;item = list_next(item)){
-        if(!item->enabled) continue;
+        if(!item->enabled){
+            continue;
+        }
         if(item->draw_proc){
             item->draw_proc(item);
             continue;
@@ -273,9 +278,9 @@ int menu_trigger_event(menu_t *menu, menu_event_t event, void **event_data){
     return true;
 }
 
-void menu_item_offset_set(menu_item_t *item, int16_t offset_x, int16_t offset_y){
-    item->x_offset = offset_x;
-    item->y_offset = offset_y;
+void menu_item_offset_set(menu_item_t *item, int16_t x_offset, int16_t y_offset){
+    item->x_offset = x_offset;
+    item->y_offset = y_offset;
 }
 
 int menu_return(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -293,12 +298,12 @@ void menu_padding_set(menu_t *menu, uint16_t x_padding, uint16_t y_padding){
     menu->y_padding = y_padding;
 }
 
-menu_item_t *menu_label_add(menu_t *menu, uint16_t cell_x, uint16_t cell_y, void *text){
-    menu_item_t *item = list_push_back(&menu->items,NULL);
+menu_item_t *menu_label_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, void *text){
+    menu_item_t *item = list_push_back(&menu->items, NULL);
     if(item){
         item->owner = menu;
-        item->x_cell = cell_x;
-        item->y_cell = cell_y;
+        item->x_cell = x_cell;
+        item->y_cell = y_cell;
         item->x_offset = 0;
         item->y_offset = 0;
         item->draw_proc = NULL;

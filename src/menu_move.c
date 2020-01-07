@@ -3,7 +3,7 @@
 #include "menu.h"
 #include "resource.h"
 
-struct item_data{
+struct item_data {
     int16_t *x;
     int16_t *y;
     _Bool active;
@@ -16,7 +16,9 @@ static int menu_move_event(event_handler_t *handler, menu_event_t event, void **
         data->active = !data->active;
         return 1;
     }else if(event == MENU_EVENT_NAVIGATE){
-        if(!data->active) return 0;
+        if(!data->active){
+            return 0;
+        }
         menu_nav_t nav = (menu_nav_t)event_data;
         int dist = (input_pressed_raw() & BUTTON_Z) ? 3 : 1;
         switch(nav){
@@ -65,7 +67,7 @@ static void menu_move_remove(menu_item_t *item){
 }
 
 menu_item_t *menu_move_button_add(menu_t *menu, uint16_t x, uint16_t y, int16_t *move_x, int16_t *move_y){    
-    menu_item_t *item = menu_add(menu,x,y);
+    menu_item_t *item = menu_add(menu, x, y);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->x = move_x;

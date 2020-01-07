@@ -45,7 +45,7 @@ static void buf_sanity(){
     }
     int buf_len = strlen(input_buf);
     if(cursor_pos > buf_len){
-        memset(&input_buf[buf_len],' ',cursor_pos - buf_len);
+        memset(&input_buf[buf_len], ' ', cursor_pos - buf_len);
     }
     for(int i = cursor_pos + 1;i < sizeof(input_buf) - 1;i++){
         if(input_buf[i] == ' ' || input_buf[i] == '_'){
@@ -66,11 +66,13 @@ static void keyboard_input_draw(menu_item_t *item){
     if(cursor_pos > 0){
         memcpy(input_buf_pre, input_buf, cursor_pos);
         input_buf_pre[cursor_pos] = 0;
-        gfx_printf_color(x,y,color, "%s", input_buf_pre);
+        gfx_printf_color(x, y, color, "%s", input_buf_pre);
         x += strlen(input_buf_pre) * 8;
     }
     char c = input_buf[cursor_pos];
-    if(c ==' ') c = '_';
+    if(c == ' '){
+        c = '_';
+    }
     gfx_printf_color(x, y, COLOR_GREEN, "%c", c);
     x += 8;
 
@@ -78,7 +80,9 @@ static void keyboard_input_draw(menu_item_t *item){
     if(cursor_pos != input_len){
         memcpy(input_buf_post, input_buf + cursor_pos + 1, post_len);
     }
-    if(post_len < 0) post_len++;
+    if(post_len < 0){
+        post_len++;
+    }
     if(cursor_pos < sizeof(input_buf) - 1){
         memset(input_buf_post + post_len, '_', sizeof(input_buf) - 1 - input_len);
         input_buf_post[sizeof(input_buf) - cursor_pos - 2]  = 0;
@@ -183,8 +187,8 @@ static int key_onactivate(event_handler_t *handler, menu_event_t event, void **e
     return 1;
 }
 
-static menu_item_t *menu_key_add(menu_t *menu, int x, int y, int row, int col){
-    menu_item_t *item = menu_add(menu,x,y);
+static menu_item_t *menu_key_add(menu_t *menu, int x_cell, int y_cell, int row, int col){
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         struct key_data *data = malloc(sizeof(*data));
         data->col = col;
@@ -201,11 +205,15 @@ static int accept_onactivate(event_handler_t *handler, menu_event_t event, void 
     if(dest_string){
         if(!*dest_string){
             *dest_string = malloc(sizeof(input_buf));
-            if(!*dest_string) return 0;
+            if(!*dest_string){
+                return 0;
+            }
         }
         int buf_len = strlen(input_buf);
-        if(buf_len > 0 && input_buf[buf_len - 1] == '_') input_buf[buf_len - 1] = 0;
-        memcpy(*dest_string,input_buf,sizeof(input_buf));
+        if(buf_len > 0 && input_buf[buf_len - 1] == '_'){
+            input_buf[buf_len - 1] = 0;
+        }
+        memcpy(*dest_string, input_buf, sizeof(input_buf));
     }
     *event_data = &input_buf;
     menu_item_trigger_event(keyboard_caller, MENU_EVENT_KEYBOARD, event_data);
@@ -215,7 +223,7 @@ static int accept_onactivate(event_handler_t *handler, menu_event_t event, void 
     return 1;
 }
 
-static void init_keyboard(){
+static void init_keyboard(void){
     menu_init(&menu_keyboard, 0, 0);
     menu_padding_set(&menu_keyboard, 8, 8);
 
@@ -234,11 +242,11 @@ void menu_keyboard_get(menu_item_t *item, char **dest){
     if(!keyboard_ready){
         init_keyboard();
     }
-    memset(input_buf,0,sizeof(input_buf));
+    memset(input_buf, 0, sizeof(input_buf));
     dest_string = dest;
     keyboard_caller = item;
     if(dest && *dest){
-        strcpy(input_buf,*dest);
+        strcpy(input_buf, *dest);
         cursor_pos = strlen(input_buf);
         buf_sanity();
     }

@@ -22,7 +22,7 @@ typedef struct
     uint32_t    overlay_d;      /* 0x001C */
 } zu_disp_ptr_t;                /* 0x0020 */
 
-int     zu_is_ingame();
+int     zu_is_ingame        (void);
 void    zu_file_load        (uint32_t vrom_addr, void *ram, size_t size);
 void    zu_file_idx_load    (int idx, void *ram);
 void   *zu_segment_reloc    (void *phy_seg_addr);

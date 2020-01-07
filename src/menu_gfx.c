@@ -16,7 +16,7 @@ static void menu_gfx_draw(menu_item_t *item){
 }
 
 menu_item_t *menu_gfx_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, gfx_texture *texture, int tile, int width, int height){
-    menu_item_t *item = menu_add(menu,x_cell, y_cell);
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         if(data){
@@ -25,10 +25,8 @@ menu_item_t *menu_gfx_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, gfx_te
             data->height = height;
             data->tile = tile;
             item->data = data;
-            item->color = DEFAULT_COLOR;
         }
         item->draw_proc = menu_gfx_draw;
-        item->interactive = 0;
     }
     return item;
 }

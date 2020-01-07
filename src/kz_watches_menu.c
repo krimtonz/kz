@@ -5,7 +5,7 @@
 #include "kz.h"
 #include "resource.h"
 
-struct watch_row{
+struct watch_row {
     union{
         struct {
             menu_item_t *delete_button;
@@ -21,10 +21,10 @@ struct watch_row{
     watch_t *watch;
 };
 
-static struct list watch_rows;
+static struct list  watch_rows;
 static menu_item_t *add_button = NULL;
-static menu_t watches;
-static int prev_addr = 0x80000000;
+static menu_t       watches;
+static int          prev_addr = 0x80000000;
 
 static char *watch_type_names[] = {
     "u8",   "s8",   "x8",
@@ -54,7 +54,7 @@ static int watch_address_onnumber(event_handler_t *handler, menu_event_t event, 
     watch_t *watch = row->watch;
     uint32_t value = (uint32_t)*event_data;
     value -= value % watch_data_sizes[watch->type];
-    menu_number_set((menu_item_t*)handler->subscriber, value);
+    menu_number_set(handler->subscriber, value);
     watch->address = (void*)value;
     prev_addr = value;
     return 1;
@@ -93,8 +93,8 @@ static int menu_watch_delete_onactivate(event_handler_t *handler, menu_event_t e
         item->owner->selected_item = add_button;
     }
     while(next){
-        for(int i = 0;i<sizeof(next->row_items)/sizeof(*next->row_items);i++){
-            next->row_items[i]->y_cell-=2;
+        for(int i = 0;i < sizeof(next->row_items) / sizeof(*next->row_items);i++){
+            next->row_items[i]->y_cell -= 2;
         }
         next = list_next(next);
     }
@@ -102,7 +102,7 @@ static int menu_watch_delete_onactivate(event_handler_t *handler, menu_event_t e
     return 1;
 }
 
-void clear_watches(){
+void clear_watches(void){
     struct watch_row *row = watch_rows.first;
     while(row){
         struct watch_row *next = list_next(row);
@@ -112,11 +112,11 @@ void clear_watches(){
     add_button->y_cell = 1;
 }
 
-void init_watch_rows(){
+void init_watch_rows(void){
     for(watch_t *watch = kz.watches.first;watch;watch = list_next(watch)){
         if(!watch->label){
             watch->label = malloc(21);
-            memset(watch->label,0,21);
+            memset(watch->label, 0, 21);
         }
         watch_add(watch, 0);
     }
@@ -124,8 +124,8 @@ void init_watch_rows(){
 
 static int menu_watch_anchor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
     struct watch_row *row = handler->callback_data;
-    menu_sprite_t *sprite = menu_button_sprite_get((menu_item_t*)handler->subscriber);
-    row->watch->floating=!row->watch->floating;
+    menu_sprite_t *sprite = menu_button_sprite_get(handler->subscriber);
+    row->watch->floating = !row->watch->floating;
     if(!row->watch->floating){
         row->watch->x = menu_item_x(row->watch_item);
         row->watch->y = menu_item_y(row->watch_item);
@@ -152,7 +152,7 @@ static void watch_add(watch_t *watch, _Bool setpos){
     int x = add_button->x_cell;
     int y = add_button->y_cell;
 
-    struct watch_row *row = list_push_back(&watch_rows,NULL);
+    struct watch_row *row = list_push_back(&watch_rows, NULL);
     static menu_sprite_t delete_sprite = {
         NULL,   0,  0,  DEFAULT_COLOR,  DEFAULT_COLOR,
         8,      8,      NULL,           0,  
@@ -168,7 +168,7 @@ static void watch_add(watch_t *watch, _Bool setpos){
     delete_sprite.texture = resource_get(R_KZ_ICON);
     anchor_sprite.texture = resource_get(R_KZ_ICON);
 
-    row->delete_button = menu_gfx_button_add(&watches, x, y,  &delete_sprite, menu_watch_delete_onactivate, row);
+    row->delete_button = menu_gfx_button_add(&watches, x, y, &delete_sprite, menu_watch_delete_onactivate, row);
 
     anchor_sprite.on_tile = watch->floating ? 1 : 7;
     row->anchor_button = menu_gfx_button_add(&watches, x + 1, y, &anchor_sprite, menu_watch_anchor_onactivate,row);
@@ -177,7 +177,7 @@ static void watch_add(watch_t *watch, _Bool setpos){
     row->move_button = witem;
     witem->enabled = watch->floating;
 
-    row->addr_input = menu_number_input_add(&watches,x + 4, y, 16, 8);
+    row->addr_input = menu_number_input_add(&watches, x + 4, y, 16, 8);
     menu_item_register_event(row->addr_input, MENU_EVENT_NUMBER, watch_address_onnumber, row);
     menu_number_set(row->addr_input, (uint32_t)watch->address);
 
@@ -214,11 +214,11 @@ static int watches_button_add_onactivate(event_handler_t *handler, menu_event_t 
     return 1;
 }
 
-menu_t *create_watches_menu(){
+menu_t *create_watches_menu(void){
     menu_init(&watches, 0, 0);
-    list_init(&watch_rows,sizeof(struct watch_row));
+    list_init(&watch_rows, sizeof(struct watch_row));
     watches.selected_item = menu_button_add(&watches, 0, 0, "return", menu_return, NULL);
-    add_button = menu_button_add(&watches, 0, 1,"+",watches_button_add_onactivate, NULL);
+    add_button = menu_button_add(&watches, 0, 1,"+", watches_button_add_onactivate, NULL);
     init_watch_rows();
     return &watches;
 }

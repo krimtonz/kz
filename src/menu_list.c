@@ -53,7 +53,9 @@ static void menu_list_draw(menu_item_t *item){
 
 void menu_list_set(menu_item_t *item, int idx){
     struct item_data *data = item->data;
-    if(idx < 0 || idx >= data->option_cnt) return;
+    if(idx < 0 || idx >= data->option_cnt){
+        return;
+    }
     data->selected_idx = idx;
 }
 
@@ -62,9 +64,9 @@ static void menu_list_remove(menu_item_t *item){
     item->data = NULL;
 }
 
-menu_item_t *menu_list_add(menu_t *menu, uint16_t x, uint16_t y,
+menu_item_t *menu_list_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell,
                            char **text, int option_cnt){
-    menu_item_t *item = menu_add(menu,x,y);
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->text = text;

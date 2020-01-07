@@ -88,16 +88,15 @@ static void poly_writer_append(poly_writer_t *writer, Vtx (*vtx)[3], uint32_t co
     if(writer->vtx_cnt == 30){
         poly_writer_flush(writer);
     }
-
 }
 
 static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){
-    uint32_t render_mode;
-    uint32_t blend_cyc1;
-    uint32_t blend_cyc2;
-    uint8_t alpha;
-    uint64_t combiner;
-    uint32_t geometry;
+    uint32_t    render_mode;
+    uint32_t    blend_cyc1;
+    uint32_t    blend_cyc2;
+    uint8_t     alpha;
+    uint64_t    combiner;
+    uint32_t    geometry;
 
     if(xlu){
         render_mode = Z_CMP | IM_RD | CVG_DST_FULL | FORCE_BL;
@@ -127,7 +126,7 @@ static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){
 
     gSPLoadGeometryMode((*poly_p)++, geometry);
     gSPTexture((*poly_p)++, qu016(0.5), qu016(0.5), 0, G_TX_RENDERTILE, G_OFF);
-    gSPMatrix((*poly_p)++,mtx_mv, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gSPMatrix((*poly_p)++, mtx_mv, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
     gDPPipeSync((*poly_p)++);
     gDPSetCycleType((*poly_p)++, G_CYC_1CYCLE);
     gDPSetRenderMode((*poly_p)++, render_mode | blend_cyc1, render_mode | blend_cyc2);
@@ -257,7 +256,7 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
     for(int i = 0;i < hitbox_cnt;i++){
         z2_hitbox_t *hitbox = hitbox_list[i];
         switch(hitbox->type){
-            case Z2_HITBOX_CYLINDER_LIST:{
+            case Z2_HITBOX_CYLINDER_LIST: {
                 z2_hitbox_cylinder_list_t *cylinder_list = (z2_hitbox_cylinder_list_t*)hitbox;
                 for(int j = 0;j < cylinder_list->entry_cnt;j++){
                     z2_hitbox_cylinder_ent_t *entry = &cylinder_list->entries[j];
@@ -269,7 +268,7 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
                 }
             }
             break;
-            case Z2_HITBOX_CYLINDER:{
+            case Z2_HITBOX_CYLINDER: {
                 z2_hitbox_cylinder_t *cylinder = (z2_hitbox_cylinder_t*)hitbox;
                 int16_t radius = cylinder->radius;
                 if(radius == 0){
@@ -278,7 +277,7 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
                 draw_cylinder(hit_view_p, hit_view_d, radius, cylinder->height, cylinder->pos.x, cylinder->pos.y + cylinder->y_offset, cylinder->pos.z);
             }
             break;
-            case Z2_HITBOX_TRI_LIST:{
+            case Z2_HITBOX_TRI_LIST: {
                 z2_hitbox_tri_list_t *tri_list = (z2_hitbox_tri_list_t*)hitbox;
                 for(int j = 0;j < tri_list->entry_cnt;j++){
                     z2_hitbox_tri_ent_t *entry = &tri_list->entries[j];
@@ -286,7 +285,7 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
                 }
             }
             break;
-            case Z2_HITBOX_QUAD:{
+            case Z2_HITBOX_QUAD: {
                 z2_hitbox_quad_t *quad = (z2_hitbox_quad_t*)hitbox;
                 draw_quad(hit_view_p, hit_view_d, &quad->vertices[0], &quad->vertices[2], &quad->vertices[3], &quad->vertices[1]);
             }
@@ -316,7 +315,7 @@ void kz_hitbox_view(){
         kz.hitbox_view_status = COL_VIEW_NONE;
         return;
     }
-    
+
     _Bool show = kz.hitbox_view_status == COL_VIEW_SHOW &&
                  zu_is_ingame() &&
                  z2_game.pause_ctx.state == 0;
@@ -360,7 +359,7 @@ static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *po
             color = 0xFF0000FF;
         }else if(type->flags_1.exit != 0 || type->flags_1.special == 0x5){
             color = 0x00FFFFFF;
-        }else if(type->flags_1.behavior!=0 || type->flags_2.wall_damage){
+        }else if(type->flags_1.behavior != 0 || type->flags_2.wall_damage){
             color = 0x00FF00FF;
         }else if(type->flags_2.terrain == 1){
             color = 0xFFFF00FF;
@@ -369,10 +368,13 @@ static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *po
         }else{
             color = 0xFFFFFFFF;
         }
-        
+
         if(!skip){
-            gDPSetPrimColor(writer->p++, 0, 0, (color >> 24) & 0xFF, (color >> 16) & 0xFF,
-                            (color >> 8) & 0xFF, color & 0xFF);
+            gDPSetPrimColor(writer->p++, 0, 0,
+                            (color >> 24) & 0xFF,
+                            (color >> 16) & 0xFF,
+                            (color >> 8) & 0xFF,
+                            color & 0xFF);
 
             Vtx v[3] = {
                 gdSPDefVtxN(va->x, va->y, va->z, 0, 0,
@@ -386,7 +388,7 @@ static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *po
                             0xFF),
             };
 
-            poly_writer_append(writer,&v,color);
+            poly_writer_append(writer, &v, color);
         }
     }
 }
@@ -453,7 +455,7 @@ void kz_col_view(){
                     static_col_size++;
                 }else if(type->flags_1.exit != 0 || type->flags_1.special == 0x5){
                     static_col_size++;
-                }else if(type->flags_1.behavior!=0 || type->flags_2.wall_damage){
+                }else if(type->flags_1.behavior != 0 || type->flags_2.wall_damage){
                     static_col_size++;
                 }else if(type->flags_2.terrain == 1){
                     static_col_size++;
@@ -469,7 +471,7 @@ void kz_col_view(){
         static_col = malloc(sizeof(*static_col) * static_col_size);
         Gfx *static_col_p = static_col;
         Gfx *static_col_d = static_col + static_col_size;
-        poly_writer_init(&writer,static_col_p, static_col_d);
+        poly_writer_init(&writer, static_col_p, static_col_d);
         do_poly_list(&writer, hdr->vtx, hdr->poly, hdr->type, hdr->n_poly, settings->col_view_red);
         poly_writer_finish(&writer, &static_col_p, &static_col_d);
         gSPEndDisplayList(static_col_p++);
@@ -529,4 +531,3 @@ void kz_col_view(){
         }
     }
 }
-

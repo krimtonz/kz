@@ -12,14 +12,14 @@ struct equip_option {
 };
 
 static struct equip_option sword_options[] = {
-    { 0, 1, Z2_ITEM_KOKIRI_SWORD},
-    { 0, 2, Z2_ITEM_RAZOR_SWORD},
-    { 0, 3, Z2_ITEM_GILDED_SWORD}
+    { 0,    1,  Z2_ITEM_KOKIRI_SWORD},
+    { 0,    2,  Z2_ITEM_RAZOR_SWORD},
+    { 0,    3,  Z2_ITEM_GILDED_SWORD}
 };
 
 static struct equip_option shield_options[] = {
-    {4, 1, Z2_ITEM_HERO_SHIELD},
-    {4, 2, Z2_ITEM_MIRROR_SHIELD}
+    { 4,    1,  Z2_ITEM_HERO_SHIELD},
+    { 4,    2,  Z2_ITEM_MIRROR_SHIELD}
 };
 
 static uint8_t get_equip_value(struct equip_option *data){
@@ -81,21 +81,21 @@ static menu_item_t *equip_option_add(menu_t *menu, uint16_t x_cell, uint16_t y_c
     return item;
 }
 
-menu_t *create_equips_menu(){
+menu_t *create_equips_menu(void){
     static menu_t equips;
 
     menu_init(&equips, 0, 0);
     menu_cell_set(&equips, 16, 16);
 
     equips.selected_item = menu_button_add(&equips, 0, 0, "return", menu_return, NULL);
-    
+
     menu_item_t *item;
 
     for(int i = 0;i < sizeof(sword_options) / sizeof(*sword_options);i++){
         item = equip_option_add(&equips, i, 1, &sword_options[i]);
         menu_item_offset_set(item, 5 * i, 0);
     }
-    
+
     for(int i = 0;i < sizeof(shield_options) / sizeof(*shield_options);i++){
         item = equip_option_add(&equips, i, 2, &shield_options[i]);
         menu_item_offset_set(item, i * 5, 5);
@@ -133,7 +133,7 @@ menu_t *create_equips_menu(){
     c_down_sprite.null_texture = buttons_texture;
     c_right_sprite.background = buttons_texture;
     c_right_sprite.null_texture = buttons_texture;
-    
+
     item = menu_item_list_add(&equips, 0, 3, 0, NULL, Z2_ITEM_ODOLWAS_REMAINS - 1, &b_val, NULL, Z2_ITEM_ODOLWAS_REMAINS - 1, &b_sprite, NULL);
     menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, b_button_event, NULL);
     menu_item_offset_set(item, 0, 8);

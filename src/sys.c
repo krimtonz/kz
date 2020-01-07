@@ -9,12 +9,6 @@
 #include "hb.h"
 #include "fat.h"
 
-enum device_type{
-    DEVICE_NONE,
-    DEVICE_ED64,
-    DEVICE_HOMEBOY,
-};
-
 typedef struct {
     int         descriptor;
     fat_path_t *fp;
@@ -33,16 +27,14 @@ typedef struct {
     dirent_t    dirent;
 } dir_desc_t;
 
-static fat_ctxt_t fat;
-static desc_t *desc_list[FOPEN_MAX];
+static fat_ctxt_t   fat;
+static desc_t      *desc_list[FOPEN_MAX];
 
-static fat_path_t *wd;
+static fat_path_t  *wd;
 
-static int fat_ready = 0;
-static enum device_type device_type;
+static int              fat_ready = 0;
 
-time_t time(time_t *tloc)
-{
+time_t time(time_t *tloc){
     if (tloc){
         *tloc = 0;
     }
@@ -53,9 +45,7 @@ static int init_fat(){
     if(fat_ready){
         return 0;
     }
-    if(hb_sd_init() == 0){
-        device_type = DEVICE_HOMEBOY;
-    }else{
+    if(hb_sd_init() != 0){
         errno = ENODEV;
         return -1;
     }
@@ -111,7 +101,7 @@ static void *new_desc(size_t size, fat_path_t *fp, int flags){
             }
             desc->descriptor = i;
             desc->fp = fp;
-            fat_begin(fat_path_target(fp),&desc->file);
+            fat_begin(fat_path_target(fp), &desc->file);
             desc->flags = flags;
             desc_list[i] = desc;
             return desc;
@@ -131,11 +121,11 @@ static int entry_access(fat_entry_t *entry, _Bool write){
         if(!desc){
             continue;
         }
-        if(write & check_path(sn,desc->fp)){
+        if(write & check_path(sn, desc->fp)){
             return -1;
         }
         if((desc->flags & _FWRITE) && sn == make_sn(fat_path_target(desc->fp))){
-            errno=EACCES;
+            errno = EACCES;
             return -1;
         }
     }
@@ -188,7 +178,7 @@ static int seek_file(file_desc_t *fdesc){
     }
     int e = errno;
     errno = 0;
-    fat_advance(file,fdesc->pos - file->p_offset,NULL);
+    fat_advance(file, fdesc->pos - file->p_offset, NULL);
     if(errno != 0){
         return -1;
     }
@@ -215,7 +205,7 @@ int open(const char *path, int open_flags, ...){
     }
     int flags = open_flags + 1;
     const char *tail;
-    fat_path_t *origin = get_origin(path,&tail);
+    fat_path_t *origin = get_origin(path, &tail);
     int e = errno;
     errno = 0;
     fat_path_t *fp = fat_path(&fat, origin, tail, NULL);
@@ -238,7 +228,7 @@ int open(const char *path, int open_flags, ...){
     else{
         if(errno == ENOENT && (open_flags & O_CREAT)){
             va_list va;
-            va_start(va,open_flags);
+            va_start(va, open_flags);
             mode_t mode = va_arg(va, mode_t);
             va_end(va);
             uint8_t attributes = FAT_ATTRIBUTE_ARCHIVE;
@@ -263,11 +253,11 @@ int open(const char *path, int open_flags, ...){
         }
     }
     if((open_flags & O_TRUNC) && entry->size > 0){
-        if(fat_resize(entry,0,NULL)){
+        if(fat_resize(entry, 0, NULL)){
             goto error;
         }
     }
-    file_desc_t *desc = new_desc(sizeof(*desc),fp,flags);
+    file_desc_t *desc = new_desc(sizeof(*desc), fp, flags);
     if(!desc){
         goto error;
     }
@@ -296,21 +286,21 @@ int write(int file, void *buf, uint32_t byte_cnt){
     }
     if(fdesc->pos > desc->file.size){
         uint32_t size = desc->file.size;
-        if(fat_resize(entry,fdesc->pos + byte_cnt, &desc->file)){
+        if(fat_resize(entry, fdesc->pos + byte_cnt, &desc->file)){
             return -1;
         }
         uint32_t advance = size - desc->file.p_offset;
-        if(fat_advance(&desc->file,advance,NULL) != advance){
+        if(fat_advance(&desc->file, advance, NULL) != advance){
             return -1;
         }
         uint32_t cnt = fdesc->pos - size;
-        if(fat_rw(&desc->file,FAT_WRITE,NULL,cnt,&desc->file,NULL) != cnt){
+        if(fat_rw(&desc->file, FAT_WRITE, NULL, cnt, &desc->file, NULL) != cnt){
             return -1;
         }
     }else{
         uint32_t new_offset = fdesc->pos + byte_cnt;
         if(new_offset > desc->file.size){
-            if(fat_resize(entry,new_offset,&desc->file)){
+            if(fat_resize(entry, new_offset, &desc->file)){
                 return -1;
             }
         }
@@ -338,15 +328,15 @@ int read(int file, void *buf, uint32_t byte_cnt){
     if(seek_file(fd)){
         return -1;
     }
-    uint32_t cnt = fat_rw(&fd->descriptor.file, FAT_READ,buf, byte_cnt,&fd->descriptor.file,NULL);
+    uint32_t cnt = fat_rw(&fd->descriptor.file, FAT_READ, buf, byte_cnt, &fd->descriptor.file, NULL);
     fd->pos += cnt;
     return cnt;
 }
 
 static fat_path_t *wd_path(const char *path){
     const char *tail;
-    fat_path_t *origin = get_origin(path,&tail);
-    return fat_path(&fat,origin,tail,NULL);
+    fat_path_t *origin = get_origin(path, &tail);
+    return fat_path(&fat, origin, tail, NULL);
 }
 
 DIR *opendir(const char *dir){
@@ -367,7 +357,7 @@ DIR *opendir(const char *dir){
         errno = ENOTDIR;
         goto error;
     }
-    if(entry_access(ent,0)){
+    if(entry_access(ent, 0)){
         goto error;
     }
     dir_desc_t *dd = new_desc(sizeof(*dd), fp, _FREAD);
@@ -398,8 +388,8 @@ char *getcwd(char *buf, size_t size){
         while(*name && p!=end){
             *p++ = *name++;
         }
-        if((ent == wd->entry_list.first || ent!= wd->entry_list.last) && p != end){
-            *p++='/';
+        if((ent == wd->entry_list.first || ent != wd->entry_list.last) && p != end){
+            *p++ = '/';
         }
         if(p == end){
             errno = ERANGE;
@@ -420,14 +410,14 @@ dirent_t *readdir(DIR *dir){
     dir_desc_t *dd = (void*)dir;
     fat_entry_t ent;
     do{
-        if(fat_dir(&dd->base.file,&ent)){
+        if(fat_dir(&dd->base.file, &ent)){
             return NULL;
         } 
-    }while(ent.attributes & FAT_ATTRIBUTE_LABEL);
+    } while(ent.attributes & FAT_ATTRIBUTE_LABEL);
     dd->pos++;
     dirent_t *dirent = &dd->dirent;
     dirent->dir_ino = make_sn(&ent);
-    strcpy(dirent->dir_name,ent.long_name);
+    strcpy(dirent->dir_name, ent.long_name);
     dirent->mode = ent_mode(&ent);
     dirent->create_time = ent.create;
     dirent->modify_time = ent.modify_time;
@@ -464,7 +454,7 @@ error:
 
 void reset_disk(void){
     fat_ready = 0;
-    for(int i = 0;i<FOPEN_MAX;i++){
+    for(int i = 0;i < FOPEN_MAX;i++){
         if(desc_list[i]){
             delete_desc(i);
         }

@@ -19,16 +19,16 @@ static char *memfile_action_text[] = {
 };
 
 static int memfile_action_values[] = {
-    MEMFILE_NONE, MEMFILE_VOID, MEMFILE_POS,
+    MEMFILE_NONE,   MEMFILE_VOID,   MEMFILE_POS,
 };
 
-struct binding_view_row{
-    menu_item_t *command_button;
-    menu_item_t *command_bind;
+struct binding_view_row {
+    menu_item_t    *command_button;
+    menu_item_t    *command_bind;
 };
 
-static struct binding_view_row command_bindings[13];
-static int command_pos = 0;
+static struct binding_view_row  command_bindings[13];
+static int                      command_pos = 0;
 
 static int profile_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
     kz.settings_profile += SETTINGS_MAX - 1;
@@ -129,7 +129,7 @@ static int settings_switch_event(event_handler_t *handler, menu_event_t event, v
     return 1;
 }
 
-static void update_commands_table(){
+static void update_commands_table(void){
     for(int i = 0;i < 13;i++){
         command_bindings[i].command_button->text = kz_commands[i + command_pos].text;
         menu_bind_set(command_bindings[i].command_bind, i + command_pos);
@@ -144,7 +144,6 @@ static int command_dec_onactivate(event_handler_t *handler, menu_event_t event, 
     }
     update_commands_table();
     return 1;
-    
 }
 
 static int command_inc_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -170,7 +169,7 @@ static void do_export_memfile(char *path, void *data){
 
 static void do_import_memfile(char *path, void *data){
     int file = open(path, O_RDONLY);
-    if(file!=-1){
+    if(file != -1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
         if(!memfile){
             memfile = malloc(sizeof(*memfile));
@@ -202,7 +201,7 @@ static int memfile_action_onlist(event_handler_t *handler, menu_event_t event, v
     return 1;
 }
 
-menu_t *create_settings_menu(){
+menu_t *create_settings_menu(void){
     static menu_t settingsm;
     static menu_t commands;
 
@@ -221,13 +220,13 @@ menu_t *create_settings_menu(){
     menu_button_add(&settingsm, 0, 2, "save settings", save_profile_onactivate, NULL);
     menu_button_add(&settingsm, 0, 3, "load settings", load_profile_onactivate, NULL);
     menu_button_add(&settingsm, 0, 4, "load default settings", default_settings_onactivate, NULL);
-    
+
     menu_item_t *item = menu_checkbox_add(&settingsm, 0, 5);
     menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_INPUT_DISPLAY);
     menu_checkbox_set(item, settings->input_display);
     menu_label_add(&settingsm, 2, 5, "input display");
     menu_move_button_add(&settingsm, 16, 5, &settings->id_x, &settings->id_y);
-    
+
     item = menu_checkbox_add(&settingsm, 0, 6);
     menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_TIMER);
     menu_checkbox_set(item, settings->timer);
@@ -235,7 +234,7 @@ menu_t *create_settings_menu(){
     menu_move_button_add(&settingsm, 16, 6, &settings->timer_x, &settings->timer_y);
 
     item = menu_checkbox_add(&settingsm, 0, 7);
-    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event,(void*)SW_LAG_COUNTER);
+    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_LAG_COUNTER);
     menu_checkbox_set(item, settings->lag_counter);
     menu_label_add(&settingsm, 2, 7, "lag counter");
     menu_move_button_add(&settingsm, 16, 7, &settings->lag_x, &settings->lag_y);
@@ -244,10 +243,10 @@ menu_t *create_settings_menu(){
     menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_TURBO);
     menu_checkbox_set(item, settings->turbo_type);
     menu_label_add(&settingsm, 2, 8, "turbo hold");
-    
+
     int y = 9;
     menu_label_add(&settingsm, 0, y, "memfile");
-    menu_button_add(&settingsm, 15, y, "-", memfile_dec_onactivate,NULL);
+    menu_button_add(&settingsm, 15, y, "-", memfile_dec_onactivate, NULL);
     static watch_t memfile_watch;
     memfile_watch.address = &kz.memfile_slot;
     memfile_watch.type = WATCH_TYPE_U8;
@@ -256,14 +255,14 @@ menu_t *create_settings_menu(){
     menu_button_add(&settingsm, 17, y++, "+", memfile_inc_onactivate, NULL);
 
 #ifndef LITE
-    menu_button_add(&settingsm, 0, y, "export",export_memfile_onactivate, NULL);
-    menu_button_add(&settingsm, 8, y++,"import", import_memfile_onactivate, NULL);
+    menu_button_add(&settingsm, 0, y, "export", export_memfile_onactivate, NULL);
+    menu_button_add(&settingsm, 8, y++, "import", import_memfile_onactivate, NULL);
 #endif
 
     menu_label_add(&settingsm, 0, y, "memfile action");
     item = menu_list_add(&settingsm, 15, y++, memfile_action_text, sizeof(memfile_action_values) / sizeof(*memfile_action_values));
     menu_item_register_event(item, MENU_EVENT_LIST, memfile_action_onlist, NULL);
-    
+
     menu_label_add(&settingsm, 0, y, "saved position");
     menu_button_add(&settingsm, 15, y, "-", position_dec_onactivate, NULL);
     static watch_t position_watch;
@@ -287,7 +286,7 @@ menu_t *create_settings_menu(){
         menu_gfx_button_add(&commands, 0, 2, scroll_up_sprite, command_dec_onactivate, NULL);
         menu_gfx_button_add(&commands, 0, 14, scroll_down_sprite,  command_inc_onactivate, NULL);
 
-        for(int i=0;i < 13;i++){
+        for(int i = 0;i < 13;i++){
             command_bindings[i].command_button = menu_button_add(&commands, 2, y, kz_commands[i].text, command_onactivate, (void*)i);
             command_bindings[i].command_bind = menu_bind_add(&commands, 22, y++, i);
         }

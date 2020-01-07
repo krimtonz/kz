@@ -1,17 +1,23 @@
+/*
+* gu.h
+*
+* definitions for homeboy vc interfacing
+*/
+
 #ifndef LITE
 #ifndef _HB_H
 #define _HB_H
 
 #include <stdint.h>
 
-typedef struct{
+typedef struct {
     uint32_t key;
     uint32_t dram_addr;
     uint32_t write_lba;
     uint32_t read_lba;
     uint32_t block_cnt;
     union{
-        struct{
+        struct {
             uint32_t            : 22;
             uint32_t reset      : 1;
             uint32_t error      : 4;
@@ -32,11 +38,11 @@ typedef struct{
 
 #define hb_sd_regs  (*(volatile hb_sd_regs_t*) 0xA8050000)
 
-int hb_sd_write(void *buf, uint32_t lba, uint32_t block_cnt);
-int hb_sd_read(void *buf, uint32_t lba, uint32_t block_cnt);
-int hb_sd_init(void);
-int hb_available(void);
-int hb_reset(void);
+int hb_sd_write     (void *buf, uint32_t lba, uint32_t block_cnt);
+int hb_sd_read      (void *buf, uint32_t lba, uint32_t block_cnt);
+int hb_sd_init      (void);
+int hb_available    (void);
+int hb_reset        (void);
 
 #endif
 #endif

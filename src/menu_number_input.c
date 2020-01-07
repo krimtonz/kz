@@ -2,7 +2,7 @@
 #include "menu.h"
 #include "gfx.h"
 
-struct item_data{
+struct item_data {
     uint32_t                value;
     char                   *digits;
     uint8_t                 base;
@@ -13,14 +13,16 @@ struct item_data{
 };
 
 static char int_to_char(int i){
-    if(i>=0 && i<=9)
+    if(i >= 0 && i <= 9){
         return i + '0';
+    }
     return i + ('a' - 0xA);
 }
 
 static int char_to_int(char c){
-    if(c>='0' && c<='9')
+    if(c >= '0' && c <= '9'){
         return c - '0';
+    }
     return c - ('a' - 0xA);
 }
 
@@ -31,15 +33,18 @@ static uint32_t get_val(struct item_data *data){
 static void menu_number_draw(menu_item_t *item){
     struct item_data *data = item->data;
     uint32_t color = DEFAULT_COLOR;
-    if(item->owner->selected_item == item && !data->editing)
+    if(item->owner->selected_item == item && !data->editing){
         color = SELECTED_COLOR;
+    }
     int x = menu_item_x(item) + (kfont->c_width * (data->length-1));
-    if(!data->_signed) x -= kfont->c_width;
+    if(!data->_signed){
+        x -= kfont->c_width;
+    }
     int y = menu_item_y(item);
     uint32_t val = get_val(data);
     int sign = (data->_signed && data->digits[0] == '-') ? -1 : 1;
     val *= sign;
-    for(int i=data->length - 1;i>=0;i--){
+    for(int i = data->length - 1;i >= 0;i--){
         if(!data->_signed && i == data->length - 1){
             continue;
         }
@@ -52,9 +57,9 @@ static void menu_number_draw(menu_item_t *item){
             }
         }
         else{
-            if(i == 0 && data->_signed && sign>0){
+            if(i == 0 && data->_signed && sign > 0){
                 data->digits[i] = '+';
-            }else if(i == 0 && data->_signed && sign<0){
+            }else if(i == 0 && data->_signed && sign < 0){
                 data->digits[i] = '-';
             }
             else if(!data->_signed && i == data->length - 1){
@@ -79,7 +84,7 @@ static int menu_number_event(event_handler_t *handler, menu_event_t event, void 
             data->editing = 0;
             int mul = 1;
             uint32_t val = 0;
-            for(int i = data->length-1;i >= 0;i--){
+            for(int i = data->length - 1;i >= 0;i--){
                 if(data->_signed && i == 0) {
                     break;
                 }
@@ -89,7 +94,9 @@ static int menu_number_event(event_handler_t *handler, menu_event_t event, void 
                 val += (char_to_int(data->digits[i]) % data->base) * mul;
                 mul *= data->base;
             }
-            if(data->_signed && data->digits[0] == '-') val *= -1;
+            if(data->_signed && data->digits[0] == '-'){
+                val *= -1;
+            }
             data->value = val;
             *event_data = (void*)data->value;
             menu_item_trigger_event(item, MENU_EVENT_NUMBER, event_data);
@@ -121,7 +128,7 @@ static int menu_number_event(event_handler_t *handler, menu_event_t event, void 
                 if(!data->_signed && data->edit_idx == data->length-1){
                     data->edit_idx = 0;
                 }
-                else if(data->edit_idx>=data->length){
+                else if(data->edit_idx >= data->length){
                     data->edit_idx = 0;
                 }
                 break;
@@ -230,7 +237,7 @@ static void menu_number_remove(menu_item_t *item){
 }
 
 menu_item_t *menu_number_input_add(menu_t* menu, uint16_t x, uint16_t y, int8_t base, uint8_t length){
-    menu_item_t *item = menu_add(menu,x,y);
+    menu_item_t *item = menu_add(menu, x, y);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         item->draw_proc = menu_number_draw;
@@ -251,7 +258,7 @@ menu_item_t *menu_number_input_add(menu_t* menu, uint16_t x, uint16_t y, int8_t 
         data->digits = malloc(length + 1);
         data->digits[length] = 0;
         int val = data->value;
-        for(int i=data->length - 1;i>=0;i--){
+        for(int i = data->length - 1;i >= 0;i--){
             if(i == 0 && data->_signed){
                 data->digits[i] = '+';
             }

@@ -28,13 +28,18 @@ struct switch_data {
     char       *tooltip;
 };
 
+struct item_switch_data {
+    uint8_t                 map_idx;
+    uint8_t                 map;
+};
+
 struct song_data {
     uint32_t        bitmask;
     uint32_t        color;
     char           *tooltip;
 };
 
-struct capacity_upgrade_option{
+struct capacity_upgrade_option {
     uint8_t     shift;
     uint16_t    item_tile;
     int         option_cnt;
@@ -67,99 +72,99 @@ static struct capacity_upgrade_option capacity_options[] = {
 
 #ifndef LITE
 static struct item_map_row item_map_table[] = {
-    { &z2_file.items[Z2_SLOT_OCARINA], Z2_ITEM_OCARINA },
-    { &z2_file.items[Z2_SLOT_BOW], Z2_ITEM_HEROS_BOW },
-    { &z2_file.items[Z2_SLOT_FIRE_ARROW], Z2_ITEM_FIRE_ARROW },
-    { &z2_file.items[Z2_SLOT_ICE_ARROW], Z2_ITEM_ICE_ARROW },
-    { &z2_file.items[Z2_SLOT_LIGHT_ARROW], Z2_ITEM_LIGHT_ARROW },
-    { &z2_file.items[Z2_SLOT_BOMB], Z2_ITEM_BOMB },
-    { &z2_file.items[Z2_SLOT_BOMBCHU], Z2_ITEM_BOMBCHU },
-    { &z2_file.items[Z2_SLOT_STICK], Z2_ITEM_STICK },
-    { &z2_file.items[Z2_SLOT_NUT], Z2_ITEM_NUT },
-    { &z2_file.items[Z2_SLOT_MAGIC_BEAN], Z2_ITEM_MAGIC_BEAN },
-    { &z2_file.items[Z2_SLOT_POWDER_KEG], Z2_ITEM_POWDER_KEG },
-    { &z2_file.items[Z2_SLOT_PICTOGRAPH_BOX], Z2_ITEM_PICTOGRAPH_BOX },
-    { &z2_file.items[Z2_SLOT_LENS], Z2_ITEM_LENS },
-    { &z2_file.items[Z2_SLOT_HOOKSHOT], Z2_ITEM_HOOKSHOT },
-    { &z2_file.items[Z2_SLOT_GREAT_FAIRY_SWORD], Z2_ITEM_GREAT_FAIRY_SWORD },
+    { &z2_file.items[Z2_SLOT_OCARINA],              Z2_ITEM_OCARINA },
+    { &z2_file.items[Z2_SLOT_BOW],                  Z2_ITEM_HEROS_BOW },
+    { &z2_file.items[Z2_SLOT_FIRE_ARROW],           Z2_ITEM_FIRE_ARROW },
+    { &z2_file.items[Z2_SLOT_ICE_ARROW],            Z2_ITEM_ICE_ARROW },
+    { &z2_file.items[Z2_SLOT_LIGHT_ARROW],          Z2_ITEM_LIGHT_ARROW },
+    { &z2_file.items[Z2_SLOT_BOMB],                 Z2_ITEM_BOMB },
+    { &z2_file.items[Z2_SLOT_BOMBCHU],              Z2_ITEM_BOMBCHU },
+    { &z2_file.items[Z2_SLOT_STICK],                Z2_ITEM_STICK },
+    { &z2_file.items[Z2_SLOT_NUT],                  Z2_ITEM_NUT },
+    { &z2_file.items[Z2_SLOT_MAGIC_BEAN],           Z2_ITEM_MAGIC_BEAN },
+    { &z2_file.items[Z2_SLOT_POWDER_KEG],           Z2_ITEM_POWDER_KEG },
+    { &z2_file.items[Z2_SLOT_PICTOGRAPH_BOX],       Z2_ITEM_PICTOGRAPH_BOX },
+    { &z2_file.items[Z2_SLOT_LENS],                 Z2_ITEM_LENS },
+    { &z2_file.items[Z2_SLOT_HOOKSHOT],             Z2_ITEM_HOOKSHOT },
+    { &z2_file.items[Z2_SLOT_GREAT_FAIRY_SWORD],    Z2_ITEM_GREAT_FAIRY_SWORD },
 };
 
 static struct item_map_row mask_map_table[] = {
-    { &z2_file.masks[Z2_SLOT_POSTMAN], Z2_MASK_POSTMAN },
-    { &z2_file.masks[Z2_SLOT_ALL_NIGHT], Z2_MASK_ALL_NIGHT },
-    { &z2_file.masks[Z2_SLOT_BLAST], Z2_MASK_BLAST },
-    { &z2_file.masks[Z2_SLOT_STONE], Z2_MASK_STONE },
-    { &z2_file.masks[Z2_SLOT_GREAT_FAIRY], Z2_MASK_GREAT_FAIRY },
-    { &z2_file.masks[Z2_SLOT_DEKU], Z2_MASK_DEKU },
+    { &z2_file.masks[Z2_SLOT_POSTMAN],              Z2_MASK_POSTMAN },
+    { &z2_file.masks[Z2_SLOT_ALL_NIGHT],            Z2_MASK_ALL_NIGHT },
+    { &z2_file.masks[Z2_SLOT_BLAST],                Z2_MASK_BLAST },
+    { &z2_file.masks[Z2_SLOT_STONE],                Z2_MASK_STONE },
+    { &z2_file.masks[Z2_SLOT_GREAT_FAIRY],          Z2_MASK_GREAT_FAIRY },
+    { &z2_file.masks[Z2_SLOT_DEKU],                 Z2_MASK_DEKU },
 
-    { &z2_file.masks[Z2_SLOT_KEATON], Z2_MASK_KEATON },
-    { &z2_file.masks[Z2_SLOT_BREMEN], Z2_MASK_BREMEN },
-    { &z2_file.masks[Z2_SLOT_BUNNY_HOOD], Z2_MASK_BUNNY_HOOD },
-    { &z2_file.masks[Z2_SLOT_DON_GERO], Z2_MASK_DON_GERO },
-    { &z2_file.masks[Z2_SLOT_SCENTS], Z2_MASK_SCENTS },
-    { &z2_file.masks[Z2_SLOT_GORON], Z2_MASK_GORON },
+    { &z2_file.masks[Z2_SLOT_KEATON],               Z2_MASK_KEATON },
+    { &z2_file.masks[Z2_SLOT_BREMEN],               Z2_MASK_BREMEN },
+    { &z2_file.masks[Z2_SLOT_BUNNY_HOOD],           Z2_MASK_BUNNY_HOOD },
+    { &z2_file.masks[Z2_SLOT_DON_GERO],             Z2_MASK_DON_GERO },
+    { &z2_file.masks[Z2_SLOT_SCENTS],               Z2_MASK_SCENTS },
+    { &z2_file.masks[Z2_SLOT_GORON],                Z2_MASK_GORON },
 
-    { &z2_file.masks[Z2_SLOT_ROMANI], Z2_MASK_ROMANI },
-    { &z2_file.masks[Z2_SLOT_CIRCUS_LEADER], Z2_MASK_CIRCUS_LEADER },
-    { &z2_file.masks[Z2_SLOT_KAFEI], Z2_MASK_KAFEI },
-    { &z2_file.masks[Z2_SLOT_COUPLE], Z2_MASK_COUPLE },
-    { &z2_file.masks[Z2_SLOT_MASK_OF_TRUTH], Z2_MASK_MASK_OF_TRUTH },
-    { &z2_file.masks[Z2_SLOT_ZORA], Z2_MASK_ZORA },
+    { &z2_file.masks[Z2_SLOT_ROMANI],               Z2_MASK_ROMANI },
+    { &z2_file.masks[Z2_SLOT_CIRCUS_LEADER],        Z2_MASK_CIRCUS_LEADER },
+    { &z2_file.masks[Z2_SLOT_KAFEI],                Z2_MASK_KAFEI },
+    { &z2_file.masks[Z2_SLOT_COUPLE],               Z2_MASK_COUPLE },
+    { &z2_file.masks[Z2_SLOT_MASK_OF_TRUTH],        Z2_MASK_MASK_OF_TRUTH },
+    { &z2_file.masks[Z2_SLOT_ZORA],                 Z2_MASK_ZORA },
 
-    { &z2_file.masks[Z2_SLOT_KAMARO], Z2_MASK_KAMARO },
-    { &z2_file.masks[Z2_SLOT_GIBDO], Z2_MASK_GIBDO },
-    { &z2_file.masks[Z2_SLOT_GARO], Z2_MASK_GARO },
-    { &z2_file.masks[Z2_SLOT_CAPTAIN], Z2_MASK_CAPTAINSHAT },
-    { &z2_file.masks[Z2_SLOT_GIANT], Z2_MASK_GIANT },
-    { &z2_file.masks[Z2_SLOT_FIERCE_DEITY], Z2_MASK_FIERCE_DEITY },
+    { &z2_file.masks[Z2_SLOT_KAMARO],               Z2_MASK_KAMARO },
+    { &z2_file.masks[Z2_SLOT_GIBDO],                Z2_MASK_GIBDO },
+    { &z2_file.masks[Z2_SLOT_GARO],                 Z2_MASK_GARO },
+    { &z2_file.masks[Z2_SLOT_CAPTAIN],              Z2_MASK_CAPTAINSHAT },
+    { &z2_file.masks[Z2_SLOT_GIANT],                Z2_MASK_GIANT },
+    { &z2_file.masks[Z2_SLOT_FIERCE_DEITY],         Z2_MASK_FIERCE_DEITY },
 };
 #else
 static struct item_map_row item_map_table[] = {
-    {"ocarina", &z2_file.items[Z2_SLOT_OCARINA], Z2_ITEM_OCARINA },
-    {"bow", &z2_file.items[Z2_SLOT_BOW], Z2_ITEM_HEROS_BOW },
-    {"fire arrow", &z2_file.items[Z2_SLOT_FIRE_ARROW], Z2_ITEM_FIRE_ARROW },
-    {"ice arrow", &z2_file.items[Z2_SLOT_ICE_ARROW], Z2_ITEM_ICE_ARROW },
-    {"light arrow", &z2_file.items[Z2_SLOT_LIGHT_ARROW], Z2_ITEM_LIGHT_ARROW },
-    {"bomb", &z2_file.items[Z2_SLOT_BOMB], Z2_ITEM_BOMB },
-    {"bombchu", &z2_file.items[Z2_SLOT_BOMBCHU], Z2_ITEM_BOMBCHU },
-    {"stick", &z2_file.items[Z2_SLOT_STICK], Z2_ITEM_STICK },
-    {"nut", &z2_file.items[Z2_SLOT_NUT], Z2_ITEM_NUT },
-    {"magic bean", &z2_file.items[Z2_SLOT_MAGIC_BEAN], Z2_ITEM_MAGIC_BEAN },
-    {"powder keg", &z2_file.items[Z2_SLOT_POWDER_KEG], Z2_ITEM_POWDER_KEG },
-    {"pictograph box", &z2_file.items[Z2_SLOT_PICTOGRAPH_BOX], Z2_ITEM_PICTOGRAPH_BOX },
-    {"lens of truth", &z2_file.items[Z2_SLOT_LENS], Z2_ITEM_LENS },
-    {"hookshot", &z2_file.items[Z2_SLOT_HOOKSHOT], Z2_ITEM_HOOKSHOT },
-    {"great fairy sword", &z2_file.items[Z2_SLOT_GREAT_FAIRY_SWORD], Z2_ITEM_GREAT_FAIRY_SWORD },
+    { "ocarina",            &z2_file.items[Z2_SLOT_OCARINA],            Z2_ITEM_OCARINA },
+    { "bow",                &z2_file.items[Z2_SLOT_BOW],                Z2_ITEM_HEROS_BOW },
+    { "fire arrow",         &z2_file.items[Z2_SLOT_FIRE_ARROW],         Z2_ITEM_FIRE_ARROW },
+    { "ice arrow",          &z2_file.items[Z2_SLOT_ICE_ARROW],          Z2_ITEM_ICE_ARROW },
+    { "light arrow",        &z2_file.items[Z2_SLOT_LIGHT_ARROW],        Z2_ITEM_LIGHT_ARROW },
+    { "bomb",               &z2_file.items[Z2_SLOT_BOMB],               Z2_ITEM_BOMB },
+    { "bombchu",            &z2_file.items[Z2_SLOT_BOMBCHU],            Z2_ITEM_BOMBCHU },
+    { "stick",              &z2_file.items[Z2_SLOT_STICK],              Z2_ITEM_STICK },
+    { "nut",                &z2_file.items[Z2_SLOT_NUT],                Z2_ITEM_NUT },
+    { "magic bean",         &z2_file.items[Z2_SLOT_MAGIC_BEAN],         Z2_ITEM_MAGIC_BEAN },
+    { "powder keg",         &z2_file.items[Z2_SLOT_POWDER_KEG],         Z2_ITEM_POWDER_KEG },
+    { "pictograph box",     &z2_file.items[Z2_SLOT_PICTOGRAPH_BOX],     Z2_ITEM_PICTOGRAPH_BOX },
+    { "lens of truth",      &z2_file.items[Z2_SLOT_LENS],               Z2_ITEM_LENS },
+    { "hookshot",           &z2_file.items[Z2_SLOT_HOOKSHOT],           Z2_ITEM_HOOKSHOT },
+    { "great fairy sword",  &z2_file.items[Z2_SLOT_GREAT_FAIRY_SWORD],  Z2_ITEM_GREAT_FAIRY_SWORD },
 };
 
 static struct item_map_row mask_map_table[] = {
-    {"postman", &z2_file.masks[Z2_SLOT_POSTMAN], Z2_MASK_POSTMAN },
-    {"all night", &z2_file.masks[Z2_SLOT_ALL_NIGHT], Z2_MASK_ALL_NIGHT },
-    {"blast", &z2_file.masks[Z2_SLOT_BLAST], Z2_MASK_BLAST },
-    {"stone", &z2_file.masks[Z2_SLOT_STONE], Z2_MASK_STONE },
-    {"great fairy", &z2_file.masks[Z2_SLOT_GREAT_FAIRY], Z2_MASK_GREAT_FAIRY },
-    {"deku", &z2_file.masks[Z2_SLOT_DEKU], Z2_MASK_DEKU },
+    { "postman",            &z2_file.masks[Z2_SLOT_POSTMAN],            Z2_MASK_POSTMAN },
+    { "all night",          &z2_file.masks[Z2_SLOT_ALL_NIGHT],          Z2_MASK_ALL_NIGHT },
+    { "blast",              &z2_file.masks[Z2_SLOT_BLAST],              Z2_MASK_BLAST },
+    { "stone",              &z2_file.masks[Z2_SLOT_STONE],              Z2_MASK_STONE },
+    { "great fairy",        &z2_file.masks[Z2_SLOT_GREAT_FAIRY],        Z2_MASK_GREAT_FAIRY },
+    { "deku",               &z2_file.masks[Z2_SLOT_DEKU],               Z2_MASK_DEKU },
 
-    {"keaton", &z2_file.masks[Z2_SLOT_KEATON], Z2_MASK_KEATON },
-    {"bremen", &z2_file.masks[Z2_SLOT_BREMEN], Z2_MASK_BREMEN },
-    {"bunny hood", &z2_file.masks[Z2_SLOT_BUNNY_HOOD], Z2_MASK_BUNNY_HOOD },
-    {"don gero", &z2_file.masks[Z2_SLOT_DON_GERO], Z2_MASK_DON_GERO },
-    {"scents", &z2_file.masks[Z2_SLOT_SCENTS], Z2_MASK_SCENTS },
-    {"goron", &z2_file.masks[Z2_SLOT_GORON], Z2_MASK_GORON },
+    { "keaton",             &z2_file.masks[Z2_SLOT_KEATON],             Z2_MASK_KEATON },
+    { "bremen",             &z2_file.masks[Z2_SLOT_BREMEN],             Z2_MASK_BREMEN },
+    { "bunny hood",         &z2_file.masks[Z2_SLOT_BUNNY_HOOD],         Z2_MASK_BUNNY_HOOD },
+    { "don gero",           &z2_file.masks[Z2_SLOT_DON_GERO],           Z2_MASK_DON_GERO },
+    { "scents",             &z2_file.masks[Z2_SLOT_SCENTS],             Z2_MASK_SCENTS },
+    { "goron",              &z2_file.masks[Z2_SLOT_GORON],              Z2_MASK_GORON },
 
-    {"romani", &z2_file.masks[Z2_SLOT_ROMANI], Z2_MASK_ROMANI },
-    {"circus leader", &z2_file.masks[Z2_SLOT_CIRCUS_LEADER], Z2_MASK_CIRCUS_LEADER },
-    {"kafei", &z2_file.masks[Z2_SLOT_KAFEI], Z2_MASK_KAFEI },
-    {"couples", &z2_file.masks[Z2_SLOT_COUPLE], Z2_MASK_COUPLE },
-    {"mask of truth", &z2_file.masks[Z2_SLOT_MASK_OF_TRUTH], Z2_MASK_MASK_OF_TRUTH },
-    {"zora", &z2_file.masks[Z2_SLOT_ZORA], Z2_MASK_ZORA },
+    { "romani",             &z2_file.masks[Z2_SLOT_ROMANI],             Z2_MASK_ROMANI },
+    { "circus leader",      &z2_file.masks[Z2_SLOT_CIRCUS_LEADER],      Z2_MASK_CIRCUS_LEADER },
+    { "kafei",              &z2_file.masks[Z2_SLOT_KAFEI],              Z2_MASK_KAFEI },
+    { "couples",            &z2_file.masks[Z2_SLOT_COUPLE],             Z2_MASK_COUPLE },
+    { "mask of truth",      &z2_file.masks[Z2_SLOT_MASK_OF_TRUTH],      Z2_MASK_MASK_OF_TRUTH },
+    { "zora",               &z2_file.masks[Z2_SLOT_ZORA],               Z2_MASK_ZORA },
 
-    {"kamaro", &z2_file.masks[Z2_SLOT_KAMARO], Z2_MASK_KAMARO },
-    {"gibdo", &z2_file.masks[Z2_SLOT_GIBDO], Z2_MASK_GIBDO },
-    {"garo", &z2_file.masks[Z2_SLOT_GARO], Z2_MASK_GARO },
-    {"captain's hat", &z2_file.masks[Z2_SLOT_CAPTAIN], Z2_MASK_CAPTAINSHAT },
-    {"giant's", &z2_file.masks[Z2_SLOT_GIANT], Z2_MASK_GIANT },
-    {"fierce deity", &z2_file.masks[Z2_SLOT_FIERCE_DEITY], Z2_MASK_FIERCE_DEITY },
+    { "kamaro",             &z2_file.masks[Z2_SLOT_KAMARO],             Z2_MASK_KAMARO },
+    { "gibdo",              &z2_file.masks[Z2_SLOT_GIBDO],              Z2_MASK_GIBDO },
+    { "garo",               &z2_file.masks[Z2_SLOT_GARO],               Z2_MASK_GARO },
+    { "captain's hat",      &z2_file.masks[Z2_SLOT_CAPTAIN],            Z2_MASK_CAPTAINSHAT },
+    { "giant's",            &z2_file.masks[Z2_SLOT_GIANT],              Z2_MASK_GIANT },
+    { "fierce deity",       &z2_file.masks[Z2_SLOT_FIERCE_DEITY],       Z2_MASK_FIERCE_DEITY },
 };
 #endif
 
@@ -186,19 +191,19 @@ static struct switch_data quest_status_table[] = {
 };
 
 static struct song_data song_data_table[] = {
-    { 0x0001000, 0xFFFFFFFF, "song of time" },
-    { 0x0002000, 0xFFFFFFFF, "song of healing" },
-    { 0x0004000, 0xFFFFFFFF, "epona's song" },
-    { 0x0008000, 0xFFFFFFFF, "song of soaring" },
-    { 0x0010000, 0xFFFFFFFF, "song of storms" },
-    { 0x0000040, 0x96FF64FF, "sonata of awakening" },
-    { 0x0000080, 0xFF5028FF, "goron lullaby" },
-    { 0x0000100, 0x6496FFFF, "new wave bossa nova" },
-    { 0x0000200, 0xFFA000FF, "elegy of emptiness" },
-    { 0x0000400, 0xFF64FFFF, "oath to order" },
-    { 0x1000000, 0xFF5028FF, "lullaby intro" },
-    { 0x0020000, 0xFFFFFFFF, "suns song" },
-    { 0x0000800, 0xFFFFFFFF, "sarias song" },
+    { 0x0001000,    0xFFFFFFFF, "song of time" },
+    { 0x0002000,    0xFFFFFFFF, "song of healing" },
+    { 0x0004000,    0xFFFFFFFF, "epona's song" },
+    { 0x0008000,    0xFFFFFFFF, "song of soaring" },
+    { 0x0010000,    0xFFFFFFFF, "song of storms" },
+    { 0x0000040,    0x96FF64FF, "sonata of awakening" },
+    { 0x0000080,    0xFF5028FF, "goron lullaby" },
+    { 0x0000100,    0x6496FFFF, "new wave bossa nova" },
+    { 0x0000200,    0xFFA000FF, "elegy of emptiness" },
+    { 0x0000400,    0xFF64FFFF, "oath to order" },
+    { 0x1000000,    0xFF5028FF, "lullaby intro" },
+    { 0x0020000,    0xFFFFFFFF, "suns song" },
+    { 0x0000800,    0xFFFFFFFF, "sarias song" },
 };
 
 static int8_t bottle_contents[] = {
@@ -281,13 +286,8 @@ static int8_t trade_quest_contents[] = {
 };
 
 static char *dungeon_names[] = {
-    "woodfall", "snowhead", "great bay",
-    "stone tower",
-};
-
-struct item_switch_data {
-    uint8_t                 map_idx;
-    uint8_t                 map;
+    "woodfall",     "snowhead",
+    "great bay",    "stone tower",
 };
 
 static int max_health_event(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -298,7 +298,7 @@ static int max_health_event(event_handler_t *handler, menu_event_t event, void *
             z2_file.defense_hearts = value / 16;
         }
     }else if(event == MENU_EVENT_UPDATE){
-        menu_number_set((menu_item_t*)handler->subscriber, z2_file.max_health);
+        menu_number_set(handler->subscriber, z2_file.max_health);
     }
     return 1;
 }
@@ -312,7 +312,7 @@ static int double_defense_event(event_handler_t *handler, menu_event_t event, vo
             z2_file.defense_hearts = 0;
         }
     }else if (event == MENU_EVENT_UPDATE){
-        menu_checkbox_set((menu_item_t*)handler->subscriber, z2_file.has_double_defense);
+        menu_checkbox_set(handler->subscriber, z2_file.has_double_defense);
     }
     return 1;
 }
@@ -340,22 +340,21 @@ static int magic_event(event_handler_t *handler, menu_event_t event, void **even
         }
     }else if (event == MENU_EVENT_UPDATE){
         if(data == 0){
-            menu_checkbox_set((menu_item_t*)handler->subscriber, z2_file.has_magic);
+            menu_checkbox_set(handler->subscriber, z2_file.has_magic);
         }else if(data == 1){
-            menu_checkbox_set((menu_item_t*)handler->subscriber, z2_file.has_double_magic);
+            menu_checkbox_set(handler->subscriber, z2_file.has_double_magic);
         }
     }
     return 1;
 }
 
 static int selected_dungeon_onlist(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_LIST){
-        int idx = (int)*event_data;
-        dungeon_idx = idx;
-        dungeon_keys = z2_file.dungeon_keys[idx];
-        dungeon_items = z2_file.dungeon_items[idx].dungeon_item;
-        stray_fairies = z2_file.stray_fairies[idx];
-    }
+    int idx = (int)*event_data;
+    dungeon_idx = idx;
+    dungeon_keys = z2_file.dungeon_keys[idx];
+    dungeon_items = z2_file.dungeon_items[idx].dungeon_item;
+    stray_fairies = z2_file.stray_fairies[idx];
+
     return 1;
 }
 
@@ -382,7 +381,7 @@ static int dungeon_item_event(event_handler_t *handler, menu_event_t event, void
         dungeon_items = dungeon_items ^ (uint8_t)((int)handler->callback_data);
         z2_file.dungeon_items[dungeon_idx].dungeon_item = dungeon_items;
     }else if(event == MENU_EVENT_UPDATE){
-        menu_switch_set((menu_item_t*)handler->subscriber, (dungeon_items & (uint8_t)((int)handler->callback_data)) > 0);
+        menu_switch_set(handler->subscriber, (dungeon_items & (uint8_t)((int)handler->callback_data)) > 0);
     }
     return 1;
 }
@@ -391,7 +390,7 @@ static int quest_status_event(event_handler_t *handler, menu_event_t event, void
     if(event == MENU_EVENT_ACTIVATE){
         z2_file.quest_status = z2_file.quest_status ^ (int)handler->callback_data;
     }else if(event == MENU_EVENT_UPDATE){
-        menu_switch_set((menu_item_t*)handler->subscriber, (z2_file.quest_status & (int)handler->callback_data) > 0);
+        menu_switch_set(handler->subscriber, (z2_file.quest_status & (int)handler->callback_data) > 0);
     }
     return 1;
 }
@@ -400,7 +399,7 @@ static int owl_event(event_handler_t *handler, menu_event_t event, void **event_
     if(event == MENU_EVENT_ACTIVATE){
         z2_file.owls_hit = z2_file.owls_hit ^ (int)handler->callback_data;
     }else if(event == MENU_EVENT_UPDATE){
-        menu_switch_set((menu_item_t*)handler->subscriber, (z2_file.owls_hit & (int)handler->callback_data) > 0);
+        menu_switch_set(handler->subscriber, (z2_file.owls_hit & (int)handler->callback_data) > 0);
     }
     return 1;
 }
@@ -435,7 +434,7 @@ static int item_switch_event(event_handler_t *handler, menu_event_t event, void 
         }
     }else if(event == MENU_EVENT_UPDATE){
         if(*row->slot == row->item){
-            
+
 #ifndef LITE
             menu_switch_set(item, 1);
 #else
@@ -452,7 +451,7 @@ static int item_switch_event(event_handler_t *handler, menu_event_t event, void 
     return 1;
 }
 
-menu_t *create_inventory_menu(){
+menu_t *create_inventory_menu(void){
     static menu_t menu;
     static menu_t items;
     static menu_t masks;
@@ -480,8 +479,9 @@ menu_t *create_inventory_menu(){
         menu_padding_set(&items, 5, 5);
         int x = 1;
         int y = 1;
-        
-        for(int i = 0;i < 15;i++){
+
+        int item_cnt = sizeof(item_map_table) / sizeof(*item_map_table);
+        for(int i = 0;i < item_cnt;i++){
             struct item_switch_data *data = malloc(sizeof(*data));
             data->map = 0;
             data->map_idx = i;
@@ -520,11 +520,11 @@ menu_t *create_inventory_menu(){
         y = 1;
 
         int opt_cnt = sizeof(capacity_options) / sizeof(*capacity_options);
-        static int8_t threebit_options[] = {Z2_ITEM_NULL, 0, 1, 2, 3, 4, 5, 6};
-        static int8_t twobit_options[] = {Z2_ITEM_NULL, 0, 1, 2, 3};
+        static int8_t threebit_options[] = { Z2_ITEM_NULL, 0, 1, 2, 3, 4, 5, 6 };
+        static int8_t twobit_options[] = { Z2_ITEM_NULL, 0, 1, 2, 3 };
         for(int i = 0;i < opt_cnt;i++){
             struct capacity_upgrade_data *capdata = malloc(sizeof(*capdata));
-            
+
             capdata->value = 0;
             capdata->idx = i;
 
@@ -543,7 +543,7 @@ menu_t *create_inventory_menu(){
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, capacity_event, capdata);
         }
     }
-    
+
     // Populate masks menu
     {
         masks.selected_item = menu_button_add(&masks, 0, 0, "return", menu_return, NULL);
@@ -551,7 +551,8 @@ menu_t *create_inventory_menu(){
         menu_padding_set(&masks, 5, 5);
         int x = 0;
         int y = 1;
-        for(int i = 0;i < 24;i++){
+        int mask_cnt = sizeof(mask_map_table) / sizeof(*mask_map_table);
+        for(int i = 0;i < mask_cnt;i++){
             struct item_switch_data *data = malloc(sizeof(*data));
             data->map = 1;
             data->map_idx = i;
@@ -569,45 +570,45 @@ menu_t *create_inventory_menu(){
             }
         }
     }
-    
+
     // Populate quest status menu
     {
         menu_padding_set(&quest_status, 0, 1);
-        quest_status.selected_item = menu_button_add(&quest_status,0,0,"return",menu_return,NULL);
+        quest_status.selected_item = menu_button_add(&quest_status, 0, 0, "return", menu_return, NULL);
 
         int x = 0;
         int y = 1;
         int oy = 0;
         int ox = 0;
 
-        menu_label_add(&quest_status,x,y,"max health");
+        menu_label_add(&quest_status, x, y, "max health");
         item = menu_number_input_add(&quest_status, 15, y++, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, max_health_event, NULL);
-        
+
         item = menu_checkbox_add(&quest_status, 0, y);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, double_defense_event, NULL);
         menu_label_add(&quest_status, 2, y++, "double defense");
-        
+
         item = menu_checkbox_add(&quest_status, 0, y);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, magic_event, (void*)0);
         menu_label_add(&quest_status, 2, y++, "magic");
-        
+
         item = menu_checkbox_add(&quest_status, 0, y);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, magic_event, (void*)1);
-        menu_label_add(&quest_status,2,y++,"double magic");
-        
+        menu_label_add(&quest_status, 2, y++, "double magic");
+
         menu_label_add(&quest_status, 0, y, "dungeon");
         item = menu_list_add(&quest_status, 15, y++, dungeon_names, 4);
         menu_item_register_event(item, MENU_EVENT_LIST, selected_dungeon_onlist, NULL);
-        
+
         menu_label_add(&quest_status, 0, y, "small keys");
         item = menu_number_input_add(&quest_status, 15, y++, 16, 2);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, dungeon_keys_event, (void*)0);
-        
+
         menu_label_add(&quest_status, 0, y, "stray fairies");
         item = menu_number_input_add(&quest_status, 15, y++, 16, 2);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, stray_fairies_event, (void*)1);
-        
+
         oy = 5;
 
         gfx_texture *dungeon_items_tex = resource_get(R_Z2_DUNGEON);
@@ -628,23 +629,23 @@ menu_t *create_inventory_menu(){
         menu_item_offset_set(item, 20, oy);
 
         oy += 16;
-        
+
         for(int i = 0;i < sizeof(quest_status_table) / sizeof(*quest_status_table);i++){
             item = menu_switch_add(&quest_status, x, y, get_item_texture(Z2_ITEM_ODOLWAS_REMAINS + i, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 16, 16, quest_status_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, quest_status_event, (void*)quest_status_table[i].bitmask);
             menu_item_offset_set(item, x++ * 10, oy);
         }
-        
+
         x = 0;
         y++;
 
         int start_y = y;
         int start_oy = oy;
         int start_ox = ox;
-        
+
         gfx_texture *owl_icon_texture = resource_get(R_Z2_OWL);
-        
+
         for(int i = 0;i < sizeof(owl_data_table) / sizeof(*owl_data_table);i++){
             x = i % 5;
             ox = x * 6;
@@ -662,9 +663,9 @@ menu_t *create_inventory_menu(){
         y = start_y;
         oy = start_oy;
         ox = start_ox;
-        
+
         gfx_texture *note_texture = resource_get(R_Z2_NOTE);
-        
+
         for(int i = 0;i < sizeof(song_data_table) / sizeof(*song_data_table);i++){
             x = i % 5 + 6;
             ox = x * 6;
@@ -686,11 +687,11 @@ menu_t *create_inventory_menu(){
         amounts.selected_item = menu_button_add(&amounts, 0, 0, "return", menu_return, NULL);
 
         uint8_t items[] = {
-            Z2_ITEM_HEROS_BOW, Z2_ITEM_BOMB, Z2_ITEM_BOMBCHU,
-            Z2_ITEM_STICK, Z2_ITEM_NUT, Z2_ITEM_MAGIC_BEAN,
+            Z2_ITEM_HEROS_BOW,  Z2_ITEM_BOMB,   Z2_ITEM_BOMBCHU,
+            Z2_ITEM_STICK,      Z2_ITEM_NUT,    Z2_ITEM_MAGIC_BEAN,
             Z2_ITEM_POWDER_KEG
         };
-        
+
         int x = 0;
         int y = 1;
         for(int i = 0;i < sizeof(items) / sizeof(*items);i++){
@@ -704,12 +705,12 @@ menu_t *create_inventory_menu(){
         }
 
         gfx_texture *dungeon_tex = resource_get(R_Z2_DUNGEON);
-        
+
         menu_gfx_add(&amounts, 3, 3, dungeon_tex, 12, 12, 12);
         item = menu_number_input_add(&amounts, 4, 3, 10, 3);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.current_magic);
         menu_item_offset_set(item, 5, 2);
-        
+
         menu_gfx_add(&amounts,6,3,dungeon_tex,1,12,12);
         item = menu_number_input_add(&amounts, 7, 3, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.current_health);
@@ -721,6 +722,6 @@ menu_t *create_inventory_menu(){
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.rupees);
         menu_item_offset_set(item, 5, 2);
     }
-    
+
     return &menu;
 }

@@ -89,9 +89,9 @@ void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx){
         //&primary,
         //&segment_setup,
     };
-    for(int i=0;i<sizeof(new_disp)/sizeof(*new_disp);i++){
+    for(int i = 0;i<sizeof(new_disp) / sizeof(*new_disp);i++){
         z2_disp_buf_t *dbuf = new_disp[i];
-        for(Gfx *p = dbuf->buf;p!=dbuf->p;p++){
+        for(Gfx *p = dbuf->buf;p != dbuf->p;p++){
             switch(p->hi >> 24){
                 case G_VTX: break;
                 case G_DMA_IO: break;

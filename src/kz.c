@@ -49,7 +49,7 @@ static int save_state_onactivate(event_handler_t *handler, menu_event_t event, v
     kz_state->size = save_state(state);
     kz_state->z2_version = Z2_VERSION;
     kz_state->settings_version = 0;
-    state = realloc(state,kz_state->size);
+    state = realloc(state, kz_state->size);
     return 1;
 }
 
@@ -70,19 +70,23 @@ static void kz_main(void) {
     // Emergency settings reset, konami code
     {
         static uint16_t settings_reset[] = {
-            BUTTON_D_UP, BUTTON_D_UP,
-            BUTTON_D_DOWN, BUTTON_D_DOWN,
-            BUTTON_D_LEFT, BUTTON_D_RIGHT,
-            BUTTON_D_LEFT, BUTTON_D_RIGHT,
-            BUTTON_B, BUTTON_A
+            BUTTON_D_UP,    BUTTON_D_UP,
+            BUTTON_D_DOWN,  BUTTON_D_DOWN,
+            BUTTON_D_LEFT,  BUTTON_D_RIGHT,
+            BUTTON_D_LEFT,  BUTTON_D_RIGHT,
+            BUTTON_B,       BUTTON_A
         };
         static int reset_pos = 0;
         uint16_t pressed = input_pressed();
         if(pressed){
-            if(pressed & settings_reset[reset_pos]) reset_pos++;
-            else reset_pos = 0;
+            if(pressed & settings_reset[reset_pos]){
+                reset_pos++;
+            }
+            else{
+                reset_pos = 0;
+            }
         }
-        if(reset_pos == sizeof(settings_reset)/sizeof(*settings_reset)){
+        if(reset_pos == sizeof(settings_reset) / sizeof(*settings_reset)){
             kz_log("settings reset");
             load_default_settings();
             kz_apply_settings();
@@ -99,11 +103,13 @@ static void kz_main(void) {
             int y = settings->id_y;
             gfx_printf(x, y, "%4i %4i", input_x(), input_y());
             gfx_texture *btn_tex = resource_get(R_KZ_BUTTONS);
-            static const int8_t btns[] = { 15, 14, 12, 13, 3, 2, 0, 1, 5, 4, 11, 10, 8, 9}; 
+            static const int8_t btns[] = { 15, 14, 12, 13, 3, 2, 0, 1, 5, 4, 11, 10, 8, 9};
             uint16_t pad = input_pressed_raw();
             for(int i = 0;i < sizeof(btns) / sizeof(*btns);i++){
                 int8_t btn = btns[i];
-                if(!(pad & (1 << btn))) continue;
+                if(!(pad & (1 << btn))){
+                    continue;
+                }
                 gfx_draw_sprite_color(btn_tex, x + 80 + (i*10), y, btn, 8, 8, button_colors[btn]);
             }
         }
@@ -162,11 +168,11 @@ static void kz_main(void) {
             z2_file.ammo[Z2_SLOT_POWDER_KEG] = 0x01;
         }
         if(settings->cheats & (1 << CHEAT_NUTS)){
-            static uint8_t nut_cap[] = { 1, 20, 30, 40, 1, 99, 1, 99};
+            static uint8_t nut_cap[] = { 1, 20, 30, 40, 1, 99, 1, 99 };
             z2_file.ammo[Z2_SLOT_NUT] = nut_cap[z2_file.nut_upgrade];
         }
         if(settings->cheats & (1 << CHEAT_STICKS)){
-            static uint8_t stick_cap[] = { 1, 10, 20, 30, 1, 20, 30, 40};
+            static uint8_t stick_cap[] = { 1, 10, 20, 30, 1, 20, 30, 40 };
             z2_file.ammo[Z2_SLOT_STICK] = stick_cap[z2_file.stick_upgade];
         }
         if(settings->cheats & (1 << CHEAT_HEALTH)){
@@ -215,7 +221,7 @@ static void kz_main(void) {
                 if(!kz.debug_active){
                     free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
                 }
-            }else if(input_bind_pressed(KZ_CMD_RETURN)){
+            }else if(input_bind_pressed_raw(KZ_CMD_RETURN)){
                 menu_trigger_event(kz_menu, MENU_EVENT_RETURN, &event_data);
             }else{
                 uint16_t pressed = input_pressed();
@@ -320,7 +326,7 @@ static void kz_main(void) {
         free_buttons(BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP | BUTTON_L);
         kz.debug_active = 0;
     }
-    
+
 #ifdef LITE
     struct item_texture *textures = resource_get(R_Z2_ITEMS);
     for(int i = 0;i < Z2_ITEM_END;i++){
@@ -405,7 +411,7 @@ static void init(void) {
     kz.position_save = malloc(sizeof(*kz.position_save) * KZ_POSITION_MAX);
     memset(kz.position_save, 0, sizeof(*kz.position_save) * KZ_POSITION_MAX);
     kz.pos_slot = 0;
-    
+
     memcpy(restriction_table, (void*)z2_restriction_table_addr, sizeof(restriction_table));
 
     kz.ready = 1;
@@ -479,10 +485,10 @@ HOOK void draw_actors_hook(void){
     if(kz.hide_actors){
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);
-        z2_DrawActors(&z2_game,&z2_game.actor_ctxt);
+        z2_DrawActors(&z2_game, &z2_game.actor_ctxt);
         zu_disp_ptr_load(&disp_p);
     }else{
-        z2_DrawActors(&z2_game,&z2_game.actor_ctxt);
+        z2_DrawActors(&z2_game, &z2_game.actor_ctxt);
     }
 }
 
@@ -490,10 +496,10 @@ HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room, int a2){
     if(kz.hide_room){
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);
-        z2_DrawRoom(game,room,a2);
+        z2_DrawRoom(game, room, a2);
         zu_disp_ptr_load(&disp_p);
     }else{
-        z2_DrawRoom(game,room,a2);
+        z2_DrawRoom(game, room, a2);
     }
 }
 

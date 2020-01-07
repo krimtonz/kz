@@ -53,17 +53,19 @@ static void menu_text_remove(menu_item_t *item){
     item->data = NULL;
 }
 
-menu_item_t *menu_text_input_add(menu_t *menu, uint16_t x, uint16_t y, char *default_text, char **value_ptr, int val_len){
-    menu_item_t *item = menu_add(menu,x,y);
+menu_item_t *menu_text_input_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, char *default_text, char **value_ptr, int val_len){
+    menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){
         struct item_data *data = malloc(sizeof(*data));
         data->value = malloc(32);
         data->empty_string = malloc(32);
-        memset(data->value,0,32);
-        memset(data->empty_string,0,32);
+        memset(data->value, 0, 32);
+        memset(data->empty_string, 0, 32);
         data->value_ptr = value_ptr;
         data->val_len = val_len - 1;
-        if(data->val_len > 31) data->val_len = 31;
+        if(data->val_len > 31){
+            data->val_len = 31;
+        }
         if(default_text){
             strncpy(data->empty_string, default_text, 31);
         }else{
