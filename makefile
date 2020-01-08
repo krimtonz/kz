@@ -46,7 +46,7 @@ VC	= $(foreach v,$(VC_VERSIONS),kz-vc-$(v))
 
 all			: $(KZ) $(KZ_LITE) $(VC)
 clean       :
-	rm -rf $(OBJDIR) $(BINDIR) $(PATCHDIR)
+	rm -rf $(OBJDIR) $(BINDIR)
 distclean 	: clean
 	rm -rf build/*.z64 build/*.wad
 clean-vc        :
