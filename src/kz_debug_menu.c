@@ -266,9 +266,51 @@ static void actor_info_draw(menu_item_t *item){
         gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: n/a");
     }else{
         sprintf(data->actor_button->text, "%08" PRIx32 , (uint32_t)actor);
-        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       %04x"PRIx16, actor->id);
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       %04"PRIx16, actor->id);
         item->y_cell++;
-        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: %04x"PRIx16, actor->variable);
+        gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: %04"PRIx16, actor->variable);
+
+        /* create crosshair showing location of actor,
+           because the debug menu is VC/PJ64 only we don't need l3dex */
+        Mtx m;
+        {
+            MtxF mt;
+            guTranslateF(&mt, actor->pos_2.x, actor->pos_2.y, actor->pos_2.z);
+            MtxF mr;
+            guRotateRPYF(&mr, actor->rot_2.x * M_PI / 0x8000,
+                              actor->rot_2.y * M_PI / 0x8000,
+                              actor->rot_2.z * M_PI / 0x8000);
+            guMtxCatF(&mr, &mt, &mt);
+            guMtxF2L(&mt, &m);
+        }
+
+        z2_disp_buf_t *xlu = &z2_game.common.gfx->poly_xlu;
+        static Vtx v[6] = {
+            gdSPDefVtxC(-8192,  0,      0,      0,  0,  0xFF,   0x00,   0x00,   0xFF),
+            gdSPDefVtxC(8192,   0,      0,      0,  0,  0xFF,   0x00,   0x00,   0xFF),
+            gdSPDefVtxC(0,      -8192,   0,     0,  0,  0x00,   0xFF,   0x00,   0xFF),
+            gdSPDefVtxC(0,      8192,  0,       0,  0,  0x00,   0xFF,   0x00,   0xFF),
+            gdSPDefVtxC(0,      0,      -8192,  0,  0,  0x00,   0x00,   0xFF,   0xFF),
+            gdSPDefVtxC(0,      0,      8192,   0,  0,  0x00,   0x00,   0xFF,   0xFF),
+        };
+        static Gfx crosshair[] = {
+            gsDPSetCycleType(G_CYC_1CYCLE),
+            gsDPSetRenderMode(G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2),
+            gsDPSetCombineMode(G_CC_PRIMITIVE, G_CC_PRIMITIVE),
+            gsSPLoadGeometryMode(G_ZBUFFER),
+            gsSPTexture(0, 0, 0, 0, G_OFF),
+            gsSPVertex(&v, 6, 0),
+            gsDPSetPrimColor(0, 0, 0xFF, 0x00, 0x00, 0xFF),
+            gsSPLine3D(0, 1, 0),
+            gsDPSetPrimColor(0, 0, 0x00, 0xFF, 0x00, 0xFF),
+            gsSPLine3D(2, 3, 0),
+            gsDPSetPrimColor(0, 0, 0x00, 0x00, 0xFF, 0xFF),
+            gsSPLine3D(4, 5, 0),
+            gsSPEndDisplayList(),
+        };
+        gDPPipeSync(xlu->p++);
+        gSPMatrix(xlu->p++, gDisplayListData(&xlu->d, m), G_MTX_LOAD | G_MTX_NOPUSH | G_MTX_MODELVIEW);
+        gSPDisplayList(xlu->p++, crosshair);
     }
 
     item->y_cell--;

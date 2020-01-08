@@ -67,6 +67,30 @@ void guRotateF(MtxF *mf, float a, float x, float y, float z)
     mf->ww = 1.f;
 }
 
+void guRotateRPYF(MtxF *mf, float r, float p, float h){
+    float cosr = cosf(r);
+    float cosp = cosf(p);
+    float cosh = cosf(h);
+    float sinr = sinf(r);
+    float sinp = sinf(p);
+    float sinh = sinf(h);
+
+    mf->xx = cosp * cosh;
+    mf->xy = cosp * sinh;
+    mf->xz = -sinp;
+    mf->yx = sinr * sinp * cosh - cosr * sinh;
+    mf->yy = sinr * sinp * sinh + cosr * cosh;
+    mf->yz = sinr * cosp;
+    mf->zx = cosr * sinp * cosh + sinr * sinh;
+    mf->zy = cosr * sinp * sinh - sinr * cosh;
+    mf->zz = cosr * cosp;
+    mf->zw = 0.f;
+    mf->wx = 0.f;
+    mf->wy = 0.f;
+    mf->wz = 0.f;
+    mf->ww = 1.f;
+}
+
 void guTranslateF(MtxF *mf, float x, float y, float z)
 {
   *mf = (MtxF)guDefMtxF(1.f, 0.f, 0.f, 0.f,

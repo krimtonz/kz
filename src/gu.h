@@ -32,6 +32,7 @@ typedef union {
 }MtxF;
 
 void    guRotateF       (MtxF *mf, float a, float x, float y, float z);
+void    guRotateRPYF    (MtxF *mf, float r, float p, float h);
 void    guMtxCatF       (const MtxF *m, const MtxF *n, MtxF *r);
 void    guMtxF2L        (const MtxF *mf, Mtx *m);
 void    guTranslateF    (MtxF *mf, float x, float y, float z);
