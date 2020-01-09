@@ -68,10 +68,10 @@ void zu_disp_ptr_load(zu_disp_ptr_t *disp_ptr){
 
 void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx){
     z2_gfx_t *gfx = z2_game.common.gfx;
-    uint32_t src_gfx = z2_disp_addr + src_disp_idx * Z2_DISP_SIZE;
-    uint32_t dst_gfx = z2_disp_addr + (gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE;
-    uint32_t src_cimg = z2_cimg[src_cimg_idx];
-    uint32_t dst_cimg = z2_cimg[gfx->frame_cnt_2 & 1];
+    uint32_t src_gfx = (uint32_t)&z2_disp[src_disp_idx * Z2_DISP_SIZE];
+    uint32_t dst_gfx = (uint32_t)&z2_disp[(gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE];
+    uint32_t src_cimg = (uint32_t)z2_cimg[src_cimg_idx];
+    uint32_t dst_cimg = (uint32_t)z2_cimg[gfx->frame_cnt_2 & 1];
     
     //z2_disp_buf_t segment_setup;
     //segment_setup.buf = (Gfx*)(dst_gfx + 0x140);

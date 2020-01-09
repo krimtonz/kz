@@ -29,9 +29,9 @@ static int cheat_event(event_handler_t *handler, menu_event_t event, void **even
         settings->cheats = settings->cheats ^ (1 << cheat);
         if(cheat == CHEAT_RESTRICTION){
             if(settings->cheats & (1 << CHEAT_RESTRICTION)){
-                memset((void*)z2_restriction_table_addr, 1, sizeof(restriction_table));
+                memset(z2_restriction_table, 1, sizeof(z2_restriction_table));
             }else{
-                memcpy((void*)z2_restriction_table_addr, restriction_table, sizeof(restriction_table));
+                memcpy(z2_restriction_table, restriction_table, sizeof(z2_restriction_table));
             }
         }else if(cheat == CHEAT_FREEZE_TIME){
             if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){

@@ -6,15 +6,10 @@ if [ -z "$elf" ]; then
 	exit
 fi
 
-z2addr()
-{
-    printf "#include \"src/z2.h\"\n$1" | mips64-cpp - $CPPFLAGS | tail -n 1 | sed -e s/^M//g
-}
-
-kzsym()
-{
-    echo "0x`mips64-nm "$elf" | sed -e s/^M//g | grep " $1\$" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`"
-}
+symtbl="$(mktemp)"
+mips64-nm "$elf" | awk '(/^[0-9A-Za-z_ ]*$/) {printf "sym_%s=0x%s\n",$3,substr($1,length($1)-7)}' >"$symtbl"
+. "$symtbl"
+rm -f "$symtbl"
 
 gsc16()
 {
@@ -29,7 +24,7 @@ genhook()
 {
     addr="$(printf "%d" "$1")"
     tmp="$(mktemp)"
-    echo ".set noreorder;.set noat;$2" | mips64-as - -o "$tmp"
+    echo ".set noreorder; .set noat; $2" | mips64-as - -o "$tmp"
     mips64-readelf -x .text "$tmp" | grep "0x[0-9A-Fa-f]\{8\}" | grep -o " [0-9A-Fa-f]\{8\}" |
     while read -r line; do
         gsc16 "$addr" "0x`echo "$line" | sed -e "s/\(....\)..../\1/"`"
@@ -40,13 +35,13 @@ genhook()
     rm -f "$tmp"
 }
 
-genhook "$(z2addr z2_input_hook_addr)" "jal $(kzsym input_hook);"
-genhook "$(z2addr z2_main_hook_addr)" "jal $(kzsym _start);"
-genhook "$(z2addr z2_motion_blur_hook_addr)" "jal $(kzsym motion_blur_hook);";
-genhook "$(z2addr z2_draw_actors_hook_addr)" "jal $(kzsym draw_actors_hook)"
-genhook "$(z2addr z2_draw_room_1_hook_addr)" "jal $(kzsym draw_room_hook)"
-genhook "$(z2addr z2_draw_room_2_hook_addr)" "jal $(kzsym draw_room_hook)"
+genhook "$sym_z2_input_hook" "jal $sym_input_hook;"
+genhook "$sym_z2_main_hook" "jal $sym__start;"
+genhook "$sym_z2_motion_blur_hook" "jal $sym_motion_blur_hook;";
+genhook "$sym_z2_draw_actors_hook" "jal $sym_draw_actors_hook"
+genhook "$sym_z2_draw_room_1_hook" "jal $sym_draw_room_hook"
+genhook "$sym_z2_draw_room_2_hook" "jal $sym_draw_room_hook"
 
 if [ "$2" == "lite" ]; then
-	genhook "$(z2addr z2_set_heap_addr)" "la \$t8, 0x806E0000;"
+	genhook "$sym_z2_set_heap" "la \$t8, 0x806E0000;"
 fi

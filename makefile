@@ -13,6 +13,7 @@ RESFILES	= *.png
 SRCDIR		= src
 OBJDIR 		= obj
 BINDIR		= bin
+LIBDIR		= lib
 VCDIR		= vc
 HOMEBOYDIR	= homeboy
 PATCHDIR	= patch/dol
@@ -25,8 +26,9 @@ ADDRESS     = 0x80800060
 ADDRESS_LITE	= 0x806E0060
 ADDRESS_LDR	= 0x80080000
 ALL_CFLAGS      = -g -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
-ALL_CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS)
-ALL_LDFLAGS     = -T gl-n64.ld -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
+ALL_CPPFLAGS	= -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS) $(VCCPPFLAGS)
+ALL_LDFLAGS     = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
+ALL_LIBS		= $(LIBS)
 
 KZ 			= $(foreach v,$(KZ_VERSIONS),kz-$(v))
 KZ_LITE		= $(foreach v,$(KZ_VERSIONS),kz-lite-$(v))
@@ -91,7 +93,7 @@ $$(SOBJ-$(1))		: $$(OBJDIR-$(1))/%.o: $$(SRCDIR-$(1))/% | $$(OBJDIR-$(1))
 $$(RESOBJ-$(1))		: $$(OBJDIR-$(1))/%.o: $$(RESDIR-$(1))/% | $$(OBJDIR-$(1))
 	$(GRC) $$< -d $(RESDESC) -o $$@
 $$(ELF-$(1))      : $$(OBJ-$(1)) | $$(BINDIR-$(1))
-	$(LD) $$(ALL_LDFLAGS) $$^ -o $$@
+	$(LD) $$(ALL_LDFLAGS) $$^ $$(ALL_LIBS) -o $$@
 $$(BIN-$(1))      : $$(ELF-$(1)) | $$(BINDIR-$(1))
 	$(OBJCOPY) -S -O binary $$< $$@
 $$(OUTDIR-$(1))   :
@@ -126,8 +128,11 @@ $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-lite-$(v),$(v),ldr,
 $(foreach v,$(VC_VERSIONS),$(eval $(call vc_template,kz-vc-$(v),kz-vc,$(v))))
 
 $(KZ-NZSE)  	: CPPFLAGS	?=	-DZ2_VERSION=NZSE
+$(KZ-NZSE)		: ALL_LIBS	:=	-lNZSE
 $(KZ-NZSJ)		: CPPFLAGS	?=	-DZ2_VERSION=NZSJ
+$(KZ-NZSJ)		: ALL_LIBS	:=	-lNZSJ
 $(KZ-NZSJ10)	: CPPFLAGS	?=	-DZ2_VERSION=NZSJ10
+$(KZ-NZSJ10)	: ALL_LIBS	:=	-lNZSJ10
 $(KZ-FULL)		: CPPFLAGS	+=	-DKZ_VERSION=KZ_FULL
 $(KZ-FULL)		: CFLAGS	?=  -O3 -flto -ffat-lto-objects
 $(KZ-FULL)		: LDFLAGS	?=	-O3 -flto

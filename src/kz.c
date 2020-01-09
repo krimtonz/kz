@@ -412,7 +412,7 @@ static void init(void) {
     memset(kz.position_save, 0, sizeof(*kz.position_save) * KZ_POSITION_MAX);
     kz.pos_slot = 0;
 
-    memcpy(restriction_table, (void*)z2_restriction_table_addr, sizeof(restriction_table));
+    memcpy(restriction_table, &z2_restriction_table, sizeof(z2_restriction_table));
 
     kz.ready = 1;
 }
@@ -451,9 +451,9 @@ static void game_state_main(void){
         z2_gfx_t *gfx = z2_game.common.gfx;
         if(z2_ctxt.gamestate_frames != 0){
             if(gfx->frame_cnt_1 & 1){
-                memcpy(((void*)z2_disp_addr + Z2_DISP_SIZE), (void*)z2_disp_addr, Z2_DISP_SIZE);
+                memcpy(&z2_disp[Z2_DISP_SIZE], z2_disp, Z2_DISP_SIZE);
             }else{
-                memcpy((void*)z2_disp_addr, (void*)(z2_disp_addr + Z2_DISP_SIZE), Z2_DISP_SIZE);
+                memcpy(z2_disp, &z2_disp[Z2_DISP_SIZE], Z2_DISP_SIZE);
             }
             zu_disp_ptr_load(&kz.disp_p);
             zu_gfx_reloc(1 - (gfx->frame_cnt_1 & 1), 1 - (gfx->frame_cnt_2 & 1));
@@ -464,9 +464,7 @@ static void game_state_main(void){
 
 HOOK void input_hook(void){
     if(kz.pending_frames != 0 && kz.z2_input_enabled){
-        void (*z2_input_update)(z2_game_t *game);
-        z2_input_update = (void*)z2_input_update_addr;
-        z2_input_update(&z2_game);
+        z2_input_update(&z2_ctxt);
         z2_input_t *input = &z2_ctxt.input[0];
         uint16_t mask = ~(BUTTON_D_DOWN | BUTTON_D_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
         input->raw.pad &=  mask;

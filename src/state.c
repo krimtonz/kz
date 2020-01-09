@@ -265,7 +265,7 @@ void load_state(void *state){
     }
 
     /* load cutscene state */
-    st_read(&p, (void*)z2_cutscene_state_addr, 8);
+    st_read(&p, &z2_cutscene_state, 8);
 
     /* load scene file, and create static collision if loading from a different scene */
     if(scene_index != z2_game.scene_index){
@@ -570,7 +570,7 @@ size_t save_state(void *state){
     st_write(&p, &ent_end, sizeof(ent_end));
 
     /* save current cutscene state */
-    st_write(&p, (void*)z2_cutscene_state_addr, 8);
+    st_write(&p, &z2_cutscene_state, 8);
 
     /* save room transition actors */
     int trans_cnt = z2_game.room_ctx.transition_cnt;
