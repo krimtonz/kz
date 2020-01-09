@@ -59,7 +59,6 @@ z2_mtx_stack                = 0x801FC210;
 z2_mtx_stack_top            = 0x801FC214;
 z2_pi_io_handle             = 0x801FD490;
 z2_disp                     = 0x8020A2B0;
-z2_static_ctxt              = 0x80382900;
 z2_ctxt                     = 0x803E6FB0;
 z2_game                     = z2_ctxt;
 z2_link                     = 0x80400260;

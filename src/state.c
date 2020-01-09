@@ -78,8 +78,8 @@ void load_state(void *state){
     void *p = state;
 
     /* wait for rcp to finish task */
-    osRecvMesg(&z2_ctxt.gfx->task_queue,NULL,OS_MESG_BLOCK);
-    osSendMesg(&z2_ctxt.gfx->task_queue,NULL,OS_MESG_NOBLOCK);
+    osRecvMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_BLOCK);
+    osSendMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_NOBLOCK);
 
     st_skip(&p,sizeof(kz_state_hdr_t));
 
@@ -149,16 +149,16 @@ void load_state(void *state){
     }
 
     /* load global context */
-    st_read(&p,&z2_game,sizeof(z2_game));
+    st_read(&p, &z2_game, sizeof(z2_game));
 
     /* load file data */
-    st_read(&p,&z2_file,sizeof(z2_file));
+    st_read(&p, &z2_file, sizeof(z2_file));
 
     /* load static context */
-    st_read(&p,&z2_static_ctxt,sizeof(z2_static_ctxt));
+    st_read(&p, z2_file.static_ctx, sizeof(*z2_file.static_ctx));
 
     /* load segment address table */
-    st_read(&p,&z2_segment,sizeof(z2_segment));
+    st_read(&p, &z2_segment, sizeof(z2_segment));
 
     /* load arena nodes */
     st_read(&p, &z2_game_arena, sizeof(z2_game_arena));
@@ -478,19 +478,19 @@ size_t save_state(void *state){
             set_insert(&node_set, &ovl->ram);
         }
     }
-    st_write(&p,&ent_end,sizeof(ent_end));
+    st_write(&p, &ent_end, sizeof(ent_end));
 
     /* save global context */
-    st_write(&p,&z2_game,sizeof(z2_game));
+    st_write(&p, &z2_game, sizeof(z2_game));
 
     /* save currently loaded file data */
-    st_write(&p,&z2_file,sizeof(z2_file));
+    st_write(&p, &z2_file, sizeof(z2_file));
 
     /* save static context */
-    st_write(&p,&z2_static_ctxt,sizeof(z2_static_ctxt));
+    st_write(&p, z2_file.static_ctx, sizeof(*z2_file.static_ctx));
 
     /* save segment address table */
-    st_write(&p,&z2_segment,sizeof(z2_segment));
+    st_write(&p, &z2_segment, sizeof(z2_segment));
 
     /* save game area nodes */
     st_write(&p,&z2_game_arena,sizeof(z2_game_arena));

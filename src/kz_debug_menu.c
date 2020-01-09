@@ -76,9 +76,10 @@ static char                *flag_region_names[] = {
     "switch","chest","clear","collect",
 };
 static uint32_t flag_start_addr[] = {
-    (uint32_t)&z2_file.week_event_inf[0], (uint32_t)&z2_file.event_inf[0],
-    (uint32_t)&z2_file.week_event_inf[0], (uint32_t)&z2_game.actor_ctxt.switch_1, (uint32_t)&z2_game.actor_ctxt.chest,
-    (uint32_t)&z2_game.actor_ctxt.clear, (uint32_t)&z2_game.actor_ctxt.collectible_1
+    (uint32_t)&z2_file.week_event_inf[0],   (uint32_t)&z2_file.event_inf[0],
+    (uint32_t)&z2_file.mask_mask_bit[0],    (uint32_t)&z2_game.actor_ctxt.switch_1,
+    (uint32_t)&z2_game.actor_ctxt.chest,    (uint32_t)&z2_game.actor_ctxt.clear,
+    (uint32_t)&z2_game.actor_ctxt.collectible_1,
 };
 static uint8_t flag_sizes[] = {
     0x64, 0x8, 0x3, 0x10, 0x4, 0x4, 0x10

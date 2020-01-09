@@ -261,6 +261,20 @@ typedef enum {
 } z2_mask_slot_t;
 
 typedef struct {
+    char        unk_0x00_[0x32];    /* 0x0000 */
+    int16_t     time_speed;         /* 0x0032 */
+    char        unk_0x34_[0x06];    /* 0x0034 */
+    int16_t     acceleration;       /* 0x003A */
+    char        unk_0x3C_[0x0E];    /* 0x003C */
+    int16_t     turn_speed;         /* 0x004A */
+    char        unk_0x4E_[0x50];    /* 0x004C */
+    int16_t     gravity;            /* 0x009C */
+    char        unk_0x9E_[0x72];    /* 0x009E */
+    uint16_t    update_rate;        /* 0x0110 */
+    char        unk_0x112[0x14CE];  /* 0x0112 */
+} z2_static_ctxt_t;                 /* 0x15E0 */
+
+typedef struct {
     union {
         struct {
             uint32_t            : 16;
@@ -270,34 +284,34 @@ typedef struct {
         };
         uint32_t    exit;                           /* 0x0000 */
     };
-    uint8_t         mask;                           /* 0x0004 */
-    uint8_t         intro_flag;                     /* 0x0005 */
-    uint8_t         mash_timer;                     /* 0x0006 */
-    uint8_t         pad_0x07_;                      /* 0x0007 */
-    uint32_t        cutscene_id;                    /* 0x0008 */
-    uint16_t        time_of_day;                    /* 0x000C */
-    uint16_t        owl_load;                       /* 0x000E */
-    uint32_t        daynight;                       /* 0x0010 */
-    int32_t         timespeed;                      /* 0x0014 */
-    uint32_t        day;                            /* 0x0018 */
-    uint32_t        elapsed_days;                   /* 0x001C */
-    uint8_t         current_form;                   /* 0x0020 */
-    uint8_t         unk_0x21_;                      /* 0x0021 */
-    uint8_t         tatl_flag;                      /* 0x0022 */
-    uint8_t         owl_save;                       /* 0x0023 */
-    char            zelda3[0x06];                   /* 0x0024 */
-    uint16_t        sot_count;                      /* 0x002A */
-    char            name[0x08];                     /* 0x002C */
-    uint16_t        max_health;                     /* 0x0034 */
-    uint16_t        current_health;                 /* 0x0036 */
-    uint8_t         magic_level;                    /* 0x0038 */
-    uint8_t         current_magic;                  /* 0x0039 */
-    uint16_t        rupees;                         /* 0x003A */
-    uint32_t        tatl_timer;                     /* 0x003C */
-    uint8_t         has_magic;                      /* 0x0040 */
-    uint8_t         has_double_magic;               /* 0x0041 */
-    uint8_t         has_double_defense;             /* 0x0042 */
-    char            unk_0x43_[0x03];                /* 0x0043 */
+    uint8_t             mask;                           /* 0x0004 */
+    uint8_t             intro_flag;                     /* 0x0005 */
+    uint8_t             mash_timer;                     /* 0x0006 */
+    uint8_t             pad_0x07_;                      /* 0x0007 */
+    uint32_t            cutscene_id;                    /* 0x0008 */
+    uint16_t            time_of_day;                    /* 0x000C */
+    uint16_t            owl_load;                       /* 0x000E */
+    uint32_t            daynight;                       /* 0x0010 */
+    int32_t             timespeed;                      /* 0x0014 */
+    uint32_t            day;                            /* 0x0018 */
+    uint32_t            elapsed_days;                   /* 0x001C */
+    uint8_t             current_form;                   /* 0x0020 */
+    uint8_t             unk_0x21_;                      /* 0x0021 */
+    uint8_t             tatl_flag;                      /* 0x0022 */
+    uint8_t             owl_save;                       /* 0x0023 */
+    char                zelda3[0x06];                   /* 0x0024 */
+    uint16_t            sot_count;                      /* 0x002A */
+    char                name[0x08];                     /* 0x002C */
+    uint16_t            max_health;                     /* 0x0034 */
+    uint16_t            current_health;                 /* 0x0036 */
+    uint8_t             magic_level;                    /* 0x0038 */
+    uint8_t             current_magic;                  /* 0x0039 */
+    uint16_t            rupees;                         /* 0x003A */
+    uint32_t            tatl_timer;                     /* 0x003C */
+    uint8_t             has_magic;                      /* 0x0040 */
+    uint8_t             has_double_magic;               /* 0x0041 */
+    uint8_t             has_double_defense;             /* 0x0042 */
+    char                unk_0x43_[0x03];                /* 0x0043 */
     union {
         struct {
             uint16_t hidden_owl         : 1;
@@ -396,12 +410,12 @@ typedef struct {
             uint8_t boss_key                : 1;
         };
         uint8_t dungeon_item;
-    }               dungeon_items[0xA];             /* 0x00C0 */
-    uint8_t         dungeon_keys[0x9];              /* 0x00CA */
-    uint8_t         defense_hearts;                 /* 0x00D3 */
-    uint8_t         stray_fairies[0xA];             /* 0x00D4 */
-    char            form_name[0x8][0x3];            /* 0x00DE */
-    char            unk_0x00F6_[0x2];               /* 0x00F6 */
+    }                   dungeon_items[0xA];             /* 0x00C0 */
+    uint8_t             dungeon_keys[0x9];              /* 0x00CA */
+    uint8_t             defense_hearts;                 /* 0x00D3 */
+    uint8_t             stray_fairies[0xA];             /* 0x00D4 */
+    char                form_name[0x8][0x3];            /* 0x00DE */
+    char                unk_0x00F6_[0x2];               /* 0x00F6 */
     struct
     {
         uint32_t    chest;                          /* 0x0000 */
@@ -411,41 +425,45 @@ typedef struct {
         uint32_t    collect;                        /* 0x0010 */
         uint32_t    unk_0x14;                       /* 0x0014 */
         uint32_t    unk_0x18;                       /* 0x0018 */
-    }               save_scene_flags[0x78];         /* 0x00F8 */
-    char            unk_0x0E18_[0xE0];              /* 0x0E18 */
-    char            week_event_inf[0x64];           /* 0x0EF8 */
-    char            unk_0x0F5C[0x90];               /* 0x0F5C */
+    }                   save_scene_flags[0x78];         /* 0x00F8 */
+    char                unk_0x0E18_[0xE0];              /* 0x0E18 */
+    char                week_event_inf[0x64];           /* 0x0EF8 */
+    char                unk_0x0F5C[0x90];               /* 0x0F5C */
 #if Z2_VERSION!=NZSE
-    char            unk_0x0FEC_[0x2F64];                            /* 0x0FEC */
+    char                unk_0x0FEC_[0x2F64];                            /* 0x0FEC */
 #else
-    char            unk_0x0FEC_[0x20];              /* 0x0FEC */
-    char            event_inf[0x8];                 /* 0x100C */
-    char            unk_0x1014[0x2C8C];             /* 0x1014 */
+    char                unk_0x0FEC_[0x20];              /* 0x0FEC */
+    char                event_inf[0x8];                 /* 0x100C */
+    char                unk_0x1014[0x2C8C];             /* 0x1014 */
 #endif
-    int32_t         file_index;                     /* 0x3CA0 */    /* 0x3F50 */
-    char            unk_0x3CA4[0x0C];               /* 0x3CA4 */    /* 0x3F54 */
-    int             void_flag;                      /* 0x3CB0 */    /* 0x3F60 */
+    int32_t             file_index;                     /* 0x3CA0 */    /* 0x3F50 */
+    char                unk_0x3CA4[0x0C];               /* 0x3CA4 */    /* 0x3F54 */
+    int                 void_flag;                      /* 0x3CB0 */    /* 0x3F60 */
 #if Z2_VERSION==NZSE
-    char            unk_0x03CB4[0x264];             /* 0x3CB4 */
+    char                unk_0x03CB4[0x264];             /* 0x3CB4 */
 #else
-    char            unk_0x03F64[0x338];                             /* 0x3F64 */
+    char                unk_0x03F64[0x338];                             /* 0x3F64 */
 #endif
-    uint8_t         restriction_flags[0x4];         /* 0x3F18 */    /* 0x429C */
+    uint8_t             restriction_flags[0x4];         /* 0x3F18 */    /* 0x429C */
 #if Z2_VERSION==NZSE
-    char            unk_0x3F1C[0x4C];               /* 0x3F1C */
+    char                unk_0x3F1C[0x4C];               /* 0x3F1C */
 #else
-    char            unk_0x42A0[0x1A];                               /* 0x42A0 */
-    char            event_inf[0x8];                                 /* 0x42BA */
-    char            unk_0x42C2[0x32];                               /* 0x4232 */
+    char                unk_0x42A0[0x1A];                               /* 0x42A0 */
+    char                event_inf[0x8];                                 /* 0x42BA */
+    char                unk_0x42C2[0x32];                               /* 0x4232 */
 #endif
     struct {                                        /* 0x3F68 */    /* 0x42F4 */
-                    uint32_t    chest;          /* 0x0000 */
-                    uint32_t    switch1;        /* 0x0004 */
-                    uint32_t    switch2;        /* 0x0008 */
-                    uint32_t    clear;          /* 0x000C */
-                    uint32_t    collectible;    /* 0x0010 */
-    }               scene_flags[0x78];          /* 0x0014 */
-} z2_file_t;                                        /* 0x48C8 */    /* 0x4C54 */
+        uint32_t    chest;          /* 0x0000 */
+        uint32_t    switch1;        /* 0x0004 */
+        uint32_t    switch2;        /* 0x0008 */
+        uint32_t    clear;          /* 0x000C */
+        uint32_t    collectible;    /* 0x0010 */
+    }                   scene_flags[0x78];          /* 0x0014 */
+    char                unk_0x48C8[2];              /* 0x48C8 */        /* 0x4C54 */
+    char                mask_mask_bit[3];           /* 0x48CA */        /* 0x4C56 */
+    char                unk_0x48CD[0x27];           /* 0x48CD */        /* 0x4C59 */
+    z2_static_ctxt_t   *static_ctx;                 /* 0x48F4 */        /* 0x4C80 */
+} z2_file_t;                                        /* 0x48F8 */        /* 0x4C84 */
 
 typedef struct
 {
@@ -1334,20 +1352,6 @@ typedef struct {
     uint32_t            prom_end;               /* 0x000C */
 } z2_file_table_t;                              /* 0x0010 */
 
-typedef struct {
-    char        unk_0x00_[0x32];    /* 0x0000 */
-    int16_t     time_speed;         /* 0x0032 */
-    char        unk_0x34_[0x06];    /* 0x0034 */
-    int16_t     acceleration;       /* 0x003A */
-    char        unk_0x3C_[0x0E];    /* 0x003C */
-    int16_t     turn_speed;         /* 0x004A */
-    char        unk_0x4E_[0x50];    /* 0x004C */
-    int16_t     gravity;            /* 0x009C */
-    char        unk_0x9E_[0x72];    /* 0x009E */
-    uint16_t    update_rate;        /* 0x0110 */
-    char        unk_0x112[0x14CE];  /* 0x0112 */
-} z2_static_ctxt_t;                 /* 0x15E0 */
-
 typedef union {
     struct {
         uint16_t    no_y_rot    : 1;
@@ -1522,7 +1526,6 @@ z2_extern MtxF                     *z2_mtx_stack;
 z2_extern MtxF                     *z2_mtx_stack_top;
 z2_extern OSPiHandle                z2_pi_io_handle;
 z2_extern char                      z2_disp[];
-z2_extern z2_static_ctxt_t          z2_static_ctxt;
 z2_extern z2_ctxt_t                 z2_ctxt;
 z2_extern z2_game_t                 z2_game;
 z2_extern z2_link_t                 z2_link;

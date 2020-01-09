@@ -129,7 +129,7 @@ static void kz_main(void) {
         gfx_printf(settings->lag_x, settings->lag_y, "%d", lag_frames);
     }
 
-    kz.frames += z2_static_ctxt.update_rate;
+    kz.frames += z2_file.static_ctx->update_rate;
 
     if(!kz.timer_running){
         kz.cpu_offset -= kz.cpu_cycle_counter - kz.cpu_prev;
@@ -190,7 +190,7 @@ static void kz_main(void) {
             gfx_printf_color(Z2_SCREEN_WIDTH - 60, Z2_SCREEN_HEIGHT - 60, COLOR_GREEN, "t");
         }
         if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){
-            z2_file.timespeed = -z2_static_ctxt.time_speed;
+            z2_file.timespeed = -z2_file.static_ctx->time_speed;
         }
         if(settings->cheats & (1 << CHEAT_RESTRICTION)){
             memset(&z2_game.hud_ctx.restriction_flags, 0, 0xC);
