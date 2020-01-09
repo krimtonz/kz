@@ -125,7 +125,7 @@ void input_update(void){
         int *cs = &bind_component_state[i];
         int j = 0;
         uint16_t c = BIND_END;
-        if(((reserved & bind_pad[i]) && i != 0) || !input_enabled){
+        if(((reserved & bind_pad[i]) && i != 0 && i != KZ_CMD_RETURN) || !input_enabled){
             *cs = 0;
         }else{
             int css = *cs;
