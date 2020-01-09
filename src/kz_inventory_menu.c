@@ -477,8 +477,6 @@ menu_t *create_inventory_menu(void){
         items.selected_item = menu_button_add(&items, 0, 0, "return", menu_return, NULL);
         menu_cell_set(&items, 16, 16);
         menu_padding_set(&items, 5, 5);
-        int x = 1;
-        int y = 1;
 
         int item_cnt = sizeof(item_map_table) / sizeof(*item_map_table);
         for(int i = 0;i < item_cnt;i++){
@@ -486,17 +484,13 @@ menu_t *create_inventory_menu(void){
             data->map = 0;
             data->map_idx = i;
 #ifndef LITE
-            item = menu_switch_add(&items, x++, y, get_item_texture(item_map_table[i].item, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
+            item = menu_switch_add(&items, i % 5 + 1, i / 5 + 1, get_item_texture(item_map_table[i].item, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 16, 16, NULL);
 #else
             item = menu_checkbox_add(&items, x++, y);
             item->tooltip = item_map_table[i].tooltip;
 #endif
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, item_switch_event, data);
-            if(x == 6){
-                x = 1;
-                y++;
-            }
         }
 
         static menu_sprite_t list_sprite = {
@@ -517,8 +511,6 @@ menu_t *create_inventory_menu(void){
                                &z2_file.items[Z2_SLOT_QUEST_1 + i * 6], NULL, -1, &list_sprite, "trade quest");
         }
 
-        y = 1;
-
         int opt_cnt = sizeof(capacity_options) / sizeof(*capacity_options);
         static int8_t threebit_options[] = { Z2_ITEM_NULL, 0, 1, 2, 3, 4, 5, 6 };
         static int8_t twobit_options[] = { Z2_ITEM_NULL, 0, 1, 2, 3 };
@@ -537,7 +529,7 @@ menu_t *create_inventory_menu(void){
                 options = twobit_options;
                 option_cnt = 4;
             }
-            item = menu_item_list_add(&items, 0, y++, capacity_options[i].item_tile,
+            item = menu_item_list_add(&items, 0, i + 1, capacity_options[i].item_tile,
                                options, option_cnt, &capdata->value, capacity_options[i].cap_vals,
                                capacity_options[i].tiles_cnt, &list_sprite, capacity_options[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, capacity_event, capdata);
@@ -549,25 +541,19 @@ menu_t *create_inventory_menu(void){
         masks.selected_item = menu_button_add(&masks, 0, 0, "return", menu_return, NULL);
         menu_cell_set(&masks, 16, 16);
         menu_padding_set(&masks, 5, 5);
-        int x = 0;
-        int y = 1;
         int mask_cnt = sizeof(mask_map_table) / sizeof(*mask_map_table);
         for(int i = 0;i < mask_cnt;i++){
             struct item_switch_data *data = malloc(sizeof(*data));
             data->map = 1;
             data->map_idx = i;
             #ifndef LITE
-            item = menu_switch_add(&masks, x++, y, get_item_texture(mask_map_table[i].item, 0), NULL,
+            item = menu_switch_add(&masks, i % 6, i / 6 + 1, get_item_texture(mask_map_table[i].item, 0), NULL,
                             DEFAULT_COLOR, DEFAULT_COLOR, 0, 1, 16, 16, NULL);
             #else
             item = menu_checkbox_add(&masks, x++, y);
             item->tooltip = mask_map_table[i].tooltip;
             #endif
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, item_switch_event, data);
-            if(x == 6){
-                x = 0;
-                y++;
-            }
         }
     }
 
@@ -576,108 +562,74 @@ menu_t *create_inventory_menu(void){
         menu_padding_set(&quest_status, 0, 1);
         quest_status.selected_item = menu_button_add(&quest_status, 0, 0, "return", menu_return, NULL);
 
-        int x = 0;
-        int y = 1;
-        int oy = 0;
-        int ox = 0;
-
-        menu_label_add(&quest_status, x, y, "max health");
-        item = menu_number_input_add(&quest_status, 15, y++, 16, 4);
+        menu_label_add(&quest_status, 0, 1, "max health");
+        item = menu_number_input_add(&quest_status, 15, 1, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, max_health_event, NULL);
 
-        item = menu_checkbox_add(&quest_status, 0, y);
+        item = menu_checkbox_add(&quest_status, 0, 2);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, double_defense_event, NULL);
-        menu_label_add(&quest_status, 2, y++, "double defense");
+        menu_label_add(&quest_status, 2, 2, "double defense");
 
-        item = menu_checkbox_add(&quest_status, 0, y);
+        item = menu_checkbox_add(&quest_status, 0, 3);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, magic_event, (void*)0);
-        menu_label_add(&quest_status, 2, y++, "magic");
+        menu_label_add(&quest_status, 2, 3, "magic");
 
-        item = menu_checkbox_add(&quest_status, 0, y);
+        item = menu_checkbox_add(&quest_status, 0, 4);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, magic_event, (void*)1);
-        menu_label_add(&quest_status, 2, y++, "double magic");
+        menu_label_add(&quest_status, 2, 4, "double magic");
 
-        menu_label_add(&quest_status, 0, y, "dungeon");
-        item = menu_list_add(&quest_status, 15, y++, dungeon_names, 4);
+        menu_label_add(&quest_status, 0, 5, "dungeon");
+        item = menu_list_add(&quest_status, 15, 5, dungeon_names, 4);
         menu_item_register_event(item, MENU_EVENT_LIST, selected_dungeon_onlist, NULL);
 
-        menu_label_add(&quest_status, 0, y, "small keys");
-        item = menu_number_input_add(&quest_status, 15, y++, 16, 2);
+        menu_label_add(&quest_status, 0, 6, "small keys");
+        item = menu_number_input_add(&quest_status, 15, 6, 16, 2);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, dungeon_keys_event, (void*)0);
 
-        menu_label_add(&quest_status, 0, y, "stray fairies");
-        item = menu_number_input_add(&quest_status, 15, y++, 16, 2);
+        menu_label_add(&quest_status, 0, 7, "stray fairies");
+        item = menu_number_input_add(&quest_status, 15, 7, 16, 2);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, stray_fairies_event, (void*)1);
-
-        oy = 5;
 
         gfx_texture *dungeon_items_tex = resource_get(R_Z2_DUNGEON);
 
-        item = menu_switch_add(&quest_status, 0, y, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
+        item = menu_switch_add(&quest_status, 0, 8, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                                6, dungeon_items_tex->y_tiles / 2 + 6, 16, 16, "boss key");
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, dungeon_item_event, (void*)1);
-        menu_item_offset_set(item, 0, oy);
+        menu_item_offset_set(item, 0, 5);
 
-        item = menu_switch_add(&quest_status, 1, y, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
+        item = menu_switch_add(&quest_status, 1, 8, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                                7, dungeon_items_tex->y_tiles / 2 + 7, 16, 16, "compass");
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, dungeon_item_event, (void*)2);
-        menu_item_offset_set(item, 10, oy);
+        menu_item_offset_set(item, 10, 5);
 
-        item = menu_switch_add(&quest_status, 2, y, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
+        item = menu_switch_add(&quest_status, 2, 8, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                                8, dungeon_items_tex->y_tiles / 2 + 8, 16, 16, "map");
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, dungeon_item_event, (void*)4);
-        menu_item_offset_set(item, 20, oy);
-
-        oy += 16;
+        menu_item_offset_set(item, 20, 5);
 
         for(int i = 0;i < sizeof(quest_status_table) / sizeof(*quest_status_table);i++){
-            item = menu_switch_add(&quest_status, x, y, get_item_texture(Z2_ITEM_ODOLWAS_REMAINS + i, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
+            item = menu_switch_add(&quest_status, i, 9, get_item_texture(Z2_ITEM_ODOLWAS_REMAINS + i, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 16, 16, quest_status_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, quest_status_event, (void*)quest_status_table[i].bitmask);
-            menu_item_offset_set(item, x++ * 10, oy);
+            menu_item_offset_set(item, i * 10, 12);
         }
-
-        x = 0;
-        y++;
-
-        int start_y = y;
-        int start_oy = oy;
-        int start_ox = ox;
 
         gfx_texture *owl_icon_texture = resource_get(R_Z2_OWL);
 
         for(int i = 0;i < sizeof(owl_data_table) / sizeof(*owl_data_table);i++){
-            x = i % 5;
-            ox = x * 6;
-            if(i % 5 == 0){
-                y++;
-                oy += 9;
-            }
-
-            item = menu_switch_add(&quest_status, x, y, owl_icon_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
+            item = menu_switch_add(&quest_status, i % 5, i / 5 + 11, owl_icon_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                                    0, 1, 16, 8, owl_data_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, owl_event, (void*)owl_data_table[i].bitmask);
-            menu_item_offset_set(item, ox, oy);
+            menu_item_offset_set(item, i % 5 * 6, ((i / 5) * 9) + 21);
         }
-
-        y = start_y;
-        oy = start_oy;
-        ox = start_ox;
 
         gfx_texture *note_texture = resource_get(R_Z2_NOTE);
 
         for(int i = 0;i < sizeof(song_data_table) / sizeof(*song_data_table);i++){
-            x = i % 5 + 6;
-            ox = x * 6;
-            if(i % 5 == 0){
-                y++;
-                oy += 8;
-            }
-
-            item = menu_switch_add(&quest_status, x, y, note_texture, NULL, song_data_table[i].color, 0x808080FF,
+            item = menu_switch_add(&quest_status, i % 5 + 6, i / 5 + 11, note_texture, NULL, song_data_table[i].color, 0x808080FF,
                                    0, 0, 10, 16, song_data_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, quest_status_event, (void*)song_data_table[i].bitmask);
-            menu_item_offset_set(item, ox, oy);
+            menu_item_offset_set(item, ((i % 5) + 6) * 6, ((i / 5) * 9) + 21);
         }
     }
 
@@ -692,16 +644,11 @@ menu_t *create_inventory_menu(void){
             Z2_ITEM_POWDER_KEG
         };
 
-        int x = 0;
-        int y = 1;
         for(int i = 0;i < sizeof(items) / sizeof(*items);i++){
-            menu_gfx_add(&amounts, x, y, get_item_texture(items[i], 0), 0, 12, 12);
-            item = menu_number_input_add(&amounts, x + 1, y, 10, 3);
+            menu_gfx_add(&amounts, i % 3 * 3, i / 3 + 1, get_item_texture(items[i], 0), 0, 12, 12);
+            item = menu_number_input_add(&amounts, i % 3 * 3 + 1, i / 3 + 1, 10, 3);
             menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.ammo[items[i]]);
             menu_item_offset_set(item, 5, 2);
-            x += 3;
-            x %= 9;
-            if(x == 0) y++;
         }
 
         gfx_texture *dungeon_tex = resource_get(R_Z2_DUNGEON);
@@ -711,7 +658,7 @@ menu_t *create_inventory_menu(void){
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.current_magic);
         menu_item_offset_set(item, 5, 2);
 
-        menu_gfx_add(&amounts,6,3,dungeon_tex,1,12,12);
+        menu_gfx_add(&amounts, 6, 3, dungeon_tex, 1, 12, 12);
         item = menu_number_input_add(&amounts, 7, 3, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.current_health);
         menu_item_offset_set(item, 5, 2);
