@@ -465,11 +465,13 @@ static void game_state_main(void){
 HOOK void input_hook(void){
     if(kz.pending_frames != 0 && kz.z2_input_enabled){
         z2_input_update(&z2_ctxt);
-        z2_input_t *input = &z2_ctxt.input[0];
-        uint16_t mask = ~(BUTTON_D_DOWN | BUTTON_D_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
-        input->raw.pad &=  mask;
-        input->pad_pressed &= mask;
-        input->pad_released &= mask;
+        if(!kz.debug_active){
+            z2_input_t *input = &z2_ctxt.input[0];
+            uint16_t mask = ~(BUTTON_D_DOWN | BUTTON_D_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
+            input->raw.pad &=  mask;
+            input->pad_pressed &= mask;
+            input->pad_released &= mask;
+        }
     }
 }
 
