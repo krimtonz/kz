@@ -487,7 +487,7 @@ menu_t *create_inventory_menu(void){
             item = menu_switch_add(&items, i % 5 + 1, i / 5 + 1, get_item_texture(item_map_table[i].item, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 16, 16, NULL);
 #else
-            item = menu_checkbox_add(&items, x++, y);
+            item = menu_checkbox_add(&items, i % 5 + 1, i / 5 + 1);
             item->tooltip = item_map_table[i].tooltip;
 #endif
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, item_switch_event, data);
@@ -550,7 +550,7 @@ menu_t *create_inventory_menu(void){
             item = menu_switch_add(&masks, i % 6, i / 6 + 1, get_item_texture(mask_map_table[i].item, 0), NULL,
                             DEFAULT_COLOR, DEFAULT_COLOR, 0, 1, 16, 16, NULL);
             #else
-            item = menu_checkbox_add(&masks, x++, y);
+            item = menu_checkbox_add(&masks, i % 6, i / 6 + 1);
             item->tooltip = mask_map_table[i].tooltip;
             #endif
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, item_switch_event, data);
