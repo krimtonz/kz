@@ -437,7 +437,8 @@ typedef struct {
     char                unk_0x1014[0x2C8C];             /* 0x1014 */
 #endif
     int32_t             file_index;                     /* 0x3CA0 */    /* 0x3F50 */
-    char                unk_0x3CA4[0x0C];               /* 0x3CA4 */    /* 0x3F54 */
+    char                unk_0x3CA4[0x08];               /* 0x3CA4 */    /* 0x3F54 */
+    uint32_t            scene_setup;                    /* 0x3CAC */    /* 0x3F5C */
     int                 void_flag;                      /* 0x3CB0 */    /* 0x3F60 */
 #if Z2_VERSION==NZSE
     char                unk_0x03CB4[0x264];             /* 0x3CB4 */
@@ -1039,7 +1040,8 @@ typedef struct {
     z2_loadfile_t       loadfile;               /* 0x0038 */
     OSMesgQueue         load_mq;                /* 0x0058 */
     OSMesg              load_msg;               /* 0x0070 */
-    char                unk_0x0074[0x0C];       /* 0x0074 */
+    void               *area_map_tex;           /* 0x0074 */
+    char                unk_0x0078[0x08];       /* 0x0078 */
     uint8_t             transition_cnt;         /* 0x0080 */
     char                pad_0x0079[0x03];       /* 0x0081 */
     void               *transition_list;        /* 0x0084 */
@@ -1484,6 +1486,29 @@ typedef struct {
     z2_unk_part_t   unks[15];           /* 0x3DF0 */
 } z2_static_particle_ctxt_t;            /* 0x98E0 */
 
+typedef struct {
+    uint8_t     cmd;                    /* 0x0000 */
+    uint8_t     tex_idx;                /* 0x0001 */
+    uint16_t    pad_0x02;               /* 0x0002 */
+    uint8_t     sky_id;                 /* 0x0004 */
+    uint8_t                 : 4;        /* 0x0005 */
+    uint8_t     sky_effect  : 4;        /* 0x0005 */
+    uint8_t                 : 4;        /* 0x0006 */
+    uint8_t     fog         : 4;        /* 0x0006 */
+    uint8_t     pad_0x07;               /* 0x0007 */
+} z2_sky_scene_cmd_t;                   /* 0x0008 */
+
+typedef struct {
+    uint8_t     cmd;                    /* 0x0000 */
+    uint8_t     pad_0x01[3];            /* 0x0001 */
+    uint32_t    addr;                   /* 0x0004 */
+} z2_alternate_scene_cmd_t;             /* 0x0008 */
+
+typedef struct {
+    uint8_t     cmd;                    /* 0x0000 */
+    uint8_t     data[7];                /* 0x0001 */
+} z2_scene_cmd_t;                       /* 0x0008 */
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1530,6 +1555,7 @@ z2_extern char                      z2_letter_box_timer[];
 z2_extern char                      z2_cutscene_state[];
 z2_extern z2_gamestate_table_t      z2_gamestate_table[];
 z2_extern char                      z2_restriction_table[0x23A];
+z2_extern z2_rom_file_t             z2_area_tex_table[9];
 z2_extern uint16_t                  z2_link_form_obj_idx[];
 z2_extern z2_rom_file_t             z2_obj_table[];
 z2_extern z2_scene_table_ent_t      z2_scene_table[113];

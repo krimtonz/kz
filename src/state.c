@@ -275,6 +275,25 @@ void load_state(void *state){
         size_t size = scene_ent->vrom_end - scene_ent->vrom_start;
         zu_file_load(scene_ent->vrom_start,z2_game.scene_addr,size);
         relocate_col_hdr((uint32_t)z2_game.col_ctxt.col_hdr);
+
+        /* load area textures */
+        z2_scene_cmd_t *cmd = z2_game.scene_addr;
+        while(cmd->cmd != 0x14){
+            if(cmd->cmd == 0x18){
+                z2_alternate_scene_cmd_t *alt_cmd = (z2_alternate_scene_cmd_t*)cmd;
+                uint32_t *alt_hdrs = zu_segment_find(alt_cmd->addr);
+                cmd = zu_segment_find(alt_hdrs[z2_file.scene_setup - 1]);
+            }
+            if(cmd->cmd == 0x11){
+                z2_sky_scene_cmd_t *sky_cmd = (z2_sky_scene_cmd_t*)cmd;
+                if(sky_cmd->tex_idx == 0){
+                    break;
+                }
+                z2_rom_file_t *file = &z2_area_tex_table[sky_cmd->tex_idx];
+                zu_file_load(file->vrom_start, z2_game.room_ctx.area_map_tex, file->vrom_end - file->vrom_start);
+            }
+            cmd++;
+        }
         z2_game.col_ctxt.stc_list_pos = 0;
         z2_CreateStaticCollision(&z2_game.col_ctxt,&z2_game,z2_game.col_ctxt.stc_lut);
     }

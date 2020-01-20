@@ -43,6 +43,7 @@ z2_letter_box_timer         = 0x801B9E58;
 z2_cutscene_state           = 0x801BD8B0;
 z2_gamestate_table          = 0x801BD910;
 z2_restriction_table        = 0x801C2410;
+z2_area_tex_table           = 0x801C2660;
 z2_link_form_obj_idx        = 0x801C2730;
 z2_obj_table                = 0x801C2740;
 z2_scene_table              = 0x801C3CA0;
