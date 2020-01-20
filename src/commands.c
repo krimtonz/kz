@@ -5,6 +5,7 @@
 #include "kz.h"
 #include "settings.h"
 #include "z2.h"
+#include "state.h"
 
 struct command kz_commands[KZ_CMD_MAX] = {
     {"toggle menu",         COMMAND_PRESS,  NULL},
@@ -30,7 +31,32 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"load position",       COMMAND_PRESS,  command_load_position},
     {"next position",       COMMAND_PRESS,  command_next_position},
     {"prev position",       COMMAND_PRESS,  command_prev_position},
+    {"load state",          COMMAND_PRESS,  command_load_state},
+    {"save state",          COMMAND_PRESS,  command_save_state},
 };
+
+static void *state = NULL;
+void command_load_state(){
+    if(state){
+        load_state(state);
+        kz_log("loaded state");
+    }else{
+        kz_log("no state");
+    }
+}
+
+void command_save_state(){
+    if(state){
+        free(state);
+    }
+    state = malloc(768 * 1024);
+    kz_state_hdr_t *kz_state = state;
+    kz_state->size = save_state(state);
+    kz_state->z2_version = Z2_VERSION;
+    kz_state->settings_version = 0;
+    state = realloc(state, kz_state->size);
+    kz_log("saved state");
+}
 
 void command_timer(void){
     kz.timer_running = !kz.timer_running;

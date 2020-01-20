@@ -185,6 +185,8 @@ void load_state(void *state){
         node = node->next;
     }
 
+    st_read(&p, &z2_light_queue, sizeof(z2_light_queue));
+
     /* load matrix stack */
     st_read(&p, &z2_mtx_stack, sizeof(z2_mtx_stack));
     st_read(&p, &z2_mtx_stack_top, sizeof(z2_mtx_stack_top));
@@ -324,12 +326,14 @@ void load_state(void *state){
         switch(c_id){
             case 0x0001:
                 relocate_col_hdr(0x040118D8);
+                relocate_col_hdr(0x0400E760);
+                relocate_col_hdr(0x04011928);
                 break;
             case 0x0197:
                 relocate_col_hdr(0x060012B0);
                 relocate_col_hdr(0x06001590);
                 break;
-            case 0x0C:
+            case 0x000C:
                 relocate_col_hdr(0x060080E8);
                 break;
             case 0x0205:
@@ -338,6 +342,39 @@ void load_state(void *state){
                 break;
             case 0x01A4:
                 relocate_col_hdr(0x06000968);
+                break;
+            case 0x0163:
+                relocate_col_hdr(0x060048D0);
+                break;
+            case 0x01A0:
+                relocate_col_hdr(0x06002D30);
+                break;
+            case 0x01A5:
+                relocate_col_hdr(0x06000A20);
+                break;
+            case 0x0187:
+                relocate_col_hdr(0x06001AA8);
+                break;
+            case 0x020E:
+                relocate_col_hdr(0x06009A88);
+                break;
+            case 0x0250:
+                relocate_col_hdr(0x06000FC8);
+                break;
+            case 0x0218:
+                relocate_col_hdr(0x06001428);
+                break;
+            case 0x003E:
+                relocate_col_hdr(0x06008BD4);
+                break;
+            case 0x0280:
+                relocate_col_hdr(0x06002420);
+                break;
+            case 0x0088:
+                relocate_col_hdr(0x060142E8);
+                break;
+            case 0x0169:
+                relocate_col_hdr(0x06001C98);
                 break;
         }
     }
@@ -356,7 +393,13 @@ void load_state(void *state){
     st_read(&p, &col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
 
     /* create skybox */
-    z2_CreateSkyboxGfx(&z2_game.skybox_ctx, 5);
+    if(z2_game.skybox_type != 0){
+        if(z2_game.skybox_type == 5){
+            z2_CreateSkyboxVtx(&z2_game.skybox_ctx, 6);
+        }else{
+            z2_CreateSkyboxVtx(&z2_game.skybox_ctx, 5);
+        }
+    }
 
     /* load hud textures */
     zu_file_idx_load(z2_parameter_static, z2_game.hud_ctx.parameter_static);
@@ -493,7 +536,7 @@ size_t save_state(void *state){
     st_write(&p, &z2_segment, sizeof(z2_segment));
 
     /* save game area nodes */
-    st_write(&p,&z2_game_arena,sizeof(z2_game_arena));
+    st_write(&p, &z2_game_arena, sizeof(z2_game_arena));
     for(z2_arena_node_t *node = z2_game_arena.first;node;node = node->next){
         st_write(&p, &ent_start, sizeof(ent_start));
         st_write(&p, &node->free, sizeof(node->free));
@@ -506,6 +549,8 @@ size_t save_state(void *state){
     st_write(&p, &ent_end, sizeof(ent_end));
 
     set_destroy(&node_set);
+
+    st_write(&p, &z2_light_queue, sizeof(z2_light_queue));
 
     /* save matrix stack */
     st_write(&p, &z2_mtx_stack, sizeof(z2_mtx_stack));

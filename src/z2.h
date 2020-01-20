@@ -450,7 +450,7 @@ typedef struct {
 #else
     char                unk_0x42A0[0x1A];                               /* 0x42A0 */
     char                event_inf[0x8];                                 /* 0x42BA */
-    char                unk_0x42C2[0x32];                               /* 0x4232 */
+    char                unk_0x42C2[0x32];                               /* 0x42C2 */
 #endif
     struct {                                        /* 0x3F68 */    /* 0x42F4 */
         uint32_t    chest;          /* 0x0000 */
@@ -461,9 +461,13 @@ typedef struct {
     }                   scene_flags[0x78];          /* 0x0014 */
     char                unk_0x48C8[2];              /* 0x48C8 */        /* 0x4C54 */
     char                mask_mask_bit[3];           /* 0x48CA */        /* 0x4C56 */
-    char                unk_0x48CD[0x27];           /* 0x48CD */        /* 0x4C59 */
-    z2_static_ctxt_t   *static_ctx;                 /* 0x48F4 */        /* 0x4C80 */
-} z2_file_t;                                        /* 0x48F8 */        /* 0x4C84 */
+#if Z2_VERSION==NZSE
+    char                unk_0x48CD[0x23];           /* 0x48CD */
+#else
+    char                unk_0x48CD[0x27];                               /* 0x4C59 */
+#endif
+    z2_static_ctxt_t   *static_ctx;                 /* 0x48F0 */        /* 0x4C80 */
+} z2_file_t;                                        /* 0x48F4 */        /* 0x4C84 */
 
 typedef struct
 {
@@ -1181,10 +1185,24 @@ typedef struct {
     void               *texture[2];                 /* 0x0168 */
     char                unk_0x170[0x8];             /* 0x0170 */
     void               *unk_0x178;                  /* 0x0178 */
-    Gfx                *dlist[2];                   /* 0x017C */
+    Gfx                *disp_buf;                   /* 0x017C */
+    Gfx                *disp_p;                     /* 0x0180 */
     Vtx                *vtx;                        /* 0x0184 */
     char                unk_0x188[0x98];            /* 0x0188 */
 } z2_skybox_ctxt_t;                                 /* 0x0220 */
+
+typedef struct z2_light_node_s z2_light_node_t;
+struct z2_light_node_s {
+    void               *light;                      /* 0x0000 */
+    z2_light_node_t    *prev;                       /* 0x0004 */
+    z2_light_node_t    *next;                       /* 0x0008 */
+};                                                  /* 0x000C */
+
+typedef struct {
+    uint32_t            node_cnt;                   /* 0x0000 */
+    uint32_t            node_cur;                   /* 0x0004 */
+    z2_light_node_t     nodes[32];                  /* 0x0008 */
+} z2_light_queue_t;                                 /* 0x0188 */
 
 typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     z2_ctxt_t           common;                     /* 0x00000 */
@@ -1198,7 +1216,9 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     z2_camera_t        *active_cameras[4];          /* 0x00800 */
     int16_t             camera_cur;                 /* 0x00810 */
     int16_t             camera_next;                /* 0x00812 */
-    char                unk_0x814[0x1C];            /* 0x00814 */
+    char                unk_0x814[0x4];             /* 0x00814 */
+    z2_light_node_t    *light_append;               /* 0x00818 */
+    char                unk_0x81C[0x14];            /* 0x0081C */
     z2_col_ctxt_t       col_ctxt;                   /* 0x00830 */
     z2_actor_ctxt_t     actor_ctxt;                 /* 0x01CA0 */
     char                unk_0x1F24[0x04];           /* 0x01F24 */
@@ -1489,7 +1509,7 @@ z2_extern void          z2_ActionLabelUpdate        (z2_hud_ctxt_t *hud_ctx, uin
 z2_extern void          z2_LoadRoom                 (z2_game_t *game, z2_room_ctxt_t *room_ctx, uint8_t room_id);
 z2_extern void          z2_DrawRoom                 (z2_game_t *game, z2_room_t *room, int a2);
 z2_extern void          z2_UnloadRoom               (z2_game_t *game, z2_room_ctxt_t *room_ctx);
-z2_extern void          z2_CreateSkyboxGfx          (z2_skybox_ctxt_t *skybox_ctx, int type);
+z2_extern void          z2_CreateSkyboxVtx          (z2_skybox_ctxt_t *skybox_ctx, int a1);
 z2_extern void          z2_MotionBlur               (z2_ctxt_t *ctx);
 z2_extern void          z2_input_update             (z2_ctxt_t *ctx);
 z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram);
@@ -1518,6 +1538,7 @@ z2_extern uint16_t                  z2_link_spawn_obj;
 z2_extern z2_player_ovl_table_t     z2_player_ovl_table[2];
 z2_extern z2_static_particle_ctxt_t z2_static_particle_ctxt;
 z2_extern z2_file_t                 z2_file;
+z2_extern z2_light_queue_t          z2_light_queue;
 z2_extern z2_arena_t                z2_game_arena;
 z2_extern z2_segment_t              z2_segment;
 z2_extern uint32_t                 *z2_cimg[];

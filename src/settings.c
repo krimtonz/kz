@@ -18,7 +18,7 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_TOGGLE_MENU] = make_bind(2, BUTTON_R, BUTTON_L);
     settings->binds[KZ_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
     settings->binds[KZ_CMD_LEVITATE] = make_bind(1, BUTTON_L);
-    settings->binds[KZ_CMD_TURBO] = make_bind(1, BUTTON_D_LEFT);
+    settings->binds[KZ_CMD_TURBO] = BIND_END;
     settings->binds[KZ_CMD_FALL] = BIND_END;
     settings->binds[KZ_CMD_RELOAD] = BIND_END;
     settings->binds[KZ_CMD_VOID] = make_bind(2, BUTTON_D_LEFT, BUTTON_A);
@@ -38,6 +38,8 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_NEXT_POSITION] = BIND_END;
     settings->binds[KZ_CMD_PREV_POSITION] = BIND_END;
     settings->binds[KZ_CMD_TITLE_SCREEN] = BIND_END;
+    settings->binds[KZ_CMD_LOAD_STATE] = make_bind(1, BUTTON_D_LEFT);
+    settings->binds[KZ_CMD_SAVE_STATE] = make_bind(1, BUTTON_D_RIGHT);
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 20;
@@ -71,18 +73,20 @@ void save_settings_to_flashram(int profile){
             i++;
         }
     }
-    struct settings *settings_temp = malloc(sizeof(*settings_temp) * SETTINGS_MAX);
-    z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
-    memcpy(settings_temp + profile, &settings_info, sizeof(settings_info));
-    z2_dmaramtoflash(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
+    int blk_cnt = SIZE_TO_BLOCK(sizeof(struct settings) * SETTINGS_MAX) + 1;
+    char *settings_temp = malloc(blk_cnt * IO_BLOCK_SIZE);
+    z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
+    memcpy(settings_temp + IO_BLOCK_SIZE + profile * sizeof(settings_info), &settings_info, sizeof(settings_info));
+    z2_dmaramtoflash(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
     kz_log("saved settings profile %d", profile);
     free(settings_temp);
 }
 
 void load_settings_from_flashram(int profile){
-    struct settings *settings_temp = malloc(sizeof(*settings_temp) * SETTINGS_MAX);
-    z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), SIZE_TO_BLOCK(sizeof(*settings_temp) * SETTINGS_MAX));
-    struct settings *settings_profile = &settings_temp[profile];
+    int blk_cnt = SIZE_TO_BLOCK(sizeof(struct settings) * SETTINGS_MAX) + 1;
+    char *settings_temp = malloc(blk_cnt * IO_BLOCK_SIZE);
+    z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
+    struct settings *settings_profile = (struct settings*)(settings_temp + IO_BLOCK_SIZE + profile * sizeof(*settings_profile));
     if(settings_profile->header.version > 0 && settings_profile->header.version == FULL_SETTINGS){
         if(settings_profile->header.magic[0] == 'k' && settings_profile->header.magic[1] == 'z' && settings_profile->header.magic[2] == 'k' && settings_profile->header.magic[3] == 'z'){
             memcpy((void*)&settings_info, (void*)settings_profile, sizeof(*settings_profile));

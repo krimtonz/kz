@@ -38,29 +38,6 @@ static void cpu_counter(void){
     count = new_count;
 }
 
-#ifndef LITE
-static void *state = NULL;
-static int save_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(state){
-        free(state);
-    }
-    state = malloc(768 * 1024);
-    kz_state_hdr_t *kz_state = state;
-    kz_state->size = save_state(state);
-    kz_state->z2_version = Z2_VERSION;
-    kz_state->settings_version = 0;
-    state = realloc(state, kz_state->size);
-    return 1;
-}
-
-static int load_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(state){
-        load_state(state);
-    }
-    return 1;
-}
-#endif
-
 static void kz_main(void) {
     cpu_counter();
     gfx_begin();
@@ -189,7 +166,7 @@ static void kz_main(void) {
             z2_link.linear_velocity = 18.0f;
             gfx_printf_color(Z2_SCREEN_WIDTH - 60, Z2_SCREEN_HEIGHT - 60, COLOR_GREEN, "t");
         }
-        if(settings->cheats & (1 << CHEAT_FREEZE_TIME)){
+        if(settings->cheats & (1 << CHEAT_FREEZE_TIME) && z2_file.static_ctx){
             z2_file.timespeed = -z2_file.static_ctx->time_speed;
         }
         if(settings->cheats & (1 << CHEAT_RESTRICTION)){
@@ -398,8 +375,6 @@ static void init(void) {
     #ifndef LITE
     menu_submenu_add(&kz.main_menu, 0, 8, "debug", create_debug_menu());
     menu_submenu_add(&kz.main_menu, 0, 9, "settings", create_settings_menu());
-    menu_button_add(&kz.main_menu, 0, 10, "save state", save_state_onactivate, NULL);
-    menu_button_add(&kz.main_menu, 0, 11, "load state", load_state_onactivate, NULL);
     #else
     menu_submenu_add(&kz.main_menu, 0, 8, "settings", create_settings_menu());
     #endif
@@ -423,7 +398,7 @@ void kz_log(const char *format, ...){
         free(log_entry->mesg);
     }
     for(int i = KZ_LOG_MAX - 1;i > 0;i--){
-        kz.log[i] = kz.log[i-1];
+        kz.log[i] = kz.log[i - 1];
     }
     va_list va;
     va_start(va, format);
