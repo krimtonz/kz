@@ -6,6 +6,7 @@
 #include "state.h"
 #include "zu.h"
 #include "resource.h"
+#include "obj_reloc.h"
 
 static void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
@@ -342,186 +343,14 @@ void load_state(void *state){
            these are relocated during actor initalization, and therefore are not relocated.
            adding these as they are found */
         z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(c_ptr);
-        switch(c_id){
-            case 0x0001:
-                relocate_col_hdr(0x040118D8);
-                relocate_col_hdr(0x0400E760);
-                relocate_col_hdr(0x04011928);
-                relocate_col_hdr(0x0400E710);
+        for(int j = 0;j < sizeof(obj_relocs) / sizeof(*obj_relocs);j++){
+            obj_reloc_t *reloc = &obj_relocs[j];
+            if(c_id == reloc->obj_id){
+                for(int k = 0;k < reloc->reloc_cnt;k++){
+                    relocate_col_hdr(reloc->relocs[k]);
+                }
                 break;
-            case 0x0197:
-                relocate_col_hdr(0x060012B0);
-                relocate_col_hdr(0x06001590);
-                break;
-            case 0x000C:
-                relocate_col_hdr(0x060080E8);
-                break;
-            case 0x0205:
-                relocate_col_hdr(0x06002D80);
-                relocate_col_hdr(0x060026A0);
-                break;
-            case 0x01A4:
-                relocate_col_hdr(0x06000968);
-                break;
-            case 0x0163:
-                relocate_col_hdr(0x060048D0);
-                break;
-            case 0x01A0:
-                relocate_col_hdr(0x06002D30);
-                break;
-            case 0x01A5:
-                relocate_col_hdr(0x06000A20);
-                break;
-            case 0x0187:
-                relocate_col_hdr(0x06001AA8);
-                break;
-            case 0x020E:
-                relocate_col_hdr(0x06009A88);
-                relocate_col_hdr(0x0600B868);
-                break;
-            case 0x0250:
-                relocate_col_hdr(0x06000FC8);
-                relocate_col_hdr(0x06001CB0);
-                break;
-            case 0x0218:
-                relocate_col_hdr(0x06001428);
-                break;
-            case 0x003E:
-                relocate_col_hdr(0x06008BD4);
-                break;
-            case 0x0280:
-                relocate_col_hdr(0x06002420);
-                break;
-            case 0x0088:
-                relocate_col_hdr(0x060142E8);
-                break;
-            case 0x0169:
-                relocate_col_hdr(0x06001C98);
-                break;
-            case 0x01A1:
-                relocate_col_hdr(0x060023D4);
-                break;
-            case 0x020D:
-                relocate_col_hdr(0x06001B2C);
-                break;
-            case 0x016C:
-                relocate_col_hdr(0x06001BA8);
-                break;
-            case 0x0208:
-                relocate_col_hdr(0x06002948);
-                break;
-            case 0x0212:
-                relocate_col_hdr(0x06006688);
-                break;
-            case 0x017F:
-                relocate_col_hdr(0x060016DC);
-                break;
-            case 0x019a:
-                relocate_col_hdr(0x060002AC);
-                break;
-            case 0x018A:
-                relocate_col_hdr(0x06000E00);
-                break;
-            case 0x01D2:
-                relocate_col_hdr(0x06003CD0);
-                break;
-            case 0x01A8:
-                relocate_col_hdr(0x06000AD0);
-                break;
-            case 0x01BF:
-                relocate_col_hdr(0x060011C0);
-                relocate_col_hdr(0x06001EB8);
-                break;
-            case 0x005F:
-                relocate_col_hdr(0x060000C0);
-                break;
-            case 0x0003:
-                relocate_col_hdr(0x06007498);
-                relocate_col_hdr(0x06008018);
-                relocate_col_hdr(0x0602324C);
-                break;
-            case 0x0157:
-                relocate_col_hdr(0x06000294);
-                break;
-            case 0x027F:
-                relocate_col_hdr(0x060014D8);
-                break;
-            case 0x00EC:
-                relocate_col_hdr(0x06000578);
-                relocate_col_hdr(0x06000F00);
-                break;
-            case 0x0158:
-                relocate_col_hdr(0x060011C0);
-                break;
-            case 0x01F5:
-                relocate_col_hdr(0x06000490);
-                break;
-            case 0x01F4:
-                relocate_col_hdr(0x06000048);
-                break;
-            case 0x0133:
-                relocate_col_hdr(0x06000B70);
-                break;
-            case 0x01C7:
-                relocate_col_hdr(0x060005C8);
-                break;
-            case 0x0260:
-                relocate_col_hdr(0x06001118);
-                break;
-            case 0x0229:
-                relocate_col_hdr(0x06002328);
-                break;
-            case 0x0199:
-                relocate_col_hdr(0x060016C0);
-                break;
-            case 0x01C1:
-                relocate_col_hdr(0x06008040);
-                break;
-            case 0x01C2:
-                relocate_col_hdr(0x06002FC4);
-                break;
-            case 0x0237:
-                relocate_col_hdr(0x060119D4);
-                break;
-            case 0x0239:
-                relocate_col_hdr(0x060011B0);
-                break;
-            case 0x022C:
-                relocate_col_hdr(0x060018C0);
-                relocate_col_hdr(0x06001D10);
-                break;
-            case 0x0236:
-                relocate_col_hdr(0x0600DE48);
-                break;
-            case 0x005C:
-                relocate_col_hdr(0x06004640);
-                break;
-            case 0x01B3:
-                relocate_col_hdr(0x06000B80);
-                break;
-            case 0x0222:
-                relocate_col_hdr(0x06000118);
-                break;
-            case 0x0267:
-                relocate_col_hdr(0x06002498);
-                break;
-            case 0x00D2:
-                relocate_col_hdr(0x06001558);
-                relocate_col_hdr(0x06001438);
-                break;
-            case 0x0256:
-                relocate_col_hdr(0x0600805C);
-                break;
-            case 0x0257:
-                relocate_col_hdr(0x060022AC);
-                break;
-            case 0x0207:
-                relocate_col_hdr(0x06002190);
-                relocate_col_hdr(0x06004DF0);
-                break;
-            case 0x019F:
-                relocate_col_hdr(0x06001640);
-                break;
+            }
         }
     }
 
