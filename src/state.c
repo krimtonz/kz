@@ -395,6 +395,9 @@ void load_state(void *state){
             case 0x0169:
                 relocate_col_hdr(0x06001C98);
                 break;
+            case 0x01A1:
+                relocate_col_hdr(0x060023D4);
+                break;
         }
     }
 
@@ -407,9 +410,9 @@ void load_state(void *state){
 
     /* load dynamic collision */
     z2_col_ctxt_t *col = &z2_game.col_ctxt;
-    st_read(&p, &col->dyn.list, sizeof(*col->dyn.list) * col->dyn_list_max);
-    st_read(&p, &col->dyn_poly, sizeof(*col->dyn_poly) * col->dyn_poly_max);
-    st_read(&p, &col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
+    st_read(&p, col->dyn.list, sizeof(*col->dyn.list) * col->dyn_list_max);
+    st_read(&p, col->dyn_poly, sizeof(*col->dyn_poly) * col->dyn_poly_max);
+    st_read(&p, col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
 
     /* create skybox */
     if(z2_game.skybox_type != 0){
@@ -648,9 +651,9 @@ size_t save_state(void *state){
     st_write(&p, &col_hdr->water, sizeof(*col_hdr->water) * col_hdr->n_water);
 
     /* save dynamic collision */
-    st_write(&p, &dynamic_col->dyn.list, sizeof(*dynamic_col->dyn.list) * dynamic_col->dyn_list_max);
-    st_write(&p, &dynamic_col->dyn_poly, sizeof(*dynamic_col->dyn_poly) * dynamic_col->dyn_poly_max);
-    st_write(&p, &dynamic_col->dyn_vtx, sizeof(*dynamic_col->dyn_vtx) * dynamic_col->dyn_vtx_max);
+    st_write(&p, dynamic_col->dyn.list, sizeof(*dynamic_col->dyn.list) * dynamic_col->dyn_list_max);
+    st_write(&p, dynamic_col->dyn_poly, sizeof(*dynamic_col->dyn_poly) * dynamic_col->dyn_poly_max);
+    st_write(&p, dynamic_col->dyn_vtx, sizeof(*dynamic_col->dyn_vtx) * dynamic_col->dyn_vtx_max);
 
     /* save display lists */
     z2_gfx_t *gfx = z2_ctxt.gfx;
