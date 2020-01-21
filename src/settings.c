@@ -38,8 +38,10 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_NEXT_POSITION] = BIND_END;
     settings->binds[KZ_CMD_PREV_POSITION] = BIND_END;
     settings->binds[KZ_CMD_TITLE_SCREEN] = BIND_END;
+#ifndef LITE
     settings->binds[KZ_CMD_LOAD_STATE] = make_bind(1, BUTTON_D_LEFT);
     settings->binds[KZ_CMD_SAVE_STATE] = make_bind(1, BUTTON_D_RIGHT);
+#endif
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 20;

@@ -31,10 +31,13 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"load position",       COMMAND_PRESS,  command_load_position},
     {"next position",       COMMAND_PRESS,  command_next_position},
     {"prev position",       COMMAND_PRESS,  command_prev_position},
+#ifndef LITE
     {"load state",          COMMAND_PRESS,  command_load_state},
     {"save state",          COMMAND_PRESS,  command_save_state},
+#endif
 };
 
+#ifndef LITE
 static void *state = NULL;
 void command_load_state(){
     if(state){
@@ -57,6 +60,7 @@ void command_save_state(){
     state = realloc(state, kz_state->size);
     kz_log("saved state");
 }
+#endif
 
 void command_timer(void){
     kz.timer_running = !kz.timer_running;
