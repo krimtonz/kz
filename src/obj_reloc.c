@@ -1,3 +1,4 @@
+#ifndef LITE
 #include "obj_reloc.h"
 
 obj_reloc_t obj_relocs[55] = {
@@ -279,3 +280,4 @@ obj_reloc_t obj_relocs[55] = {
         }
     },
 };
+#endif

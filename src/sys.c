@@ -34,13 +34,6 @@ static fat_path_t  *wd;
 
 static int              fat_ready = 0;
 
-time_t time(time_t *tloc){
-    if (tloc){
-        *tloc = 0;
-    }
-    return 0;
-}
-
 static int init_fat(){
     if(fat_ready){
         return 0;
@@ -148,6 +141,21 @@ static int ent_mode(fat_entry_t *ent){
     return mode;
 }
 
+static void ent_stat(fat_entry_t *ent, struct stat *buf){
+    buf->st_dev = 0;
+    buf->st_ino = make_sn(ent);
+    buf->st_mode = ent_mode(ent);
+    buf->st_nlink = 1;
+    buf->st_uid = 0;
+    buf->st_gid = 0;
+    buf->st_size = ent->size;
+    buf->st_atime = ent->access_time;
+    buf->st_mtime = ent->modify_time;
+    buf->st_ctime = ent->create;
+    buf->st_blksize = fat.bytes_per_cluster;
+    buf->st_blocks = (ent->size + fat.bytes_per_cluster - 1) / fat.bytes_per_cluster;
+}
+
 static void delete_desc(int file){
     desc_t *desc = desc_list[file];
     fat_free(desc->fp);
@@ -183,6 +191,27 @@ static int seek_file(file_desc_t *fdesc){
         return -1;
     }
     errno = e;
+    return 0;
+}
+
+static fat_path_t *wd_path(const char *path){
+    const char *tail;
+    fat_path_t *origin = get_origin(path, &tail);
+    return fat_path(&fat, origin, tail, NULL);
+}
+
+static int wd_find(const char *path, fat_entry_t *ent){
+    const char *tail;
+    fat_path_t *origin = get_origin(path, &tail);
+    return fat_find(&fat, fat_path_target(origin), tail, ent);
+}
+
+/* implement syscalls */
+
+time_t time(time_t *tloc){
+    if (tloc){
+        *tloc = 0;
+    }
     return 0;
 }
 
@@ -333,11 +362,6 @@ int read(int file, void *buf, uint32_t byte_cnt){
     return cnt;
 }
 
-static fat_path_t *wd_path(const char *path){
-    const char *tail;
-    fat_path_t *origin = get_origin(path, &tail);
-    return fat_path(&fat, origin, tail, NULL);
-}
 
 DIR *opendir(const char *dir){
     if(init_fat()){
@@ -463,6 +487,270 @@ void reset_disk(void){
         fat_free(wd);
         wd = NULL;
     }
+}
+off_t lseek(int file, off_t offset, int whence){
+    file_desc_t *file_desc = get_desc(file);
+    if(!file_desc){
+        return -1;
+    }
+    if(whence == SEEK_SET){
+        file_desc->pos = offset;
+    }
+    else if(whence == SEEK_CUR){
+        file_desc->pos += offset;
+    }else if(whence == SEEK_END){
+        file_desc->pos = file_desc->descriptor.file.size + offset;
+    }
+    else{
+        errno = EINVAL;
+        return -1;
+    }
+    return file_desc->pos;
+}
+
+int isatty(int file){
+    if(get_desc(file)){
+        errno = ENOTTY;
+    }
+    return 0;
+}
+
+int fstatat(int file, const char *path, struct stat *buf, int flag){
+    if(init_fat()){
+        return -1;
+    }
+    fat_entry_t *dir;
+    if(file == AT_FDCWD){
+        dir = fat_path_target(wd);
+    }
+    else{
+        desc_t *desc = get_desc(file);
+        if(!desc){
+            return -1;
+        }
+        dir = fat_path_target(desc->fp);
+    }
+    fat_entry_t ent;
+    if(fat_find(&fat, dir, path, &ent)){
+        return -1;
+    }
+    ent_stat(&ent, buf);
+    return 0;
+}
+
+int fstat(int file, struct stat *buf){
+    desc_t *desc = get_desc(file);
+    if(!desc){
+        return -1;
+    }
+    ent_stat(fat_path_target(desc->fp), buf);
+    return 0;
+}
+
+int truncate(const char *path, off_t len){
+    if(init_fat()){
+        return -1;
+    }
+    if(len < 0){
+        errno = EINVAL;
+        return -1;
+    }
+    fat_entry_t ent;
+    if(wd_find(path, &ent)){
+        return -1;
+    }
+    if(ent.attributes & FAT_ATTRIBUTE_DIRECTORY){
+        errno = EISDIR;
+        return -1;
+    }
+    if(entry_access(&ent, 1)){
+        return - 1;
+    }
+    uint32_t size = ent.size;
+    if(fat_resize(&ent, len, NULL)){
+        return -1;
+    }
+    if(len > size){
+        fat_file_t file;
+        fat_begin(&ent, &file);
+        int e = errno;
+        errno = 0;
+        fat_advance(&file, size, NULL);
+        if(errno != 0){
+            return -1;
+        }
+        errno = e;
+        uint32_t cnt = len - size;
+        if(fat_rw(&file, FAT_WRITE, NULL, cnt, NULL, NULL) != cnt){
+            return -1;
+        }
+    }
+    return fat_flush(&fat);
+}
+
+int rename(const char *old_path, const char *new_path){
+    if(init_fat()){
+        return -1;
+    }
+    int e = errno;
+    errno = 0;
+    fat_path_t *fp = wd_path(old_path);
+    if(errno == 0){
+        entry_access(fat_path_target(fp), 1);
+    }
+    int ret = -1;
+    if(fp){
+        if(errno == 0){
+            errno = e;
+            const char *tail;
+            fat_path_t *origin = get_origin(new_path, &tail);
+            ret = fat_rename(&fat, fp, origin, tail, NULL);
+        }
+        fat_free(fp);
+    }
+    if(ret == 0){
+        return fat_flush(&fat);
+    }else{
+        return ret;
+    }
+}
+
+int chmod(const char *path, mode_t mode){
+    if(init_fat()){
+        return -1;
+    }
+    fat_entry_t ent;
+    if(wd_find(path, &ent)){
+        return -1;
+    }
+    if(entry_access(&ent, 1)){
+        return -1;
+    }
+    uint8_t attr = ent.attributes;
+    if(mode & S_IRUSR){
+        attr &= ~FAT_ATTRIBUTE_HIDDEN;
+    }else{
+        attr |= FAT_ATTRIBUTE_HIDDEN;
+    }
+    if(mode & S_IWUSR){
+        attr &= ~FAT_ATTRIBUTE_READONLY;
+    }else{
+        attr |= FAT_ATTRIBUTE_READONLY;
+    }
+    if(fat_attribute(&ent, attr)){
+        return -1;
+    }
+    return fat_flush(&fat);
+}
+
+int unlink(const char *path){
+    if(init_fat()){
+        return -1;
+    }
+    fat_entry_t ent;
+    if(wd_find(path, &ent)){
+        return -1;
+    }
+    if(ent.attributes & FAT_ATTRIBUTE_DIRECTORY){
+        errno = EISDIR;
+        return -1;
+    }
+    if(entry_access(&ent, 1)){
+        return -1;
+    }
+    if(fat_remove(&ent)){
+        return -1;
+    }
+    return fat_flush(&fat);
+}
+
+void seekdir(DIR *dirp, long loc){
+    rewinddir(dirp);
+    dir_desc_t *ddesc = (void*)dirp;
+    for(long i = 0;i < loc;i++){
+        fat_entry_t ent;
+        do{
+            if(fat_dir(&ddesc->base.file, &ent)){
+                return;
+            }
+        } while(ent.attributes & FAT_ATTRIBUTE_LABEL);
+        ddesc->pos++;
+    }
+}
+
+long telldir(DIR *dirp){
+    dir_desc_t *ddesc = (void*)dirp;
+    return ddesc->pos;
+}
+
+void rewinddir(DIR *dirp){
+    dir_desc_t *ddesc = (void*)dirp;
+    fat_rewind(&ddesc->base.file);
+    ddesc->pos = 0;
+}
+
+int mkdir(const char *path, mode_t mode){
+    if(init_fat()){
+        return -1;
+    }
+    uint8_t attr = FAT_ATTRIBUTE_DIRECTORY;
+    if(!(mode & S_IRUSR)){
+        attr |= FAT_ATTRIBUTE_HIDDEN;
+    }
+    if(!(mode & S_IWUSR)){
+        attr |= FAT_ATTRIBUTE_READONLY;
+    }
+    const char *tail;
+    fat_path_t *fp = get_origin(path, &tail);
+    if(fat_create(&fat, fat_path_target(fp), tail, attr, NULL)){
+        return -1;
+    }
+    return fat_flush(&fat);
+}
+
+int rmdir(const char *path){
+    if(init_fat()){
+        return -1;
+    }
+    fat_entry_t ent;
+    if(wd_find(path, &ent)){
+        return -1;
+    }
+    if(!(ent.attributes & FAT_ATTRIBUTE_DIRECTORY)){
+        errno = ENOTDIR;
+        return -1;
+    }
+    if(entry_access(&ent, 1)){
+        return -1;
+    }
+    if(fat_remove(&ent)){
+        return -1;
+    }
+    return fat_flush(&fat);
+}
+
+int stat(const char *path, struct stat *buf){
+    if(init_fat()){
+        return -1;
+    }
+    fat_entry_t ent;
+    if(wd_find(path, &ent)){
+        return -1;
+    }
+    if(buf){
+        ent_stat(&ent, buf);
+    }
+    return 0;
+}
+
+int lstat(const char *path, struct stat *buf){
+    return stat(path, buf);
+}
+
+/* __assert_func stub to fulfill assert calls in newlib */
+__attribute__ ((used))
+void __assert_func(const char *file, int line, const char *func, const char *failedexpr){
+    return;
 }
 
 #endif

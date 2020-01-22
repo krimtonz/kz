@@ -1,3 +1,4 @@
+#ifndef LITE
 #ifndef _OBJ_RELOC_H
 #define _OBJ_RELOC_H
 
@@ -11,4 +12,5 @@ typedef struct {
 
 extern obj_reloc_t  obj_relocs[55];
 
+#endif
 #endif

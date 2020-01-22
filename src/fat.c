@@ -14,6 +14,19 @@ enum sfn_case{
     SFN_CASE_UPPER,
 };
 
+static int entry_mod(fat_entry_t *entry){
+    fat_ctxt_t *fat = entry->fat_ctxt;
+    if(strcmp(entry->long_name, ".") == 0 || strcmp(entry->long_name, "..") == 0){
+        errno = EINVAL;
+        return -1;
+    }
+    if((entry->attributes & FAT_ATTRIBUTE_DIRECTORY) && (entry->cluster < 2 || (fat->type == FAT32 && entry->cluster == fat->root_cluster))){
+        errno = EINVAL;
+        return -1;
+    }
+    return 0;
+}
+
 static _Bool name_compare(const char *a, const char *b){
     while(*a && *b){
         char ca = *a++;
@@ -773,6 +786,31 @@ int dir_find(fat_ctxt_t *fat, uint32_t cluster, const char *name, fat_entry_t *e
     return -1;
 }
 
+static int dir_remove(fat_entry_t *entry){
+    fat_ctxt_t *fat = entry->fat_ctxt;
+    fat_file_t pos = entry->first;
+    while(pos.p_offset <= entry->last.p_offset){
+        if(file_sector(&pos, 1)){
+            return -1;
+        }
+        void *data = file_data(&pos);
+        set_word(data, 0x0D, 1, get_word(data, 0x00, 1));
+        set_word(data, 0x00, 1, 0xE5);
+        cache_dirty(fat, FAT_CACHE_DATA);
+        if(pos.p_offset == entry->last.p_offset){
+            break;
+        }
+        _Bool ate;
+        if(fat_advance(&pos, 0x20, &ate) != 0x20){
+            if(ate){
+                errno = EINVAL;
+            }
+            return -1;
+        }
+    }
+    return 0;
+}
+
 static int dir_insert(fat_ctxt_t *fat, uint32_t dir_cluster, const char *name, time_t create_time, int cms, time_t access_time, time_t modify_time, uint8_t attributes, uint32_t cluster, uint32_t size, fat_entry_t *entry){
     char long_file_name_buf[0x20];
     char short_file_name_buf[0x20];
@@ -1049,7 +1087,7 @@ static uint32_t cluster_rw(fat_file_t *file, enum fat_io rw, void *buf, uint32_t
     return copy_cnt;
 }
 
-static int fat_find(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, fat_entry_t *entry){
+int fat_find(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, fat_entry_t *entry){
     fat_entry_t ent;
     if(dir){
         ent = *dir;
@@ -1358,6 +1396,37 @@ void fat_begin(fat_entry_t *entry, fat_file_t *file){
     }
 }
 
+static int fat_empty(fat_ctxt_t *fat, fat_entry_t *dir){
+    if(!(dir->attributes & FAT_ATTRIBUTE_DIRECTORY)){
+        errno = ENOTDIR;
+        return -1;
+    }
+    fat_file_t pos;
+    if(dir){
+        fat_begin(dir, &pos);
+    }else{
+        fat_root(fat, &pos);
+    }
+    fat_entry_t ent;
+    int e = errno;
+    errno = 0;
+    while(fat_dir(&pos, &ent) == 0){
+        if(ent.attributes & FAT_ATTRIBUTE_LABEL){
+            continue;
+        }
+        if(strcmp(ent.long_name, ".") == 0 || strcmp(ent.long_name, "..") == 0){
+            continue;
+        }
+        errno = ENOTEMPTY;
+        return -1;
+    }
+    if(errno != 0){
+        return -1;
+    }
+    errno = e;
+    return 0;
+}
+
 fat_entry_t *fat_path_target(fat_path_t *fat_path){
     if(fat_path){
         return fat_path->entry_list.last;
@@ -1585,6 +1654,25 @@ int fat_create(fat_ctxt_t *fat, fat_entry_t *dir, const char *path, uint8_t attr
     return 0;
 }
 
+int fat_remove(fat_entry_t *entry){
+    fat_ctxt_t *fat = entry->fat_ctxt;
+    if(entry_mod(entry)){
+        return -1;
+    }
+    if((entry->attributes & FAT_ATTRIBUTE_DIRECTORY) && fat_empty(fat, entry)){
+        return -1;
+    }
+    if(entry->cluster >= 2){
+        if(cluster_resize_chain(fat, entry->cluster, 0, 0)){
+            return -1;
+        }
+    }
+    if(dir_remove(entry)){
+        return -1;
+    }
+    return 0;
+}
+
 int fat_resize(fat_entry_t *entry, uint32_t size, fat_file_t *file){
     fat_ctxt_t *fat = entry->fat_ctxt;
     if(entry->attributes & FAT_ATTRIBUTE_DIRECTORY){
@@ -1639,6 +1727,92 @@ int fat_resize(fat_entry_t *entry, uint32_t size, fat_file_t *file){
         }
     }
     return 0;
+}
+
+int fat_attribute(fat_entry_t *ent, uint8_t attribute){
+    fat_ctxt_t *fat = ent->fat_ctxt;
+    if(entry_mod(ent)){
+        return -1;
+    }
+    uint8_t e_type = ent->attributes & (FAT_ATTRIBUTE_DIRECTORY | FAT_ATTRIBUTE_LABEL);
+    uint8_t a_type = attribute & (FAT_ATTRIBUTE_DIRECTORY | FAT_ATTRIBUTE_LABEL);
+    if(a_type != e_type){
+        errno = EINVAL;
+        return -1;
+    }
+    if(file_sector(&ent->last, 1)){
+        return -1;
+    }
+    void *data = file_data(&ent->last);
+    if(!data){
+        return -1;
+    }
+    ent->attributes = attribute;
+    set_word(data, 0x0B, 1, attribute);
+    cache_dirty(fat, FAT_CACHE_DATA);
+    return 0;
+}
+
+int fat_rename(fat_ctxt_t *fat, fat_path_t *ent_fp, fat_path_t *dir_fp, const char *path, fat_entry_t *new_ent){
+    fat_entry_t *ent = fat_path_target(ent_fp);
+    if(entry_mod(ent)){
+        return -1;
+    }
+    int e = errno;
+    errno = 0;
+    const char *tail;
+    fat_path_t *dest_fp = fat_path(fat, dir_fp, path, &tail);
+    if(errno == 0){
+        fat_entry_t *dest_ent = fat_path_target(dest_fp);
+        if(dest_ent->last.cluster == ent->last.cluster && dest_ent->last.p_offset == ent->last.p_offset){
+            errno = e;
+            goto exit;
+        }else{
+            errno = EEXIST;
+            goto error;
+        }
+    }else{
+        if(errno == ENOENT && strlen(tail) > 0 && !strchr(tail, '/') && !strchr(tail, '\\')){
+            errno = e;
+        }else{
+            goto error;
+        }
+    }
+    if(ent->attributes & FAT_ATTRIBUTE_DIRECTORY){
+        for(fat_entry_t *l_ent = dest_fp->entry_list.first;l_ent;l_ent = list_next(l_ent)){
+            if((l_ent->attributes & FAT_ATTRIBUTE_DIRECTORY) && l_ent->cluster == ent->cluster){
+                errno = EINVAL;
+                goto error;
+            }
+        }
+    }
+    size_t name_len = name_trim(tail, strlen(tail));
+    if(name_len == 0){
+        errno = EINVAL;
+        goto error;
+    }
+    if(name_len > 255){
+        errno = ENAMETOOLONG;
+        goto error;
+    }
+    char name[256];
+    memcpy(name, tail, name_len);
+    name[name_len] = 0;
+    if(dir_insert(fat, fat_path_target(dest_fp)->cluster, name, ent->create,
+                  ent->cms, ent->access_time, ent->modify_time,
+                  ent->attributes, ent->cluster, ent->size, new_ent)
+        || dir_remove(ent))
+    {
+        goto error;
+    }
+exit:
+    fat_free(dest_fp);
+    return 0;
+error:
+    if(dest_fp){
+        fat_free(dest_fp);
+    }
+    return -1;
 }
 
 int fat_init(fat_ctxt_t *fat){
