@@ -41,7 +41,7 @@ struct item_data {
     uint8_t                 option_cnt;
     int8_t                 *value_ptr;
     uint16_t                start_tile;
-    uint8_t                *ovl_values;
+    int8_t                 *ovl_values;
     int                     tiles_cnt;
     menu_sprite_t          *draw_info;
 #ifndef LITE
@@ -323,7 +323,7 @@ static int menu_item_list_event(event_handler_t *handler, menu_event_t event, vo
 }
 
 menu_item_t *menu_item_list_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, uint16_t start_tile, int8_t *options,
-                                uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
+                                uint8_t option_cnt, int8_t *value_ptr, int8_t *ovl_values, int tiles_cnt,
                                 menu_sprite_t *sprite, char *tooltip){
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if(item){

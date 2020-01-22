@@ -142,7 +142,7 @@ menu_item_t        *menu_watch_add          (menu_t *menu, uint16_t cell_x, uint
 menu_item_t        *menu_text_input_add     (menu_t *menu, uint16_t cell_x, uint16_t cell_y, char *default_text, char **value_ptr, int val_len);
 menu_item_t        *menu_bind_add           (menu_t *menu, int x, int y, int cmd);
 menu_item_t        *menu_item_list_add      (menu_t *menu, uint16_t cell_x, uint16_t cell_y, uint16_t start_tile, int8_t *options,
-                                             uint8_t option_cnt, int8_t *value_ptr, uint8_t *ovl_values, int tiles_cnt,
+                                             uint8_t option_cnt, int8_t *value_ptr, int8_t *ovl_values, int tiles_cnt,
                                              menu_sprite_t *sprite, char *tooltip);
 menu_item_t        *menu_move_button_add    (menu_t *menu, uint16_t cell_x, uint16_t cell_y,
                                              int16_t *move_x, int16_t *move_y);

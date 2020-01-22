@@ -43,7 +43,7 @@ struct capacity_upgrade_option {
     uint8_t     shift;
     uint16_t    item_tile;
     int         option_cnt;
-    uint8_t     cap_vals[8];
+    int8_t      cap_vals[8];
     int         tiles_cnt;
     char       *tooltip;
 };
