@@ -134,6 +134,9 @@ void load_state(void *state){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
             st_read(&p,&next_ent,sizeof(next_ent));
             set_insert(&ovl_set,&ent->ram);
+        }else{
+            ent->ram = NULL;
+            ent->reloc_off = 0;
         }
     }
 
@@ -146,6 +149,8 @@ void load_state(void *state){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
             st_read(&p, &next_ent, sizeof(next_ent));
             set_insert(&ovl_set, &ent->ram);
+        }else{
+            ent->ram = NULL;
         }
     }
 
