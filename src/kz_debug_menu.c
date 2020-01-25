@@ -3,11 +3,11 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "menu.h"
+#include <libundermine/menu.h>
+#include <libundermine/input.h>
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 #include "scenes.h"
-#include "input.h"
 
 #define MEMORY_MAX  0x80C00000
 

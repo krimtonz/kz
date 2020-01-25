@@ -1,6 +1,8 @@
 #include <grc.h>
 #include <stdlib.h>
-#include "resource.h"
+#include "kzresource.h"
+#include "kzgfx.h"
+#include "z2.h"
 
 #if Z2_VERSION!=NZSE
 static z2_item_t texture_map[] = {
@@ -137,6 +139,9 @@ static z2_item_t texture_map[] = {
 };
 #endif
 
+menu_sprite_t   *scroll_up_sprite = NULL;
+menu_sprite_t   *scroll_down_sprite = NULL;
+
 static const char *resource_names[R_END] = {
     NULL,
     NULL,
@@ -224,7 +229,7 @@ static void *resource_load_dungeon_items(enum resource resource){
         G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          13,
         1,              0,              SOURCE_ARCHIVE,
 #else
-        DUNGEON_OFFSET, 24,             24,         z2_icon_item_24_static,
+        0,              24,             24,         z2_icon_item_24_static,
         G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          0,
         1,              13,             SOURCE_FILE,
 #endif
@@ -284,4 +289,22 @@ gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
     return item->texture;
 }
 
-#include <grc.c>
+void static_sprites_init(void){
+    static menu_sprite_t up_sprite = {
+        NULL,   0,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
+        8,      8,      NULL,   DEFAULT_COLOR,   0,
+        0,      NULL,
+    };
+
+    static menu_sprite_t down_sprite = {
+        NULL,   1,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
+        8,      8,      NULL,   DEFAULT_COLOR,   0,
+        0,      NULL,
+    };
+
+    up_sprite.texture = resource_get(R_KZ_ARROWS);
+    down_sprite.texture = resource_get(R_KZ_ARROWS);
+
+    scroll_up_sprite = &up_sprite;
+    scroll_down_sprite = &down_sprite;
+}

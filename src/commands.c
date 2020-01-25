@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <libundermine/input.h>
 #include "commands.h"
-#include "input.h"
 #include "kz.h"
 #include "settings.h"
 #include "z2.h"

@@ -1,7 +1,8 @@
 #include <stdlib.h>
-#include "menu.h"
+#include <libundermine/menu.h>
+#include "menu_item_list.h"
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 #define ITEM_SCREEN_SIZE 11
 
@@ -43,7 +44,7 @@ struct capacity_upgrade_option {
     uint8_t     shift;
     uint16_t    item_tile;
     int         option_cnt;
-    uint8_t     cap_vals[8];
+    int8_t      cap_vals[8];
     int         tiles_cnt;
     char       *tooltip;
 };
@@ -645,7 +646,7 @@ menu_t *create_inventory_menu(void){
         };
 
         for(int i = 0;i < sizeof(items) / sizeof(*items);i++){
-            menu_gfx_add(&amounts, i % 3 * 3, i / 3 + 1, get_item_texture(items[i], 0), 0, 12, 12);
+            menu_static_gfx_add(&amounts, i % 3 * 3, i / 3 + 1, get_item_texture(items[i], 0), 0, 12, 12);
             item = menu_number_input_add(&amounts, i % 3 * 3 + 1, i / 3 + 1, 10, 3);
             menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.ammo[items[i]]);
             menu_item_offset_set(item, 5, 2);
@@ -653,17 +654,17 @@ menu_t *create_inventory_menu(void){
 
         gfx_texture *dungeon_tex = resource_get(R_Z2_DUNGEON);
 
-        menu_gfx_add(&amounts, 3, 3, dungeon_tex, 12, 12, 12);
+        menu_static_gfx_add(&amounts, 3, 3, dungeon_tex, 12, 12, 12);
         item = menu_number_input_add(&amounts, 4, 3, 10, 3);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.current_magic);
         menu_item_offset_set(item, 5, 2);
 
-        menu_gfx_add(&amounts, 6, 3, dungeon_tex, 1, 12, 12);
+        menu_static_gfx_add(&amounts, 6, 3, dungeon_tex, 1, 12, 12);
         item = menu_number_input_add(&amounts, 7, 3, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.current_health);
         menu_item_offset_set(item, 5, 2);
 
-        item = menu_gfx_add(&amounts, 0, 4, resource_get(R_Z2_RUPEE), 0, 12, 12);
+        item = menu_static_gfx_add(&amounts, 0, 4, resource_get(R_Z2_RUPEE), 0, 12, 12);
         item->color = 0xC8FF64FF;
         item = menu_number_input_add(&amounts, 1, 4, 10, 3);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.rupees);

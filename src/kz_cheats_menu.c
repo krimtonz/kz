@@ -1,6 +1,6 @@
-#include "menu.h"
+#include <libundermine/menu.h>
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 struct cheat_item {
     enum cheats mask;

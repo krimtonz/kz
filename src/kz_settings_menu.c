@@ -1,10 +1,11 @@
 #include <stdlib.h>
+#include <libundermine/input.h>
 #include "kz.h"
 #include "settings.h"
-#include "resource.h"
-#include "input.h"
+#include "kzresource.h"
 #include "commands.h"
 #include "menu_file.h"
+#include "menu_bind.h"
 #include "sys.h"
 
 enum settings_switch_item {

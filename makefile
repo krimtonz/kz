@@ -28,7 +28,7 @@ ADDRESS_LDR         = 0x80080000
 ALL_CFLAGS          = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
 ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS) $(VCCPPFLAGS)
 ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
-ALL_LIBS            = $(LIBS)
+ALL_LIBS            = -lundermine-f3dex2 $(LIBS)
 
 KZ                  = $(foreach v,$(KZ_VERSIONS),kz-$(v))
 KZ_LITE             = $(foreach v,$(KZ_VERSIONS),kz-lite-$(v))
@@ -130,11 +130,11 @@ $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-lite-$(v),$(v),ldr,
 $(foreach v,$(VC_VERSIONS),$(eval $(call vc_template,kz-vc-$(v),kz-vc,$(v))))
 
 $(KZ-NZSE)          :   CPPFLAGS    ?=	-DZ2_VERSION=NZSE
-$(KZ-NZSE)          :   ALL_LIBS    :=	-lNZSE
+$(KZ-NZSE)          :   LIBS	    :=	-lNZSE
 $(KZ-NZSJ)          :   CPPFLAGS    ?=	-DZ2_VERSION=NZSJ
-$(KZ-NZSJ)          :   ALL_LIBS    :=	-lNZSJ
+$(KZ-NZSJ)          :   LIBS	    :=	-lNZSJ
 $(KZ-NZSJ10)        :   CPPFLAGS    ?=	-DZ2_VERSION=NZSJ10
-$(KZ-NZSJ10)        :   ALL_LIBS    :=	-lNZSJ10
+$(KZ-NZSJ10)        :   LIBS	    :=	-lNZSJ10
 $(KZ-FULL)          :   CPPFLAGS    +=	-DKZ_VERSION=KZ_FULL
 $(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto
 $(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects

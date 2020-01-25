@@ -3,12 +3,12 @@
 #include <set/set.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "menu.h"
+#include <libundermine/menu.h>
 #include "sys.h"
 #include "fat.h"
 #include "menu_file.h"
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 #define FILE_ROWS 13
 

@@ -2,7 +2,7 @@
 #include <math.h>
 
 #include "collision_view.h"
-#include "gfx.h"
+#include <libundermine/gfx.h>
 #include "kz.h"
 #include "z2.h"
 #include "zu.h"

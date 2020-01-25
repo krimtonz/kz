@@ -3,15 +3,15 @@
 #include <startup.h>
 #include <inttypes.h>
 #include <math.h>
+#include <libundermine/gfx.h>
+#include <libundermine/input.h>
+#include <libundermine/watches.h>
 #include "kz.h"
-#include "gfx.h"
-#include "watches.h"
-#include "input.h"
 #include "collision_view.h"
 #include "scenes.h"
 #include "commands.h"
 #include "settings.h"
-#include "resource.h"
+#include "kzresource.h"
 #include "zu.h"
 #include "state.h"
 
@@ -317,7 +317,7 @@ static void kz_main(void) {
         }
     }
 #endif
-
+gfx_printf(100,100,"%08x",sbrk(0));
     gfx_finish();
 }
 
@@ -330,7 +330,13 @@ static int main_menu_return_onactivate(event_handler_t *handler, menu_event_t ev
 static void init(void) {
     clear_bss();
     do_global_ctors();
-    gfx_init();
+
+    input_init(&z2_input_direct.raw.pad, &z2_input_direct.raw.x, &z2_input_direct.raw.y, settings->binds, KZ_CMD_MAX);
+    bind_override(KZ_CMD_TOGGLE_MENU);
+    bind_override(KZ_CMD_RETURN);
+
+    gfx_init(0x32800, resource_get(R_KZ_FONT), &z2_ctxt.gfx->overlay.p);
+    static_sprites_init();
 
     kz.cpu_cycle_counter = 0;
     cpu_counter();
@@ -360,10 +366,9 @@ static void init(void) {
     memset(&kz.log, 0, sizeof(kz.log));
 
     kz.menu_active = 0;
+    menu_ctx_init(&kz.main_menu, &kz.tooltip);
     menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
     kz.main_menu.selected_item = menu_button_add(&kz.main_menu, 0, 0, "return", main_menu_return_onactivate, NULL);
-
-    menu_static_sprites_init();
 
     menu_submenu_add(&kz.main_menu, 0, 1, "warps", create_warps_menu());
     menu_submenu_add(&kz.main_menu, 0, 2, "cheats", create_cheats_menu());
@@ -507,8 +512,3 @@ ENTRY void _start() {
     game_state_main();
     kz_stack(kz_main);
 }
-
-#include <startup.c>
-#include <vector/vector.c>
-#include <list/list.c>
-#include <set/set.c>

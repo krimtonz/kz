@@ -4,10 +4,11 @@
 * definitions for loading graphic resources
 */
 
-#ifndef _RESOURCE_H
-#define _RESOURCE_H
-#include "gfx.h"
-#include "menu.h"
+#ifndef _KZRESOURCE_H
+#define _KZRESOURCE_H
+#include <libundermine/gfx.h>
+#include <libundermine/menu.h>
+#include "z2.h"
 
 #define     OWL_OFFSET      0x14668
 #define     RUPEE_OFFSET    0xE50
@@ -47,5 +48,8 @@ struct item_texture {
 
 void           *resource_get        (enum resource resource);
 gfx_texture    *get_item_texture    (uint8_t item_id, _Bool release);
+void            static_sprites_init (void);
 
+extern menu_sprite_t           *scroll_up_sprite;
+extern menu_sprite_t           *scroll_down_sprite;
 #endif

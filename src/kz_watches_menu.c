@@ -1,9 +1,9 @@
 #include <stdlib.h>
+#include <libundermine/menu.h>
+#include <libundermine/watches.h>
 
-#include "menu.h"
-#include "watches.h"
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 struct watch_row {
     union{

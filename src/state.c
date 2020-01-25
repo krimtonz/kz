@@ -5,8 +5,7 @@
 #include "z2.h"
 #include "state.h"
 #include "zu.h"
-#include "resource.h"
-#include "obj_reloc.h"
+#include "kzresource.h"
 
 static void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
@@ -124,7 +123,7 @@ void load_state(void *state){
             ent->loaded_cnt = 0;
         }
     }
-
+ 
     /* load player/pause overlays */
     st_read(&p, &next_ent, sizeof(next_ent));
     ovl_cnt = sizeof(z2_player_ovl_table) / sizeof(*z2_player_ovl_table);
@@ -134,6 +133,9 @@ void load_state(void *state){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
             st_read(&p,&next_ent,sizeof(next_ent));
             set_insert(&ovl_set,&ent->ram);
+        }else{
+            ent->ram = NULL;
+            ent->reloc_off = 0;
         }
     }
 
@@ -146,6 +148,8 @@ void load_state(void *state){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
             st_read(&p, &next_ent, sizeof(next_ent));
             set_insert(&ovl_set, &ent->ram);
+        }else{
+            ent->ram = NULL;
         }
     }
 
@@ -322,34 +326,60 @@ void load_state(void *state){
     /* load the room file */
     osSendMesg(&z2_file_msgqueue, &z2_game.room_ctx.loadfile, OS_MESG_NOBLOCK);
 
-    /* load objects if they are not currently loaded in the same dram address */
-    for(int i = 0;i < 35;i++){
-        struct alloc *p_obj = &objects[i];
-        z2_obj_t *c_obj = &z2_game.obj_ctx.obj[i];
-        int p_id = p_obj->id;
-        int c_id = c_obj->id;
-        if(c_id < 0){
-            c_id = -c_id;
-        }
-        void *p_ptr = p_obj->ptr;
-        void *c_ptr = c_obj->data;
-        if(c_id != 0 && (c_id != p_id || c_ptr != p_ptr)){
-            uint32_t start = z2_obj_table[c_id].vrom_start;
-            uint32_t end = z2_obj_table[c_id].vrom_end;
-            zu_file_load(start, c_ptr, end - start);
+
+    if(z2_game.pause_ctx.state != 0){
+        /* we need to load pause screen assets */
+        zu_file_idx_load(z2_icon_item_static, z2_game.pause_ctx.icon_item_static);
+        int rest_offset = z2_file.current_form * 0x72;
+        for(int i = 0;i < 0x65;i++){
+            if(!z2_restriction_table[rest_offset + i]){
+                gfx_texture_desaturate(zu_segment_find(z2_icon_item_static_table[i]), 0x1000);
+            }
         }
 
-        /* some objects have collision headers hard coded into their overlay codes. 
-           these are relocated during actor initalization, and therefore are not relocated.
-           adding these as they are found */
-        z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(c_ptr);
-        for(int j = 0;j < sizeof(obj_relocs) / sizeof(*obj_relocs);j++){
-            obj_reloc_t *reloc = &obj_relocs[j];
-            if(c_id == reloc->obj_id){
-                for(int k = 0;k < reloc->reloc_cnt;k++){
-                    relocate_col_hdr(reloc->relocs[k]);
+        zu_file_idx_load(z2_icon_item_24_static, z2_game.pause_ctx.icon_item_24);
+        zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
+        zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
+    }else{
+        /* load objects if they are not currently loaded in the same dram address */
+        for(int i = 0;i < 35;i++){
+            struct alloc *p_obj = &objects[i];
+            z2_obj_t *c_obj = &z2_game.obj_ctx.obj[i];
+            int p_id = p_obj->id;
+            int c_id = c_obj->id;
+            if(c_id < 0){
+                c_id = -c_id;
+            }
+            void *p_ptr = p_obj->ptr;
+            void *c_ptr = c_obj->data;
+            if(c_id != 0 && (c_id != p_id || c_ptr != p_ptr)){
+                uint32_t start = z2_obj_table[c_id].vrom_start;
+                uint32_t end = z2_obj_table[c_id].vrom_end;
+                zu_file_load(start, c_ptr, end - start);
+            }
+
+            /* some objects have collision headers hard coded into their overlay codes. 
+            these are relocated during actor initalization, and therefore are not relocated.
+            adding these as they are found */
+            /*for(int j = 0;j < sizeof(obj_relocs) / sizeof(*obj_relocs);j++){
+                obj_reloc_t *reloc = &obj_relocs[j];
+                if(c_id == reloc->obj_id){
+                    for(int k = 0;k < reloc->reloc_cnt;k++){
+                        relocate_col_hdr(reloc->relocs[k]);
+                    }
+                    break;
                 }
-                break;
+            }*/
+
+            for(int i = 0; i < sizeof(z2_game.col_ctxt.actors) / sizeof(*z2_game.col_ctxt.actors);i++){
+                z2_col_chk_actor_t *col = &z2_game.col_ctxt.actors[i];
+                if(col->actor == NULL){
+                    continue;
+                }
+                z2_obj_t *obj = &z2_game.obj_ctx.obj[col->actor->alloc_index];
+                z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(obj);
+                uint32_t offset = (uint32_t)col->col_hdr - (uint32_t)obj;
+                relocate_col_hdr(0x06000000 | offset);
             }
         }
     }
