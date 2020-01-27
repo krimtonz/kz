@@ -13,7 +13,6 @@
 #include "settings.h"
 #include "kzresource.h"
 #include "zu.h"
-#include "state.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -317,7 +316,7 @@ static void kz_main(void) {
         }
     }
 #endif
-gfx_printf(100,100,"%08x",sbrk(0));
+
     gfx_finish();
 }
 

@@ -51,6 +51,7 @@ z2_scene_table              = 0x801BEBB0;
 z2_stored_song              = 0x801C18EC;
 z2_link_spawn_obj           = 0x801CB318;
 z2_player_ovl_table         = 0x801CB330;
+z2_player_ovl_cur           = 0x801CB36C;
 z2_static_particle_ctxt     = 0x801E3DA0;
 z2_file                     = 0x801EF460;
 z2_light_queue              = 0x801F50F0;

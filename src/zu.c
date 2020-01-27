@@ -113,11 +113,7 @@ void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx){
                 case G_SETTIMG: break;
                 case G_SETZIMG: break;
                 case G_SETCIMG: break;
-                case G_BG_1CYC: {
-                    p->lo = 0;
-                    p->hi = 0;
-                    continue;
-                }
+                case G_BG_1CYC: break;
                 case G_BG_COPY: break;
                 default: continue;
             }

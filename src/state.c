@@ -132,7 +132,8 @@ void load_state(void *state){
         if(i == next_ent){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
             st_read(&p,&next_ent,sizeof(next_ent));
-            set_insert(&ovl_set,&ent->ram);
+            set_insert(&ovl_set, &ent->ram);
+            z2_player_ovl_cur = ent;
         }else{
             ent->ram = NULL;
             ent->reloc_off = 0;
@@ -329,7 +330,12 @@ void load_state(void *state){
 
     if(z2_game.pause_ctx.state != 0){
         /* we need to load pause screen assets */
+#if Z2_VERSION==NZSE
+        size_t size = z2_file_table[z2_item_icon_archive].vrom_end - z2_file_table[z2_item_icon_archive].vrom_start;
+        z2_LoadArchiveFile(z2_file_table[z2_item_icon_archive].vrom_start, z2_game.pause_ctx.icon_item_static, size);
+#else
         zu_file_idx_load(z2_icon_item_static, z2_game.pause_ctx.icon_item_static);
+#endif
         int rest_offset = z2_file.current_form * 0x72;
         for(int i = 0;i < 0x65;i++){
             if(!z2_restriction_table[rest_offset + i]){

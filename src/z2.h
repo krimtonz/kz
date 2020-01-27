@@ -1538,6 +1538,9 @@ z2_extern void          z2_CreateSkyboxVtx          (z2_skybox_ctxt_t *skybox_ct
 z2_extern void          z2_MotionBlur               (z2_ctxt_t *ctx);
 z2_extern void          z2_input_update             (z2_ctxt_t *ctx);
 z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram, uint32_t size);
+#if Z2_VERSION==NZSE
+z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, size_t size);
+#endif
 z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
 
@@ -1563,6 +1566,7 @@ z2_extern z2_scene_table_ent_t      z2_scene_table[113];
 z2_extern uint16_t                  z2_stored_song;
 z2_extern uint16_t                  z2_link_spawn_obj;
 z2_extern z2_player_ovl_table_t     z2_player_ovl_table[2];
+z2_extern z2_player_ovl_table_t    *z2_player_ovl_cur;
 z2_extern z2_static_particle_ctxt_t z2_static_particle_ctxt;
 z2_extern z2_file_t                 z2_file;
 z2_extern z2_light_queue_t          z2_light_queue;
@@ -1582,6 +1586,7 @@ z2_extern z2_link_t                 z2_link;
 #if Z2_VERSION==NZSE
 #define z2_icon_item_static             9 /* need to verify */
 #define z2_icon_item_field_static       10
+#define z2_map_name_static              13
 #define z2_item_icon_archive            19
 #define z2_icon_item_24_static          20
 #define z2_parameter_static             1126
