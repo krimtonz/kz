@@ -4,7 +4,6 @@
 * definitions for i/o using homeboy devices
 */
 
-#ifndef LITE
 #ifndef _SYS_H
 #define _SYS_H
 
@@ -13,6 +12,10 @@
 #include <fcntl.h>
 #include <time.h>
 
+#ifdef LITE
+#define SBRK_MAX    ((uint32_t)0x80780000)
+#else
+#define SBRK_MAX    ((uint32_t)0x80C00000)
 typedef void *DIR;
 
 typedef struct {
@@ -52,6 +55,7 @@ int         stat            (const char *path, struct stat *buf);
 int         lstat           (const char *path, struct stat *buf);
 void        __assert_func   (const char *file, int line, const char *func, const char *failedexpr);
 void        reset_disk      (void);
-
 #endif
+void       *sbrk            (int len);
+
 #endif
