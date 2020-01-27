@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include "vc.h"
 
-HOOK bool treeInsert(n64_cpu_t *cpu,uint32_t n64_start,int n64_end)
+HOOK bool kz_treeInsert(n64_cpu_t *cpu,uint32_t n64_start,int n64_end)
 
 {
     bool bVar1;
@@ -46,7 +46,7 @@ HOOK bool treeInsert(n64_cpu_t *cpu,uint32_t n64_start,int n64_end)
             ret = false;
         }
         else {
-            ret = treeBalance(ctx);
+            ret = kz_treeBalance(ctx);
         }
     }
     return ret;

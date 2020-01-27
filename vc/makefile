@@ -7,6 +7,7 @@ CFILES      = *.c
 SFILES		= *.S
 SRCDIR		= src
 OBJDIR 		= obj
+LIBDIR		= lib
 BINDIR		= ../patch/dol/vc
 VC_VERSIONS	= NARJ NARE
 NAME		= kz-vc
@@ -14,7 +15,8 @@ ADDRESS		=
 
 ALL_CFLAGS      	= -c -mcpu=750 -meabi -mhard-float -G 0 -O3 -ffunction-sections -fdata-sections $(CFLAGS)
 ALL_CPPFLAGS		= $(CPPFLAGS)
-ALL_LDFLAGS     	= -T vc.ld -G 0 -nostartfiles -specs=nosys.specs $(LDFLAGS)
+ALL_LDFLAGS     	= -L$(LIBDIR) -T vc.ld -G 0 -nostartfiles -specs=nosys.specs $(LDFLAGS) $(ALL_LIBS)
+ALL_LIBS			= $(LIBS)
 
 VC 			= $(foreach v,$(VC_VERSIONS),kz-vc-$(v))
 
@@ -65,6 +67,8 @@ endef
 $(foreach v,$(VC_VERSIONS),$(eval $(call bin_template,kz-vc-$(v),$(v),kz-vc,src)))
 
 $(VC-NARJ)  	: CPPFLAGS	?=	-DVC_VERSION=NARJ
+$(VC-NARJ)  	: LIBS		?=	-lNARJ
 $(VC-NARJ)		: ADDRESS	:=	0x80212320
 $(VC-NARE)		: CPPFLAGS	?=	-DVC_VERSION=NARE
+$(VC-NARE)		: LIBS		?=	-lNARE
 $(VC-NARE)		: ADDRESS	:=	0x8020d4a0

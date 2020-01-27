@@ -12,7 +12,7 @@
  * 
 */
 
-HOOK bool treeInit(n64_cpu_t *cpu,int code_end)
+HOOK bool kz_treeInit(n64_cpu_t *cpu,int code_end)
 
 {
     _start();
