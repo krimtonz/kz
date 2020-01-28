@@ -6,6 +6,7 @@
 #include <libundermine/gfx.h>
 #include <libundermine/input.h>
 #include <libundermine/watches.h>
+#include <libundermine/resource.h>
 #include "kz.h"
 #include "collision_view.h"
 #include "scenes.h"
@@ -78,7 +79,7 @@ static void kz_main(void) {
             int x = settings->id_x;
             int y = settings->id_y;
             gfx_printf(x, y, "%4i %4i", input_x(), input_y());
-            gfx_texture *btn_tex = resource_get(R_KZ_BUTTONS);
+            gfx_texture *btn_tex = resource_get(resource_handles[R_KZ_BUTTONS]);
             static const int8_t btns[] = { 15, 14, 12, 13, 3, 2, 0, 1, 5, 4, 11, 10, 8, 9};
             uint16_t pad = input_pressed_raw();
             for(int i = 0;i < sizeof(btns) / sizeof(*btns);i++){
@@ -244,9 +245,9 @@ static void kz_main(void) {
 
     /* print frame advance status */
     if(kz.pending_frames == 0){
-        gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
+        gfx_draw_sprite(resource_get(R_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
     }else if(kz.pending_frames>0){
-        gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
+        gfx_draw_sprite(resource_get(R_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
     }
     if(!kz.z2_input_enabled){
         gfx_printf_color(Z2_SCREEN_WIDTH - 68, Z2_SCREEN_HEIGHT - 60, COLOR_RED, "i");
@@ -330,13 +331,6 @@ static void init(void) {
     clear_bss();
     do_global_ctors();
 
-    input_init(&z2_input_direct.raw.pad, &z2_input_direct.raw.x, &z2_input_direct.raw.y, settings->binds, KZ_CMD_MAX);
-    bind_override(KZ_CMD_TOGGLE_MENU);
-    bind_override(KZ_CMD_RETURN);
-
-    gfx_init(0x32800, resource_get(R_KZ_FONT), &z2_ctxt.gfx->overlay.p);
-    static_sprites_init();
-
     kz.cpu_cycle_counter = 0;
     cpu_counter();
     kz.cpu_offset = -kz.cpu_cycle_counter;
@@ -362,7 +356,12 @@ static void init(void) {
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
 
-    memset(&kz.log, 0, sizeof(kz.log));
+    input_init(&z2_input_direct.raw.pad, &z2_input_direct.raw.x, &z2_input_direct.raw.y, settings->binds, KZ_CMD_MAX);
+    bind_override(KZ_CMD_TOGGLE_MENU);
+    bind_override(KZ_CMD_RETURN);
+
+    kz_resource_init();
+    gfx_init(0x32800, resource_get(resource_handles[R_KZ_FONT]), &z2_ctxt.gfx->overlay.p);
 
     kz.menu_active = 0;
     menu_ctx_init(&kz.main_menu, &kz.tooltip);
@@ -392,6 +391,8 @@ static void init(void) {
     kz.pos_slot = 0;
 
     memcpy(restriction_table, &z2_restriction_table, sizeof(z2_restriction_table));
+
+    memset(&kz.log, 0, sizeof(kz.log));
 
     kz.ready = 1;
 }

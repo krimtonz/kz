@@ -126,7 +126,7 @@ menu_t *create_equips_menu(void){
         4,      NULL
     };
 
-    gfx_texture *buttons_texture = resource_get(R_Z2_BUTTONS);
+    gfx_texture *buttons_texture = resource_get(resource_handles[R_Z2_BUTTONS]);
     b_sprite.background = buttons_texture;
     c_left_sprite.background = buttons_texture;
     c_left_sprite.null_texture = buttons_texture;

@@ -8,6 +8,7 @@
 #define _KZRESOURCE_H
 #include <libundermine/gfx.h>
 #include <libundermine/menu.h>
+#include <libundermine/resource.h>
 #include "z2.h"
 
 #define     OWL_OFFSET      0x14668
@@ -26,8 +27,6 @@ enum resource {
     R_Z2_OWL,
     R_Z2_NOTE,
     R_Z2_DUNGEON,
-    R_KZ_CHECKBOX,
-    R_KZ_ICON,
     R_KZ_FONT,
     R_KZ_BUTTONS,
     R_KZ_AMOUNTS,
@@ -35,7 +34,7 @@ enum resource {
     R_KZ_ARROWS,
     R_KZ_FILES,
     R_Z2_RUPEE,
-    R_END
+    R_KZ_END
 };
 
 struct item_texture {
@@ -46,10 +45,11 @@ struct item_texture {
 #endif
 };
 
-void           *resource_get        (enum resource resource);
 gfx_texture    *get_item_texture    (uint8_t item_id, _Bool release);
-void            static_sprites_init (void);
+void            kz_resource_init    (void);
 
 extern menu_sprite_t           *scroll_up_sprite;
 extern menu_sprite_t           *scroll_down_sprite;
+extern int resource_handles[R_KZ_END];
+
 #endif

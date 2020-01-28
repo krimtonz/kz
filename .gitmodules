@@ -1,3 +1,6 @@
 [submodule "homeboy"]
 	path = homeboy
 	url = https://github.com/krimtonz/homeboy
+[submodule "libundermine"]
+	path = libundermine
+	url = https://github.com/krimtonz/libundermine

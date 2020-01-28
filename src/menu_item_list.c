@@ -145,7 +145,7 @@ static void draw_item(struct item_data *data, int item, float rot){
         if(data->ovl_values){
             int ovl_tile = data->ovl_values[ovl_idx];
             if(ovl_tile >= 0){
-                gfx_load_tile(resource_get(R_KZ_AMOUNTS), ovl_tile);
+                gfx_load_tile(resource_get(resource_handles[R_KZ_AMOUNTS]), ovl_tile);
                 gfx_push(gsSP2Triangles(4, 5, 6, 4, 6, 5, 7, 4));
             }
         }
@@ -263,7 +263,7 @@ static void menu_item_list_draw(menu_item_t *item){
         if(data->ovl_values){
             int ovl_tile = data->ovl_values[idx];
             if(ovl_tile >= 0){
-                gfx_draw_sprite(resource_get(R_KZ_AMOUNTS), menu_item_x(item) + 8, menu_item_y(item) + 11,
+                gfx_draw_sprite(resource_get(resource_handles[R_KZ_AMOUNTS]), menu_item_x(item) + 8, menu_item_y(item) + 11,
                                       ovl_tile, 8, 4);
             }
         }

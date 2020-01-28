@@ -165,8 +165,8 @@ static void watch_add(watch_t *watch, _Bool setpos){
         0,      0,      NULL
     };
 
-    delete_sprite.texture = resource_get(R_KZ_ICON);
-    anchor_sprite.texture = resource_get(R_KZ_ICON);
+    delete_sprite.texture = resource_get(R_ICON);
+    anchor_sprite.texture = resource_get(R_ICON);
 
     row->delete_button = menu_gfx_button_add(&watches, x, y, &delete_sprite, menu_watch_delete_onactivate, row);
 

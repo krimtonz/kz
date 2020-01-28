@@ -1,5 +1,7 @@
 #include <grc.h>
 #include <stdlib.h>
+#include <startup.h>
+#include <libundermine/resource.h>
 #include "kzresource.h"
 #include "kzgfx.h"
 #include "z2.h"
@@ -142,14 +144,14 @@ static z2_item_t texture_map[] = {
 menu_sprite_t   *scroll_up_sprite = NULL;
 menu_sprite_t   *scroll_down_sprite = NULL;
 
-static const char *resource_names[R_END] = {
+int resource_handles[R_KZ_END] = { 0 };
+
+static const char *resource_names[R_KZ_END] = {
     NULL,
     NULL,
     NULL,
     NULL,
     NULL,
-    "checkbox",
-    "icons",
     "font",
     "buttons",
     "amounts",
@@ -159,32 +161,7 @@ static const char *resource_names[R_END] = {
     NULL,
 };
 
-static void *resource_load_kz_texture(enum resource resource){
-    if(resource_names[resource]){
-        gfx_texture *kztext = malloc(sizeof(*kztext));
-        if(!kztext){
-            return kztext;
-        }
-        memset(kztext, 0, sizeof(*kztext));
-        void *grctexture;
-        if(!grc_resource_get(resource_names[resource], &grctexture, NULL)){
-            return kztext;
-        }
-        struct grc_texture *gtext = grctexture;
-        kztext->data = gtext->texture_data;
-        kztext->img_fmt = gtext->im_fmt;
-        kztext->img_size = gtext->im_siz;
-        kztext->tile_width = gtext->tile_width;
-        kztext->tile_height = gtext->tile_height;
-        kztext->x_tiles = gtext->tiles_x;
-        kztext->y_tiles = gtext->tiles_y;
-        kztext->tile_size = (kztext->tile_width * kztext->tile_height * G_SIZ_BITS(kztext->img_size) + 63) / 64 * 8;
-        return kztext;
-    }
-    return NULL;
-}
-
-static void *resource_load_items(enum resource resource){
+static void *resource_load_items(int resource_id){
     struct item_texture *textures = malloc(sizeof(*textures) * Z2_ITEM_END);
     memset(textures, 0, sizeof(*textures) * Z2_ITEM_END);
 #ifndef LITE
@@ -195,7 +172,7 @@ static void *resource_load_items(enum resource resource){
     return textures;
 }
 
-static void *resource_load_buttons(enum resource resource){
+static void *resource_buttons_ctor(int resource_id){
     texture_loader loader = {
         0xF60,          32,             32, z2_parameter_static,
         G_IM_FMT_IA,    G_IM_SIZ_8b,    0,  0,
@@ -204,7 +181,7 @@ static void *resource_load_buttons(enum resource resource){
     return gfx_load(&loader);
 }
 
-static void *resource_load_note(enum resource resource){
+static void *resource_note_ctor(int resource_id){
     texture_loader loader = {
         0,              16,             24,         z2_item_icon_archive,
         G_IM_FMT_IA,    G_IM_SIZ_8b,    NOTE_INDEX, NOTE_INDEX,
@@ -213,7 +190,7 @@ static void *resource_load_note(enum resource resource){
     return gfx_load(&loader);
 }
 
-static void *resource_load_owl(enum resource resource){
+static void *resource_owl_ctor(int resource_id){
     texture_loader loader = {
         OWL_OFFSET,     24,             12,         z2_icon_item_field_static,
         G_IM_FMT_RGBA,  G_IM_SIZ_32b,   0,          0,
@@ -222,7 +199,7 @@ static void *resource_load_owl(enum resource resource){
     return gfx_load(&loader);
 }
 
-static void *resource_load_dungeon_items(enum resource resource){
+static void *resource_dungeon_items_ctor(int resource_id){
     texture_loader loader = {
 #if Z2_VERSION==NZSE
         0,              24,             24,         z2_icon_item_24_static,
@@ -237,7 +214,7 @@ static void *resource_load_dungeon_items(enum resource resource){
     return gfx_load(&loader);
 }
 
-static void *resource_load_rupee_texture(enum resource resource){
+static void *resource_rupee_ctor(int resource_id){
     texture_loader loader = {
         RUPEE_OFFSET,   16,             16,         z2_parameter_static,
         G_IM_FMT_IA,    G_IM_SIZ_8b,    0,          0,
@@ -246,38 +223,26 @@ static void *resource_load_rupee_texture(enum resource resource){
     return gfx_load(&loader);
 }
 
-static void *resource_table[R_END] = { NULL };
-static void *(*resource_ctors[R_END])(enum resource) = {
+static resource_ctor resource_ctors[R_KZ_END] = {
     resource_load_items,
-    resource_load_buttons,
-    resource_load_owl,
-    resource_load_note,
-    resource_load_dungeon_items,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_kz_texture,
-    resource_load_rupee_texture,
+    resource_buttons_ctor,
+    resource_owl_ctor,
+    resource_note_ctor,
+    resource_dungeon_items_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    resource_rupee_ctor,
 };
-
-void *resource_get(enum resource resource){
-    if(!resource_table[resource]){
-        if(resource_ctors[resource]){
-            resource_table[resource] = resource_ctors[resource](resource);
-        }
-    }
-    return resource_table[resource];
-}
 
 gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
 #if Z2_VERSION!=NZSE
     item_id = texture_map[item_id];
 #endif
-    struct item_texture *item = (struct item_texture*)resource_get(R_Z2_ITEMS) + item_id;
+    struct item_texture *item = (struct item_texture*)resource_get(resource_handles[R_Z2_ITEMS]) + item_id;
 #ifdef LITE
     item->last_access_counter = 0;
     item->release = release;
@@ -289,7 +254,14 @@ gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
     return item->texture;
 }
 
-void static_sprites_init(void){
+void kz_resource_init(){
+    for(int i = 0;i < R_KZ_END;i++){
+        resource_ent_t *res = resource_create(resource_names[i], resource_ctors[i], NULL);
+        if(res){
+            resource_handles[i] = res->resource_id;
+        }
+    }
+
     static menu_sprite_t up_sprite = {
         NULL,   0,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
         8,      8,      NULL,   DEFAULT_COLOR,   0,
@@ -302,8 +274,8 @@ void static_sprites_init(void){
         0,      NULL,
     };
 
-    up_sprite.texture = resource_get(R_KZ_ARROWS);
-    down_sprite.texture = resource_get(R_KZ_ARROWS);
+    up_sprite.texture = resource_get(resource_handles[R_KZ_ARROWS]);
+    down_sprite.texture = resource_get(resource_handles[R_KZ_ARROWS]);
 
     scroll_up_sprite = &up_sprite;
     scroll_down_sprite = &down_sprite;

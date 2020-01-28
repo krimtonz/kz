@@ -286,7 +286,7 @@ static void menu_file_row_draw(menu_item_t *item){
     if(item->owner->selected_item == item){
         color = SELECTED_COLOR;
     }
-    gfx_draw_sprite_color(resource_get(R_KZ_FILES), x, y, tile, 8, 8, color);
+    gfx_draw_sprite_color(resource_get(resource_handles[R_KZ_FILES]), x, y, tile, 8, 8, color);
     gfx_printf_color(x + 10, y,color,"%s",text);
 }
 
