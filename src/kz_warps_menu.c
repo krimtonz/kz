@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <libundermine/menu.h>
+#include <libundermine.h>
 #include "scenes.h"
 #include "kz.h"
 

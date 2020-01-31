@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <libundermine/input.h>
+#include <libundermine.h>
 #include "commands.h"
 #include "kz.h"
 #include "settings.h"

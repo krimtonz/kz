@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <malloc.h>
-#include <libundermine/gfx.h>
+#include <libundermine.h>
 #include "kzgfx.h"
 #include "kzresource.h"
 #include "zu.h"

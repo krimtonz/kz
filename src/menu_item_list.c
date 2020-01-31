@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
-#include <libundermine/menu.h>
-#include <libundermine/gu.h>
+#include <libundermine.h>
 #include "kzresource.h"
 #include "z2.h"
 

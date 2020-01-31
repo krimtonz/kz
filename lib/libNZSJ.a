@@ -1,7 +1,6 @@
 z2_LoadOverlay              = 0x80085768;
 osSendMesg                  = 0x80088A10;
 osRecvMesg                  = 0x80088DD0;
-osWritebackDCache           = 0x8008B4E0;
 osEPiStartDma               = 0x8008FD30;
 osCreateMesgQueue           = 0x80090140;
 osEPiReadIo                 = 0x80092FB0;

@@ -3,10 +3,7 @@
 #include <startup.h>
 #include <inttypes.h>
 #include <math.h>
-#include <libundermine/gfx.h>
-#include <libundermine/input.h>
-#include <libundermine/watches.h>
-#include <libundermine/resource.h>
+#include <libundermine.h>
 #include "kz.h"
 #include "collision_view.h"
 #include "scenes.h"
@@ -472,14 +469,14 @@ HOOK void draw_actors_hook(void){
     }
 }
 
-HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room, int a2){
+HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room){
     if(kz.hide_room){
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);
-        z2_DrawRoom(game, room, a2);
+        z2_DrawRoom(game, room);
         zu_disp_ptr_load(&disp_p);
     }else{
-        z2_DrawRoom(game, room, a2);
+        z2_DrawRoom(game, room);
     }
 }
 

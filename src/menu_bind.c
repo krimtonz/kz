@@ -1,6 +1,5 @@
 #include <stdint.h>
-#include <libundermine/menu.h>
-#include <libundermine/input.h>
+#include <libundermine.h>
 #include "menu_bind.h"
 #include "kzresource.h"
 #include "settings.h"

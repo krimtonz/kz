@@ -1,6 +1,5 @@
 #include <stdlib.h>
-#include <libundermine/menu.h>
-#include <libundermine/watches.h>
+#include <libundermine.h>
 
 #include "kz.h"
 #include "kzresource.h"
@@ -155,13 +154,13 @@ static void watch_add(watch_t *watch, _Bool setpos){
     struct watch_row *row = list_push_back(&watch_rows, NULL);
     static menu_sprite_t delete_sprite = {
         NULL,   0,  0,  DEFAULT_COLOR,  DEFAULT_COLOR,
-        8,      8,      NULL,           0,  
+        8,      8,      NULL,           0,
         0,      0,      NULL
     };
 
     static menu_sprite_t anchor_sprite = {
         NULL,   2,  2,  DEFAULT_COLOR,  DEFAULT_COLOR,
-        8,      8,      NULL,           0,  
+        8,      8,      NULL,           0,
         0,      0,      NULL
     };
 

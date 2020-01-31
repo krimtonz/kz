@@ -1,7 +1,7 @@
 #include <grc.h>
 #include <stdlib.h>
 #include <startup.h>
-#include <libundermine/resource.h>
+#include <libundermine.h>
 #include "kzresource.h"
 #include "kzgfx.h"
 #include "z2.h"

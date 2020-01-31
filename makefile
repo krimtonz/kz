@@ -25,7 +25,7 @@ RESDESC             = res.json
 ADDRESS             = 0x80800060
 ADDRESS_LITE        = 0x806E0060
 ADDRESS_LDR         = 0x80080000
-ALL_CFLAGS          = -I. -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
+ALL_CFLAGS          = -Ilibundermine/include -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
 ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS) $(VCCPPFLAGS)
 ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -Llibundermine/lib/libundermine-f3dex2 -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
 ALL_LIBS            = $(LIBS)

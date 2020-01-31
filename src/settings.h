@@ -9,7 +9,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <libundermine/watches.h>
+#include <libundermine.h>
 #include "commands.h"
 #include "kz.h"
 

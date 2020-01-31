@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include <libundermine/input.h>
+#include <libundermine.h>
 #include "settings.h"
 #include "kz.h"
 

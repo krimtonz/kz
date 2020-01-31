@@ -1,4 +1,4 @@
-#include <libundermine/input.h>
+#include <libundermine.h>
 #include "kz.h"
 #include "kzresource.h"
 #include "zu.h"
