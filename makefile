@@ -152,6 +152,7 @@ $(KZ-NZSJ10)        :   CPPFLAGS    ?=	-DZ2_VERSION=NZSJ10
 $(KZ-NZSJ10)        :   LIBS	    :=	-lNZSJ10 -Wl,--whole-archive -lundermine-f3dex2 -Wl,--no-whole-archive
 $(KZ-FULL)          :   CPPFLAGS    +=	-DKZ_VERSION=KZ_FULL
 $(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto
+$(ELF-FULL)			:	LIBS		+= 	-lz
 $(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects
 $(KZ-LITE)          :   CPPFLAGS    +=	-DLITE -DKZ_VERSION=KZ_LITE
 $(KZ-LITE)          :   CFLAGS      ?=  -Os

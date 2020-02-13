@@ -52,7 +52,7 @@ void command_save_state(){
     if(state){
         free(state);
     }
-    state = malloc(768 * 1024);
+    state = malloc(0x20000);
     kz_state_hdr_t *kz_state = state;
     kz_state->size = save_state(state);
     kz_state->z2_version = Z2_VERSION;

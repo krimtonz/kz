@@ -2,22 +2,109 @@
 #include <stdint.h>
 #include <set/set.h>
 #include <mips.h>
+#include <zlib.h>
 #include "z2.h"
 #include "state.h"
 #include "zu.h"
 #include "kzresource.h"
 
+#define ENT_COMPRESSED  (0b1 << 31)
+#define Z_CHUNK         0x4000
+
+static z_stream zstrm = {
+    .zalloc = Z_NULL,
+    .zfree = Z_NULL,
+    .opaque = Z_NULL
+};
+
+static uint8_t  zbuf[Z_CHUNK] = { 0 };
+
+/* compress len bytes of src to *dst, output the compressed size */
+static int z_compress(void **dst, void *src, size_t len){
+    unsigned have;
+    unsigned left = len;
+    int flush;
+    int total = 0;
+    deflateInit(&zstrm, Z_DEFAULT_COMPRESSION);
+    uint8_t *p = src;
+    uint8_t *dst_p = *dst;
+    do{
+        zstrm.avail_in = left > Z_CHUNK ? Z_CHUNK : left;
+        flush = zstrm.avail_in < Z_CHUNK ? Z_FINISH : Z_NO_FLUSH;
+        zstrm.next_in = p;
+        p += zstrm.avail_in;
+        left -= zstrm.avail_in;
+        do{
+            zstrm.avail_out = Z_CHUNK;
+            zstrm.next_out = zbuf;
+            deflate(&zstrm, flush);
+            have = Z_CHUNK - zstrm.avail_out;
+            total += have;
+            memcpy(dst_p, zbuf, have);
+            dst_p += have;
+        } while(zstrm.avail_out == 0);
+    } while(flush != Z_FINISH);
+    deflateEnd(&zstrm);
+    return total;
+}
+
+static void z_decompress(void **src, void *dst, size_t len){
+    unsigned have;
+    unsigned left = len;
+    int flush = 0;
+    inflateInit(&zstrm);
+    uint8_t *p = *src;
+    uint8_t *dst_p = dst;
+    do {
+        zstrm.avail_in = left > Z_CHUNK ? Z_CHUNK : left;
+        zstrm.next_in = p;
+        p += zstrm.avail_in;
+        left -= zstrm.avail_in;
+        do{
+            zstrm.avail_out = Z_CHUNK;
+            zstrm.next_out = zbuf;
+            flush = inflate(&zstrm, Z_NO_FLUSH);
+            have = Z_CHUNK - zstrm.avail_out;
+            memcpy(dst_p, zbuf, have);
+            dst_p += have;
+        } while(zstrm.avail_out == 0);
+    } while(flush != Z_STREAM_END);
+    inflateEnd(&zstrm);
+}
+
 static void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
-    memcpy(p, src, len);
-    p += len;
+    char *comp_size = p;
+    uint32_t size;
+    p += 4;
+    *dst = p;
+    if(len < 0x40){
+        memcpy(p, src, len);
+        size = len;
+    }else{
+        size = z_compress(dst, src, len);
+        size |= ENT_COMPRESSED;
+    }
+    memcpy(comp_size, &size, 4);
+    size &= ~(ENT_COMPRESSED);
+    p += size;
     *dst = p;
 }
 
-static void st_read(void **src, void *dst, size_t len){
+static void st_read(void **src, void *dst){
     char *p = *src;
-    memcpy(dst, p, len);
-    p += len;
+    uint32_t size;
+    memcpy(&size, p, 4);
+    p += 4;
+    *src = p;
+    int compressed = size & ENT_COMPRESSED;
+    size &= ~(ENT_COMPRESSED);
+    if(compressed){
+        z_decompress(src, dst, size);
+    }else{
+        memcpy(dst, p, size);
+    }
+    p += size;
     *src = p;
 }
 
@@ -43,7 +130,7 @@ _Bool load_overlay(void **src, void **tab_addr, uint32_t vrom_start, uint32_t vr
         if(z2_file_table[i].vrom_end == 0) return 0;
     }
     void *addr = NULL;
-    st_read(src, &addr, sizeof(addr));
+    st_read(src, &addr);
     if(*tab_addr != addr){
         *tab_addr = addr;
         z2_LoadOverlay(vrom_start, vrom_end, vram_start, vram_end, addr);
@@ -60,8 +147,8 @@ _Bool load_overlay(void **src, void **tab_addr, uint32_t vrom_start, uint32_t vr
     char *bss = end;
 
     /* read data and bss segments */
-    st_read(src, data, overlay_hdr->data_size);
-    st_read(src, bss, overlay_hdr->bss_size);
+    st_read(src, data);
+    st_read(src, bss);
     return 1;
 }
 
@@ -110,28 +197,28 @@ void load_state(void *state){
     int next_ent;
     /* load actor overlays */
     int ovl_cnt = sizeof(z2_actor_ovl_table) / sizeof(*z2_actor_ovl_table);
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     for(int i = 0;i < ovl_cnt;i++){
         z2_actor_ovl_table_t *ent = &z2_actor_ovl_table[i];
         if(i == next_ent){
-            st_read(&p, &ent->loaded_cnt, sizeof(ent->loaded_cnt));
+            st_read(&p, &ent->loaded_cnt);
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
-            st_read(&p,&next_ent,sizeof(next_ent));
-            set_insert(&ovl_set,&ent->ram);
+            st_read(&p, &next_ent);
+            set_insert(&ovl_set, &ent->ram);
         }else{
             ent->ram = NULL;
             ent->loaded_cnt = 0;
         }
     }
- 
+
     /* load player/pause overlays */
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     ovl_cnt = sizeof(z2_player_ovl_table) / sizeof(*z2_player_ovl_table);
     for(int i = 0;i < ovl_cnt;i++){
         z2_player_ovl_table_t *ent = &z2_player_ovl_table[i];
         if(i == next_ent){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
-            st_read(&p,&next_ent,sizeof(next_ent));
+            st_read(&p, &next_ent);
             set_insert(&ovl_set, &ent->ram);
             z2_player_ovl_cur = ent;
         }else{
@@ -141,13 +228,13 @@ void load_state(void *state){
     }
 
     /* load particle overlays */
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     ovl_cnt = sizeof(z2_particle_ovl_table) / sizeof(*z2_particle_ovl_table);
     for(int i = 0;i < ovl_cnt;i++){
         z2_particle_ovl_table_t *ent = &z2_particle_ovl_table[i];
         if(i == next_ent){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
-            st_read(&p, &next_ent, sizeof(next_ent));
+            st_read(&p, &next_ent);
             set_insert(&ovl_set, &ent->ram);
         }else{
             ent->ram = NULL;
@@ -155,33 +242,33 @@ void load_state(void *state){
     }
 
     /* load global context */
-    st_read(&p, &z2_game, sizeof(z2_game));
+    st_read(&p, &z2_game);
 
     /* load file data */
-    st_read(&p, &z2_file, sizeof(z2_file));
+    st_read(&p, &z2_file);
 
     /* load static context */
-    st_read(&p, z2_file.static_ctx, sizeof(*z2_file.static_ctx));
+    st_read(&p, z2_file.static_ctx);
 
     /* load segment address table */
-    st_read(&p, &z2_segment, sizeof(z2_segment));
+    st_read(&p, &z2_segment);
 
     /* load arena nodes */
-    st_read(&p, &z2_game_arena, sizeof(z2_game_arena));
+    st_read(&p, &z2_game_arena);
     z2_arena_node_t *node = z2_game_arena.first;
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     while(node){
         node->magic = 0x7373;
-        st_read(&p, &node->free, sizeof(node->free));
-        st_read(&p, &node->size, sizeof(node->size));
+        st_read(&p, &node->free);
+        st_read(&p, &node->size);
         char *data = node->data;
         if(set_get(&ovl_set, &data) == NULL && node->free == 0){
-            st_read(&p, data, node->size);
+            st_read(&p, data);
         }
         if(node == z2_game_arena.first){
             node->prev = NULL;
         }
-        st_read(&p, &next_ent, sizeof(next_ent));
+        st_read(&p, &next_ent);
         if(next_ent == 0){
             node->next = (void*)&node->data[node->size];
             node->next->prev = node;
@@ -191,21 +278,21 @@ void load_state(void *state){
         node = node->next;
     }
 
-    st_read(&p, &z2_light_queue, sizeof(z2_light_queue));
+    st_read(&p, &z2_light_queue);
 
     /* load matrix stack */
-    st_read(&p, &z2_mtx_stack, sizeof(z2_mtx_stack));
-    st_read(&p, &z2_mtx_stack_top, sizeof(z2_mtx_stack_top));
+    st_read(&p, &z2_mtx_stack);
+    st_read(&p, &z2_mtx_stack_top);
 
     /* load dynamic particles */
-    st_read(&p, &z2_particle_info, sizeof(z2_particle_info));
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &z2_particle_info);
+    st_read(&p, &next_ent);
     for(int i = 0;i < z2_particle_info.part_max;i++){
         z2_particle_t *particle = &z2_particle_info.part_space[i];
         /* particle space occupied */
         if(i == next_ent){
-            st_read(&p, particle, sizeof(*particle));
-            st_read(&p, &next_ent, sizeof(next_ent));
+            st_read(&p, particle);
+            st_read(&p, &next_ent);
         /* particle space free */
         }else{
             memset(particle, 0, sizeof(*particle));
@@ -219,14 +306,14 @@ void load_state(void *state){
     z2_static_particle_ctxt_t *spart_ctx = &z2_static_particle_ctxt;
 
     /* load static dot particles */
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     int part_cnt = sizeof(spart_ctx->dots) / sizeof(*spart_ctx->dots);
     for(int i = 0;i < part_cnt;i++){
         z2_dot_t *dot = &spart_ctx->dots[i];
         /* position occupied */
         if(i == next_ent){
-            st_read(&p, dot, sizeof(*dot));
-            st_read(&p, &next_ent, sizeof(next_ent));
+            st_read(&p, dot);
+            st_read(&p, &next_ent);
         /* position free */
         }else{
             dot->active = 0;
@@ -234,46 +321,46 @@ void load_state(void *state){
     }
 
     /* load static trail particles */
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     part_cnt = sizeof(spart_ctx->trails) / sizeof(*spart_ctx->trails);
     for(int i = 0;i < part_cnt;i++){
         z2_trail_t *trail = &spart_ctx->trails[i];
         if(i == next_ent){
-            st_read(&p, trail, sizeof(*trail));
-            st_read(&p, &next_ent, sizeof(next_ent));
+            st_read(&p, trail);
+            st_read(&p, &next_ent);
         }else{
             trail->active = 0;
         }
     }
 
     /* load static spark particles */
-    st_read(&p, &next_ent, sizeof(next_ent));
+    st_read(&p, &next_ent);
     part_cnt = sizeof(spart_ctx->sparks) / sizeof(*spart_ctx->sparks);
     for(int i = 0;i < part_cnt;i++){
         z2_spark_t *spark = &spart_ctx->sparks[i];
         if(i == next_ent){
-            st_read(&p, spark, sizeof(*spark));
-            st_read(&p, &next_ent, sizeof(next_ent));
+            st_read(&p, spark);
+            st_read(&p, &next_ent);
         }else{
             spark->active = 0;
         }
     }
 
     /* load static unknown particles */
-    st_read(&p,&next_ent,sizeof(next_ent));
+    st_read(&p,&next_ent);
     part_cnt = sizeof(spart_ctx->unks) / sizeof(*spart_ctx->unks);
     for(int i = 0;i < part_cnt;i++){
         z2_unk_part_t *unk = &spart_ctx->unks[i];
         if(i == next_ent){
-            st_read(&p, unk, sizeof(*unk));
-            st_read(&p, &next_ent, sizeof(next_ent));
+            st_read(&p, unk);
+            st_read(&p, &next_ent);
         }else{
             unk->active = 0;
         }
     }
 
     /* load cutscene state */
-    st_read(&p, &z2_cutscene_state, 8);
+    st_read(&p, &z2_cutscene_state);
 
     /* load scene file, and create static collision if loading from a different scene */
     if(scene_index != z2_game.scene_index){
@@ -305,9 +392,8 @@ void load_state(void *state){
     }
 
     /* load transition actors */
-    int trans_cnt = z2_game.room_ctx.transition_cnt;
     z2_room_trans_actor_t *trans = z2_game.room_ctx.transition_list;
-    st_read(&p,trans,sizeof(*trans) * trans_cnt);
+    st_read(&p, trans);
 
     /* load room files if not loaded */
     for(int i = 0;i < 2;i++){
@@ -364,7 +450,7 @@ void load_state(void *state){
                 zu_file_load(start, c_ptr, end - start);
             }
 
-            /* some objects have collision headers hard coded into their overlay codes. 
+            /* some objects have collision headers hard coded into their overlay codes.
             these are relocated during actor initalization, and therefore are not relocated.
             adding these as they are found */
             /*for(int j = 0;j < sizeof(obj_relocs) / sizeof(*obj_relocs);j++){
@@ -394,14 +480,14 @@ void load_state(void *state){
 
     /* load water boxes */
     z2_col_hdr_t *col_hdr = z2_game.col_ctxt.col_hdr;
-    st_read(&p, &col_hdr->n_water, sizeof(col_hdr->n_water));
-    st_read(&p, &col_hdr->water, sizeof(*col_hdr->water) * col_hdr->n_water);
+    st_read(&p, &col_hdr->n_water);
+    st_read(&p, &col_hdr->water);
 
     /* load dynamic collision */
     z2_col_ctxt_t *col = &z2_game.col_ctxt;
-    st_read(&p, col->dyn.list, sizeof(*col->dyn.list) * col->dyn_list_max);
-    st_read(&p, col->dyn_poly, sizeof(*col->dyn_poly) * col->dyn_poly_max);
-    st_read(&p, col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
+    st_read(&p, col->dyn.list);
+    st_read(&p, col->dyn_poly);
+    st_read(&p, col->dyn_vtx);
 
     /* create skybox */
     if(z2_game.skybox_type != 0){
@@ -437,7 +523,7 @@ void load_state(void *state){
     /* load display lists */
     z2_gfx_t *gfx = z2_ctxt.gfx;
     zu_disp_ptr_t disp_ptr;
-    st_read(&p, &disp_ptr, sizeof(disp_ptr));
+    st_read(&p, &disp_ptr);
     zu_disp_ptr_load(&disp_ptr);
     z2_disp_buf_t *z2_dlist[4] = {
         &gfx->work,
@@ -447,15 +533,13 @@ void load_state(void *state){
     };
     for(int i = 0;i < 4;i++){
         z2_disp_buf_t *dlist = z2_dlist[i];
-        size_t len = sizeof(Gfx);
-        Gfx *end = dlist->buf + dlist->size / len;
-        st_read(&p, dlist->buf, (dlist->p - dlist->buf) * len);
-        st_read(&p, dlist->d, (end - dlist->d) * len);
+        st_read(&p, dlist->buf);
+        st_read(&p, dlist->d);
     }
     uint32_t frame_cnt_1;
     uint32_t frame_cnt_2;
-    st_read(&p, &frame_cnt_1, sizeof(frame_cnt_1));
-    st_read(&p, &frame_cnt_2, sizeof(frame_cnt_2));
+    st_read(&p, &frame_cnt_1);
+    st_read(&p, &frame_cnt_2);
     zu_gfx_reloc(frame_cnt_1 & 1, frame_cnt_2 & 1);
 }
 
@@ -508,7 +592,7 @@ size_t save_state(void *state){
             set_insert(&node_set, &ovl->ram);
         }
     }
-    st_write(&p,&ent_end,sizeof(ent_end));
+    st_write(&p, &ent_end, sizeof(ent_end));
 
     /* save player/pause overlay information */
     ovl_cnt = sizeof(z2_player_ovl_table) / sizeof(*z2_player_ovl_table);
