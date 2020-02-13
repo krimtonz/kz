@@ -10,6 +10,12 @@
 #include <stdarg.h>
 #include "z2.h"
 
+#ifndef LITE
+#define GFX_SIZE    (0x6500 * sizeof(Gfx))
+#else
+#define GFX_SIZE    (0x1500 * sizeof(Gfx))
+#endif
+
 enum loader_source{
     SOURCE_ARCHIVE,
     SOURCE_FILE,

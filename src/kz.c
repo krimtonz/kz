@@ -11,6 +11,7 @@
 #include "settings.h"
 #include "kzresource.h"
 #include "zu.h"
+#include "kzgfx.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -64,6 +65,8 @@ static void kz_main(void) {
             kz_log("settings reset");
             load_default_settings();
             kz_apply_settings();
+            kz.main_menu.x_offset = settings->menu_x;
+            kz.main_menu.y_offset = settings->menu_y;
             reset_pos = 0;
         }
     }
@@ -302,7 +305,7 @@ static void kz_main(void) {
     }
 
 #ifdef LITE
-    struct item_texture *textures = resource_get(R_Z2_ITEMS);
+    struct item_texture *textures = resource_get(resource_handles[R_Z2_ITEMS]);
     for(int i = 0;i < Z2_ITEM_END;i++){
         if(!textures[i].texture || !textures[i].release){
             continue;
@@ -358,7 +361,7 @@ static void init(void) {
     bind_override(KZ_CMD_RETURN);
 
     kz_resource_init();
-    gfx_init(0x32800, resource_get(resource_handles[R_KZ_FONT]), &z2_ctxt.gfx->overlay.p);
+    gfx_init(GFX_SIZE, resource_get(resource_handles[R_KZ_FONT]), &z2_ctxt.gfx->overlay.p);
 
     kz.menu_active = 0;
     menu_ctx_init(&kz.main_menu, &kz.tooltip);
