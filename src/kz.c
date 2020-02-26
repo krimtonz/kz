@@ -12,6 +12,7 @@
 #include "kzresource.h"
 #include "zu.h"
 #include "kzgfx.h"
+#include "start.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -426,7 +427,7 @@ static void game_state_main(void){
         if(kz.pending_frames > 0){
             kz.pending_frames--;
         }
-        z2_ctxt.gamestate_update(&z2_ctxt);
+        kz_exit(z2_ctxt.gamestate_update, &z2_ctxt);
     }else{
         z2_gfx_t *gfx = z2_game.common.gfx;
         if(z2_ctxt.gamestate_frames != 0){
@@ -483,32 +484,12 @@ HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room){
     }
 }
 
-// Uses kz's stack instead of graph stack.
-static void kz_stack(void (*kzfunc)(void)) {
-    static _Alignas(8) __attribute__((section(".stack")))
-    char stack[0x2000];
-    __asm__ volatile(   "la     $t0, %1;"
-                        "sw     $sp, -0x04($t0);"
-                        "sw     $ra, -0x08($t0);"
-                        "addiu  $sp, $t0, -0x08;"
-                        "jalr   %0;\n"
-                        "lw     $ra, 0($sp);"
-                        "lw     $sp, 4($sp);"
-                        ::
-                        "r"(kzfunc),
-                        "i"(&stack[sizeof(stack)])
-                        :
-                        "$v0", "$v1",
-                        "$a0", "$a1", "$a2", "$a3",
-                        "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9");
-}
-
-/* Entry Point of KZ executable */
-ENTRY void _start() {
+int main() {
     init_gp();
     if(!kz.ready){
-        kz_stack(init);
+        init();
     }
     game_state_main();
-    kz_stack(kz_main);
+    kz_main();
+    return 0;
 }
