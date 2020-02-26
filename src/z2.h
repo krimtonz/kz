@@ -8,7 +8,7 @@
 #define _Z2_H
 #include <n64.h>
 #include <stdint.h>
-#include "gu.h"
+#include <libundermine.h>
 
 #define Z2_SCREEN_WIDTH    320
 #define Z2_SCREEN_HEIGHT   240
@@ -1517,7 +1517,6 @@ typedef struct {
 z2_extern void          z2_LoadOverlay              (uint32_t vrom_start, uint32_t vrom_end, uint32_t vram_start, uint32_t vram_end, void *dest);
 z2_extern void          osSendMesg                  (OSMesgQueue *mq, OSMesg msg, int32_t flag);
 z2_extern int32_t       osRecvMesg                  (OSMesgQueue *mq, OSMesg msg, int32_t flag);
-z2_extern void          osWritebackDCache           (void *vaddr, int32_t nbytes);
 z2_extern int32_t       osEPiStartDma               (OSPiHandle *pihandle, OSIoMesg *mb, int32_t direction);
 z2_extern void          osCreateMesgQueue           (OSMesgQueue *mq, OSMesg msg, int32_t count);
 z2_extern int32_t       osEPiReadIo                 (OSPiHandle *pihandle, uint32_t devAddr, uint32_t *data);
@@ -1532,12 +1531,15 @@ z2_extern void          z2_pause_persp              (z2_game_t *game);
 z2_extern void          z2_btnupdate                (z2_game_t *game, uint8_t btn_idx);
 z2_extern void          z2_ActionLabelUpdate        (z2_hud_ctxt_t *hud_ctx, uint16_t action, int btn_idx);
 z2_extern void          z2_LoadRoom                 (z2_game_t *game, z2_room_ctxt_t *room_ctx, uint8_t room_id);
-z2_extern void          z2_DrawRoom                 (z2_game_t *game, z2_room_t *room, int a2);
+z2_extern void          z2_DrawRoom                 (z2_game_t *game, z2_room_t *room);
 z2_extern void          z2_UnloadRoom               (z2_game_t *game, z2_room_ctxt_t *room_ctx);
 z2_extern void          z2_CreateSkyboxVtx          (z2_skybox_ctxt_t *skybox_ctx, int a1);
 z2_extern void          z2_MotionBlur               (z2_ctxt_t *ctx);
 z2_extern void          z2_input_update             (z2_ctxt_t *ctx);
-z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram);
+z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram, uint32_t size);
+#if Z2_VERSION==NZSE
+z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, size_t size);
+#endif
 z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
 
@@ -1554,6 +1556,7 @@ z2_extern char                      z2_event_state_1[];
 z2_extern char                      z2_letter_box_timer[];
 z2_extern char                      z2_cutscene_state[];
 z2_extern z2_gamestate_table_t      z2_gamestate_table[];
+z2_extern uint32_t                  z2_icon_item_static_table[0x65];
 z2_extern char                      z2_restriction_table[0x23A];
 z2_extern z2_rom_file_t             z2_area_tex_table[9];
 z2_extern uint16_t                  z2_link_form_obj_idx[];
@@ -1562,6 +1565,7 @@ z2_extern z2_scene_table_ent_t      z2_scene_table[113];
 z2_extern uint16_t                  z2_stored_song;
 z2_extern uint16_t                  z2_link_spawn_obj;
 z2_extern z2_player_ovl_table_t     z2_player_ovl_table[2];
+z2_extern z2_player_ovl_table_t    *z2_player_ovl_cur;
 z2_extern z2_static_particle_ctxt_t z2_static_particle_ctxt;
 z2_extern z2_file_t                 z2_file;
 z2_extern z2_light_queue_t          z2_light_queue;
@@ -1579,14 +1583,18 @@ z2_extern z2_link_t                 z2_link;
 
 // File indcies
 #if Z2_VERSION==NZSE
+#define z2_icon_item_static             9 /* need to verify */
 #define z2_icon_item_field_static       10
+#define z2_map_name_static              13
 #define z2_item_icon_archive            19
 #define z2_icon_item_24_static          20
 #define z2_parameter_static             1126
 #define z2_clock_face_days              1127
 #else
+#define z2_icon_item_static             8
 #define z2_icon_item_24_static          9
 #define z2_icon_item_field_static       10
+#define z2_map_name_static              13
 #define z2_item_icon_archive            18
 #define z2_parameter_static             1125
 #define z2_clock_face_days              1126

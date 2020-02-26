@@ -9,8 +9,8 @@
 
 #include <stdint.h>
 #include <vector/vector.h>
+#include <libundermine.h>
 #include "z2.h"
-#include "menu.h"
 #include "settings.h"
 #include "collision_view.h"
 #include "zu.h"

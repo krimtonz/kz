@@ -3,11 +3,10 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include "menu.h"
+#include <libundermine.h>
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 #include "scenes.h"
-#include "input.h"
 
 #define MEMORY_MAX  0x80C00000
 
@@ -581,7 +580,7 @@ menu_t *create_debug_menu(void){
 
     menu_init(&debug, 0, 0);
     menu_padding_set(&debug, 0, 2);
-    
+
     menu_item_t *item;
 
     debug.selected_item = menu_button_add(&debug, 0, 0, "return", menu_return, NULL);
@@ -590,7 +589,7 @@ menu_t *create_debug_menu(void){
         menu_init(&memory, 0, 0);
         menu_padding_set(&memory, 1, 5);
         memory.selected_item = menu_button_add(&memory, 0, 0, "return", menu_return, NULL);
-        
+
         item = menu_number_input_add(&memory, 0, 1, 16, 8);
         menu_number_set(item, 0x80000000);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, memory_start_event, NULL);
@@ -609,15 +608,15 @@ menu_t *create_debug_menu(void){
         menu_init(&objects, 0, 0);
         menu_padding_set(&objects, 0, 2);
         objects.selected_item = menu_button_add(&objects, 0, 0, "return", menu_return, NULL);
-        
+
         menu_label_add(&objects, 0, 1, "id:");
         item = menu_number_input_add(&objects, 4, 1, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER, menu_number_halfword_event, &obj_id);
-        
+
         menu_button_add(&objects, 12, 1, "push", object_push_onactivate, NULL);
 
         menu_button_add(&objects, 20, 1, "pop", object_pop_onactivate, NULL);
-        
+
         menu_objects_view_add(&objects, 0, 2);
     }
 
@@ -634,7 +633,7 @@ menu_t *create_debug_menu(void){
         menu_label_add(&actors, 0, 1, "type");
         item = menu_list_add(&actors, 6, 1, actor_type_text, sizeof(actor_type_values) / sizeof(*actor_type_values));
         menu_item_register_event(item, MENU_EVENT_LIST | MENU_EVENT_UPDATE, actor_type_event, NULL);
-        
+
         char *actor_button_text = malloc(9);
         strcpy(actor_button_text,"<none>");
 
@@ -643,12 +642,12 @@ menu_t *create_debug_menu(void){
         actor_info.actor_button = menu_button_add(&actors, 0, 3, actor_button_text, actor_button_onactivate, NULL);
 
         menu_actor_info_add(&actors, 0, 4);
-        
+
         menu_button_add(&actors, 0, 6, "go to", goto_actor_onactivate, NULL);
         item = menu_label_add(&actors, 6, 6, "view");
         item->interactive = 1;
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, view_actor_event, NULL);
-        
+
         menu_button_add(&actors, 11, 6, "delete", delete_actor_onactivate, NULL);
 
         menu_button_add(&actors, 18, 6, "copy", copy_actor_onactivate, NULL);
@@ -696,7 +695,7 @@ menu_t *create_debug_menu(void){
 
         menu_flags_add(&flags, 2, 2);
 
-        gfx_texture *flags_texture = resource_get(R_KZ_FLAGS);
+        gfx_texture *flags_texture = resource_get(resource_handles[R_KZ_FLAGS]);
         for(int i = 0;i < 256;i++){
             flags_item_cells[i] = menu_switch_add(&flags, (i % 16) + 9, (i / 16) + 3, flags_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 8, 8, NULL);

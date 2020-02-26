@@ -1,3 +1,5 @@
+#include "sys.h"
+
 #ifndef LITE
 #include <errno.h>
 #include <stdio.h>
@@ -5,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "sys.h"
 #include "hb.h"
 #include "fat.h"
 
@@ -753,4 +754,22 @@ void __assert_func(const char *file, int line, const char *func, const char *fai
     return;
 }
 
+/* minimalist sbrk to report unbrkable mem */
+__attribute__ ((used))
+__attribute__ ((noinline))
+void *sbrk(int len){
+    extern char end;
+    static char *heap_cur = NULL;
+
+    if(heap_cur == NULL){
+        heap_cur = &end;
+    }
+
+    char *heap_prev = heap_cur;
+    if((uint32_t)(heap_cur + len) >= SBRK_MAX){
+        return NULL;
+    }
+    heap_cur += len;
+    return heap_prev;
+}
 #endif

@@ -3,12 +3,12 @@
 #include <set/set.h>
 #include <stdlib.h>
 #include <errno.h>
-#include "menu.h"
+#include <libundermine.h>
 #include "sys.h"
 #include "fat.h"
 #include "menu_file.h"
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 #define FILE_ROWS 13
 
@@ -71,7 +71,7 @@ static _Bool update_file_list(void){
     file_menu_location->text[31] = 0;
     dirent_t *dirent;
     while((dirent = readdir(dir))){
-        if((dirent->dir_name[0] == '.' && strcmp(dirent->dir_name, "..")) !=0 || 
+        if((dirent->dir_name[0] == '.' && strcmp(dirent->dir_name, "..")) !=0 ||
             !(dirent->mode & S_IRUSR)){
             continue;
         }
@@ -286,7 +286,7 @@ static void menu_file_row_draw(menu_item_t *item){
     if(item->owner->selected_item == item){
         color = SELECTED_COLOR;
     }
-    gfx_draw_sprite_color(resource_get(R_KZ_FILES), x, y, tile, 8, 8, color);
+    gfx_draw_sprite_color(resource_get(resource_handles[R_KZ_FILES]), x, y, tile, 8, 8, color);
     gfx_printf_color(x + 10, y,color,"%s",text);
 }
 
@@ -322,7 +322,7 @@ static void menu_file_init(void){
     file_menu_accept_button = menu_button_add(&file_menu, 0, 4, "accept", accept_onactivate, NULL);
     file_menu_clear_button = menu_button_add(&file_menu, 8, 4, "clear", clear_onactivate, NULL);
     int y = 3;
-    
+
     file_menu_up_button = menu_gfx_button_add(&file_menu, 0, y, scroll_up_sprite, file_menu_up_onactivate, NULL);
     file_menu_down_button = menu_gfx_button_add(&file_menu, 0, y + FILE_ROWS - 1, scroll_down_sprite, file_menu_down_onactivate, NULL);
 

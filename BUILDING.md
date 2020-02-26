@@ -1,35 +1,70 @@
 # Prerequisites
-In order to build kz, you need to have the [n64 toolchain](https://github.com/glankk/n64) installed.  
+## Toolchain
+In order to build kz, you need to have the [n64 toolchain](https://github.com/glankk/n64) installed.
 
-If you're planning on building for the Wii U VC, you will need to be build 
+If you're planning on building for the Wii U VC, you will need to be build
 the toolchain with `CFLAGS_FOR_TARGET='-mno-check-zero-division' CXX_FLAGS_FOR_TARGET='-mno-check-zero-division'`
 
 If building for the Wii U VC or the Wii VC, you will need the `--enable-vc` option when configuring the toolchain
 
+## libUndermine
+kz requires [libundermine-f3dex2](https://github.com/krimtonz/libundermine) This is also provided as a git submodule via `git submodule update --init`
+
+To build the libunderime-f3dex2 submodule run `make libum`
+
+## zlib
+kz full versions require [zlib](https://www.zlib.net/). zlib should be installed in your n64 toolchain directory
+For example:
+
+    CC=mips64-gcc CFLAGS="-Os" ./configure --prefix=/opt/n64/mips64
+
+    Output:
+    Checking for shared library support...
+    No shared library support; try without defining CC and CFLAGS
+    Building static library libz.a version 1.2.11 with mips64-gcc.
+    Checking for size_t... Yes.
+    Checking for off64_t... No.
+    Checking for fseeko... No.
+    Checking for strerror... No.
+    Checking for unistd.h... Yes.
+    Checking for stdarg.h... Yes.
+    Checking whether to use vs[n]printf() or s[n]printf()... using vs[n]printf().
+    makChecking for vsnprintf() in stdio.h... No.
+    WARNING: vsnprintf() not found, falling back to vsprintf(). zlib
+    e  can build but will be open to possible buffer-overflow security
+    vulnerabilities.
+    Checking for return value of vsprintf()... Yes.
+    libz.Checking for attribute(visibility) support... Yes.
+
+    make libz.a
+    make install
+
+**Note:** depending on which version of newlib was installed with your toolchain running `make` without the `libz.a` target will cause an error when building the test program.
+
+## gzinject
 In order to create a Wii Virtual Console WAD you will need [gzinject](https://github.com/krimtonz/gzinject)
 
-
-# Building 
+# Building
 To build all kz binaries, run `make all` to only build a sepecific version run `make kz-VERSION` Where VERSION is
 `kz-NZSJ kz-NZSJ10 kz-NZSE kz-lite-NZSJ kz-lite-NZSJ10 kz-lite-NZSE`
 
 # Patching
-The patching scripts will run the building process, so you can skip the building process if you plan on patching.  
+The patching scripts will run the building process, so you can skip the building process if you plan on patching.
 
-#### N64, WiiUVC, and Standard Emulators
+## N64, WiiUVC, and Standard Emulators
 To build a ROM that will work on the Wii U VC, N64, and standard N64 Emulators, run
 
     build/makerom-lite /patch/to/vanilla/rom.z64
 
-#### Full KZ Version ROM for custom Project64 
-To build a full kz version rom run  
-Note: this rom will only work on a modified [Project64](https://github.com/krimtonz/project64).  
+## Full KZ Version ROM for custom Project64
+To build a full kz version rom run
+Note: this rom will only work on a modified [Project64](https://drive.google.com/file/d/1Ttd0sLqYF2VGZsFOwcWVT7issqgVeyo-/view).
 
     build/makerom /path/to/vanilla/rom.z64
-    
+
 
 To build a Wii VC Wad which contains the full
-version of kz, run 
+version of kz, run
 
     build/makewad /path/to/vanilla/wad.wad
 
@@ -37,6 +72,6 @@ By default the script will build the vc patches in the `vc` directory.  These pa
 
     git submodule update --init
 
-This will also require a compatible PowerPC&trade; Compiler.  See [devkitPro](https://devkitpro.org/) for a prebuilt toolchain.  
+This will also require a compatible PowerPC&trade; Compiler.  See [devkitPro](https://devkitpro.org/) for a prebuilt toolchain.
 
-In order to exclude the VC patches pass `--no-vc-fix` to the `makewad` script.  
+In order to exclude the VC patches pass `--no-vc-fix` to the `makewad` script.

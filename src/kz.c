@@ -3,17 +3,16 @@
 #include <startup.h>
 #include <inttypes.h>
 #include <math.h>
+#include <libundermine.h>
 #include "kz.h"
-#include "gfx.h"
-#include "watches.h"
-#include "input.h"
 #include "collision_view.h"
 #include "scenes.h"
 #include "commands.h"
 #include "settings.h"
-#include "resource.h"
+#include "kzresource.h"
 #include "zu.h"
-#include "state.h"
+#include "kzgfx.h"
+#include "start.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -67,6 +66,8 @@ static void kz_main(void) {
             kz_log("settings reset");
             load_default_settings();
             kz_apply_settings();
+            kz.main_menu.x_offset = settings->menu_x;
+            kz.main_menu.y_offset = settings->menu_y;
             reset_pos = 0;
         }
     }
@@ -79,7 +80,7 @@ static void kz_main(void) {
             int x = settings->id_x;
             int y = settings->id_y;
             gfx_printf(x, y, "%4i %4i", input_x(), input_y());
-            gfx_texture *btn_tex = resource_get(R_KZ_BUTTONS);
+            gfx_texture *btn_tex = resource_get(resource_handles[R_KZ_BUTTONS]);
             static const int8_t btns[] = { 15, 14, 12, 13, 3, 2, 0, 1, 5, 4, 11, 10, 8, 9};
             uint16_t pad = input_pressed_raw();
             for(int i = 0;i < sizeof(btns) / sizeof(*btns);i++){
@@ -245,9 +246,9 @@ static void kz_main(void) {
 
     /* print frame advance status */
     if(kz.pending_frames == 0){
-        gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
+        gfx_draw_sprite(resource_get(R_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
     }else if(kz.pending_frames>0){
-        gfx_draw_sprite(resource_get(R_KZ_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
+        gfx_draw_sprite(resource_get(R_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
     }
     if(!kz.z2_input_enabled){
         gfx_printf_color(Z2_SCREEN_WIDTH - 68, Z2_SCREEN_HEIGHT - 60, COLOR_RED, "i");
@@ -305,7 +306,7 @@ static void kz_main(void) {
     }
 
 #ifdef LITE
-    struct item_texture *textures = resource_get(R_Z2_ITEMS);
+    struct item_texture *textures = resource_get(resource_handles[R_Z2_ITEMS]);
     for(int i = 0;i < Z2_ITEM_END;i++){
         if(!textures[i].texture || !textures[i].release){
             continue;
@@ -330,7 +331,6 @@ static int main_menu_return_onactivate(event_handler_t *handler, menu_event_t ev
 static void init(void) {
     clear_bss();
     do_global_ctors();
-    gfx_init();
 
     kz.cpu_cycle_counter = 0;
     cpu_counter();
@@ -357,13 +357,17 @@ static void init(void) {
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
 
-    memset(&kz.log, 0, sizeof(kz.log));
+    input_init(&z2_input_direct.raw.pad, &z2_input_direct.raw.x, &z2_input_direct.raw.y, settings->binds, KZ_CMD_MAX);
+    bind_override(KZ_CMD_TOGGLE_MENU);
+    bind_override(KZ_CMD_RETURN);
+
+    kz_resource_init();
+    gfx_init(GFX_SIZE, resource_get(resource_handles[R_KZ_FONT]), &z2_ctxt.gfx->overlay.p);
 
     kz.menu_active = 0;
+    menu_ctx_init(&kz.main_menu, &kz.tooltip);
     menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
     kz.main_menu.selected_item = menu_button_add(&kz.main_menu, 0, 0, "return", main_menu_return_onactivate, NULL);
-
-    menu_static_sprites_init();
 
     menu_submenu_add(&kz.main_menu, 0, 1, "warps", create_warps_menu());
     menu_submenu_add(&kz.main_menu, 0, 2, "cheats", create_cheats_menu());
@@ -388,6 +392,8 @@ static void init(void) {
     kz.pos_slot = 0;
 
     memcpy(restriction_table, &z2_restriction_table, sizeof(z2_restriction_table));
+
+    memset(&kz.log, 0, sizeof(kz.log));
 
     kz.ready = 1;
 }
@@ -421,7 +427,7 @@ static void game_state_main(void){
         if(kz.pending_frames > 0){
             kz.pending_frames--;
         }
-        z2_ctxt.gamestate_update(&z2_ctxt);
+        kz_exit(z2_ctxt.gamestate_update, &z2_ctxt);
     }else{
         z2_gfx_t *gfx = z2_game.common.gfx;
         if(z2_ctxt.gamestate_frames != 0){
@@ -467,48 +473,23 @@ HOOK void draw_actors_hook(void){
     }
 }
 
-HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room, int a2){
+HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room){
     if(kz.hide_room){
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);
-        z2_DrawRoom(game, room, a2);
+        z2_DrawRoom(game, room);
         zu_disp_ptr_load(&disp_p);
     }else{
-        z2_DrawRoom(game, room, a2);
+        z2_DrawRoom(game, room);
     }
 }
 
-// Uses kz's stack instead of graph stack.
-static void kz_stack(void (*kzfunc)(void)) {
-    static _Alignas(8) __attribute__((section(".stack")))
-    char stack[0x2000];
-    __asm__ volatile(   "la     $t0, %1;"
-                        "sw     $sp, -0x04($t0);"
-                        "sw     $ra, -0x08($t0);"
-                        "addiu  $sp, $t0, -0x08;"
-                        "jalr   %0;\n"
-                        "lw     $ra, 0($sp);"
-                        "lw     $sp, 4($sp);"
-                        ::
-                        "r"(kzfunc),
-                        "i"(&stack[sizeof(stack)])
-                        :
-                        "$v0", "$v1",
-                        "$a0", "$a1", "$a2", "$a3",
-                        "$t0", "$t1", "$t2", "$t3", "$t4", "$t5", "$t6", "$t7", "$t8", "$t9");
-}
-
-/* Entry Point of KZ executable */
-ENTRY void _start() {
+int main() {
     init_gp();
     if(!kz.ready){
-        kz_stack(init);
+        init();
     }
     game_state_main();
-    kz_stack(kz_main);
+    kz_main();
+    return 0;
 }
-
-#include <startup.c>
-#include <vector/vector.c>
-#include <list/list.c>
-#include <set/set.c>

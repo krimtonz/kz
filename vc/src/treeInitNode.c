@@ -4,7 +4,7 @@
 
 #include "vc.h"
 
-HOOK bool treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n64_start,int n64_end)
+HOOK bool kz_treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n64_start,int n64_end)
 
 {
     bool bVar1;

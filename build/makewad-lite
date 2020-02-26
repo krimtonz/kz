@@ -1,0 +1,6 @@
+#!/bin/sh
+
+gzinject -a genkey -k "build/common-key.bin"
+gru build/lua/makewad.lua "$@" lite
+rm -rf "build/common-key.bin"
+if test -d wadextract; then rm -rf wadexract; fi

@@ -1,0 +1,13 @@
+xlHeapTake      = 0x80088790;
+cpuTreeTake     = 0x8004c87c;
+cpuHeapTake     = 0x8004c54c;
+treeInitNode    = 0x8004d550;
+heap_size_hook  = 0x80091ea4;
+treeAdjustRoot  = 0x8004e33c;
+treeInsertNode  = 0x8004e0cc;
+treeInsert      = 0x8004dfbc;
+treeInit        = 0x8004d4f8;
+treeSearchNode  = 0x8004e520;
+ramSetSizeCall  = 0x8001563c;
+ramSetSize      = 0x800507c8;
+mem2_heap_size  = 0x80091F44;

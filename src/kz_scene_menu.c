@@ -1,7 +1,7 @@
 #include <stdlib.h>
-#include "menu.h"
+#include <libundermine.h>
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 static int room_idx;
 

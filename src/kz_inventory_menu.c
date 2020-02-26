@@ -1,7 +1,8 @@
 #include <stdlib.h>
-#include "menu.h"
+#include <libundermine.h>
+#include "menu_item_list.h"
 #include "kz.h"
-#include "resource.h"
+#include "kzresource.h"
 
 #define ITEM_SCREEN_SIZE 11
 
@@ -499,7 +500,7 @@ menu_t *create_inventory_menu(void){
             0,      NULL,
         };
 
-        list_sprite.background = resource_get(R_Z2_BUTTONS);
+        list_sprite.background = resource_get(resource_handles[R_Z2_BUTTONS]);
 
         for(int i = 0;i < 6;i++){
             menu_item_list_add(&items, i + 1, 4, Z2_ITEM_BOTTLE, bottle_contents, sizeof(bottle_contents),
@@ -590,7 +591,7 @@ menu_t *create_inventory_menu(void){
         item = menu_number_input_add(&quest_status, 15, 7, 16, 2);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, stray_fairies_event, (void*)1);
 
-        gfx_texture *dungeon_items_tex = resource_get(R_Z2_DUNGEON);
+        gfx_texture *dungeon_items_tex = resource_get(resource_handles[R_Z2_DUNGEON]);
 
         item = menu_switch_add(&quest_status, 0, 8, dungeon_items_tex, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                                6, dungeon_items_tex->y_tiles / 2 + 6, 16, 16, "boss key");
@@ -614,7 +615,7 @@ menu_t *create_inventory_menu(void){
             menu_item_offset_set(item, i * 10, 12);
         }
 
-        gfx_texture *owl_icon_texture = resource_get(R_Z2_OWL);
+        gfx_texture *owl_icon_texture = resource_get(resource_handles[R_Z2_OWL]);
 
         for(int i = 0;i < sizeof(owl_data_table) / sizeof(*owl_data_table);i++){
             item = menu_switch_add(&quest_status, i % 5, i / 5 + 11, owl_icon_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
@@ -623,7 +624,7 @@ menu_t *create_inventory_menu(void){
             menu_item_offset_set(item, i % 5 * 6, ((i / 5) * 9) + 21);
         }
 
-        gfx_texture *note_texture = resource_get(R_Z2_NOTE);
+        gfx_texture *note_texture = resource_get(resource_handles[R_Z2_NOTE]);
 
         for(int i = 0;i < sizeof(song_data_table) / sizeof(*song_data_table);i++){
             item = menu_switch_add(&quest_status, i % 5 + 6, i / 5 + 11, note_texture, NULL, song_data_table[i].color, 0x808080FF,
@@ -645,25 +646,25 @@ menu_t *create_inventory_menu(void){
         };
 
         for(int i = 0;i < sizeof(items) / sizeof(*items);i++){
-            menu_gfx_add(&amounts, i % 3 * 3, i / 3 + 1, get_item_texture(items[i], 0), 0, 12, 12);
+            menu_static_gfx_add(&amounts, i % 3 * 3, i / 3 + 1, get_item_texture(items[i], 0), 0, 12, 12);
             item = menu_number_input_add(&amounts, i % 3 * 3 + 1, i / 3 + 1, 10, 3);
             menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.ammo[items[i]]);
             menu_item_offset_set(item, 5, 2);
         }
 
-        gfx_texture *dungeon_tex = resource_get(R_Z2_DUNGEON);
+        gfx_texture *dungeon_tex = resource_get(resource_handles[R_Z2_DUNGEON]);
 
-        menu_gfx_add(&amounts, 3, 3, dungeon_tex, 12, 12, 12);
+        menu_static_gfx_add(&amounts, 3, 3, dungeon_tex, 12, 12, 12);
         item = menu_number_input_add(&amounts, 4, 3, 10, 3);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.current_magic);
         menu_item_offset_set(item, 5, 2);
 
-        menu_gfx_add(&amounts, 6, 3, dungeon_tex, 1, 12, 12);
+        menu_static_gfx_add(&amounts, 6, 3, dungeon_tex, 1, 12, 12);
         item = menu_number_input_add(&amounts, 7, 3, 16, 4);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.current_health);
         menu_item_offset_set(item, 5, 2);
 
-        item = menu_gfx_add(&amounts, 0, 4, resource_get(R_Z2_RUPEE), 0, 12, 12);
+        item = menu_static_gfx_add(&amounts, 0, 4, resource_get(resource_handles[R_Z2_RUPEE]), 0, 12, 12);
         item->color = 0xC8FF64FF;
         item = menu_number_input_add(&amounts, 1, 4, 10, 3);
         menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_halfword_event, &z2_file.rupees);

@@ -12,7 +12,7 @@
  * 
 */
 
-HOOK bool treeSearchNode(func_tree_node_t *start,int n64_addr,func_tree_node_t **found_node)
+HOOK bool kz_treeSearchNode(func_tree_node_t *start,int n64_addr,func_tree_node_t **found_node)
 
 {
     int iVar1;

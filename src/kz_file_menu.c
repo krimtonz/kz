@@ -1,6 +1,6 @@
+#include <libundermine.h>
 #include "kz.h"
-#include "resource.h"
-#include "input.h"
+#include "kzresource.h"
 #include "zu.h"
 
 static char *stored_song_text[] = {

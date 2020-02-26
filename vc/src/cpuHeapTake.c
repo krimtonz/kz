@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include "vc.h"
 
-HOOK bool cpuHeapTake(int **code,int cpu,func_tree_node_t *node,int size)
+HOOK bool kz_cpuHeapTake(int **code,int cpu,func_tree_node_t *node,int size)
 
 {
     bool bVar1;

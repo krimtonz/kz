@@ -1,7 +1,7 @@
 #include <stdlib.h>
+#include <libundermine.h>
 #include "settings.h"
 #include "kz.h"
-#include "input.h"
 
 static _Alignas(128) struct settings settings_info;
 struct settings_data *settings = &settings_info.data;

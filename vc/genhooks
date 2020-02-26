@@ -10,6 +10,11 @@ if [ -z "$bin" ]; then
     echo usage: \`genhooks \<elf\> \<bin\>\`
 fi
 
+symtbl="$(mktemp)"
+powerpc-eabi-nm "$elf" | awk '(/^[0-9A-Za-z_ ]*$/) {printf "sym_%s=0x%s\n",$3,substr($1,length($1)-7)}' >"$symtbl"
+. "$symtbl"
+rm -f "$symtbl"
+
 vcaddr()
 {
     printf "#include \"src/vc.h\"\n$1" | powerpc-eabi-cpp - $CPPFLAGS | tail -n 1 | sed -e s/^M//g
@@ -22,9 +27,8 @@ vcsym()
 
 vcbranch()
 {
-    dest="$(vcsym "$1")"
-    dest="$(printf "%d" "$dest")"
-    origin="$(vcaddr "$2")"
+    dest="$(printf "%d" "$1")"
+    origin="$2"
     origin="$(printf "%d" "$origin")"
     val=$(expr "$dest" - "$origin")
     printf "0x%08x" "$val"    
@@ -51,19 +55,19 @@ genhook()
 }
 
 echo "0000 00000000 00000001"
-genhook "$(vcaddr treeInitNode_addr)" "b $(vcbranch treeInitNode treeInitNode_addr);"
-genhook "$(vcaddr cpuHeapTake_addr)" "b $(vcbranch cpuHeapTake cpuHeapTake_addr);"
-genhook "$(vcaddr treeInsert_addr)" "b $(vcbranch treeInsert treeInsert_addr);"
-genhook "$(vcaddr treeInit_addr)" "b $(vcbranch treeInit treeInit_addr);"
-genhook "$(vcaddr treeSearchNode_addr)" "b $(vcbranch treeSearchNode treeSearchNode_addr);"
+genhook "$sym_treeInitNode" "b $(vcbranch $sym_kz_treeInitNode $sym_treeInitNode);"
+genhook "$sym_cpuHeapTake" "b $(vcbranch $sym_kz_cpuHeapTake $sym_cpuHeapTake);"
+genhook "$sym_treeInsert" "b $(vcbranch $sym_kz_treeInsert $sym_treeInsert);"
+genhook "$sym_treeInit" "b $(vcbranch $sym_kz_treeInit $sym_treeInit);"
+genhook "$sym_treeSearchNode" "b $(vcbranch $sym_kz_treeSearchNode $sym_treeSearchNode);"
 binsiz="$(stat --printf="%s" "$bin")"
-initaddr="$(vcsym _start)"
+initaddr="$sym__start"
 initaddr=$(printf "%d" "$initaddr")
 heapaddr=$(expr "$initaddr" + "$binsiz")
 heapaddr=$(printf "0x%08x" "$heapaddr")
-genhook "$(vcaddr heap_size_hook_addr)" "lis r3, "$heapaddr"@h;ori r3, r3, "$heapaddr"@l;"
-genhook "$(vcaddr ramSetSizeCall_addr)" "bl $(vcbranch hb_hook ramSetSizeCall_addr);"
-genhook "$(vcaddr mem2_heap_size_addr)" "lis r4, 0x9010;nop;nop;ori r0, r4, 0x0800;nop;nop;"
+genhook "$sym_heap_size_hook" "lis r3, "$heapaddr"@h;ori r3, r3, "$heapaddr"@l;"
+genhook "$sym_ramSetSizeCall" "bl $(vcbranch $sym_hb_hook $sym_ramSetSizeCall);"
+genhook "$sym_mem2_heap_size" "lis r4, 0x9010;nop;nop;ori r0, r4, 0x0800;nop;nop;"
 
 echo "0000 00000000 00000064"
 echo "0301 0000018B 0000003D"
