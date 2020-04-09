@@ -7,6 +7,9 @@
 #include "z2.h"
 #include "zu.h"
 
+#define ONE 0.525731112119133606f
+#define TAU 0.850650808352039932f
+
 #define G_CC_MODULATERGB_PRIM_ENVA  PRIMITIVE, 0, SHADE, 0, \
                                     0,         0, 0,     ENVIRONMENT
 
@@ -161,6 +164,67 @@ static void tri_norm(z2_xyzf_t *v0, z2_xyzf_t *v1, z2_xyzf_t *v2, z2_xyzf_t *nor
     }
 }
 
+static void draw_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t x, int16_t y, int16_t z){
+    static Gfx *sphere_p = NULL;
+
+    if(sphere_p == NULL){
+        static z2_xyzf_t icosvtx[12] = {
+            { -ONE, 0.0f,   TAU },  { ONE,  0.0f,   TAU },  {-ONE,  0.0f,  -TAU },
+            { ONE,  0.0f,  -TAU},   { 0.0f, TAU,    ONE },  { 0.0f, TAU,   -ONE },
+            { 0.0f,-TAU,    ONE},   { 0.0f,-TAU,   -ONE },  { TAU,  ONE,    0.0f },
+            {-TAU,  ONE,    0.0f }, { TAU, -ONE,    0.0f},  {-TAU, -ONE,    0.0f },
+        };
+
+        static int icostri [20][3] = {
+            { 1, 4, 0 },    { 4, 9, 0 },    { 4, 5, 9 },    { 8, 5, 4 },
+            { 1, 8, 4 },    { 1, 10, 8 },   { 10, 3, 8 },   { 8, 3, 5 },
+            { 3, 2, 5 },    { 3, 7, 2 },    { 3, 10, 7 },   { 10, 6, 7 },
+            { 6, 11, 7 },   { 6, 0, 11 },	{ 6, 1, 0 },    { 10, 1, 6 },
+            { 11, 0, 9 },   { 2, 11, 9 },   { 5, 2, 9 },    { 11, 2, 7 },
+        };
+
+        static Gfx sphere_gfx[24];
+        static Vtx sphere_vtx[12];
+        sphere_p = sphere_gfx;
+        Gfx* sph_p = sphere_p;
+        for(int i = 0; i < 12; i++) {
+            z2_xyzf_t *vtx = &icosvtx[i];
+            int vx = floorf(vtx->x * 128.f);
+            int vy = floorf(vtx->y * 128.f);
+            int vz = floorf(vtx->z * 128.f);
+
+            int nx = vtx->x * 127.f;
+            int ny = vtx->y * 127.f;
+            int nz = vtx->z * 127.f;
+
+            sphere_vtx[i] = gdSPDefVtxN(vx, vy, vz, 0, 0, nx, ny,  nz, 0xFF);
+        }
+
+        gSPSetGeometryMode(sph_p++, G_CULL_BACK);
+        gSPVertex(sph_p++, sphere_vtx, 12, 0);
+
+        for(int i = 0; i < sizeof(icostri) / sizeof(*icostri); i++) {
+            gSP1Triangle(sph_p++, icostri[i][0], icostri[i][1], icostri[i][2], 0);
+        }
+
+        gSPClearGeometryMode(sph_p++, G_CULL_BACK);
+        gSPEndDisplayList(sph_p++);
+    }
+
+    Mtx m;
+    {
+        MtxF m_trans;
+        guTranslateF(&m_trans, x, y, z);
+        MtxF m_scale;
+        guScaleF(&m_scale, radius / 128.0f, radius / 128.0f, radius / 128.0f);
+        guMtxCatF(&m_scale, &m_trans, &m_trans);
+        guMtxF2L(&m_trans, &m);
+    }
+    gSPMatrix((*hit_view_p)++, gDisplayListData(hit_view_d, m), G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
+    gSPDisplayList((*hit_view_p)++, sphere_p);
+    gSPPopMatrix((*hit_view_p)++, G_MTX_MODELVIEW);
+}
+
 static void draw_cylinder(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t height, int16_t x, int16_t y, int16_t z){
     static Gfx *cylinder_p = NULL;
 
@@ -256,15 +320,15 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
     for(int i = 0;i < hitbox_cnt;i++){
         z2_hitbox_t *hitbox = hitbox_list[i];
         switch(hitbox->type){
-            case Z2_HITBOX_CYLINDER_LIST: {
-                z2_hitbox_cylinder_list_t *cylinder_list = (z2_hitbox_cylinder_list_t*)hitbox;
-                for(int j = 0;j < cylinder_list->entry_cnt;j++){
-                    z2_hitbox_cylinder_ent_t *entry = &cylinder_list->entries[j];
+            case Z2_HITBOX_SPHERE_LIST: {
+                z2_hitbox_sphere_list_t *sphere_list = (z2_hitbox_sphere_list_t*)hitbox;
+                for(int j = 0;j < sphere_list->entry_cnt;j++){
+                    z2_hitbox_sphere_ent_t *entry = &sphere_list->entries[j];
                     int16_t radius = entry->radius;
                     if(radius == 0){
                         radius = 1;
                     }
-                    draw_cylinder(hit_view_p, hit_view_d, radius, radius * 2, entry->pos.x, entry->pos.y, entry->pos.z);
+                    draw_sphere(hit_view_p, hit_view_d, radius, entry->pos.x, entry->pos.y, entry->pos.z);
                 }
             }
             break;
