@@ -12,35 +12,6 @@ kz requires [libundermine-f3dex2](https://github.com/krimtonz/libundermine) This
 
 To build the libunderime-f3dex2 submodule run `make libum`
 
-## zlib
-kz full versions require [zlib](https://www.zlib.net/). zlib should be installed in your n64 toolchain directory
-For example:
-
-    CC=mips64-gcc CFLAGS="-Os" ./configure --prefix=/opt/n64/mips64
-
-    Output:
-    Checking for shared library support...
-    No shared library support; try without defining CC and CFLAGS
-    Building static library libz.a version 1.2.11 with mips64-gcc.
-    Checking for size_t... Yes.
-    Checking for off64_t... No.
-    Checking for fseeko... No.
-    Checking for strerror... No.
-    Checking for unistd.h... Yes.
-    Checking for stdarg.h... Yes.
-    Checking whether to use vs[n]printf() or s[n]printf()... using vs[n]printf().
-    makChecking for vsnprintf() in stdio.h... No.
-    WARNING: vsnprintf() not found, falling back to vsprintf(). zlib
-    e  can build but will be open to possible buffer-overflow security
-    vulnerabilities.
-    Checking for return value of vsprintf()... Yes.
-    libz.Checking for attribute(visibility) support... Yes.
-
-    make libz.a
-    make install
-
-**Note:** depending on which version of newlib was installed with your toolchain running `make` without the `libz.a` target will cause an error when building the test program.
-
 ## gzinject
 In order to create a Wii Virtual Console WAD you will need [gzinject](https://github.com/krimtonz/gzinject)
 
