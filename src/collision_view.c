@@ -164,64 +164,112 @@ static void tri_norm(z2_xyzf_t *v0, z2_xyzf_t *v1, z2_xyzf_t *v2, z2_xyzf_t *nor
     }
 }
 
-static void draw_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t x, int16_t y, int16_t z){
-    static Gfx *sphere_p = NULL;
+void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t x, int16_t y, int16_t z){
+    static Gfx *sphere_gfx = NULL;
+    if(sphere_gfx == NULL){
+        const int   STACKS  =  6;
+        const int   SECTORS = 10;
+        static Vtx *vtx     = NULL;
+        int         vtx_cnt = (STACKS + 1) * (SECTORS + 1);
+        int         idx_cnt = ((STACKS - 1) * (SECTORS) * 2) * 3;
+        int16_t    *indices = malloc(idx_cnt * sizeof(*indices));
+        vtx = malloc(vtx_cnt * sizeof(*vtx));
 
-    if(sphere_p == NULL){
-        static z2_xyzf_t icosvtx[12] = {
-            { -ONE, 0.0f,   TAU },  { ONE,  0.0f,   TAU },  {-ONE,  0.0f,  -TAU },
-            { ONE,  0.0f,  -TAU},   { 0.0f, TAU,    ONE },  { 0.0f, TAU,   -ONE },
-            { 0.0f,-TAU,    ONE},   { 0.0f,-TAU,   -ONE },  { TAU,  ONE,    0.0f },
-            {-TAU,  ONE,    0.0f }, { TAU, -ONE,    0.0f},  {-TAU, -ONE,    0.0f },
-        };
+        // should probably figure out a calculation for gfx count 
+        sphere_gfx = malloc(57 * sizeof(*sphere_gfx));
 
-        static int icostri [20][3] = {
-            { 1, 4, 0 },    { 4, 9, 0 },    { 4, 5, 9 },    { 8, 5, 4 },
-            { 1, 8, 4 },    { 1, 10, 8 },   { 10, 3, 8 },   { 8, 3, 5 },
-            { 3, 2, 5 },    { 3, 7, 2 },    { 3, 10, 7 },   { 10, 6, 7 },
-            { 6, 11, 7 },   { 6, 0, 11 },	{ 6, 1, 0 },    { 10, 1, 6 },
-            { 11, 0, 9 },   { 2, 11, 9 },   { 5, 2, 9 },    { 11, 2, 7 },
-        };
+        float       stack_angle;
+        float       sector_angle;
+        float       stack_step = M_PI / STACKS;
+        float       sector_step = 2.0f * M_PI / SECTORS;
+        float       xz, fx, fy, fz;
+        int         vx, vy, vz, nx, ny, nz;
+        Vtx        *p_vtx = vtx;
+        int         k1, k2;
+        int16_t    *p_indices = indices;
 
-        static Gfx sphere_gfx[24];
-        static Vtx sphere_vtx[12];
-        sphere_p = sphere_gfx;
-        Gfx* sph_p = sphere_p;
-        for(int i = 0; i < 12; i++) {
-            z2_xyzf_t *vtx = &icosvtx[i];
-            int vx = floorf(vtx->x * 128.f);
-            int vy = floorf(vtx->y * 128.f);
-            int vz = floorf(vtx->z * 128.f);
+        // generate vtx and indices
+        for(int i = 0; i <= STACKS; i++){
+            stack_angle = M_PI / 2.0f - i * stack_step;
+            xz = cosf(stack_angle);
+            fy = sinf(stack_angle);
+            k1 = i * (SECTORS + 1);
+            k2 = k1 + SECTORS + 1;
+            for(int j = 0; j <= SECTORS; j++, k1++, k2++){
+                sector_angle = j * sector_step;
+                fx = xz * cosf(sector_angle);
+                fz = xz * sinf(sector_angle);
 
-            int nx = vtx->x * 127.f;
-            int ny = vtx->y * 127.f;
-            int nz = vtx->z * 127.f;
+                vx = floorf(fx * 50.0f);
+                vy = floorf(fy * 50.0f);
+                vz = floorf(fz * 50.0f);
 
-            sphere_vtx[i] = gdSPDefVtxN(vx, vy, vz, 0, 0, nx, ny,  nz, 0xFF);
+                nx = fx * 49.0f;
+                ny = fy * 49.0f;
+                nz = fz * 49.0f;
+
+                *p_vtx++ = gdSPDefVtxN(vx, vy, vz, 0, 0, nx, ny, nz, 0xFF);
+
+                if(i != STACKS && j != SECTORS){
+                    if(i != 0){
+                        *p_indices++ = k1;
+                        *p_indices++ = k2;
+                        *p_indices++ = k1 + 1;
+                    }
+
+                    if(i != (STACKS - 1)){
+                        *p_indices++ = k1 + 1;
+                        *p_indices++ = k2;
+                        *p_indices++ = k2 + 1;
+                    }
+                }
+            }
         }
 
-        gSPSetGeometryMode(sph_p++, G_CULL_BACK);
-        gSPVertex(sph_p++, sphere_vtx, 12, 0);
+        Gfx *gfx_p = sphere_gfx;
+        int vtxstart = -1;
+        gSPSetGeometryMode(gfx_p++, G_CULL_BACK);
 
-        for(int i = 0; i < sizeof(icostri) / sizeof(*icostri); i++) {
-            gSP1Triangle(sph_p++, icostri[i][0], icostri[i][1], icostri[i][2], 0);
+        // Generate tris
+        for(int i = 0; i < idx_cnt; i += 6){
+            // Get the min/max vtx index for 2 tris
+            int min = indices[i], max = indices[i];
+            for(int j = 1; j < 6; j++){
+                if(indices[i + j] < min){
+                    min = indices[i + j];
+                } else if(indices[i + j] > max){
+                    max = indices[i + j];
+                }
+            }
+            
+            Vtx *vtx_first = &vtx[min];
+            // Load vertices if the first or last isn't loaded.  This probably could be further optimized 
+            if(i == 0 || vtxstart > min || vtxstart + 31 < max){
+                gSPVertex(gfx_p++, vtx_first, 32, 0);
+                vtxstart = min;
+            }
+
+            gSP2Triangles(gfx_p++, indices[i + 2] - vtxstart, indices[i + 1] - vtxstart, indices[i] - vtxstart, 0,
+                                   indices[i + 5] - vtxstart, indices[i + 4] - vtxstart, indices[i + 3] - vtxstart, 0);
         }
+        gSPClearGeometryMode(gfx_p++, G_CULL_BACK);
+        gSPEndDisplayList(gfx_p++);
 
-        gSPClearGeometryMode(sph_p++, G_CULL_BACK);
-        gSPEndDisplayList(sph_p++);
+        free(indices);
     }
 
     Mtx m;
     {
-        MtxF m_trans;
-        guTranslateF(&m_trans, x, y, z);
-        MtxF m_scale;
-        guScaleF(&m_scale, radius / 128.0f, radius / 128.0f, radius / 128.0f);
-        guMtxCatF(&m_scale, &m_trans, &m_trans);
-        guMtxF2L(&m_trans, &m);
+        MtxF mf;
+        guTranslateF(&mf, x, y, z);
+        MtxF ms;
+        guScaleF(&ms, radius / 50.0f, radius / 50.0f, radius / 50.0f);
+        guMtxCatF(&ms, &mf, &mf);
+        guMtxF2L(&mf, &m);
     }
+
     gSPMatrix((*hit_view_p)++, gDisplayListData(hit_view_d, m), G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
-    gSPDisplayList((*hit_view_p)++, sphere_p);
+    gSPDisplayList((*hit_view_p)++, sphere_gfx);
     gSPPopMatrix((*hit_view_p)++, G_MTX_MODELVIEW);
 }
 
@@ -328,7 +376,7 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
                     if(radius == 0){
                         radius = 1;
                     }
-                    draw_sphere(hit_view_p, hit_view_d, radius, entry->pos.x, entry->pos.y, entry->pos.z);
+                    draw_uv_sphere(hit_view_p, hit_view_d, radius, entry->pos.x, entry->pos.y, entry->pos.z);
                 }
             }
             break;
