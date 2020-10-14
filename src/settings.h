@@ -9,9 +9,9 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include <libundermine.h>
 #include "commands.h"
 #include "kz.h"
+#include "watches.h"
 
 #define IO_BLOCK_SIZE       0x80
 #define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)

@@ -9,10 +9,11 @@
 
 #include <stdint.h>
 #include <vector/vector.h>
-#include <libundermine.h>
 #include "z2.h"
 #include "settings.h"
 #include "collision_view.h"
+#include "menu.h"
+#include "watches.h"
 #include "zu.h"
 
 #define KZ_MEMFILE_MAX 3

@@ -25,9 +25,9 @@ RESDESC             = res.json
 ADDRESS             = 0x80800060
 ADDRESS_LITE        = 0x806E0060
 ADDRESS_LDR         = 0x80080000
-ALL_CFLAGS          = -Ilibundermine/include -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
+ALL_CFLAGS          = -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
 ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS) $(VCCPPFLAGS)
-ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -Llibundermine/lib/libundermine-f3dex2 -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
+ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
 ALL_LIBS            = $(LIBS)
 
 KZ                  = $(foreach v,$(KZ_VERSIONS),kz-$(v))
@@ -57,25 +57,11 @@ clean-vc            :
 	cd $(VCDIR) && make clean
 clean-homeboy       :
 	cd $(HOMEBOYDIR) && make clean
-clean-libum     	:
-	cd libundermine && make clean
 
-distclean-libum 	:
-	cd libundermine && make distclean
+clean-all           :   clean clean-vc clean-homeboy
+distclean-all       :   distclean clean-vc clean-homeboy
 
-config-libum    	: libundermine/config.status
-libundermine/config.status :
-	cd libundermine && ./configure \
-		--host=$(target) \
-        --enable-lto
-
-libum           	: libundermine/libundermine-f3dex2/libundermine-f3dex2.a
-libundermine/libundermine-f3dex2/libundermine-f3dex2.a : libundermine/config.status
-	cd libundermine && make lib/libundermine-f3dex2/libundermine-f3dex2.a
-clean-all           :   clean clean-vc clean-homeboy clean-libum
-distclean-all       :   distclean clean-vc clean-homeboy distclean-libum
-
-.PHONY              :   all clean distclean clean-vc clean-homeboy config-libum libum clean-libum distclean-libum clean-all distclean-all
+.PHONY              :   all clean distclean clean-vc clean-homeboyclean-all distclean-all
 
 define bin_template
 SRCDIR-$(1)         = $(5)
@@ -145,11 +131,11 @@ $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-lite-$(v),$(v),ldr,
 $(foreach v,$(VC_VERSIONS),$(eval $(call vc_template,kz-vc-$(v),kz-vc,$(v))))
 
 $(KZ-NZSE)          :   CPPFLAGS    ?=	-DZ2_VERSION=NZSE
-$(KZ-NZSE)          :   LIBS	    :=	-lNZSE -Wl,--whole-archive -lundermine-f3dex2 -Wl,--no-whole-archive
+$(KZ-NZSE)          :   LIBS	    :=	-lNZSE
 $(KZ-NZSJ)          :   CPPFLAGS    ?=	-DZ2_VERSION=NZSJ
-$(KZ-NZSJ)          :   LIBS	    :=	-lNZSJ -Wl,--whole-archive -lundermine-f3dex2 -Wl,--no-whole-archive
+$(KZ-NZSJ)          :   LIBS	    :=	-lNZSJ
 $(KZ-NZSJ10)        :   CPPFLAGS    ?=	-DZ2_VERSION=NZSJ10
-$(KZ-NZSJ10)        :   LIBS	    :=	-lNZSJ10 -Wl,--whole-archive -lundermine-f3dex2 -Wl,--no-whole-archive
+$(KZ-NZSJ10)        :   LIBS	    :=	-lNZSJ10
 $(KZ-FULL)          :   CPPFLAGS    +=	-DKZ_VERSION=KZ_FULL
 $(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto
 $(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects

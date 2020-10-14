@@ -1,6 +1,4 @@
 #include <stdlib.h>
-#include <libundermine.h>
-#include "menu_item_list.h"
 #include "kz.h"
 #include "kzresource.h"
 

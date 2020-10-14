@@ -3,7 +3,6 @@
 #include <startup.h>
 #include <inttypes.h>
 #include <math.h>
-#include <libundermine.h>
 #include "kz.h"
 #include "collision_view.h"
 #include "scenes.h"
@@ -11,8 +10,9 @@
 #include "settings.h"
 #include "kzresource.h"
 #include "zu.h"
-#include "kzgfx.h"
+#include "gfx.h"
 #include "start.h"
+#include "input.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -246,9 +246,9 @@ static void kz_main(void) {
 
     /* print frame advance status */
     if(kz.pending_frames == 0){
-        gfx_draw_sprite(resource_get(R_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
+        gfx_draw_sprite(resource_get(R_Z2_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
     }else if(kz.pending_frames>0){
-        gfx_draw_sprite(resource_get(R_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
+        gfx_draw_sprite(resource_get(R_Z2_ICON), Z2_SCREEN_WIDTH - 40, 20, 4, 20, 20);
     }
     if(!kz.z2_input_enabled){
         gfx_printf_color(Z2_SCREEN_WIDTH - 68, Z2_SCREEN_HEIGHT - 60, COLOR_RED, "i");
@@ -365,7 +365,6 @@ static void init(void) {
     gfx_init(GFX_SIZE, resource_get(resource_handles[R_KZ_FONT]), &z2_ctxt.gfx->overlay.p);
 
     kz.menu_active = 0;
-    menu_ctx_init(&kz.main_menu, &kz.tooltip);
     menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
     kz.main_menu.selected_item = menu_button_add(&kz.main_menu, 0, 0, "return", main_menu_return_onactivate, NULL);
 
@@ -493,3 +492,9 @@ int main() {
     kz_main();
     return 0;
 }
+
+#include <grc.c>
+#include <startup.c>
+#include <vector/vector.c>
+#include <list/list.c>
+#include <set/set.c>

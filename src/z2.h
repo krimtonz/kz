@@ -8,7 +8,7 @@
 #define _Z2_H
 #include <n64.h>
 #include <stdint.h>
-#include <libundermine.h>
+#include "gu.h"
 
 #define Z2_SCREEN_WIDTH    320
 #define Z2_SCREEN_HEIGHT   240

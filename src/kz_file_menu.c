@@ -1,7 +1,7 @@
-#include <libundermine.h>
 #include "kz.h"
 #include "kzresource.h"
 #include "zu.h"
+#include "input.h"
 
 static char *stored_song_text[] = {
     "none",                 "sonata of awakening",      "goron's lullaby",      "new wave bossa nova",

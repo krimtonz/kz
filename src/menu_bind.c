@@ -1,8 +1,9 @@
 #include <stdint.h>
-#include <libundermine.h>
+#include "menu.h"
 #include "menu_bind.h"
 #include "kzresource.h"
 #include "settings.h"
+#include "input.h"
 
 enum bind_state {
     BIND_STATE_NONE,

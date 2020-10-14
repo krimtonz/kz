@@ -3,10 +3,10 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <libundermine.h>
 #include "kz.h"
 #include "kzresource.h"
 #include "scenes.h"
+#include "input.h"
 
 #define MEMORY_MAX  0x80C00000
 

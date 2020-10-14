@@ -3,7 +3,7 @@
 #include <set/set.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <libundermine.h>
+#include "menu.h"
 #include "sys.h"
 #include "fat.h"
 #include "menu_file.h"

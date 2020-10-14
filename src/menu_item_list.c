@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <math.h>
-#include <libundermine.h>
+#include "menu.h"
 #include "kzresource.h"
+#include "gu.h"
 #include "z2.h"
 
 #ifndef LITE

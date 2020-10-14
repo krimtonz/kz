@@ -2,7 +2,7 @@
 
 #include "kz.h"
 #include "kzresource.h"
-#include "menu_item_list.h"
+#include "menu.h"
 
 static int8_t b_val = Z2_ITEM_NULL;
 
