@@ -33,21 +33,21 @@
 #endif
 
 enum cheats {
-    CHEAT_STICKS,
-    CHEAT_NUTS,
-    CHEAT_ARROWS,
-    CHEAT_BOMBS,
-    CHEAT_BOMBCHUS,
-    CHEAT_POWDER_KEG,
-    CHEAT_HEALTH,
-    CHEAT_MAGIC,
-    CHEAT_BLAST_MASK,
-    CHEAT_RESTRICTION,
-    CHEAT_ISG,
-    CHEAT_RUPEES,
-    CHEAT_TURBO,
-    CHEAT_FREEZE_TIME,
-    CHEAT_MAX
+    /* 0x00 */ CHEAT_STICKS,
+    /* 0x01 */ CHEAT_NUTS,
+    /* 0x02 */ CHEAT_ARROWS,
+    /* 0x03 */ CHEAT_BOMBS,
+    /* 0x04 */ CHEAT_BOMBCHUS,
+    /* 0x05 */ CHEAT_POWDER_KEG,
+    /* 0x06 */ CHEAT_HEALTH,
+    /* 0x07 */ CHEAT_MAGIC,
+    /* 0x08 */ CHEAT_BLAST_MASK,
+    /* 0x09 */ CHEAT_RESTRICTION,
+    /* 0x0A */ CHEAT_ISG,
+    /* 0x0B */ CHEAT_RUPEES,
+    /* 0x0C */ CHEAT_TURBO,
+    /* 0x0D */ CHEAT_FREEZE_TIME,
+    /* 0x0E */ CHEAT_MAX
 };
 
 typedef struct {
@@ -96,6 +96,12 @@ typedef struct {
     struct log              log[KZ_LOG_MAX];
     _Bool                   debug_active;
     int                     prev_timespeed;
+    _Bool                   free_cam_active;
+    _Bool                   free_cam_locked;
+    z2_xyzf_t               cam_at;
+    z2_xyzf_t               cam_eye;
+    z2_xyzf_t               kz_at;
+    z2_xyzf_t               kz_eye;
 } kz_ctxt_t;
 
 menu_t *create_warps_menu       (void);

@@ -39,4 +39,8 @@ void    guTranslateF    (MtxF *mf, float x, float y, float z);
 void    guPerspectiveF  (MtxF *mf, uint16_t *perspNorm, float fovy, float aspect, float near, float far, float scale);
 void    guMtxIdent      (Mtx *m);
 void    guScaleF        (MtxF *mf, float x, float y, float z);
+void guLookAtF(MtxF *mf,
+                float eye_x, float eye_y, float eye_z,
+                float at_x, float at_y, float at_z,
+                float up_x, float  up_y, float up_z);
 #endif

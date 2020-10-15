@@ -13,6 +13,7 @@ z2_DrawActors               = 0x800BA42C;
 z2_SpawnActor               = 0x800BAE14;
 z2_DeleteActor              = 0x800BB498;
 z2_CreateStaticCollision    = 0x800C3334;
+z2_camera_update_hook       = 0x800DF0B8;
 z2_pause_persp              = 0x800F4A10;
 z2_btnupdate                = 0x80112B40;
 z2_ActionLabelUpdate        = 0x80115428;

@@ -1,5 +1,6 @@
 #include <math.h>
 #include "gu.h"
+#include "vec_math.h"
 
 void guPerspectiveF(MtxF *mf, uint16_t *perspNorm, float fovy, float aspect,
                     float near, float far, float scale)
@@ -21,6 +22,45 @@ void guPerspectiveF(MtxF *mf, uint16_t *perspNorm, float fovy, float aspect,
     mf->wy = 0.f;
     mf->wz = 2.f * near * far / (near - far) * scale;
     mf->ww = 0.f;
+}
+
+void guLookAtF(MtxF *mf,
+                float eye_x, float eye_y, float eye_z,
+                float at_x, float at_y, float at_z,
+                float up_x, float  up_y, float up_z){
+    z2_xyzf_t eye, at, up, forward, right, up_calc, trans;
+    eye.x = eye_x;
+    eye.y = eye_y;
+    eye.z = eye_z;
+
+    at.x = at_x;
+    at.y = at_y;
+    at.z = at_z;
+
+    up.x = up_x;
+    up.y = up_y;
+    up.z = up_z;
+
+    vec3f_sub(&at, &eye, &forward);   
+    vec3f_normalize(&forward, &forward);
+
+    vec3f_cross(&forward, &up, &right);
+    vec3f_normalize(&right, &right);
+
+    vec3f_cross(&right, &forward, &up_calc);
+    vec3f_normalize(&up_calc, &up_calc);
+
+    trans.x = -(eye.x * right.x + eye.y * right.y + eye.z * right.z);
+    trans.y = -(eye.x * up_calc.x + eye.y * up_calc.y + eye.z * up_calc.z);
+    trans.z = -(eye.x * forward.x + eye.y * forward.y + eye.z * forward.z);
+
+    *mf = (MtxF)guDefMtxF(
+        right.x, up.x, -forward.x, 0.0f,
+        right.y, up.y, -forward.y, 0.0f,
+        right.z, up.z, -forward.z, 0.0f,
+        trans.x, trans.y, -trans.z, 1.0f 
+    );
+
 }
 
 void guMtxCatF(const MtxF *m, const MtxF *n, MtxF *r)

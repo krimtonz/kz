@@ -37,10 +37,11 @@ genhook()
 
 genhook "$sym_z2_input_hook" "jal $sym_input_hook;"
 genhook "$sym_z2_main_hook" "jal $sym__start;"
-genhook "$sym_z2_motion_blur_hook" "jal $sym_motion_blur_hook;";
-genhook "$sym_z2_draw_actors_hook" "jal $sym_draw_actors_hook"
-genhook "$sym_z2_draw_room_1_hook" "jal $sym_draw_room_hook"
-genhook "$sym_z2_draw_room_2_hook" "jal $sym_draw_room_hook"
+genhook "$sym_z2_motion_blur_hook" "jal $sym_motion_blur_hook;"
+genhook "$sym_z2_draw_actors_hook" "jal $sym_draw_actors_hook;"
+genhook "$sym_z2_draw_room_1_hook" "jal $sym_draw_room_hook;"
+genhook "$sym_z2_draw_room_2_hook" "jal $sym_draw_room_hook;"
+genhook "$sym_z2_camera_update_hook" "jal $sym_camera_hook;"
 
 if [ "$2" == "lite" ]; then
 	genhook "$sym_z2_set_heap" "la \$t8, 0x806E0000;"

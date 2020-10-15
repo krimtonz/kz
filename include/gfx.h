@@ -12,6 +12,9 @@
 #define SCREEN_WIDTH    320
 #define SCREEN_HEIGHT   240
 
+#define G_CC_MODULATERGB_PRIM_ENVA  PRIMITIVE, 0, SHADE, 0, \
+                                    0,         0, 0,     ENVIRONMENT
+
 #define gfx_push(...)   {Gfx gfx__[]={__VA_ARGS__};     \
                         gfx_append(gfx__,sizeof(gfx__));}
 

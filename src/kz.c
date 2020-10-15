@@ -13,6 +13,7 @@
 #include "gfx.h"
 #include "start.h"
 #include "input.h"
+#include "camera.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -328,6 +329,28 @@ static int main_menu_return_onactivate(event_handler_t *handler, menu_event_t ev
     return 1;
 }
 
+static int free_cam_switch(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(event == MENU_EVENT_ACTIVATE){
+        kz.free_cam_active = !kz.free_cam_active;
+        if(kz.free_cam_active){
+            kz.kz_at = z2_game.cameras[0].at;
+            kz.kz_eye = z2_game.cameras[0].eye;
+        }
+    } else {
+        menu_checkbox_set(handler->subscriber, kz.free_cam_active);
+    }
+    return 1;
+}
+
+static int lock_cam_switch(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(event == MENU_EVENT_ACTIVATE){
+        kz.free_cam_locked = !kz.free_cam_locked;
+    } else {
+        menu_checkbox_set(handler->subscriber, kz.free_cam_locked);
+    }
+    return 1;
+}
+
 static void init(void) {
     clear_bss();
     do_global_ctors();
@@ -378,6 +401,12 @@ static void init(void) {
     #ifndef LITE
     menu_submenu_add(&kz.main_menu, 0, 8, "debug", create_debug_menu());
     menu_submenu_add(&kz.main_menu, 0, 9, "settings", create_settings_menu());
+    menu_item_t *free_swap = menu_checkbox_add(&kz.main_menu, 0, 10);
+    menu_item_register_event(free_swap, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, free_cam_switch, NULL);
+    menu_label_add(&kz.main_menu, 2, 10, "Enable Free Cam");
+    menu_item_t *lock_swap = menu_checkbox_add(&kz.main_menu, 0, 11);
+    menu_label_add(&kz.main_menu, 2, 11, "Lock Free Cam");
+    menu_item_register_event(lock_swap, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, lock_cam_switch, NULL);
     #else
     menu_submenu_add(&kz.main_menu, 0, 8, "settings", create_settings_menu());
     #endif
@@ -398,11 +427,11 @@ static void init(void) {
 }
 
 void kz_log(const char *format, ...){
-    struct log *log_entry = &kz.log[KZ_LOG_MAX-1];
+    struct log *log_entry = &kz.log[KZ_LOG_MAX - 1];
     if(log_entry->mesg){
         free(log_entry->mesg);
     }
-    for(int i = KZ_LOG_MAX - 1;i > 0;i--){
+    for(int i = KZ_LOG_MAX - 1; i > 0; i--){
         kz.log[i] = kz.log[i - 1];
     }
     va_list va;
@@ -442,6 +471,27 @@ static void game_state_main(void){
     }
 }
 
+int zu_adjust_joystick(int v)
+{
+  if (v < 0) {
+    if (v > -8)
+      return 0;
+    else if (v < -66)
+      return -60;
+    else
+      return v + 7;
+  }
+  else {
+    if (v < 8)
+      return 0;
+    else if (v > 66)
+      return 60;
+    else
+      return v - 7;
+  }
+}
+
+
 HOOK void input_hook(void){
     if(kz.pending_frames != 0 && kz.z2_input_enabled){
         z2_input_update(&z2_ctxt);
@@ -451,6 +501,16 @@ HOOK void input_hook(void){
             input->raw.pad &=  mask;
             input->pad_pressed &= mask;
             input->pad_released &= mask;
+            if(kz.free_cam_active && !kz.free_cam_locked){
+                mask = ~(BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
+                input->raw.pad &=  mask;
+                input->pad_pressed &= mask;
+                input->pad_released &= mask;
+                input->raw.x = 0;
+                input->raw.y = 0;
+                input->adjusted_x = 0;
+                input->adjusted_y = 0;
+            }
         }
     }
 }
@@ -481,6 +541,25 @@ HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room){
     }else{
         z2_DrawRoom(game, room);
     }
+}
+
+HOOK int camera_hook(z2_camera_t* camera) {
+    int (*camera_update_func)(z2_camera_t*);
+    __asm__ volatile("sw $t9, %0" : "=m"(camera_update_func) :: "t9");
+    if(!kz.free_cam_active){
+        return camera_update_func(camera);
+    }
+    camera->at = kz.cam_at;
+    camera->eye = kz.cam_eye;
+    int ret = camera_update_func(camera);
+    kz.cam_at = camera->at;
+    kz.cam_eye = camera->eye;
+    if(!kz.free_cam_locked) {
+        kz_camera_calc();
+    }
+    camera->at = kz.kz_at;
+    camera->eye = kz.kz_eye;
+    return ret;
 }
 
 int main() {

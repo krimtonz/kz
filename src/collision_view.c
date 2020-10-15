@@ -9,9 +9,6 @@
 #define ONE 0.525731112119133606f
 #define TAU 0.850650808352039932f
 
-#define G_CC_MODULATERGB_PRIM_ENVA  PRIMITIVE, 0, SHADE, 0, \
-                                    0,         0, 0,     ENVIRONMENT
-
 typedef struct {
     Gfx        *p;
     Gfx        *d;
