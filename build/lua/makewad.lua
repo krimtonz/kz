@@ -89,7 +89,7 @@ local gzinject_pack = gzinject ..
         " -p \"" .. emulator_patch .."\"" ..
         " -p \"" .. mapping_patch .. "\""
 
-if((opt_no_vc_fix == nil or opt_no_vc_fix ~= 1) and opt_lite == false) then
+if((opt_no_vc_fix == nil or opt_no_vc_fix ~= 1)) then
     local vcmake = os.execute("make " .. rom_info.vc_fix_inject .. "/homeboy.bin")
     if(vcmake ~= nil and vcmake == true) then
         gzinject_pack = gzinject_pack ..

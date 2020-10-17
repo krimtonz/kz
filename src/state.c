@@ -6,19 +6,26 @@
 #include "state.h"
 #include "zu.h"
 #include "kzresource.h"
+#include "hb.h"
+#include "kz.h"
 
-static void st_write(void **dst, void *src, size_t len){
-    char *p = *dst;
-    memcpy(p, src, len);
+static void st_write(int *pos, void *src, size_t len){
+    int p = *pos;
+    hb_mem_write(src, p, len);
+    //memcpy(p, src, len);
     p += len;
-    *dst = p;
+    *pos = p;
 }
 
-static void st_read(void **src, void *dst, size_t len){
-    char *p = *src;
-    memcpy(dst, p, len);
-    p += len;
-    *src = p;
+static void st_read(int *pos, void *dst, size_t len){
+    //char *p = *src;
+    //memcpy(dst, p, len);
+    //p += len;
+    //*src = p;
+    int p = *pos;
+    hb_mem_read(dst, p, len);
+    p+= len;
+    *pos = p;
 }
 
 static void st_skip(void **dest, size_t len){
@@ -74,14 +81,15 @@ void relocate_col_hdr(uint32_t hdr){
     zu_segment_reloc(&col_hdr->water);
 }
 
-void load_state(void *state){
-    void *p = state;
+void load_state(kz_state_hdr_t *state){
+    //void *p = state;
+    int p = 0;
 
     /* wait for rcp to finish task */
     osRecvMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_BLOCK);
     osSendMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_NOBLOCK);
 
-    st_skip(&p,sizeof(kz_state_hdr_t));
+    //st_skip(&p,sizeof(kz_state_hdr_t));
 
     /* record current loaded data */
     int scene_index = z2_game.scene_index;
@@ -485,14 +493,15 @@ _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end
     return 1;
 }
 
-size_t save_state(void *state){
-    void *p = state;
+size_t save_state(kz_state_hdr_t *state){
+    int p = 0;
+    //void *p = state;
 
     /* indicators for table entries */
     int ent_start = 0;
     int ent_end = -1;
 
-    st_skip(&p, sizeof(kz_state_hdr_t));
+    //st_skip(&p, sizeof(kz_state_hdr_t));
 
     struct set node_set;
     set_init(&node_set, sizeof(uint32_t), addr_compare);
@@ -665,6 +674,6 @@ size_t save_state(void *state){
     st_write(&p, &gfx->frame_cnt_1, sizeof(gfx->frame_cnt_1));
     st_write(&p, &gfx->frame_cnt_2, sizeof(gfx->frame_cnt_2));
 
-    return (char*)p - (char*)state;
+    return p;
 }
 #endif

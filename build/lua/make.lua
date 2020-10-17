@@ -12,7 +12,7 @@ if rom_info == nil then
 end
 
 local suffix = ""
-local ram = 0x80800000
+local ram = 0x806E0000
 
 -- arg[2] is true if building the lite version
 if arg[2] == true then

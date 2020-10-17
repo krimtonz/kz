@@ -403,23 +403,29 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
 }
 
 void kz_hitbox_view(){
+#if 0 
     static Gfx *hit_view_disp[2];
     static int hit_view_idx = 0;
+#endif
 
     if(kz.hitbox_view_status == COL_VIEW_GENERATE){
+#if 0
         hit_view_disp[0] = malloc(0x800 * sizeof(*hit_view_disp[0]));
         hit_view_disp[1] = malloc(0x800 * sizeof(*hit_view_disp[1]));
+#endif
         kz.hitbox_view_status = COL_VIEW_SHOW;
     }else if(kz.hitbox_view_status == COL_VIEW_KILL){
         kz.hitbox_view_status = COL_VIEW_DESTROY;
         return;
     }else if(kz.hitbox_view_status == COL_VIEW_DESTROY){
+#if 0
         if(hit_view_disp[0]){
             free(hit_view_disp[0]);
         }
         if(hit_view_disp[1]){
             free(hit_view_disp[1]);
         }
+#endif
         kz.hitbox_view_status = COL_VIEW_NONE;
         return;
     }
@@ -436,10 +442,15 @@ void kz_hitbox_view(){
         }else{
             z2_gfx_p = z2_ctxt.gfx->poly_opa.p++;
         }
+#if 0
         Gfx *hit_view_start = hit_view_disp[hit_view_idx];
+#endif
+        Gfx *hit_view_start = (Gfx*)0x80383AC0;
         Gfx *hit_view_p = hit_view_start;
         Gfx *hit_view_d = hit_view_p + 0x800;
+#if 0
         hit_view_idx = (hit_view_idx + 1) % 2;
+#endif
 
         init_poly_list(&hit_view_p, &hit_view_d, xlu, 0);
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.other_cnt, z2_game.hitbox_ctxt.other, 0x00FFFFFF);
@@ -525,8 +536,11 @@ static void do_dynamic_collision(poly_writer_t *writer){
 
 void kz_col_view(){
     static Gfx *static_col = NULL;
+#if 0
     static Gfx *dynamic_gfx[2] = { NULL, NULL };
     static int dynamic_idx = 0;
+#endif
+    static Gfx* dynamic_gfx = NULL;
 
     static uint16_t col_view_scene = 0;
 
@@ -576,7 +590,8 @@ void kz_col_view(){
 
         static_col_size += 0x11;
 
-        static_col = malloc(sizeof(*static_col) * static_col_size);
+        //static_col = malloc(sizeof(*static_col) * static_col_size);
+        static_col = (Gfx*)0x80008500;
         Gfx *static_col_p = static_col;
         Gfx *static_col_d = static_col + static_col_size;
         poly_writer_init(&writer, static_col_p, static_col_d);
@@ -589,8 +604,10 @@ void kz_col_view(){
         kz.collision_view_status = COL_VIEW_DESTROY;
     }else if(kz.collision_view_status == COL_VIEW_DESTROY){
         if(static_col){
+#if 0
             free(static_col);
             static_col = NULL;
+#endif
         }
         kz.collision_view_status = COL_VIEW_NONE;
     }
@@ -617,17 +634,20 @@ void kz_col_view(){
         gSPDisplayList((*gfx_p)++, static_col);
 
         if(settings->col_view_upd){
+#if 0
             if(dynamic_gfx[dynamic_idx] == NULL){
                 dynamic_gfx[0] = malloc(0x1000 * sizeof(*dynamic_gfx[0]));
                 dynamic_gfx[1] = malloc(0x1000 * sizeof(*dynamic_gfx[1]));
             }
-
+#endif
             Gfx *dynamic_buf = NULL;
             Gfx *dynamic_gfx_p = NULL;
             Gfx *dynamic_gfx_d = NULL;
             poly_writer_t *dynamic_writer = NULL;
-
+#if 0
             dynamic_buf = dynamic_gfx[dynamic_idx];
+#endif
+            dynamic_buf = (Gfx*)0x80000500;
             dynamic_gfx_p = dynamic_buf;
             dynamic_gfx_d = dynamic_buf + 0x1000;
             dynamic_writer = &writer;
@@ -635,7 +655,7 @@ void kz_col_view(){
             do_dynamic_collision(dynamic_writer);
             poly_writer_finish(dynamic_writer, &dynamic_gfx_p, &dynamic_gfx_d);
             gSPEndDisplayList(dynamic_gfx_p++);
-            gSPDisplayList((*gfx_p)++, dynamic_gfx[dynamic_idx]);
+            gSPDisplayList((*gfx_p)++, dynamic_buf);
         }
     }
 }

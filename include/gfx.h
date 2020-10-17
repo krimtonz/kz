@@ -63,10 +63,9 @@ typedef struct {
     enum loader_source  source;         /* 0x0010 */
 } texture_loader;                       /* 0x0014 */
 
-void            gfx_init                    (size_t gfx_size, gfx_texture *font, Gfx **gfx_finish_p);
+void            gfx_init                    (void);
 void            gfx_begin                   (void);
 void            gfx_finish                  (void);
-void            gfx_finish_set              (Gfx **gfx_append_p);
 
 void           *gfx_data_push               (void *data, size_t size);
 void            gfx_append                  (Gfx *gfx, size_t size);
@@ -88,12 +87,5 @@ gfx_texture    *gfx_load_item_texture       (uint8_t item_id);
 void            gfx_destroy_texture         (gfx_texture *texture);
 
 extern gfx_font *kfont;
-
-
-#ifndef LITE
-#define GFX_SIZE    (0x6500 * sizeof(Gfx))
-#else
-#define GFX_SIZE    (0x1500 * sizeof(Gfx))
-#endif
 
 #endif

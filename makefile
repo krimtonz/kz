@@ -22,7 +22,8 @@ VC_VERSIONS         = NARJ NARE
 NAME                = kz
 RESDESC             = res.json
 
-ADDRESS             = 0x80800060
+#ADDRESS             = 0x80800060
+ADDRESS				= 0x806E0060
 ADDRESS_LITE        = 0x806E0060
 ADDRESS_LDR         = 0x80080000
 ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)

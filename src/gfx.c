@@ -18,16 +18,18 @@
 
 #define TILE_SIZE(x,y,z)    ((x * y * G_SIZ_BITS(z) + 63) / 64 * 8)
 
-#define TILE_SIZE(x,y,z)    ((x * y * G_SIZ_BITS(z) + 63) / 64 * 8)
-
 #define RDP_STACK_LEN 5
+
+#ifndef LITE
+#define GFX_SIZE    (0x4B00 * sizeof(Gfx))
+#else
+#define GFX_SIZE    (0x1500 * sizeof(Gfx))
+#endif
 
 static Gfx     *gfx_disp;
 static Gfx     *gfx_disp_p;
 static Gfx     *gfx_disp_d;
 static Gfx     *gfx_disp_work;
-static Gfx    **p_gfx_p;
-static size_t   gfx_size;
 
 static _Bool    rdp_synced;
 
@@ -156,16 +158,19 @@ static void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
 
 /* start/finish gfx processing functions */
 
-void gfx_init(size_t size, gfx_texture *font, Gfx **gfx_append_p){
-    gfx_disp = malloc(size);
-    gfx_disp_work = malloc(size);
+void gfx_init(){
+#if 0
+    gfx_disp = malloc(GFX_SIZE);
+#endif
+    gfx_disp = (Gfx*)0x807DA800;
+#if 0
+    gfx_disp_work = malloc(GFX_SIZE);
+#endif
     gfx_disp_p = gfx_disp;
-    gfx_disp_d = gfx_disp + ((gfx_size + sizeof(*gfx_disp_d) - 1) / (sizeof (*gfx_disp_d) * sizeof(gfx_disp_d)));
-    gfx_size = size;
-    p_gfx_p = gfx_append_p;
+    gfx_disp_d = gfx_disp + ((GFX_SIZE + sizeof(*gfx_disp_d) - 1) / (sizeof(*gfx_disp_d)));
 
     kfont = malloc(sizeof(gfx_font));
-    kfont->texture = font;
+    kfont->texture = resource_get(R_KZ_FONT);
     kfont->c_width = 8;
     kfont->c_height = 8;
     kfont->cx_tile = 2;
@@ -180,19 +185,20 @@ void gfx_begin(void){
 
 void gfx_finish(void){
     gSPEndDisplayList(gfx_disp_p++);
-    gSPDisplayList((*p_gfx_p)++, gfx_disp);
+    gSPDisplayList(z2_ctxt.gfx->overlay.p++, gfx_disp);
+    gfx_disp_p = gfx_disp;
+    gfx_disp_d = gfx_disp + ((GFX_SIZE + sizeof(*gfx_disp_d) - 1) / (sizeof(*gfx_disp_d)));
+#if 0
+    // necessary for n64 to double buffer dlists.
     Gfx *disp_w = gfx_disp_work;
     gfx_disp_work = gfx_disp;
     gfx_disp = disp_w;
     gfx_disp_p = gfx_disp;
-    gfx_disp_d = gfx_disp + ((gfx_size + sizeof(*gfx_disp_d) - 1) / (sizeof (*gfx_disp_d) * sizeof(gfx_disp_d)));
+    gfx_disp_d = gfx_disp + ((GFX_SIZE + sizeof(*gfx_disp_d) - 1) / (sizeof (*gfx_disp_d) * sizeof(gfx_disp_d)));
 
     /* write out data cache to memory */
-    osWritebackDCache(gfx_disp_work, gfx_size);
-}
-
-void gfx_finish_set(Gfx **gfx_append_p){
-    p_gfx_p = gfx_append_p;
+    osWritebackDCache(gfx_disp_work, GFX_SIZE);
+#endif
 }
 
 /* Custom display list functions */
@@ -209,6 +215,12 @@ void *gfx_data_push(void *data, size_t size){
 }
 
 void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
+    uint32_t test = 0;
+    if(texture == resource_get(R_KZ_BUTTONS)){
+        gSPSegment(gfx_disp_p++, 0xB, 0xA8060000);
+        test = texture->data;
+        texture->data = 0x0B000000 | ((uint32_t)texture->data - 0xA8060000);
+    }
     if(texture->img_size == G_IM_SIZ_4b){
         gDPLoadTextureTile_4b(gfx_disp_p++, texture->data + (texture->tile_size * tilenum),
             texture->img_fmt, texture->tile_width, texture->tile_height,
@@ -230,6 +242,9 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
             G_TX_NOLOD, G_TX_NOLOD);
     }
     rdp_synced = 1;
+    if(test != 0){
+        texture->data = test;
+    }
 }
 
 /* texture loading functions */

@@ -753,14 +753,13 @@ __attribute__ ((used))
 void __assert_func(const char *file, int line, const char *func, const char *failedexpr){
     return;
 }
-
+int sbrk_cnt = 0;
 /* minimalist sbrk to report unbrkable mem */
 __attribute__ ((used))
 __attribute__ ((noinline))
 void *sbrk(int len){
     extern char end;
     static char *heap_cur = NULL;
-
     if(heap_cur == NULL){
         heap_cur = &end;
     }

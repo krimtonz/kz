@@ -37,10 +37,14 @@ struct command kz_commands[KZ_CMD_MAX] = {
 };
 
 #ifndef LITE
-static void *state = NULL;
+//static void *state = NULL;
+static kz_state_hdr_t kz_state = {0};
 void command_load_state(){
+#if 0
     if(state){
-        load_state(state);
+#endif
+    if(kz_state.saved){
+        load_state(&kz_state);
         kz_log("loaded state");
     }else{
         kz_log("no state");
@@ -48,15 +52,20 @@ void command_load_state(){
 }
 
 void command_save_state(){
+#if 0
     if(state){
         free(state);
     }
     state = malloc(0x80000); // 512k to start
     kz_state_hdr_t *kz_state = state;
-    kz_state->size = save_state(state);
-    kz_state->z2_version = Z2_VERSION;
-    kz_state->settings_version = 0;
+#endif
+    kz_state.size = save_state(&kz_state);
+    kz_state.z2_version = Z2_VERSION;
+    kz_state.settings_version = 0;
+    kz_state.saved = 1;
+#if 0
     state = realloc(state, kz_state->size);
+#endif
     kz_log("saved state");
 }
 #endif

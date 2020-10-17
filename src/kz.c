@@ -14,6 +14,7 @@
 #include "start.h"
 #include "input.h"
 #include "camera.h"
+#include "hb.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -37,6 +38,9 @@ static void cpu_counter(void){
     kz.cpu_cycle_counter += new_count - count;
     count = new_count;
 }
+
+int *test = NULL;
+int test2[2];
 
 static void kz_main(void) {
     cpu_counter();
@@ -351,10 +355,21 @@ static int lock_cam_switch(event_handler_t *handler, menu_event_t event, void **
     return 1;
 }
 
+static int hb_test(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(event == MENU_EVENT_ACTIVATE){
+        hb_mem_write(&z2_game, 0, 100);
+    }
+    return 1;
+}
+
 static void init(void) {
     clear_bss();
     do_global_ctors();
-
+    test = hb_alloc(100);
+    test[0] = 100;
+    test[1] = 0;
+    test2[0] = test[0];
+    test2[1] = test[1];
     kz.cpu_cycle_counter = 0;
     cpu_counter();
     kz.cpu_offset = -kz.cpu_cycle_counter;
@@ -385,7 +400,7 @@ static void init(void) {
     bind_override(KZ_CMD_RETURN);
 
     kz_resource_init();
-    gfx_init(GFX_SIZE, resource_get(resource_handles[R_KZ_FONT]), &z2_ctxt.gfx->overlay.p);
+    gfx_init();
 
     kz.menu_active = 0;
     menu_init(&kz.main_menu, settings->menu_x, settings->menu_y);
@@ -409,6 +424,7 @@ static void init(void) {
     menu_item_register_event(lock_swap, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, lock_cam_switch, NULL);
     #else
     menu_submenu_add(&kz.main_menu, 0, 8, "settings", create_settings_menu());
+    menu_button_add(&kz.main_menu, 0, 9, "hb test", hb_test, NULL);
     #endif
 
     kz.memfile = malloc(sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
@@ -425,7 +441,7 @@ static void init(void) {
 
     kz.ready = 1;
 }
-
+int col_size = 0;
 void kz_log(const char *format, ...){
     struct log *log_entry = &kz.log[KZ_LOG_MAX - 1];
     if(log_entry->mesg){
@@ -470,27 +486,6 @@ static void game_state_main(void){
         z2_game.common.gamestate_frames--;
     }
 }
-
-int zu_adjust_joystick(int v)
-{
-  if (v < 0) {
-    if (v > -8)
-      return 0;
-    else if (v < -66)
-      return -60;
-    else
-      return v + 7;
-  }
-  else {
-    if (v < 8)
-      return 0;
-    else if (v > 66)
-      return 60;
-    else
-      return v - 7;
-  }
-}
-
 
 HOOK void input_hook(void){
     if(kz.pending_frames != 0 && kz.z2_input_enabled){
