@@ -33,6 +33,7 @@ define bin_template
 SRCDIR-$(1)      = $(4)
 OBJDIR-$(1)      = obj/$(1)
 BINDIR-$(1)      = $$(BINDIR)/$(1)
+HB_HEAP-$(1)	 = $(shell echo "0x`powerpc-eabi-nm "../homeboy/bin/hb-$(2)/homeboy.elf" | sed -e s/^M//g | grep -w "hb_heap_obj" | sed -E -e "s/([0-9A-Fa-f]{8})?([0-9A-Fa-f]{8}).*/\2/"`")
 NAME-$(1)        = $(1)
 CSRC-$(1)       := $$(foreach s,$$(CFILES),$$(wildcard $$(SRCDIR-$(1))/$$(s)))
 COBJ-$(1)        = $$(patsubst $$(SRCDIR-$(1))/%,$$(OBJDIR-$(1))/%.o,$$(CSRC-$(1)))
@@ -45,7 +46,7 @@ OUTDIR-$(1)      = $$(OBJDIR-$(1)) $$(BINDIR-$(1))
 HOOKS-$(1)		 = $$(BINDIR-$(1))/$(3).gzi
 BUILD-$(1)		 = $(1)
 CLEAN-$(1)		 = clean-$(1)
-$$(ELF-$(1))		 : LDFLAGS += -Wl,--section-start,.init=$$(ADDRESS) -Wl,--defsym,start=$$(ADDRESS)
+$$(ELF-$(1))		 : LDFLAGS += -Wl,--section-start,.init=$$(ADDRESS) -Wl,--defsym,start=$$(ADDRESS) -Wl,--defsym,hb_heap_obj=$$(HB_HEAP-$(1))
 $$(BUILD-$(1))       : $$(BIN-$(1)) $$(HOOKS-$(1))
 $$(CLEAN-$(1))       :
 	rm -rf $$(OUTDIR-$(1))

@@ -34,10 +34,6 @@ typedef struct {
     uint32_t dram_restore_key;
     uint32_t timebase_hi;
     uint32_t timebase_lo;
-    uint32_t hb_addr;
-    uint32_t n64_addr;
-    uint32_t hb_wr_len;
-    uint32_t hb_rd_len;
 } hb_sd_regs_t;
 
 #define hb_sd_regs  (*(volatile hb_sd_regs_t*) 0xA8050000)
@@ -47,9 +43,6 @@ int hb_sd_read      (void *buf, uint32_t lba, uint32_t block_cnt);
 int hb_sd_init      (void);
 int hb_available    (void);
 int hb_reset        (void);
-int hb_mem_write    (void *buf, uint32_t hb_addr, uint32_t len);
-int hb_mem_read     (void *buf, uint32_t hb_addr, uint32_t len);
-void *hb_alloc(int size);
 
 #endif
 #endif

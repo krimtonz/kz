@@ -46,24 +46,6 @@ int hb_sd_write(void *buf, uint32_t lba, uint32_t block_cnt){
     return 0;
 }
 
-int hb_mem_write(void *buf, uint32_t hb_addr, uint32_t len){
-    if(!hb_available()){
-        return -1;
-    }
-    hb_sd_regs.hb_addr = hb_addr;
-    hb_sd_regs.n64_addr = MIPS_KSEG0_TO_PHYS(buf);
-    hb_sd_regs.hb_wr_len = len;
-}
-
-int hb_mem_read(void *buf, uint32_t hb_addr, uint32_t len){
-    if(!hb_available()){
-        return -1;
-    }
-    hb_sd_regs.hb_addr = hb_addr;
-    hb_sd_regs.n64_addr = MIPS_KSEG0_TO_PHYS(buf);
-    hb_sd_regs.hb_rd_len = len;
-}
-
 int hb_reset(void){
     if(!hb_available()){
         return -1;
@@ -74,14 +56,6 @@ int hb_reset(void){
         return -1;
     }
     return 0;
-}
-
-static char *hb_heap = (char*)0xA8060000;
-
-void *hb_alloc(int size) {
-    void *ret = hb_heap;
-    hb_heap += size;
-    return ret;
 }
 
 #endif

@@ -14,7 +14,7 @@
 #include "start.h"
 #include "input.h"
 #include "camera.h"
-#include "hb.h"
+#include "hb_heap.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -323,7 +323,7 @@ static void kz_main(void) {
         }
     }
 #endif
-
+    gfx_printf(10, 100, "%08x", sbrk(0));
     gfx_finish();
 }
 
@@ -355,23 +355,17 @@ static int lock_cam_switch(event_handler_t *handler, menu_event_t event, void **
     return 1;
 }
 
-static int hb_test(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_ACTIVATE){
-        hb_mem_write(&z2_game, 0, 100);
-    }
-    return 1;
-}
-
 static void init(void) {
     clear_bss();
     do_global_ctors();
-    test = hb_alloc(100);
-    test[0] = 100;
-    test[1] = 0;
-    test2[0] = test[0];
-    test2[1] = test[1];
     kz.cpu_cycle_counter = 0;
     cpu_counter();
+
+    // force a word and byte load/store in hb_heap memory.
+    char *vc_hack = halloc(0x10);
+    hmemcpy(vc_hack, vc_hack, 5);
+    hfree(vc_hack);
+
     kz.cpu_offset = -kz.cpu_cycle_counter;
     kz.cpu_prev = kz.cpu_cycle_counter;
     kz.timer_running = 0;
@@ -441,7 +435,7 @@ static void init(void) {
 
     kz.ready = 1;
 }
-int col_size = 0;
+
 void kz_log(const char *format, ...){
     struct log *log_entry = &kz.log[KZ_LOG_MAX - 1];
     if(log_entry->mesg){

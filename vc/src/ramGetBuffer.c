@@ -7,13 +7,18 @@ typedef struct {
     uint32_t ram_size;
 } gClassRAM_t;
 
-char **hb_mem = (char**)0x9000e6ac;
+typedef struct {
+    char *heap_ptr;
+    size_t heap_size;
+} class_hb_heap_t;
+
+extern class_hb_heap_t *hb_heap_obj;
 
 bool kz_ramGetBuffer(gClassRAM_t *ram, char **buf, uint32_t addr, uint32_t *len) {
     addr &= ~0xF0000000;
-    if(addr >= 0x8060000){
-        // kz hb_mem
-        *buf = *hb_mem + (addr & ~0xA8060000);
+    if(addr >= 0x8060000 && addr <= 0x8460000){
+        // homeboy hb_heap_obj
+        *buf = hb_heap_obj->heap_ptr + (addr - 0x8060000);
         return true;
     }
 

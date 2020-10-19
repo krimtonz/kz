@@ -26,9 +26,9 @@ RESDESC             = res.json
 ADDRESS				= 0x806E0060
 ADDRESS_LITE        = 0x806E0060
 ADDRESS_LDR         = 0x80080000
-ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
+ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division -n64-wiivc $(CFLAGS)
 ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS) $(VCCPPFLAGS)
-ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
+ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections -n64-wiivc $(LDFLAGS)
 ALL_LIBS            = $(LIBS)
 
 KZ                  = $(foreach v,$(KZ_VERSIONS),kz-$(v))
@@ -112,15 +112,18 @@ PATCH-$(1)          = $$(VCDIR-$(1))/$(2).gzi
 BIN-$(1)            = $$(VCDIR-$(1))/$(2).bin
 HOMEBOY-$(1)        = $$(VCDIR-$(1))/homeboy.bin
 BUILD-$(1)          = $(1)
-$$(BUILD-$(1))      :   $$(HOMEBOY-$(1))
+$$(BUILD-$(1))      :   $$(PATCH-$(1))
 
 $$(PATCH-$(1))      :   $$(BIN-$(1))
 	cd $(VCDIR) && make ../$$@
 
-$$(BIN-$(1))        :
+$$(BIN-$(1))        : $$(HOMEBOY-$(1))
 	cd $(VCDIR) && make ../$$@
 
-$$(HOMEBOY-$(1))    :   $$(PATCH-$(1))
+$$(VCDIR-$(1))		:
+	mkdir -p $$@
+
+$$(HOMEBOY-$(1))    : $$(VCDIR-$(1))
 	cd $(HOMEBOYDIR) && make bin/hb-$(3)/homeboy.bin
 	cp $(HOMEBOYDIR)/bin/hb-$(3)/homeboy.bin $$@
 endef

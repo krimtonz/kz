@@ -39,10 +39,6 @@ void *grc_ctor(int resource_id){
     kztext->x_tiles = gtext->tiles_x;
     kztext->y_tiles = gtext->tiles_y;
     kztext->tile_size = (kztext->tile_width * kztext->tile_height * G_SIZ_BITS(kztext->img_size) + 63) / 64 * 8;
-    if(resource_id == R_KZ_BUTTONS){
-        kztext->data = hb_alloc(kztext->tile_size * kztext->x_tiles * kztext->y_tiles);
-        memcpy(kztext->data, gtext->texture_data, kztext->tile_size * kztext->x_tiles * kztext->y_tiles);
-    }
     return kztext;
 }
 

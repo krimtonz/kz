@@ -25,6 +25,11 @@ enum rdp_mode {
     RDP_MODE_ALL
 };
 
+enum tex_source{
+    TEX_SRC_DRAM,
+    TEX_SRC_HB
+};
+
 typedef struct {
     void       *data;                   /* 0x0000 */
     uint16_t    tile_width;             /* 0x0004 */
@@ -34,7 +39,8 @@ typedef struct {
     size_t      tile_size;              /* 0x000C */
     g_ifmt_t    img_fmt;                /* 0x0010 */
     g_isiz_t    img_size;               /* 0x0011 */
-} gfx_texture;                          /* 0x0012 */
+    uint8_t     source;                 /* 0x0012 */
+} gfx_texture;                          /* 0x0013 */
 
 typedef struct {
     gfx_texture    *texture;            /* 0x0000 */

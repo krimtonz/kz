@@ -90,7 +90,7 @@ local gzinject_pack = gzinject ..
         " -p \"" .. mapping_patch .. "\""
 
 if((opt_no_vc_fix == nil or opt_no_vc_fix ~= 1)) then
-    local vcmake = os.execute("make " .. rom_info.vc_fix_inject .. "/homeboy.bin")
+    local vcmake = os.execute("make " .. rom_info.vc_fix_inject .. "/kz-vc.gzi")
     if(vcmake ~= nil and vcmake == true) then
         gzinject_pack = gzinject_pack ..
             " -p \"" .. rom_info.vc_fix_inject .. "/kz-vc.gzi\"" ..
