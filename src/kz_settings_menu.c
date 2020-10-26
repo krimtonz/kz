@@ -158,27 +158,33 @@ static int command_inc_onactivate(event_handler_t *handler, menu_event_t event, 
 
 #ifndef LITE
 static void do_export_memfile(char *path, void *data){
-    int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int file = -1;
+    creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file != -1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
-        write(file, memfile, sizeof(*memfile));
+        int res;
+        write(&res, file, memfile, sizeof(*memfile));
         kz_log("export from memfile %d", kz.memfile_slot);
-        close(file);
+        close(&res, file);
     }
+    
 }
 
 static void do_import_memfile(char *path, void *data){
-    int file = open(path, O_RDONLY);
+    int file = -1;
+    open(&file, path, O_RDONLY);
     if(file != -1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
         if(!memfile){
             memfile = malloc(sizeof(*memfile));
         }
-        read(file, memfile, sizeof(*memfile));
+        int res;
+        read(&res, file, memfile, sizeof(*memfile));
         kz.memfile[kz.memfile_slot] = memfile;
         kz_log("imported to memfile %d", kz.memfile_slot);
-        close(file);
+        close(&res, file);
     }
+    
 }
 
 static int export_memfile_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){

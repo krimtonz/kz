@@ -22,7 +22,7 @@
 #define RDP_STACK_LEN 5
 
 #ifndef LITE
-#define GFX_SIZE    (0x4B00 * sizeof(Gfx))
+#define GFX_SIZE    (0x2000 * sizeof(Gfx))
 #else
 #define GFX_SIZE    (0x1500 * sizeof(Gfx))
 #endif
@@ -162,12 +162,12 @@ static void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
 /* start/finish gfx processing functions */
 
 void gfx_init(){
-#if 0
-    gfx_disp = malloc(GFX_SIZE);
-#endif
+#ifdef WIIVC
     gfx_disp = (Gfx*)0x807DA800;
-#if 0
-    gfx_disp_work = malloc(GFX_SIZE);
+    gfx_disp_work = (Gfx*)0x807EA800;
+#else
+    gfx_disp = (Gfx*)malloc(GFX_SIZE * sizeof(*gfx_disp));
+    gfx_disp_work = (Gfx*)malloc(GFX_SIZE * sizeof(*gfx_disp));
 #endif
     gfx_disp_p = gfx_disp;
     gfx_disp_d = gfx_disp + ((GFX_SIZE + sizeof(*gfx_disp_d) - 1) / (sizeof(*gfx_disp_d)));
@@ -189,10 +189,6 @@ void gfx_begin(void){
 void gfx_finish(void){
     gSPEndDisplayList(gfx_disp_p++);
     gSPDisplayList(z2_ctxt.gfx->overlay.p++, gfx_disp);
-    gfx_disp_p = gfx_disp;
-    gfx_disp_d = gfx_disp + ((GFX_SIZE + sizeof(*gfx_disp_d) - 1) / (sizeof(*gfx_disp_d)));
-#if 0
-    // necessary for n64 to double buffer dlists.
     Gfx *disp_w = gfx_disp_work;
     gfx_disp_work = gfx_disp;
     gfx_disp = disp_w;
@@ -201,7 +197,6 @@ void gfx_finish(void){
 
     /* write out data cache to memory */
     osWritebackDCache(gfx_disp_work, GFX_SIZE);
-#endif
 }
 
 /* Custom display list functions */
@@ -223,9 +218,9 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
         data = texture->data;
     } else {
         gSPSegment(gfx_disp_p++, 0xB, 0xA8060000);
-        data = ((uint32_t)texture->data - 0xA8060000) | 0x0B000000;
+        data = (void*)(((uint32_t)texture->data - 0xA8060000) | 0x0B000000);
     }
-    data = (uint32_t)data + (texture->tile_size * tilenum);
+    data = (void*)((uint32_t)data + (texture->tile_size * tilenum));
     if(texture->img_size == G_IM_SIZ_4b){
         gDPLoadTextureTile_4b(gfx_disp_p++, data,
             texture->img_fmt, texture->tile_width, texture->tile_height,

@@ -15,6 +15,7 @@
 #include "input.h"
 #include "camera.h"
 #include "hb_heap.h"
+#include "sys.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -38,9 +39,6 @@ static void cpu_counter(void){
     kz.cpu_cycle_counter += new_count - count;
     count = new_count;
 }
-
-int *test = NULL;
-int test2[2];
 
 static void kz_main(void) {
     cpu_counter();
@@ -201,9 +199,6 @@ static void kz_main(void) {
             menu_t *kz_menu = &kz.main_menu;
             if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)){
                 kz.menu_active = 0;
-                if(!kz.debug_active){
-                    free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
-                }
             }else if(input_bind_pressed_raw(KZ_CMD_RETURN)){
                 menu_trigger_event(kz_menu, MENU_EVENT_RETURN, &event_data);
             }else{
@@ -304,12 +299,6 @@ static void kz_main(void) {
         gfx_printf_color(x, y - (i * 10), GPACK_RGB24A8(0xFFFFFF, alpha), "%s", log_entry->mesg);
     }
 
-    // Release Debug Menu Bindings
-    if(z2_game.pause_ctx.state == 0 && !kz.menu_active && kz.debug_active){
-        free_buttons(BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP | BUTTON_L);
-        kz.debug_active = 0;
-    }
-
 #ifdef LITE
     struct item_texture *textures = resource_get(resource_handles[R_Z2_ITEMS]);
     for(int i = 0;i < Z2_ITEM_END;i++){
@@ -323,7 +312,7 @@ static void kz_main(void) {
         }
     }
 #endif
-    gfx_printf(10, 100, "%08x", sbrk(0));
+    gfx_printf(100, 200, "%08x", static_col_size);
     gfx_finish();
 }
 
@@ -484,23 +473,6 @@ static void game_state_main(void){
 HOOK void input_hook(void){
     if(kz.pending_frames != 0 && kz.z2_input_enabled){
         z2_input_update(&z2_ctxt);
-        if(!kz.debug_active){
-            z2_input_t *input = &z2_ctxt.input[0];
-            uint16_t mask = ~(BUTTON_D_DOWN | BUTTON_D_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
-            input->raw.pad &=  mask;
-            input->pad_pressed &= mask;
-            input->pad_released &= mask;
-            if(kz.free_cam_active && !kz.free_cam_locked){
-                mask = ~(BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_D_RIGHT | BUTTON_D_LEFT);
-                input->raw.pad &=  mask;
-                input->pad_pressed &= mask;
-                input->pad_released &= mask;
-                input->raw.x = 0;
-                input->raw.y = 0;
-                input->adjusted_x = 0;
-                input->adjusted_y = 0;
-            }
-        }
     }
 }
 
@@ -510,7 +482,7 @@ HOOK void motion_blur_hook(void){
     }
 }
 
-HOOK void draw_actors_hook(void){
+HOOK void draw_actors_hook(void){ 
     if(kz.hide_actors){
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);

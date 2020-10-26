@@ -19,7 +19,7 @@ static __hb_heap_hdr_t *first_free_block;
 static _Bool hb_heap_initalized = 0;
 
 static void hb_heap_init(){
-    first_free_block = hb_heap;
+    first_free_block = (__hb_heap_hdr_t*)hb_heap;
     first_free_block->free = 1;
     first_free_block->size = HB_HEAP_SIZE - HDR_SIZE;
     first_free_block->prev = NULL;
@@ -70,7 +70,7 @@ void *halloc(size_t size){
 }
 
 void hfree(void* ptr){
-    __hb_heap_hdr_t *blk = ((char*)ptr - HDR_SIZE);
+    __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
     if(blk->next != NULL && blk->next->free){
         blk->size = ((char*)blk->next + blk->next->size) - (char*)blk;
         if(blk->next->next != NULL){
@@ -95,8 +95,8 @@ void hfree(void* ptr){
 
 void *hmemcpy(void *dst, void *src, size_t size)
 {
-    char *d = MIPS_KSEG0_TO_KSEG1(dst);
-    const char *p = MIPS_KSEG0_TO_KSEG1(src);
+    char *d = (char*)MIPS_KSEG0_TO_KSEG1(dst);
+    const char *p = (const char*)MIPS_KSEG0_TO_KSEG1(src);
 
     for(int i = 0; i < size / 4; i++, p += 4, d += 4, size -= 4){
         *((uint32_t*)d) = *((uint32_t*)p);

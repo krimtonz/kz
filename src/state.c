@@ -7,6 +7,7 @@
 #include "zu.h"
 #include "kzresource.h"
 #include "kz.h"
+#include "hb_heap.h"
 
 static void st_write(void **dst, void *src, size_t len){
     char *p = *dst;

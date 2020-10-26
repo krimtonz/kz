@@ -17,24 +17,6 @@ static uint16_t stored_song_values[] = {
     11,     12, 13, 14,
 };
 
-static int debug_menu_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(zu_is_ingame() && z2_game.cutscene_state == 0){
-        if(z2_game.pause_ctx.state == 0){
-            z2_game.pause_ctx.state = 1;
-                z2_pause_persp(&z2_game);
-                z2_game.pause_ctx.unk_0x202 = (z2_game.pause_ctx.screen_idx * 2) + 1;
-        }
-        z2_game.pause_ctx.debug_menu = 1;
-        reserve_buttons(BUTTON_D_DOWN | BUTTON_D_RIGHT | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_L);
-        kz.debug_active = 1;
-        kz.menu_active = 0;
-        kz.pending_frames = -1;
-    }else{
-        kz_log("cannot debug menu here");
-    }
-    return 1;
-}
-
 static int time_of_day_event(event_handler_t *handler, menu_event_t event, void **event_data){
     uint16_t value = (uint16_t)((uint32_t)*event_data);
     if(event == MENU_EVENT_NUMBER){
@@ -125,22 +107,20 @@ menu_t *create_file_menu(void){
     menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, great_spin_event, NULL);
     menu_label_add(&file, 2, 3,"great spin");
 
-    menu_button_add(&file, 0, 4, "debug menu", debug_menu_onactivate ,NULL);
-
-    menu_label_add(&file, 0, 5, "stored song");
-    item = menu_list_add(&file, 12, 5, stored_song_text,sizeof(stored_song_values) / sizeof(*stored_song_values));
+    menu_label_add(&file, 0, 4, "stored song");
+    item = menu_list_add(&file, 12, 4, stored_song_text,sizeof(stored_song_values) / sizeof(*stored_song_values));
     menu_item_register_event(item, MENU_EVENT_LIST | MENU_EVENT_UPDATE, stored_song_event, NULL);
 
-    menu_label_add(&file, 0, 6, "current day");
-    item = menu_number_input_add(&file, 12, 6, 10, 1);
+    menu_label_add(&file, 0, 5, "current day");
+    item = menu_number_input_add(&file, 12, 5, 10, 1);
     menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_word_event, &z2_file.day);
 
-    menu_label_add(&file, 0, 7, "time of day");
-    item = menu_number_input_add(&file, 12, 7, 16, 4);
+    menu_label_add(&file, 0, 6, "time of day");
+    item = menu_number_input_add(&file, 12, 6, 16, 4);
     menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, time_of_day_event, NULL);
 
-    menu_label_add(&file, 0, 8, "time speed");
-    item = menu_number_input_add(&file, 12, 8, -10, 2);
+    menu_label_add(&file, 0, 7, "time speed");
+    item = menu_number_input_add(&file, 12, 7, -10, 2);
     menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_word_event, &z2_file.timespeed);
     return &file;
 }

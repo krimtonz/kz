@@ -8,7 +8,7 @@
 #include "scenes.h"
 #include "input.h"
 
-#define MEMORY_MAX  0x80C00000
+#define MEMORY_MAX  0x80800000
 
 enum flags_region {
     FLAGS_WEEK_EVENT,

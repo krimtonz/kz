@@ -7,15 +7,10 @@
 #ifndef _SYS_H
 #define _SYS_H
 
-#include <sys/stat.h>
-#include <sys/param.h>
-#include <fcntl.h>
 #include <time.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-#ifdef LITE
-#define SBRK_MAX    ((uint32_t)0x80780000)
-#else
-#define SBRK_MAX    ((uint32_t)0x80C00000)
 typedef void *DIR;
 
 typedef struct {
@@ -27,35 +22,125 @@ typedef struct {
     off_t   size;
 } dirent_t;
 
-int         open            (const char *path, int open_flags, ...);
-DIR        *opendir         (const char *dir);
-int         closedir        (DIR *dir);
-dirent_t   *readdir         (DIR *dir);
-int         creat           (const char *path, mode_t mode);
-int         write           (int file, void *buf, uint32_t byte_cnt);
-int         read            (int file, void *buf, uint32_t byte_cnt);
-int         close           (int file);
-time_t      time            (time_t *tloc);
-char       *getcwd          (char *buf, size_t size);
-int         chdir           (const char *path);
-int         fstat           (int file, struct stat *buf);
-int         fstatat         (int file, const char *path, struct stat *buf, int flag);
-int         isatty          (int file);
-off_t       lseek           (int file, off_t offset, int whence);
-int         truncate        (const char *path, off_t len);
-int         rename          (const char *old_path, const char *new_path);
-int         chmod           (const char *path, mode_t mode);
-int         unlink          (const char *path);
-void        seekdir         (DIR *dirp, long loc);
-long        telldir         (DIR *dirp);
-void        rewinddir       (DIR *dirp);
-int         rmdir           (const char *path);
-int         mkdir           (const char *path, mode_t mode);
-int         stat            (const char *path, struct stat *buf);
-int         lstat           (const char *path, struct stat *buf);
-void        __assert_func   (const char *file, int line, const char *func, const char *failedexpr);
-void        reset_disk      (void);
-#endif
-void       *sbrk            (int len);
+enum {
+    SYS_OPEN,
+    SYS_OPEN_DIR,
+    SYS_CLOSE_DIR,
+    SYS_READ_DIR,
+    SYS_CREAT,
+    SYS_WRITE,
+    SYS_READ,
+    SYS_CLOSE,
+    SYS_TIME,
+    SYS_GET_CWD,
+};
+
+typedef struct {
+    uint32_t command;
+    void *n64_buffer;
+    union {
+        struct {
+            char *path;
+            uint32_t open_flags;
+            uint32_t has_mode;
+            uint32_t mode;
+        } open;
+        struct {
+            char *dir;
+        } opendir;
+        struct {
+            DIR *dir;
+        } close_dir;
+        struct {
+            DIR *dir;
+            dirent_t *buf;
+        } read_dir;
+        struct {
+            char *path;
+            uint32_t mode;
+        } creat;
+        struct {
+            int fd;
+            void *buf;
+            uint32_t byte_cnt;
+        } write;
+        struct {
+            int fd;
+            void *buf;
+            uint32_t byte_cnt;
+        } read;
+        struct {
+            int fd;
+        } close;
+        struct {
+            void *buf;
+            size_t size;
+        } getcwd;
+    };
+} hb_fat_regs_t;
+
+#define hb_fat ((volatile hb_fat_regs_t*)0xA8058000)
+
+#define open(__ret, __path, __oflags) { \
+    hb_fat->open.path = (__path); \
+    hb_fat->open.open_flags = (__oflags); \
+    hb_fat->open.has_mode = 0; \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_OPEN; \
+}(void)0
+
+#define opendir(__ret, __dir) { \
+    hb_fat->opendir.dir = (__dir); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_OPEN_DIR; \
+}(void)0
+
+#define closedir(__ret, __dir) { \
+    hb_fat->close_dir.dir = (__dir); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_CLOSE_DIR; \
+}(void)0
+
+#define readdir(__ret, __buf, __dir) { \
+    hb_fat->read_dir.dir = (__dir); \
+    hb_fat->read_dir.buf = (__buf); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_READ_DIR; \
+}(void)0
+
+#define creat(__ret, __path, __mode) { \
+    hb_fat->creat.path = (__path); \
+    hb_fat->creat.mode = (__mode); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_CREAT; \
+}(void)0
+
+#define write(__ret, __fd, __buf, __cnt) { \
+    hb_fat->write.fd = (__fd); \
+    hb_fat->write.buf = (__buf); \
+    hb_fat->write.byte_cnt = (__cnt); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_WRITE; \
+}(void)0
+
+#define read(__ret, __fd, __buf, __cnt) { \
+    hb_fat->read.fd = (__fd); \
+    hb_fat->read.buf = (__buf); \
+    hb_fat->read.byte_cnt = (__cnt); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_READ; \
+}(void)0
+
+#define close(__ret, __fd) { \
+    hb_fat->close.fd = (__fd); \
+    hb_fat->n64_buffer = (__ret); \
+    hb_fat->command = SYS_CLOSE; \
+}(void)0
+
+#define getcwd(__buf, __size) { \
+    hb_fat->getcwd.buf = (__buf); \
+    hb_fat->getcwd.size = (__size);\
+    hb_fat->command = SYS_GET_CWD; \
+}(void)0
 
 #endif

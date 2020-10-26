@@ -5,7 +5,6 @@
 #include <errno.h>
 #include "menu.h"
 #include "sys.h"
-#include "fat.h"
 #include "menu_file.h"
 #include "kz.h"
 #include "kzresource.h"
@@ -56,8 +55,10 @@ static _Bool stricmp(const char *a, const char *b){
 
 static _Bool update_file_list(void){
     vector_clear(&dir_files.container);
-    DIR *dir = opendir(".");
+    DIR *dir = NULL;
+    opendir(&dir, ".");
     if(!dir){
+        /*
         if(errno == ENODEV){
             strcpy(file_menu_location->text, "no disk");
         }else if(errno == ENOENT){
@@ -65,32 +66,39 @@ static _Bool update_file_list(void){
         }else{
             strncpy(file_menu_location->text, strerror(errno), 31);
         }
+        */
         return 0;
     }
     getcwd(file_menu_location->text, 32);
     file_menu_location->text[31] = 0;
-    dirent_t *dirent;
-    while((dirent = readdir(dir))){
-        if((dirent->dir_name[0] == '.' && strcmp(dirent->dir_name, "..")) !=0 ||
-            !(dirent->mode & S_IRUSR)){
+    dirent_t dirent;
+    int ret;
+    readdir(&ret, &dirent, dir);
+    while(ret != 0){
+        if((dirent.dir_name[0] == '.' && strcmp(dirent.dir_name, "..")) != 0 ||
+            !(dirent.mode & S_IRUSR)){
+            readdir(&ret, &dirent, dir);
             continue;
         }
-        _Bool isdir = ((dirent->mode & S_IFMT) == S_IFDIR);
-        int name_len = strlen(dirent->dir_name);
-        if(!isdir && (name_len < file_menu_extension_len || !stricmp(&dirent->dir_name[name_len - file_menu_extension_len], file_menu_extension))){
+        _Bool isdir = ((dirent.mode & S_IFMT) == S_IFDIR);
+        int name_len = strlen(dirent.dir_name);
+        if(!isdir && (name_len < file_menu_extension_len || !stricmp(&dirent.dir_name[name_len - file_menu_extension_len], file_menu_extension))){
+            readdir(&ret, &dirent, dir);
             continue;
         }
         dir_entry_t ent;
-        strcpy(ent.name, dirent->dir_name);
+        strcpy(ent.name, dirent.dir_name);
         ent.isdir = isdir;
 
-        memcpy(ent.text, dirent->dir_name, 32);
+        memcpy(ent.text, dirent.dir_name, 32);
         if(name_len > 31){
             strcpy(&ent.text[28],"...");
         }
         set_insert(&dir_files,&ent);
+        readdir(&ret, &dirent, dir);
     }
-    closedir(dir);
+    closedir(&ret, dir);
+
     return 1;
 }
 
@@ -214,22 +222,21 @@ static _Bool dir_ent_comp(void *a, void *b){
 
 static void return_path(char *path){
     char *ret = malloc(4096);
-    if(getcwd(ret, 4096)){
-        int dl = strlen(ret);
-        int nl = strlen(path);
-        if(dl + 1 + nl + file_menu_extension_len < 4096){
-            ret[dl] = '/';
-            strcpy(&ret[dl + 1], path);
-            strcpy(&ret[dl + 1 + nl], file_menu_extension);
-        }
-        file_menu_callback(ret, file_menu_callback_data);
-        menu_trigger_event(&file_menu, MENU_EVENT_RETURN, NULL);
+    getcwd(ret, 4096); // todo: error checking.
+    int dl = strlen(ret);
+    int nl = strlen(path);
+    if(dl + 1 + nl + file_menu_extension_len < 4096){
+        ret[dl] = '/';
+        strcpy(&ret[dl + 1], path);
+        strcpy(&ret[dl + 1 + nl], file_menu_extension);
     }
+    file_menu_callback(ret, file_menu_callback_data);
+    menu_trigger_event(&file_menu, MENU_EVENT_RETURN, NULL);
     free(ret);
 }
 
 static int reset_disk_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    reset_disk();
+    //reset_disk();
     update_view();
     file_menu_offset = 0;
     return 1;
@@ -250,7 +257,7 @@ static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, vo
     int data = (int)item->data;
     dir_entry_t *dirent = set_at(&dir_files, data + file_menu_offset);
     if(dirent->isdir){
-        chdir(dirent->name);
+        //chdir(dirent->name);
         update_view();
     }else{
         int len = strlen(dirent->name) - file_menu_extension_len;

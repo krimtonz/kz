@@ -94,7 +94,6 @@ typedef struct {
     position_t            **position_save;
     const char             *tooltip;
     struct log              log[KZ_LOG_MAX];
-    _Bool                   debug_active;
     int                     prev_timespeed;
     _Bool                   free_cam_active;
     _Bool                   free_cam_locked;
@@ -119,5 +118,6 @@ void    kz_log                  (const char *format, ...);
 
 extern kz_ctxt_t    kz;
 extern char         restriction_table[0x23A];
+extern size_t static_col_size;
 
 #endif
