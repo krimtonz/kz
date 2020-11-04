@@ -37,6 +37,8 @@ _Bool       input_bind_pressed      (int index);
 _Bool       input_bind_pressed_raw  (int index);
 void        reserve_buttons         (uint16_t button_bitmask);
 void        free_buttons            (uint16_t button_bitmask);
+void        reserve_stick           (void);
+void        free_stick              (void);
 uint16_t    input_pressed           (void);
 uint16_t    input_pressed_raw       (void);
 uint16_t    pad_pressed_raw         (void);

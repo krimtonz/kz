@@ -131,9 +131,10 @@ vc_extern bool  treeAdjustRoot  (n64_cpu_t *cpu, int n64_start, int n64_end);
 vc_extern bool  treeInsertNode  (func_tree_node_t **start, int n64_start, int n64_end, func_tree_node_t **new_node);
 vc_extern bool  ramSetSize      (void **dst, int size);
 
-extern func_tree_node_t     kz_tree[0x200];
-extern int                  kz_tree_status[0x10];
+extern func_tree_node_t     kz_tree[];
+extern int                  kz_tree_status[];
 extern recomp_ctxt_t       *tree_ctx;
 extern func_tree_node_t    *kz_tree_root;
+extern int                  tree_cnt;
 
 #endif

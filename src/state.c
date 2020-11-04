@@ -11,14 +11,22 @@
 
 static void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
+#ifdef WIIVC
     hmemcpy(p, src, len);
+#else
+    memcpy(p, src, len);
+#endif
     p += len;
     *dst = p;
 }
 
 static void st_read(void **src, void *dst, size_t len){
     char *p = *src;
+#ifdef WIIVC
     hmemcpy(dst, p, len);
+#else
+    memcpy(p, src, len);
+#endif
     p += len;
     *src = p;
 }

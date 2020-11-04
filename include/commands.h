@@ -20,7 +20,6 @@ enum {
     KZ_CMD_BREAK,
     KZ_CMD_PAUSE,
     KZ_CMD_ADVANCE,
-    KZ_CMD_TOGGLE_INPUT,
     KZ_CMD_RESET_LAG,
     KZ_CMD_TIMER,
     KZ_CMD_TIMER_RESET,
@@ -36,6 +35,8 @@ enum {
 #ifndef LITE
     KZ_CMD_LOAD_STATE,
     KZ_CMD_SAVE_STATE,
+    KZ_CMD_PREV_STATE,
+    KZ_CMD_NEXT_STATE,
 #endif
     KZ_CMD_MAX
 };
@@ -71,11 +72,12 @@ void    command_save_position   (void);
 void    command_load_position   (void);
 void    command_next_position   (void);
 void    command_prev_position   (void);
-void    command_toggle_input    (void);
 void    command_title_screen    (void);
 #ifndef LITE
 void    command_load_state      (void);
 void    command_save_state      (void);
+void    command_prev_state      (void);
+void    command_next_state      (void);
 #endif
 
 extern struct command kz_commands[KZ_CMD_MAX];

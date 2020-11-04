@@ -7,6 +7,7 @@
 #include "kzresource.h"
 #include "scenes.h"
 #include "input.h"
+#include "printf.h"
 
 #define MEMORY_MAX  0x80800000
 
@@ -171,7 +172,7 @@ static void memory_view_draw(menu_item_t *item){
     x = orig_x;
     y += 13;
     for(int i = 0;i < 10;i++){
-        gfx_printf(x, y, "%08x"PRIx32, memory_start_addr + (i * 8));
+        gfx_printf(x, y, "%08"PRIx32, memory_start_addr + (i * 8));
         y += 13;
     }
 }

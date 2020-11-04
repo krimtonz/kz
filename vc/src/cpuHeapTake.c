@@ -27,7 +27,7 @@ HOOK bool kz_cpuHeapTake(int **code,int cpu,func_tree_node_t *node,int size)
     do {
         iVar3 = node->alloc_type;
         if (iVar3 == -1) {
-            if(node->n64_start > 0x80800000){
+            if(node >= &kz_tree[0] && node < &kz_tree[0x80]){
                 node->alloc_type = 3;
             }
             else if (size < 0x3c01) {

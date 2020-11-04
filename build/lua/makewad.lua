@@ -3,7 +3,7 @@ local arg = {...}
 local opt_no_vc_fix
 local opt_raphnet
 local opt_out_wad
-local opt_lite
+local opt_ver
 local in_wad
 
 while arg[1] do
@@ -18,7 +18,7 @@ while arg[1] do
         table.remove(arg, 1)
         table.remove(arg, 1)
     elseif arg[1] == "lite" then
-        opt_lite = true
+        opt_ver = "lite"
         table.remove(arg, 1)
     else
         in_wad = arg[1]
@@ -45,13 +45,13 @@ os.execute(gzinject ..
             " -m \"build/wadextract/content5/romc\"" ..
             " -o \"build/rom.z64\"")
 
-if opt_lite == nil then
-    opt_lite = false
+if opt_ver == nil then
+    opt_ver = "vc"
 end
 
 wiivc = true
 local make = loadfile("build/lua/make.lua")
-local patched_rom, rom, rom_info, kz_version = make("build/rom.z64", opt_lite)
+local patched_rom, rom, rom_info, kz_version = make("build/rom.z64", opt_ver)
 
 patched_rom:write(4, patched_rom)
 patched_rom:write32be(0, 0x08000000)

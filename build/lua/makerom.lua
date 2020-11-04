@@ -9,7 +9,7 @@ while(args[1]) do
         table.remove(args, 1)
         table.remove(args, 1)
     elseif args[1] == "lite" then
-        opt_lite = true
+        opt_lite = "lite"
         table.remove(args, 1)
     else
         in_rom = args[1]

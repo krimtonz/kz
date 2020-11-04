@@ -16,31 +16,36 @@ HOOK bool kz_treeSearchNode(func_tree_node_t *start,int n64_addr,func_tree_node_
 
 {
     int iVar1;
+    bool is_kz = false;
+    func_tree_node_t *orig = NULL;
     
     if (start == NULL) {
         return false;
     }
-    if ((start == tree_ctx->other_tree_root || start == tree_ctx->code_tree_root) && n64_addr > 0x80800000){
+    if ((start == tree_ctx->other_tree_root || start == tree_ctx->code_tree_root) && n64_addr > 0x8003DF00 && n64_addr < 0x80080000){
+        orig = start;
         start = kz_tree;
     }
-    do {
-        iVar1 = start->n64_start;
-        if ((iVar1 <= n64_addr) && (n64_addr < start->n64_end)) {
-            *found_node = start;
-            return true;
-        }
-        if (n64_addr < iVar1) {
-            start = start->left_node;
-        }
-        else {
-            if (iVar1 < n64_addr) {
-                start = start->right_node;
+    
+        do {
+            iVar1 = start->n64_start;
+            if ((iVar1 <= n64_addr) && (n64_addr < start->n64_end)) {
+                *found_node = start;
+                return true;
+            }
+            if (n64_addr < iVar1) {
+                start = start->left_node;
             }
             else {
-                start = NULL;
+                if (iVar1 < n64_addr) {
+                    start = start->right_node;
+                }
+                else {
+                    start = NULL;
+                }
             }
-        }
-    } while (start != NULL);
+        } while (start != NULL);
+    
     return false;
 }
 

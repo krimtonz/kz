@@ -107,6 +107,27 @@ void guRotateF(MtxF *mf, float a, float x, float y, float z)
     mf->ww = 1.f;
 }
 
+void guRotateX(MtxF *mf, float x) {
+    float cos = cosf(x);
+    float sin = sinf(x);
+    mf->xx = 1.0f;
+    mf->xy = 0.0f;
+    mf->xz = 0.0f;
+    mf->xw = 0.0f;
+    mf->yx = 0.0f;
+    mf->yy = cos;
+    mf->yz = -sin;
+    mf->yw = 0.0f;
+    mf->zx = 0.0f;
+    mf->zy = sin;
+    mf->zz = cos;
+    mf->zw = 0.0f;
+    mf->wx = 0.0f;
+    mf->wy = 0.0f;
+    mf->wz = 0.0f;
+    mf->ww = 1.0f;
+}
+
 void guRotateRPYF(MtxF *mf, float r, float p, float h){
     float cosr = cosf(r);
     float cosp = cosf(p);

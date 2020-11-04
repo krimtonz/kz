@@ -11,4 +11,4 @@ treeSearchNode  = 0x8004e520;
 ramSetSizeCall  = 0x8001563c;
 ramSetSize      = 0x800507c8;
 mem2_heap_size  = 0x80091F44;
-ramGetBuffer    = 0x8005071c;
+ramGetBuffer    = 0x8005071C;

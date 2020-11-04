@@ -18,7 +18,6 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"break free",          COMMAND_PRESS,  command_break},
     {"pause",               COMMAND_PRESS,  command_pause},
     {"advance",             COMMAND_PRESS,  command_advance},
-    {"toggle input",        COMMAND_PRESS,  command_toggle_input},
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
@@ -34,31 +33,64 @@ struct command kz_commands[KZ_CMD_MAX] = {
 #ifndef LITE
     {"load state",          COMMAND_PRESS,  command_load_state},
     {"save state",          COMMAND_PRESS,  command_save_state},
+    {"prev state",          COMMAND_PRESS,  command_prev_state},
+    {"next state",          COMMAND_PRESS,  command_next_state},
 #endif
 };
 
 #ifndef LITE
-static void *state = NULL;
+void command_prev_state(void) {
+    kz.state_slot++;
+    kz.state_slot %= STATE_MAX;
+    kz_log("select state slot %d", kz.state_slot);
+}
+
+void command_next_state(void) {
+    kz.state_slot += STATE_MAX - 1;
+    kz.state_slot %= STATE_MAX;
+    kz_log("select state slot %d", kz.state_slot);
+}
+
 void command_load_state(){
-    if(state){
-        load_state(state);
-        kz_log("loaded state");
+    if(kz.states[kz.state_slot] != NULL){
+        load_state(kz.states[kz.state_slot]);
+        kz_log("loaded state %d", kz.state_slot);
     }else{
         kz_log("no state");
     }
 }
 
 void command_save_state(){
+    void *state = kz.states[kz.state_slot];
     if(state){
+#ifdef WIIVC
         hfree(state);
+#else
+        free(state);
+#endif
     }
+#ifdef WIIVC
     state = halloc(0x80000); // 512k to start
+#else
+    state = malloc(0x80000);
+#endif
+    size_t size = save_state(state);
+#ifdef WIIVC
+    kz_state_hdr_t kz_state;
+    kz_state.size = size;
+    kz_state.z2_version = Z2_VERSION;
+    kz_state.settings_version = 0;
+    hmemcpy(state, &kz_state, sizeof(kz_state));
+    state = hrealloc(state, size);
+#else
     kz_state_hdr_t *kz_state = state;
-    kz_state->size = save_state(state);
+    kz_state->size = size;
     kz_state->z2_version = Z2_VERSION;
     kz_state->settings_version = 0;
-    //state = realloc(state, kz_state->size);
-    kz_log("saved state");
+    state = realloc(state, kz_state->size);
+#endif
+    kz.states[kz.state_slot] = state;
+    kz_log("saved state %d", kz.state_slot);
 }
 #endif
 
@@ -120,11 +152,9 @@ void command_title_screen(void){
 void command_pause(void){
     if(kz.pending_frames == 0){
         kz.pending_frames = -1;
-        kz.z2_input_enabled = 1;
 
     }else{
         kz.pending_frames = 0;
-        kz.z2_input_enabled = 0;
     }
 }
 
@@ -134,10 +164,6 @@ void command_advance(void){
     }else{
         command_pause();
     }
-}
-
-void command_toggle_input(void){
-    kz.z2_input_enabled = !kz.z2_input_enabled;
 }
 
 void command_lag_reset(void){
@@ -171,9 +197,7 @@ void command_save_memfile(void){
     newmemfile->z2_version = Z2_VERSION;
     memcpy(&newmemfile->file, &z2_file, sizeof(newmemfile->file));
 
-    char mesg[100];
-    snprintf(mesg, 100, "memfile %d saved", kz.memfile_slot);
-    kz_log(mesg);
+    kz_log("memfile %d saved", kz.memfile_slot);
 }
 
 void command_load_memfile(void){
@@ -211,17 +235,13 @@ void command_load_memfile(void){
                 command_void();
             }
 
-            char mesg[100];
-            snprintf(mesg, 100, "memfile %d loaded", kz.memfile_slot);
-            kz_log(mesg);
+            kz_log("memfile %d loaded", kz.memfile_slot);
         }else{
             kz_log("mismatched mm version");
         }
     }
     else{
-        char mesg[100];
-        snprintf(mesg,100,"no memfile %d",kz.memfile_slot);
-        kz_log(mesg);
+        kz_log("no memfile %d", kz.memfile_slot);
     }
 }
 
@@ -246,9 +266,7 @@ void command_save_position(void){
     memcpy(&newpos->pos, &z2_link.common.pos_2, sizeof(newpos->pos));
     memcpy(&newpos->rot, &z2_link.common.rot_2, sizeof(newpos->rot));
 
-    char mesg[100];
-    snprintf(mesg, 100, "position %d saved", kz.pos_slot);
-    kz_log(mesg);
+    kz_log("position %d saved", kz.pos_slot);
 }
 
 void command_load_position(void){
@@ -258,14 +276,10 @@ void command_load_position(void){
         memcpy(&z2_link.common.pos_2, &position->pos, sizeof(position->pos));
         memcpy(&z2_link.common.rot_2, &position->rot, sizeof(position->rot));
 
-        char mesg[100];
-        snprintf(mesg, 100, "position %d loaded", kz.pos_slot);
-        kz_log(mesg);
+        kz_log("position %d loaded", kz.pos_slot);
     }
     else{
-        char mesg[100];
-        snprintf(mesg, 100, "no position %d", kz.pos_slot);
-        kz_log(mesg);
+        kz_log("no position %d", kz.pos_slot);
     }
 }
 

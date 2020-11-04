@@ -22,30 +22,43 @@ VC_VERSIONS         = NARJ NARE
 NAME                = kz
 RESDESC             = res.json
 
-#ADDRESS             = 0x80800060
-ADDRESS				= 0x806E0060
-ADDRESS_LITE        = 0x806E0060
+ADDRESS_FULL        = 0x80800060
+ADDRESS_VC			= 0x8003DF60
+ADDRESS_LITE        = 0x8003DF60
 ADDRESS_LDR         = 0x80080000
-ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division -n64-wiivc $(CFLAGS)
-ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS) $(VCCPPFLAGS)
-ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections -n64-wiivc $(LDFLAGS)
+ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
+ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS)
+ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
 ALL_LIBS            = $(LIBS)
 
-KZ                  = $(foreach v,$(KZ_VERSIONS),kz-$(v))
+KZ_VC               = $(foreach v,$(KZ_VERSIONS),kz-vc-$(v))
 KZ_LITE             = $(foreach v,$(KZ_VERSIONS),kz-lite-$(v))
+KZ_FULL				= $(foreach v,$(KZ_VERSIONS),kz-full-$(v))
 LDR                 = $(foreach v,$(KZ_VERSIONS),ldr-kz-$(v))
 LDRLITE             = $(foreach v,$(KZ_VERSIONS),ldr-kz-lite-$(v))
 
-ELF-FULL            = $(ELF-kz-NZSE) $(ELF-kz-NZSJ) $(ELF-kz-NZSJ10)
+ELF-FULL            = $(ELF-kz-full-NZSE) $(ELF-kz-full-NZSJ) $(ELF-kz-full-NZSJ10)
 ELF-LITE            = $(ELF-kz-lite-NZSE) $(ELF-kz-lite-NZSJ) $(ELF-kz-lite-NZSJ10)
-KZ-FULL             = $(OBJ-kz-NZSE) $(OBJ-kz-NZSJ) $(OBJ-kz-NZSJ10)
+
+KZ-FULL             = $(KZ-VC-NZSE) $(KZ-VC-NZSJ) $(KZ-VC-NZSJ10)
+KZ-VC-NZSE			= $(OBJ-kz-vc-NZSE) $(ELF-kz-vc-NZSE) $(HOOKS-kz-vc-NZSE)
+KZ-VC-NZSJ			= $(OBJ-kz-vc-NZSJ) $(ELF-kz-vc-NZSJ) $(HOOKS-kz-vc-NZSJ)
+KZ-VC-NZSJ10		= $(OBJ-kz-vc-NZSJ10) $(ELF-kz-vc-NZSJ10) $(HOOKS-kz-vc-NZSJ10)
+OBJ-VC				= $(OBJ-kz-vc-NZSE) $(OBJ-kz-vc-NZSJ) $(OBJ-kz-vc-NZSJ10)
+
+KZ-FULL             = $(KZ-FULL-NZSE) $(KZ-FULL-NZSJ) $(KZ-FULL-NZSJ10)
+KZ-FULL-NZSE		= $(OBJ-kz-full-NZSE) $(ELF-kz-full-NZSE) $(HOOKS-kz-full-NZSE)
+KZ-FULL-NZSJ		= $(OBJ-kz-full-NZSJ) $(ELF-kz-full-NZSJ) $(HOOKS-kz-full-NZSJ)
+KZ-FULL-NZSJ10		= $(OBJ-kz-full-NZSJ10) $(ELF-kz-full-NZSJ10) $(HOOKS-kz-full-NZSJ10)
+
+KZ-LITE             = $(KZ-LITE-NZSE) $(KZ-LITE-NZSJ) $(KZ-LITE-NZSJ10)
 KZ-LITE-NZSE        = $(OBJ-kz-lite-NZSE) $(ELF-kz-lite-NZSE) $(HOOKS-kz-lite-NZSE)
 KZ-LITE-NZSJ        = $(OBJ-kz-lite-NZSJ) $(ELF-kz-lite-NZSJ) $(HOOKS-kz-lite-NZSJ)
 KZ-LITE-NZSJ10      = $(OBJ-kz-lite-NZSJ10) $(ELF-kz-lite-NZSJ10) $(HOOKS-kz-lite-NZSJ10)
-KZ-LITE             = $(KZ-LITE-NZSE) $(KZ-LITE-NZSJ) $(KZ-LITE-NZSJ10)
-KZ-NZSE             = $(OBJ-kz-NZSE) $(ELF-kz-NZSE) $(HOOKS-kz-NZSE) $(KZ-LITE-NZSE)
-KZ-NZSJ             = $(OBJ-kz-NZSJ) $(ELF-kz-NZSJ) $(HOOKS-kz-NZSJ) $(KZ-LITE-NZSJ)
-KZ-NZSJ10           = $(OBJ-kz-NZSJ10) $(ELF-kz-NZSJ10) $(HOOKS-kz-NZSJ10) $(KZ-LITE-NZSJ10)
+
+KZ-NZSE             = $(KZ-FULL-NZSE) $(KZ-VC-NZSE) $(KZ-LITE-NZSE)
+KZ-NZSJ             = $(KZ-FULL-NZSJ) $(KZ-VC-NZSJ) $(KZ-LITE-NZSJ)
+KZ-NZSJ10           = $(KZ-FULL-NZSJ10) $(KZ-VC-NZSJ10) $(KZ-LITE-NZSJ10)
 
 VC                  = $(foreach v,$(VC_VERSIONS),kz-vc-$(v))
 
@@ -124,14 +137,16 @@ $$(VCDIR-$(1))		:
 	mkdir -p $$@
 
 $$(HOMEBOY-$(1))    : $$(VCDIR-$(1))
-	cd $(HOMEBOYDIR) && make bin/hb-$(3)/homeboy.bin
+	cd $(HOMEBOYDIR) && CPPFLAGS="-DHB_HEAP -DHB_FAT" make bin/hb-$(3)/homeboy.bin
 	cp $(HOMEBOYDIR)/bin/hb-$(3)/homeboy.bin $$@
 endef
 
-$(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,kz-$(v),$(v),kz,$(ADDRESS),src,res)))
+$(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,kz-vc-$(v),$(v),kz,$(ADDRESS_VC),src,res)))
 $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,kz-lite-$(v),$(v),kz,$(ADDRESS_LITE),src,res,lite)))
-$(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-$(v),$(v),ldr,$(ADDRESS_LDR),ldr,ldr/res)))
+$(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,kz-full-$(v),$(v),kz,$(ADDRESS_FULL),src,res)))
+$(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-vc-$(v),$(v),ldr,$(ADDRESS_LDR),ldr,ldr/res)))
 $(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-lite-$(v),$(v),ldr,$(ADDRESS_LDR),ldr,ldr/res)))
+$(foreach v,$(KZ_VERSIONS),$(eval $(call bin_template,ldr-kz-full-$(v),$(v),ldr,$(ADDRESS_LDR),ldr,ldr/res)))
 $(foreach v,$(VC_VERSIONS),$(eval $(call vc_template,kz-vc-$(v),kz-vc,$(v))))
 
 $(KZ-NZSE)          :   CPPFLAGS    ?=	-DZ2_VERSION=NZSE
@@ -146,3 +161,10 @@ $(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects
 $(KZ-LITE)          :   CPPFLAGS    +=	-DLITE -DKZ_VERSION=KZ_LITE
 $(KZ-LITE)          :   CFLAGS      ?=  -Os
 $(ELF-LITE)         :   LDFLAGS     ?=	-Os
+ifeq '$(shell $(CC) -dumpmachine 2>/dev/null)' 'mips64-ultra-elf'
+$(OBJ-VC)			:	ALL_CFLAGS		+= -n64-wiivc
+$(OBJ-VC)			:	ALL_CXXFLAGS	+= -n64-wiivc
+$(OBJ-VC)			:	ALL_LDFLAGS		+= -n64-wiivc
+else
+$(OBJ-VC)			: 	ALL_CPPFLAGS	+= -DWIIVC
+endif

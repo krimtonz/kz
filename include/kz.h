@@ -15,6 +15,7 @@
 #include "menu.h"
 #include "watches.h"
 #include "zu.h"
+#include "vec_math.h"
 
 #define KZ_MEMFILE_MAX 3
 #define KZ_POSITION_MAX 3
@@ -31,6 +32,8 @@
 #else
 #define KZ_LOG_MAX 10
 #endif
+
+#define STATE_MAX 3
 
 enum cheats {
     /* 0x00 */ CHEAT_STICKS,
@@ -85,7 +88,6 @@ typedef struct {
     _Bool                   lag_counter;
     _Bool                   hide_actors;
     _Bool                   hide_room;
-    _Bool                   z2_input_enabled;
     int32_t                 pending_frames;
     zu_disp_ptr_t           disp_p;
     uint8_t                 memfile_slot;
@@ -97,10 +99,18 @@ typedef struct {
     int                     prev_timespeed;
     _Bool                   free_cam_active;
     _Bool                   free_cam_locked;
+    _Bool                   draw_camera;
     z2_xyzf_t               cam_at;
     z2_xyzf_t               cam_eye;
-    z2_xyzf_t               kz_at;
     z2_xyzf_t               kz_eye;
+    z2_xyzf_t               kz_at;
+    sph_coord_t             cam_sph;
+    uint16_t                input_mask;
+    uint8_t                 stick_x_mask, stick_y_mask;
+#ifndef LITE
+    void                   *states[STATE_MAX];
+    int                     state_slot;
+#endif
 } kz_ctxt_t;
 
 menu_t *create_warps_menu       (void);
@@ -118,6 +128,5 @@ void    kz_log                  (const char *format, ...);
 
 extern kz_ctxt_t    kz;
 extern char         restriction_table[0x23A];
-extern size_t static_col_size;
 
 #endif

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include "input.h"
+#include "mem.h"
 
 uint32_t button_colors[16] = {
     0xFFF000FF,

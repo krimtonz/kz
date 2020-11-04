@@ -2,6 +2,7 @@
 #include "settings.h"
 #include "kz.h"
 #include "input.h"
+#include "mem.h"
 
 static _Alignas(128) struct settings settings_info;
 struct settings_data *settings = &settings_info.data;
@@ -25,7 +26,6 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_BREAK] = make_bind(2, BUTTON_D_RIGHT, BUTTON_L);
     settings->binds[KZ_CMD_PAUSE] = make_bind(1, BUTTON_D_UP);
     settings->binds[KZ_CMD_ADVANCE] = make_bind(1, BUTTON_D_DOWN);
-    settings->binds[KZ_CMD_TOGGLE_INPUT] = BIND_END;
     settings->binds[KZ_CMD_RESET_LAG] = BIND_END;
     settings->binds[KZ_CMD_TIMER] = BIND_END;
     settings->binds[KZ_CMD_TIMER_RESET] = BIND_END;
@@ -41,6 +41,8 @@ void load_default_settings(void){
 #ifndef LITE
     settings->binds[KZ_CMD_LOAD_STATE] = make_bind(1, BUTTON_D_LEFT);
     settings->binds[KZ_CMD_SAVE_STATE] = make_bind(1, BUTTON_D_RIGHT);
+    settings->binds[KZ_CMD_PREV_STATE] = BIND_END;
+    settings->binds[KZ_CMD_NEXT_STATE] = BIND_END;
 #endif
     settings->input_display = 1;
     settings->id_x = 16;

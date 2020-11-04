@@ -125,6 +125,9 @@ static void draw_item(struct item_data *data, int item, float rot){
     guMtxF2L(&mf,&m);
 
     Mtx *p_mtx = gfx_data_push(&m, sizeof(m));
+#ifdef WIIVC
+    p_mtx = (Mtx*)(((uint32_t)p_mtx - 0xA8060000) | 0x0B000000);
+#endif
     gfx_push(gsSPMatrix(p_mtx, G_MTX_MODELVIEW | G_MTX_LOAD),
              gsSPVertex(&mesh, 8, 0));
     gfx_texture *texture;
@@ -169,8 +172,11 @@ static void draw_wheel(menu_item_t *item){
     guMtxCatF(&mt, &mf, &mf);
     guMtxF2L(&mf, &m);
 
-    gfx_push(gsSPMatrix(gfx_data_push(&m, sizeof(m)), G_MTX_PROJECTION | G_MTX_LOAD));
-
+    void *mtx = gfx_data_push(&m, sizeof(m));
+#ifdef WIIVC
+    mtx = (void*)(((uint32_t)mtx - 0xA8060000) + 0x0B000000);
+#endif
+    gfx_push(gsSPMatrix(mtx, G_MTX_PROJECTION | G_MTX_LOAD));
     wheel_scroll(data, 1.f / 3.f);
     int n = (lroundf(-data->wheel_rotation / (M_PI * 2.f) * data->option_cnt) +
            (data->option_cnt + 3) / 4) % data->option_cnt;

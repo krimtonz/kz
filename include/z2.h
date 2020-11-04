@@ -1544,6 +1544,7 @@ z2_extern void          z2_UnloadRoom               (z2_game_t *game, z2_room_ct
 z2_extern void          z2_CreateSkyboxVtx          (z2_skybox_ctxt_t *skybox_ctx, int a1);
 z2_extern void          z2_MotionBlur               (z2_ctxt_t *ctx);
 z2_extern void          z2_input_update             (z2_ctxt_t *ctx);
+z2_extern void          z2_adjust_stick             (z2_input_t *inp);
 z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram, uint32_t size);
 #if Z2_VERSION==NZSE
 z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, size_t size);

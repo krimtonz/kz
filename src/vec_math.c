@@ -44,7 +44,6 @@ void vec3f_normalize(z2_xyzf_t *src, z2_xyzf_t *dest)
 
 void vec3f_to_sph(z2_xyzf_t *vec, sph_coord_t *sph)
 {
-    sph->dist = sqrtf(vec->x * vec->x + vec->y * vec->y + vec->z * vec->z);
     sph->pitch = atan2f(sqrtf(vec->x * vec->x + vec->z * vec->z), vec->y);
     sph->yaw = atan2f(vec->x, vec->z);
 }
@@ -56,9 +55,9 @@ void sph_to_vec3f(sph_coord_t *sph, z2_xyzf_t *vec)
     float sin_y = sinf(sph->yaw);
     float cos_y = cosf(sph->yaw);
 
-    vec->x = sph->dist * sin_p * sin_y;
-    vec->y = sph->dist * cos_p;
-    vec->z = sph->dist * sin_p * cos_y;
+    vec->x = sin_p * sin_y;
+    vec->y = cos_p;
+    vec->z = sin_p * cos_y;
 }
 
 void vec3f_to_geo(z2_xyzf_t *vec, sph_coord_t *geo)

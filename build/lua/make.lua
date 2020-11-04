@@ -11,23 +11,22 @@ if rom_info == nil then
     return 1
 end
 
-local suffix = ""
-local ram = 0x806E0000
+local suffix = "-full"
+local ram = 0x80800000
 
 -- arg[2] is true if building the lite version
-if arg[2] == true then
+if arg[2] == "lite" then
     suffix = "-lite"
-    ram = 0x806E0000
+    ram = 0x8003DF00
+elseif arg[2] == "vc" then
+    suffix = "-vc"
+    ram = 0x8003DF00
 end
 
 local kz_version = "kz" .. suffix .. "-" .. rom_info.rom_id
 print("Building " .. kz_version)
 
-local make = "make "
-if(wiivc) then
-    make = "VCCPPFLAGS='-DWIIVC' " .. make
-end
-local _,_,res = os.execute(make .. 
+local _,_,res = os.execute("make " .. 
                            kz_version ..
                            " patch/gsc/" .. kz_version .. "/hooks.gsc")
 if res ~= 0 then

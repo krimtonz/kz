@@ -69,7 +69,8 @@ void *halloc(size_t size){
     return NULL;
 }
 
-void hfree(void* ptr){
+void hfree(void *ptr)
+{
     __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
     if(blk->next != NULL && blk->next->free){
         blk->size = ((char*)blk->next + blk->next->size) - (char*)blk;
@@ -91,6 +92,52 @@ void hfree(void* ptr){
     if(first_free_block > blk){
         first_free_block = blk;
     }
+}
+
+__attribute__ ((noinline)) 
+void *hrealloc(void *ptr, size_t size)
+{
+    __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
+    if(blk->free)
+    {
+        return NULL;
+    }
+
+    size = HB_ALIGN(size);
+
+    if(blk->size - HDR_SIZE == size)
+    {
+        return ptr;
+    }
+
+    if(blk->size + HDR_SIZE + HDR_SIZE > size) // we have enough room to fragment this block.
+    {
+        __hb_heap_hdr_t *free = (__hb_heap_hdr_t*)((char*)blk + HDR_SIZE + size);
+        free->free = 1;
+        free->size = blk->size - size - HDR_SIZE;
+        free->next = blk->next;
+        free->next->prev = free;
+        free->prev = blk;
+        blk->next = free;
+        if(first_free_block > free) 
+        {
+            first_free_block = free;
+        }
+        return ptr;
+    }
+
+    // We're expanding this block, so find a new block and free the old block.
+    void *new_blk = halloc(size);
+    if(new_blk == NULL)
+    {
+        return NULL;
+    }
+
+    hmemcpy(new_blk, ptr, blk->size);
+
+    hfree(ptr);
+
+    return new_blk;
 }
 
 void *hmemcpy(void *dst, void *src, size_t size)

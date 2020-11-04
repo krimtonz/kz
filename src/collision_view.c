@@ -96,15 +96,13 @@ static void poly_writer_append(poly_writer_t *writer, Vtx (*vtx)[3], uint32_t co
     }
 }
 
-static void __init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal, _Bool hb){
+static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){
     uint32_t    render_mode;
     uint32_t    blend_cyc1;
     uint32_t    blend_cyc2;
     uint8_t     alpha;
     uint64_t    combiner;
     uint32_t    geometry;
-    Gfx *p = (Gfx*)MIPS_KSEG0_TO_KSEG1(*poly_p);
-    Gfx *d = (Gfx*)MIPS_KSEG0_TO_KSEG1(*poly_d);
 
     if(xlu){
         render_mode = Z_CMP | IM_RD | CVG_DST_FULL | FORCE_BL;
@@ -129,35 +127,17 @@ static void __init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal,
     combiner = G_CC_MODE(G_CC_MODULATERGB_PRIM_ENVA, G_CC_MODULATERGB_PRIM_ENVA);
     geometry = G_ZBUFFER | G_SHADE | G_LIGHTING;
 
-    Mtx *mtx_mv = gDisplayListAlloc(d, sizeof(*mtx_mv));
-    if(hb) {
-        Mtx m;
-        guMtxIdent(&m);
-        hmemcpy(mtx_mv, &m, sizeof(m));
-        mtx_mv = ((uint32_t)mtx_mv - 0xA8060000) | 0x0B000000;
-    } else {
-        guMtxIdent(mtx_mv);
-    }
+    Mtx *mtx_mv = gDisplayListAlloc(poly_d, sizeof(*mtx_mv));
+    guMtxIdent(mtx_mv);
 
-    gSPLoadGeometryMode(p++, geometry);
-    gSPTexture(p++, qu016(0.5), qu016(0.5), 0, G_TX_RENDERTILE, G_OFF);
-    gSPMatrix(p++, mtx_mv, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gDPPipeSync(p++);
-    gDPSetCycleType(p++, G_CYC_1CYCLE);
-    gDPSetRenderMode(poly_d++, render_mode | blend_cyc1, render_mode | blend_cyc2);
-    gDPSetCombine(p++, combiner);
-    gDPSetEnvColor(p++, 0xFF, 0xFF, 0xFF, alpha);
-    *poly_p = p;
-    *poly_d = d;
-}
-
-static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){ 
-    __init_poly_list(poly_p, poly_d, xlu, decal, 0);
-}
-
-static void init_poly_list_hb(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal)
-{
-    __init_poly_list(poly_p, poly_d, xlu, decal, 1);
+    gSPLoadGeometryMode((*poly_p)++, geometry);
+    gSPTexture((*poly_p)++, qu016(0.5), qu016(0.5), 0, G_TX_RENDERTILE, G_OFF);
+    gSPMatrix((*poly_p)++, mtx_mv, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
+    gDPPipeSync((*poly_p)++);
+    gDPSetCycleType((*poly_p)++, G_CYC_1CYCLE);
+    gDPSetRenderMode((*poly_p)++, render_mode | blend_cyc1, render_mode | blend_cyc2);
+    gDPSetCombine((*poly_p)++, combiner);
+    gDPSetEnvColor((*poly_p)++, 0xFF, 0xFF, 0xFF, alpha);
 }
 
 /* norm = (v1 - v0) cross (v2 - v0)
@@ -320,8 +300,17 @@ static void draw_cylinder(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, in
 
     // Create a static cylinder of height 128, and radius 1, with 12 sides
     if(cylinder_p == NULL){
+#ifdef WIIVC
+        static Gfx *cylinder_gfx = NULL;
+        static Vtx *cylinder_vtx = NULL;
+        if(cylinder_gfx == NULL) {
+            cylinder_gfx = halloc(28 * sizeof(*cylinder_gfx));
+            cylinder_vtx = halloc(27 * sizeof(*cylinder_vtx));
+        }
+#else
         static Gfx cylinder_gfx[28];
         static Vtx cylinder_vtx[26];
+#endif
         cylinder_p = cylinder_gfx;
         Gfx *cyl_p = cylinder_p;
         cylinder_vtx[0] = gdSPDefVtxN(0, 0, 0, 0, 0, 0, -127, 0, 0xFF);
@@ -338,6 +327,9 @@ static void draw_cylinder(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, in
         }
 
         gSPSetGeometryMode(cyl_p++, G_CULL_BACK);
+#ifdef WIIVC
+        cylinder_vtx = (Vtx*)(((uint32_t)cylinder_vtx - 0xA8060000) | 0x0B000000);
+#endif
         gSPVertex(cyl_p++, cylinder_vtx, 26, 0);
 
         for(int i = 0;i < 12;i++){
@@ -387,7 +379,7 @@ static void draw_triangle(Gfx **hit_view_p, Gfx **hit_view_d, z2_xyzf_t *v0, z2_
         gdSPDefVtxN(v2->x, v2->y, v2->z, 0, 0, norm.x, norm.y, norm.z, 0xFF),
     };
 #if WIIVC
-    Vtx *data_v = gDisplayListDataHB(hit_view_d, v);
+    Vtx *data_v = (Vtx*)gDisplayListDataHB(hit_view_d, v);
     data_v = (void*)(((uint32_t)data_v - 0xA8060000) | 0x0B000000);
     gSPVertex((*hit_view_p)++, data_v, 3, 0);
 #else
@@ -407,7 +399,7 @@ static void draw_quad(Gfx **hit_view_p, Gfx **hit_view_d, z2_xyzf_t *v0, z2_xyzf
     };
 
 #if WIIVC
-    Vtx *data_v = gDisplayListDataHB(hit_view_d, v);
+    Vtx *data_v = (Vtx*)gDisplayListDataHB(hit_view_d, v);
     data_v = (void*)(((uint32_t)data_v - 0xA8060000) | 0x0B000000);
     gSPVertex((*hit_view_p)++, data_v, 4, 0);
 #else
@@ -508,11 +500,15 @@ void kz_hitbox_view(){
 
     if(show){
         Gfx **z2_gfx_p;
+        Gfx **z2_gfx_d;
         _Bool xlu = !settings->hit_view_opq;
+        
         if(xlu){
             z2_gfx_p = &z2_ctxt.gfx->poly_xlu.p;
+            z2_gfx_d = &z2_ctxt.gfx->poly_xlu.d;
         }else{
             z2_gfx_p = &z2_ctxt.gfx->poly_opa.p;
+            z2_gfx_d = &z2_ctxt.gfx->poly_xlu.d;
         }
 
         Gfx *hit_view_start = hit_view_disp[hit_view_idx];
@@ -521,7 +517,7 @@ void kz_hitbox_view(){
         Gfx *hit_view_p = hit_view_start;
         Gfx *hit_view_d = hit_view_p + 0x800;
 
-        init_poly_list_hb(&hit_view_p, &hit_view_d, xlu, 0);
+        init_poly_list(z2_gfx_p, z2_gfx_d, xlu, 0);
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.other_cnt, z2_game.hitbox_ctxt.other, 0x00FFFFFF);
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.ac_cnt, z2_game.hitbox_ctxt.ac, 0x000000FF);
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.attack_cnt, z2_game.hitbox_ctxt.attack, 0x00FF0000);
@@ -529,8 +525,8 @@ void kz_hitbox_view(){
         
         void *dlist = hit_view_start;
 #ifdef WIIVC
-            gSPSegment((*z2_gfx_p)++, 0xB, 0xA8060000);
-            dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
+        gSPSegment((*z2_gfx_p)++, 0xB, 0xA8060000);
+        dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
 #endif        
         gSPDisplayList((*z2_gfx_p)++, dlist);
 #ifdef WIIVC
@@ -624,14 +620,12 @@ static void do_dynamic_collision(poly_writer_t *writer){
     }
 }
 
-size_t static_col_size;
 void kz_col_view(){
     static Gfx *static_col = NULL;
     static Gfx *dynamic_gfx[2] = { NULL, NULL };
     static int dynamic_idx = 0;
-
     static uint16_t col_view_scene = 0;
-
+    size_t static_col_size;
     poly_writer_t writer;
 
     if(settings->col_view_upd && col_view_scene != z2_game.scene_index && kz.collision_view_status == COL_VIEW_SHOW){

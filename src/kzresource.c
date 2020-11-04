@@ -217,7 +217,7 @@ int resource_handles[R_KZ_END] = { 0 };
 
 static const char *resource_names[R_KZ_END] = {
     "checkbox",
-    "icon",
+    "icons",
     NULL,
     NULL,
     NULL,

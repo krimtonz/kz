@@ -3,30 +3,34 @@
 #include <stdarg.h>
 #include <string.h>
 #include <stdio.h>
-#include <malloc.h>
-#include <n64.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdio.h>
-#include <malloc.h>
+#include <vector/vector.h>
 #include "gfx.h"
 #include "kzresource.h"
 #include "zu.h"
 #include "menu.h"
 #include "cache.h"
 #include "hb_heap.h"
+#include "mips.h"
+#include "printf.h"
 
 #define TILE_SIZE(x,y,z)    ((x * y * G_SIZ_BITS(z) + 63) / 64 * 8)
 
 #define RDP_STACK_LEN 5
 
 #ifndef LITE
-#define GFX_SIZE    (0x2000 * sizeof(Gfx))
+#define GFX_SIZE    (0x4000 * sizeof(Gfx))
 #else
 #define GFX_SIZE    (0x1500 * sizeof(Gfx))
 #endif
 
+typedef struct {
+    int tile;
+    uint32_t color;
+    uint16_t x;
+    uint16_t y;
+} gfx_char_t;
+
+static struct vector gfx_chars[8];
 static Gfx     *gfx_disp;
 static Gfx     *gfx_disp_p;
 static Gfx     *gfx_disp_d;
@@ -62,6 +66,8 @@ static Gfx rcp_init[] = {
     gsSPEndDisplayList(),
 };
 
+static void draw_chars(void);
+
 /* rdp mode functions */
 
 static inline void rdp_sync(void){
@@ -72,14 +78,13 @@ static inline void rdp_sync(void){
 }
 
 static void rdp_mode_apply(enum rdp_mode mode){
-    Gfx append_dl[RDP_MODE_ALL];
-    Gfx *append_ptr = append_dl;
+    rdp_sync();
     switch(mode){
         case RDP_MODE_ALL:
         case RDP_MODE_COLOR:
         {
             uint32_t color = rdp_modes[RDP_MODE_COLOR];
-            gDPSetPrimColor(append_ptr++, 0, 0,
+            gDPSetPrimColor(gfx_disp_p++, 0, 0,
                             (color >> 24) & 0xFF,
                             (color >> 16) & 0xFF,
                             (color >> 8) & 0xFF,
@@ -90,13 +95,13 @@ static void rdp_mode_apply(enum rdp_mode mode){
             }
         }
         case RDP_MODE_COMBINE:{
-            gDPSetCombine(append_ptr++, rdp_modes[RDP_MODE_COMBINE]);
+            gDPSetCombine(gfx_disp_p++, rdp_modes[RDP_MODE_COMBINE]);
             if(mode != RDP_MODE_ALL){
                 break;
             }
         }
         case RDP_MODE_FILTER:{
-            gDPSetTextureFilter(append_ptr++, rdp_modes[RDP_MODE_FILTER]);
+            gDPSetTextureFilter(gfx_disp_p++, rdp_modes[RDP_MODE_FILTER]);
             if(mode != RDP_MODE_ALL){
                 break;
             }
@@ -104,15 +109,9 @@ static void rdp_mode_apply(enum rdp_mode mode){
         default:
             break;
     }
-    size_t size = append_ptr - append_dl;
-    if(size > 0){
-        rdp_sync();
-        memcpy(gfx_disp_p, append_dl, size * sizeof(*append_dl));
-        gfx_disp_p += size;
-    }
 }
 
-static void rdp_mode_set(enum rdp_mode mode, uint64_t val){
+void rdp_mode_set(enum rdp_mode mode, uint64_t val){
     if(mode == RDP_MODE_ALL){
         return;
     }
@@ -163,11 +162,11 @@ static void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
 
 void gfx_init(){
 #ifdef WIIVC
-    gfx_disp = (Gfx*)0x807DA800;
-    gfx_disp_work = (Gfx*)0x807EA800;
+    gfx_disp = (Gfx*)halloc(GFX_SIZE * sizeof(*gfx_disp));
+    gfx_disp_work = (Gfx*)halloc(GFX_SIZE * sizeof(*gfx_disp_work));
 #else
-    gfx_disp = (Gfx*)malloc(GFX_SIZE * sizeof(*gfx_disp));
-    gfx_disp_work = (Gfx*)malloc(GFX_SIZE * sizeof(*gfx_disp));
+    gfx_disp = (Gfx*)malloc(GFX_SIZE);
+    gfx_disp_work = (Gfx*)malloc(GFX_SIZE);
 #endif
     gfx_disp_p = gfx_disp;
     gfx_disp_d = gfx_disp + ((GFX_SIZE + sizeof(*gfx_disp_d) - 1) / (sizeof(*gfx_disp_d)));
@@ -178,6 +177,10 @@ void gfx_init(){
     kfont->c_height = 8;
     kfont->cx_tile = 2;
     kfont->cy_tile = 16;
+
+    for(int i = 0; i < 8; i++) {
+        vector_init(&gfx_chars[i], sizeof(gfx_char_t));
+    }
 }
 
 void gfx_begin(void){
@@ -187,8 +190,17 @@ void gfx_begin(void){
 }
 
 void gfx_finish(void){
+    draw_chars();
     gSPEndDisplayList(gfx_disp_p++);
-    gSPDisplayList(z2_ctxt.gfx->overlay.p++, gfx_disp);
+    void *dl = gfx_disp;
+#ifdef WIIVC
+    dl = (void*)(((uint32_t)dl - 0xA8060000) | 0x0B000000);
+    gSPSegment(z2_ctxt.gfx->overlay.p++, 0xB, 0xA8060000);
+#endif
+    gSPDisplayList(z2_ctxt.gfx->overlay.p++, dl);
+#ifdef WIIVC
+    gSPSegment(z2_ctxt.gfx->overlay.p++, 0xB, MIPS_PHYS_TO_KSEG0(z2_segment.segments[0xB]));
+#endif
     Gfx *disp_w = gfx_disp_work;
     gfx_disp_work = gfx_disp;
     gfx_disp = disp_w;
@@ -202,13 +214,21 @@ void gfx_finish(void){
 /* Custom display list functions */
 
 void gfx_append(Gfx *gfx, size_t size){
-    memcpy(gfx_disp_p,  gfx,size);
+#ifdef WIIVC
+    hmemcpy(gfx_disp_p, gfx, size);
+#else
+    memcpy(gfx_disp_p, gfx,size);
+#endif
     gfx_disp_p += (size + sizeof(*gfx_disp_p) - 1) / sizeof(*gfx_disp_p);
 }
 
 void *gfx_data_push(void *data, size_t size){
     gfx_disp_d -= (size + sizeof(*gfx_disp_d) - 1) / sizeof(*gfx_disp_d);
+#ifdef WIIVC
+    hmemcpy(gfx_disp_d, data, size);
+#else
     memcpy(gfx_disp_d, data, size);
+#endif
     return gfx_disp_d;
 }
 
@@ -328,71 +348,93 @@ void gfx_draw_rectangle(int x, int y, int width, int height, uint32_t color){
 
 /* text printing functions */
 
-static void gfx_printchars(gfx_font *font, uint16_t x, uint16_t y, const char *chars, size_t charcnt){
-    rdp_mode_replace(RDP_MODE_COMBINE, G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
+static void gfx_printf_va_color_fast(uint16_t left, uint16_t top, uint32_t color, const char *format, va_list va) {
+    const size_t buf_len = 1024;
+    char buf[buf_len];
+    gfx_font *font = kfont;
+    int s_len = vsnprintf(buf, buf_len, format, va);
+    if(s_len >= buf_len) {
+        s_len = buf_len - 1;
+    }
+
+    uint16_t x = left + 1;
     int chars_per_tile = font->cx_tile * font->cy_tile;
-
-    for(int i = 0;i < font->texture->x_tiles * font->texture->y_tiles;i++){
-        int tile_start = chars_per_tile * i;
-        int tile_end = tile_start + chars_per_tile;
-        _Bool need_tile = true;
-        int char_x = 0;
-        for(int j = 0;j < charcnt; j++, char_x += font->c_width){
-            char c = chars[j];
-            if(c < 33){
-                continue;
-            }
-            c -= 33;
-            if(c < tile_start || c >= tile_end){
-                continue;
-            }
-            c -= tile_start;
-
-            if(need_tile){
-                gfx_load_tile(font->texture, i);
-                need_tile = false;
-            }
-
-            gSPScisTextureRectangle(gfx_disp_p++,
-                         qs102(x + char_x),
-                         qs102(y),
-                         qs102(x + char_x + font->c_width),
-                         qs102(y + font->c_height),
-                         G_TX_RENDERTILE,
-                         qu105(c % font->cx_tile *
-                               font->c_width),
-                         qu105(c / font->cx_tile *
-                               font->c_height),
-                         qu510(1.0f), qu510(1.0f));
+    uint32_t tmp_color = color & 0xFF;
+    for(int i = 0; i < s_len; i++, x += font->c_width) {
+        char c = buf[i];
+        if(c < 33) {
+            continue;
         }
-        rdp_synced = 0;
+        c -= 33;
+        int tile_idx = c / chars_per_tile;
+        int tile_char = c % chars_per_tile;
+        gfx_char_t gchar = {
+            tile_char, tmp_color, x, top + 1
+        };
+        vector_push_back(&gfx_chars[tile_idx], 1, &gchar);
+    }
+
+    x = left;
+    for(int i = 0; i < s_len; i++, x += font->c_width) {
+        char c = buf[i];
+        if(c < 33) {
+            continue;
+        }
+        c -= 33;
+        int tile_idx = c / chars_per_tile;
+        int tile_char = c % chars_per_tile;
+        gfx_char_t gchar = {
+            tile_char, color, x, top
+        };
+        vector_push_back(&gfx_chars[tile_idx], 1, &gchar);
     }
 }
 
-static void gfx_printf_va_color(uint16_t left, uint16_t top, uint32_t color, const char *format, va_list va){
-    const size_t max_len = 1024;
-    char buf[max_len];
-    int l = vsnprintf(buf, max_len, format, va);
-    if(l > max_len - 1){
-        l = max_len - 1;
+static void draw_chars(void) {
+    const gfx_font *font = kfont;
+    uint32_t color = 0x00000000;
+    _Bool first = 1;
+    for(int i = 0; i < 8; i++) {
+        struct vector *tile_vec = &gfx_chars[i];
+        for(int j = 0; j < tile_vec->size; j++) {
+            gfx_char_t *gchar = vector_at(tile_vec, j);
+            if(j == 0) {
+                gfx_load_tile(font->texture, i);
+            }
+            if(first || color != gchar->color) {
+                color = gchar->color;
+                rdp_sync();
+                gDPSetPrimColor(gfx_disp_p++, 0, 0,
+                                (color >> 24) & 0xFF, (color >> 16) & 0xFF,
+                                (color >> 8) & 0xFF, color & 0xFF);
+            }
+            first = 0;
+            gSPScisTextureRectangle(gfx_disp_p++,
+                                    qs102(gchar->x),
+                                    qs102(gchar->y),
+                                    qs102(gchar->x + font->c_width),
+                                    qs102(gchar->y + font->c_height),
+                                    G_TX_RENDERTILE,
+                                    qu105(gchar->tile % font->cx_tile * font->c_width),
+                                    qu105(gchar->tile / font->cx_tile * font->c_height),
+                                    qu510(1), qu510(1));
+            rdp_synced = 0;
+        }
+        vector_clear(tile_vec);
     }
-    //rdp_mode_replace(RDP_MODE_COLOR, GPACK_RGB24A8(0, color & 0xFF));
-    //gfx_printchars(kfont, left + 1, top + 1, buf, l);
-    rdp_mode_replace(RDP_MODE_COLOR, color);
-    gfx_printchars(kfont, left, top, buf, l);
 }
 
 void gfx_printf(uint16_t left, uint16_t top, const char *format, ...){
     va_list args;
     va_start(args, format);
-    gfx_printf_va_color(left, top, DEFAULT_COLOR, format, args);
+    gfx_printf_va_color_fast(left, top, DEFAULT_COLOR, format, args);
     va_end(args);
 }
 
 void gfx_printf_color(uint16_t left, uint16_t top, uint32_t color, const char *format, ...){
     va_list args;
     va_start(args, format);
-    gfx_printf_va_color(left, top, color, format, args);
+    gfx_printf_va_color_fast(left, top, color, format, args);
     va_end(args);
 }
 
@@ -407,17 +449,30 @@ gfx_texture *gfx_load_item_texture(uint8_t item_id){
         texture->tile_width = 32;
         texture->tile_height = 32;
         texture->img_fmt = G_IM_FMT_RGBA;
-        texture->img_size = G_IM_SIZ_32b;
+        texture->img_size = G_IM_SIZ_32b;        
+#ifdef WIIVC
         texture->source = TEX_SRC_HB;
         texture->data = halloc(size * 2);
+#else
+        texture->source = TEX_SRC_DRAM;
+        texture->data = malloc(size * 2);
+#endif
         z2_DecodeArchiveFile(z2_file_table[z2_item_icon_archive].prom_start, item_id, tex_buf, size);
         // Copy colored texture to hb heap
 
+#ifdef WIIVC
         hmemcpy(texture->data, tex_buf, size);
+#else
+        memcpy(texture->data, tex_buf, size);
+#endif
         gfx_texture_desaturate(tex_buf, size);
 
         // copy grey texture to hb heap
+#ifdef WIIVC
         hmemcpy(texture->data + size, tex_buf, size);
+#else
+        memcpy(texture->data + size, tex_buf, size);
+#endif
 
     }
     return texture;
@@ -436,7 +491,14 @@ static gfx_texture *gfx_load_archive(texture_loader *loader){
         texture->x_tiles = 1;
         texture->y_tiles = tiles_cnt * (loader->desaturate ? 2 : 1);
 
+#if WIIVC
+        texture->source = TEX_SRC_HB;
         texture->data = halloc(tile_size * texture->y_tiles);
+#else
+        texture->source= TEX_SRC_DRAM;
+        texture->data = malloc(tile_size * texture->y_tiles);
+#endif
+
         int i;
         uint8_t j;
         for(i = 0, j = loader->start_item; i < tiles_cnt; i++, j++){
@@ -463,18 +525,32 @@ static gfx_texture *gfx_load_from_rom(texture_loader *loader){
         texture->tile_height = loader->height;
         texture->x_tiles = 1;
         texture->y_tiles = loader->num_tiles * (loader->desaturate ? 2 : 1);
+#if WIIVC
+        texture->source = TEX_SRC_HB;
         texture->data = halloc(texture->tile_size * texture->y_tiles);
+#else
+        texture->source = TEX_SRC_DRAM;
+        texture->data = malloc(texture->tile_size * texture->y_tiles);
+#endif
         uint16_t file = loader->file;
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
         zu_file_idx_load(file, tempdata);
 
         for(int i = 0; i < loader->num_tiles; i++) 
         {
+#ifdef WIIVC
             hmemcpy(texture->data + (i * tile_size), (char*)tempdata + loader->offset + (i * tile_size), tile_size);
+#else
+            memcpy(texture->data + (i * tile_size), (char*)tempdata + loader->offset + (i * tile_size), tile_size);
+#endif
             if(loader->desaturate)
             {
                 gfx_texture_desaturate((char*)tempdata + loader->offset + (i * tile_size), tile_size);
+#ifdef WIIVC
                 hmemcpy((char*)texture->data + (tile_size * loader->num_tiles) + (tile_size * i), (char*)tempdata + loader->offset + (i * tile_size), tile_size);
+#else
+                memcpy((char*)texture->data + (tile_size * loader->num_tiles) + (tile_size * i), (char*)tempdata + loader->offset + (i * tile_size), tile_size);
+#endif
             }
         }
 

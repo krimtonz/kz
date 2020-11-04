@@ -12,7 +12,7 @@ HOOK bool kz_treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n
     func_tree_node_t *out_node;
 
     bVar1 = false;
-    if(n64_start > 0x80800000){
+    if(n64_start > 0x8003DF00  && n64_start < 0x80080000){
         bVar1 = kz_cpuTreeTake(&out_node, &out_pos, 0x48);
     }else{
         bVar1 = cpuTreeTake(&out_node,&out_pos,0x48);
