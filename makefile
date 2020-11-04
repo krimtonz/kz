@@ -37,10 +37,11 @@ KZ_FULL				= $(foreach v,$(KZ_VERSIONS),kz-full-$(v))
 LDR                 = $(foreach v,$(KZ_VERSIONS),ldr-kz-$(v))
 LDRLITE             = $(foreach v,$(KZ_VERSIONS),ldr-kz-lite-$(v))
 
+ELF-VC				= $(ELF-kz-vc-NZSE) $(ELF-kz-vc-NZSJ) $(ELF-kz-vc-NZSJ10)
 ELF-FULL            = $(ELF-kz-full-NZSE) $(ELF-kz-full-NZSJ) $(ELF-kz-full-NZSJ10)
 ELF-LITE            = $(ELF-kz-lite-NZSE) $(ELF-kz-lite-NZSJ) $(ELF-kz-lite-NZSJ10)
 
-KZ-FULL             = $(KZ-VC-NZSE) $(KZ-VC-NZSJ) $(KZ-VC-NZSJ10)
+KZ-VC               = $(KZ-VC-NZSE) $(KZ-VC-NZSJ) $(KZ-VC-NZSJ10)
 KZ-VC-NZSE			= $(OBJ-kz-vc-NZSE) $(ELF-kz-vc-NZSE) $(HOOKS-kz-vc-NZSE)
 KZ-VC-NZSJ			= $(OBJ-kz-vc-NZSJ) $(ELF-kz-vc-NZSJ) $(HOOKS-kz-vc-NZSJ)
 KZ-VC-NZSJ10		= $(OBJ-kz-vc-NZSJ10) $(ELF-kz-vc-NZSJ10) $(HOOKS-kz-vc-NZSJ10)
@@ -158,6 +159,9 @@ $(KZ-NZSJ10)        :   LIBS	    :=	-lNZSJ10
 $(KZ-FULL)          :   CPPFLAGS    +=	-DKZ_VERSION=KZ_FULL
 $(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto
 $(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects
+$(KZ-VC)			:	CPPFLAGS	+=	-DKZ_VERSION=KZ_VC
+$(ELF-VC)			:	LDFLAGS		?=	-O3 -flto
+$(KZ-VC)			:	CFLAGS		?=	-O3 -flto -ffat-lto-objects
 $(KZ-LITE)          :   CPPFLAGS    +=	-DLITE -DKZ_VERSION=KZ_LITE
 $(KZ-LITE)          :   CFLAGS      ?=  -Os
 $(ELF-LITE)         :   LDFLAGS     ?=	-Os

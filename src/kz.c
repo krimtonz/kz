@@ -314,6 +314,10 @@ static void kz_main(void) {
     }
 #endif
     
+    if(kz.draw_camera) {
+        camera_draw();
+    }
+
     gfx_finish();
 }
 
@@ -487,9 +491,6 @@ HOOK void draw_actors_hook(void){
 }
 
 HOOK void draw_room_hook(z2_game_t *game, z2_room_t *room){
-    if(kz.draw_camera) {
-        camera_draw();
-    }
     if(kz.hide_room){
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);

@@ -22,6 +22,7 @@
 
 #define KZ_LITE 0x00
 #define KZ_FULL 0x01
+#define KZ_VC   0x02
 
 #ifndef KZ_VERSION
 #define KZ_VERSION KZ_FULL
