@@ -272,7 +272,7 @@ static void kz_main(void) {
 #undef MAKESTRING_
 #undef MAKESTRING
 
-    if(kz.tooltip != NULL){
+    if(kz.tooltip != NULL && kz.menu_active) {
         gfx_printf(kz.main_menu.x_offset, Z2_SCREEN_HEIGHT - 40, "%s", kz.tooltip);
     }
 
