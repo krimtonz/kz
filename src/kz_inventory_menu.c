@@ -289,65 +289,73 @@ static char *dungeon_names[] = {
     "great bay",    "stone tower",
 };
 
-static int max_health_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_NUMBER){
+static int max_health_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_NUMBER) {
         uint16_t value = (uint16_t)((uint32_t)*event_data);
         z2_file.max_health = value;
-        if(z2_file.has_double_defense){
+        if (z2_file.has_double_defense) {
             z2_file.defense_hearts = value / 16;
         }
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         menu_number_set(handler->subscriber, z2_file.max_health);
     }
+    
     return 1;
 }
 
-static int double_defense_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_ACTIVATE){
+static int double_defense_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_ACTIVATE) {
         z2_file.has_double_defense = !z2_file.has_double_defense;
-        if(z2_file.has_double_defense){
+        if (z2_file.has_double_defense) {
             z2_file.defense_hearts = z2_file.max_health / 16;
-        }else{
+        } else {
             z2_file.defense_hearts = 0;
         }
-    }else if (event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         menu_checkbox_set(handler->subscriber, z2_file.has_double_defense);
     }
+
     return 1;
 }
 
-static int magic_event(event_handler_t *handler, menu_event_t event, void **event_data){
+static int magic_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
     int data = (int)handler->callback_data;
-    if(event == MENU_EVENT_ACTIVATE){
+
+    if (event == MENU_EVENT_ACTIVATE) {
         z2_file.magic_level = 0;
-        if((int)handler->callback_data == 0){
+        if ((int)handler->callback_data == 0) {
             z2_file.has_magic = !z2_file.has_magic;
-            if(z2_file.has_magic){
+            if (z2_file.has_magic) {
                 z2_file.current_magic = 0x30;
-            }else{
+            } else {
                 z2_file.has_double_magic = 0;
             }
         }
-        else if((int)handler->callback_data == 1){
+        else if ((int)handler->callback_data == 1) {
             z2_file.has_double_magic = !z2_file.has_double_magic;
-            if(z2_file.has_double_magic){
+            if (z2_file.has_double_magic) {
                 z2_file.has_magic = 1;
                 z2_file.current_magic = 0x60;
-            }else if(z2_file.has_magic && z2_file.current_magic > 0x30){
+            } else if (z2_file.has_magic && z2_file.current_magic > 0x30) {
                 z2_file.current_magic = 0x30;
             }
         }
-    }else if (event == MENU_EVENT_UPDATE){
-        if(data == 0){
+    } else if (event == MENU_EVENT_UPDATE) {
+        if (data == 0) {
             menu_checkbox_set(handler->subscriber, z2_file.has_magic);
-        }else if(data == 1){
+        } else if (data == 1) {
             menu_checkbox_set(handler->subscriber, z2_file.has_double_magic);
         }
     }
+
     return 1;
 }
 
-static int selected_dungeon_onlist(event_handler_t *handler, menu_event_t event, void **event_data){
+static int selected_dungeon_onlist(event_handler_t *handler, menu_event_t event, void **event_data)
+{
     int idx = (int)*event_data;
     dungeon_idx = idx;
     dungeon_keys = z2_file.dungeon_keys[idx];
@@ -357,89 +365,104 @@ static int selected_dungeon_onlist(event_handler_t *handler, menu_event_t event,
     return 1;
 }
 
-static int dungeon_keys_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_NUMBER){
+static int dungeon_keys_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_NUMBER) {
         z2_file.dungeon_keys[dungeon_idx] = (uint8_t)((uint32_t)*event_data);
-    }else if (event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         dungeon_keys = z2_file.dungeon_keys[dungeon_idx];
     }
+
     return 1;
 }
 
-static int stray_fairies_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_NUMBER){
+static int stray_fairies_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_NUMBER) {
         z2_file.stray_fairies[dungeon_idx] = (uint8_t)((uint32_t)*event_data);
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         stray_fairies = z2_file.stray_fairies[dungeon_idx];
     }
+
     return 1;
 }
 
-static int dungeon_item_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_ACTIVATE){
+static int dungeon_item_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_ACTIVATE) {
         dungeon_items = dungeon_items ^ (uint8_t)((int)handler->callback_data);
         z2_file.dungeon_items[dungeon_idx].dungeon_item = dungeon_items;
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         menu_switch_set(handler->subscriber, (dungeon_items & (uint8_t)((int)handler->callback_data)) > 0);
     }
+
     return 1;
 }
 
-static int quest_status_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_ACTIVATE){
+static int quest_status_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_ACTIVATE) {
         z2_file.quest_status = z2_file.quest_status ^ (int)handler->callback_data;
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         menu_switch_set(handler->subscriber, (z2_file.quest_status & (int)handler->callback_data) > 0);
     }
+
     return 1;
 }
 
-static int owl_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_ACTIVATE){
+static int owl_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
+    if (event == MENU_EVENT_ACTIVATE) {
         z2_file.owls_hit = z2_file.owls_hit ^ (int)handler->callback_data;
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         menu_switch_set(handler->subscriber, (z2_file.owls_hit & (int)handler->callback_data) > 0);
     }
+
     return 1;
 }
 
-static int capacity_event(event_handler_t *handler, menu_event_t event, void **event_data){
+static int capacity_event(event_handler_t *handler, menu_event_t event, void **event_data) 
+{
     struct capacity_upgrade_data *cdata = handler->callback_data;
     struct capacity_upgrade_option *row = &capacity_options[cdata->idx];
-    if(event == MENU_EVENT_ACTIVATE){
+    if (event == MENU_EVENT_ACTIVATE) {
         int v = ++cdata->value;
         z2_file.equipment_upgrades = (z2_file.equipment_upgrades & ~(row->option_cnt << row->shift)) | (v << row->shift);
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if (event == MENU_EVENT_UPDATE) {
         int v = (z2_file.equipment_upgrades >> row->shift) & row->option_cnt;
         cdata->value = v - 1;
     }
+
     return 1;
 }
 
-static int item_switch_event(event_handler_t *handler, menu_event_t event, void **event_data){
+static int item_switch_event(event_handler_t *handler, menu_event_t event, void **event_data)
+{
     struct item_switch_data *swdata = handler->callback_data;
     struct item_map_row *row = NULL;
     menu_item_t *item = handler->subscriber;
-    if(swdata->map == 0){
+
+    if (swdata->map == 0) {
         row = &item_map_table[swdata->map_idx];
-    }else{
+    } else {
         row = &mask_map_table[swdata->map_idx];
     }
-    if(event == MENU_EVENT_ACTIVATE){
-        if(*row->slot == row->item){
+
+    if (event == MENU_EVENT_ACTIVATE) {
+        if (*row->slot == row->item) {
             *row->slot = Z2_ITEM_NULL;
-        }else{
+        } else {
             *row->slot = row->item;
         }
-    }else if(event == MENU_EVENT_UPDATE){
-        if(*row->slot == row->item){
+    } else if (event == MENU_EVENT_UPDATE) {
+        if (*row->slot == row->item) {
 
 #ifndef LITE
             menu_switch_set(item, 1);
 #else
             menu_checkbox_set(item, 1);
 #endif
-        }else{
+        } else {
 #ifndef LITE
             menu_switch_set(item, 0);
 #else
@@ -447,10 +470,12 @@ static int item_switch_event(event_handler_t *handler, menu_event_t event, void 
 #endif
         }
     }
+
     return 1;
 }
 
-menu_t *create_inventory_menu(void){
+menu_t *create_inventory_menu(void)
+{
     static menu_t menu;
     static menu_t items;
     static menu_t masks;
@@ -478,7 +503,7 @@ menu_t *create_inventory_menu(void){
         menu_padding_set(&items, 5, 5);
 
         int item_cnt = sizeof(item_map_table) / sizeof(*item_map_table);
-        for(int i = 0;i < item_cnt;i++){
+        for (int i = 0; i < item_cnt; i++) {
             struct item_switch_data *data = malloc(sizeof(*data));
             data->map = 0;
             data->map_idx = i;
@@ -500,12 +525,12 @@ menu_t *create_inventory_menu(void){
 
         list_sprite.background = resource_get(resource_handles[R_Z2_BUTTONS]);
 
-        for(int i = 0;i < 6;i++){
+        for (int i = 0; i < 6; i++) {
             menu_item_list_add(&items, i + 1, 4, Z2_ITEM_BOTTLE, bottle_contents, sizeof(bottle_contents),
                                &z2_file.items[Z2_SLOT_BOTTLE_1 + i], NULL, -1, &list_sprite, "bottle");
         }
 
-        for(int i = 0;i < 3;i++){
+        for (int i = 0; i < 3; i++) {
             menu_item_list_add(&items, 6, i + 1, Z2_ITEM_MOONS_TEAR, trade_quest_contents, sizeof(trade_quest_contents),
                                &z2_file.items[Z2_SLOT_QUEST_1 + i * 6], NULL, -1, &list_sprite, "trade quest");
         }
@@ -513,7 +538,7 @@ menu_t *create_inventory_menu(void){
         int opt_cnt = sizeof(capacity_options) / sizeof(*capacity_options);
         static int8_t threebit_options[] = { Z2_ITEM_NULL, 0, 1, 2, 3, 4, 5, 6 };
         static int8_t twobit_options[] = { Z2_ITEM_NULL, 0, 1, 2, 3 };
-        for(int i = 0;i < opt_cnt;i++){
+        for (int i = 0; i < opt_cnt; i++) {
             struct capacity_upgrade_data *capdata = malloc(sizeof(*capdata));
 
             capdata->value = 0;
@@ -521,10 +546,10 @@ menu_t *create_inventory_menu(void){
 
             int8_t *options = NULL;
             int8_t option_cnt = 0;
-            if(capacity_options[i].option_cnt == 7){
+            if (capacity_options[i].option_cnt == 7) {
                 options = threebit_options;
                 option_cnt = 8;
-            }else{
+            } else {
                 options = twobit_options;
                 option_cnt = 4;
             }
@@ -541,7 +566,7 @@ menu_t *create_inventory_menu(void){
         menu_cell_set(&masks, 16, 16);
         menu_padding_set(&masks, 5, 5);
         int mask_cnt = sizeof(mask_map_table) / sizeof(*mask_map_table);
-        for(int i = 0;i < mask_cnt;i++){
+        for (int i = 0; i < mask_cnt; i++) {
             struct item_switch_data *data = malloc(sizeof(*data));
             data->map = 1;
             data->map_idx = i;
@@ -606,7 +631,7 @@ menu_t *create_inventory_menu(void){
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, dungeon_item_event, (void*)4);
         menu_item_offset_set(item, 20, 5);
 
-        for(int i = 0;i < sizeof(quest_status_table) / sizeof(*quest_status_table);i++){
+        for (int i = 0; i < sizeof(quest_status_table) / sizeof(*quest_status_table); i++) {
             item = menu_switch_add(&quest_status, i, 9, get_item_texture(Z2_ITEM_ODOLWAS_REMAINS + i, 0), NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 16, 16, quest_status_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, quest_status_event, (void*)quest_status_table[i].bitmask);
@@ -615,7 +640,7 @@ menu_t *create_inventory_menu(void){
 
         gfx_texture *owl_icon_texture = resource_get(resource_handles[R_Z2_OWL]);
 
-        for(int i = 0;i < sizeof(owl_data_table) / sizeof(*owl_data_table);i++){
+        for (int i = 0; i < sizeof(owl_data_table) / sizeof(*owl_data_table); i++) {
             item = menu_switch_add(&quest_status, i % 5, i / 5 + 11, owl_icon_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                                    0, 1, 16, 8, owl_data_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, owl_event, (void*)owl_data_table[i].bitmask);
@@ -624,7 +649,7 @@ menu_t *create_inventory_menu(void){
 
         gfx_texture *note_texture = resource_get(resource_handles[R_Z2_NOTE]);
 
-        for(int i = 0;i < sizeof(song_data_table) / sizeof(*song_data_table);i++){
+        for (int i = 0; i < sizeof(song_data_table) / sizeof(*song_data_table); i++) {
             item = menu_switch_add(&quest_status, i % 5 + 6, i / 5 + 11, note_texture, NULL, song_data_table[i].color, 0x808080FF,
                                    0, 0, 10, 16, song_data_table[i].tooltip);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, quest_status_event, (void*)song_data_table[i].bitmask);
@@ -643,7 +668,7 @@ menu_t *create_inventory_menu(void){
             Z2_ITEM_POWDER_KEG
         };
 
-        for(int i = 0;i < sizeof(items) / sizeof(*items);i++){
+        for (int i = 0; i < sizeof(items) / sizeof(*items); i++) {
             menu_static_gfx_add(&amounts, i % 3 * 3, i / 3 + 1, get_item_texture(items[i], 0), 0, 12, 12);
             item = menu_number_input_add(&amounts, i % 3 * 3 + 1, i / 3 + 1, 10, 3);
             menu_item_register_event(item, MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, menu_number_byte_event, &z2_file.ammo[items[i]]);

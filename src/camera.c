@@ -94,11 +94,6 @@ static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){
 void camera_draw(void) {
     static Gfx *cam_gfx[2] = { NULL, NULL };
     static int cam_gfx_idx = 0;
-    static Gfx *arrow_gfx = NULL;
-    static Vtx *cam_vtx_p = NULL;
-
-    static Gfx *arrow_tris = NULL;
-    static Gfx *cam_tris = NULL;
 
     static Vtx cam_vtx[] = {
         gdSPDefVtxC(-5, 5, -5, 0, 0, 0xFF, 0, 0, 0xFF),
