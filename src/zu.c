@@ -83,12 +83,21 @@ void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx)
     uint32_t src_cimg = (uint32_t)z2_cimg[src_cimg_idx];
     uint32_t dst_cimg = (uint32_t)z2_cimg[gfx->frame_cnt_2 & 1];
     
-    z2_disp_buf_t *new_disp[4] = 
-    {
+    z2_disp_buf_t segment_setup;
+    segment_setup.buf = (Gfx*)(dst_gfx + 0x140);
+    segment_setup.p = segment_setup.buf + 21;
+
+    z2_disp_buf_t primary;
+    primary.buf = (Gfx*)(dst_gfx + 0x02A8);
+    primary.p = primary.buf + 12;
+    
+    z2_disp_buf_t *new_disp[6] = {
         &gfx->work,
         &gfx->poly_opa,
         &gfx->poly_xlu,
         &gfx->overlay,
+        &primary,
+        &segment_setup,
     };
 
     for(int i = 0; i < sizeof(new_disp) / sizeof(*new_disp); i++)
