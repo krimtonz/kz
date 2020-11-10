@@ -52,12 +52,15 @@ local patched_rom = fs:assemble_rom()
 
 print("Applying memory hack")
 local zero_patch
-if arg[2] == true then
+if arg[2] == "lite" then
     zero_patch = gru.gsc_load("patch/gsc/zero_patch_lite.gsc")
-else
-    zero_patch = gru.gsc_load("patch/gsc/zero_patch.gsc")
+elseif arg[2] == "vc" then
+    zero_patch = gru.gsc_load("patch/gsc/zero_patch_vc.gsc")
 end
-zero_patch:apply_be(patched_rom)
+
+if(zero_patch ~= nil) then 
+    zero_patch:apply_be(patched_rom)
+end
 
 local prev_ldr = patched_rom:copy(0x1000, 0x60)
 local kz = gru.blob_load("bin/" .. kz_version .. "/kz.bin")
