@@ -1517,6 +1517,33 @@ typedef struct {
     uint8_t     data[7];                /* 0x0001 */
 } z2_scene_cmd_t;                       /* 0x0008 */
 
+typedef struct {
+    char unk_0x00[0x20A];
+    uint16_t seq_idx;
+    char unk_0x20C[0x10];
+} z2_seq_ctl_t;                         /* 0x021C */
+
+typedef struct {
+    uint32_t    hi;                     /* 0x0000 */
+    void       *lo;                     /* 0x0004 */
+} z2_audio_cmd_t;                       /* 0x0008 */
+
+typedef struct {
+    uint8_t status;
+    char unk_0x01[0x15F];
+} z2_sequencer_t;                       /* 0x0160 */
+
+typedef struct {
+    char unk_0x00[0x4460];
+    z2_sequencer_t sequencers[4]; /* 0x4460 */
+    char unk_0x49E0[0x2F98];
+    uint8_t cmd_wr_pos; /* 7978 */
+    uint8_t cmd_rd_pos; /* 7979 */
+    char unk_0x797A[0x7A];
+    z2_audio_cmd_t cmd_buf[0x100]; /* 0x79F4 */
+    char unk_0x81F4[4];
+} z2_audio_ctxt_t;
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1551,6 +1578,15 @@ z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, si
 #endif
 z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
+z2_extern void          z2_AfxCmdFloat              (uint32_t cmd, float data);
+z2_extern void          z2_AfxCmdWord               (uint32_t cmd, uint32_t data);
+z2_extern void          z2_AfxCmdByte               (uint32_t cmd, uint8_t data);
+z2_extern void          z2_AfxCmdShort              (uint32_t cmd, uint16_t data);
+z2_extern void          z2_CheckAfxCfg              (void);
+z2_extern void          z2_AfxConfig                (uint8_t cfg);
+z2_extern void          z2_AudioReset               (uint8_t cfg);
+z2_extern void          z2_StopSfx                  (void);
+z2_extern void          z2_AfxCmdFlush              (void);
 
 /* data */
 z2_extern int32_t                   z2_vi_counter;
@@ -1561,7 +1597,7 @@ z2_extern z2_particle_info_t        z2_particle_info;
 z2_extern z2_particle_ovl_table_t   z2_particle_ovl_table[38];
 z2_extern z2_actor_ovl_table_t      z2_actor_ovl_table[689];
 z2_extern char                      z2_hud_state[];
-z2_extern char                      z2_event_state_1[];
+z2_extern uint32_t                  z2_event_state_1;
 z2_extern char                      z2_letter_box_timer[];
 z2_extern char                      z2_cutscene_state[];
 z2_extern z2_gamestate_table_t      z2_gamestate_table[];
@@ -1577,6 +1613,7 @@ z2_extern z2_player_ovl_table_t     z2_player_ovl_table[2];
 z2_extern z2_player_ovl_table_t    *z2_player_ovl_cur;
 z2_extern z2_static_particle_ctxt_t z2_static_particle_ctxt;
 z2_extern z2_file_t                 z2_file;
+z2_extern char                      z2_cs_info[];
 z2_extern z2_light_queue_t          z2_light_queue;
 z2_extern z2_arena_t                z2_game_arena;
 z2_extern z2_segment_t              z2_segment;
@@ -1585,10 +1622,20 @@ z2_extern z2_input_t                z2_input_direct;
 z2_extern MtxF                     *z2_mtx_stack;
 z2_extern MtxF                     *z2_mtx_stack_top;
 z2_extern OSPiHandle                z2_pi_io_handle;
+z2_extern uint8_t                   z2_sfx_cmd_wr_pos;
+z2_extern uint8_t                   z2_sfx_cmd_rd_pos;
+z2_extern uint8_t                   z2_seq_cmd_wr_pos;
+z2_extern uint8_t                   z2_seq_cmd_rd_pos;
+z2_extern uint8_t                   z2_afx_cfg;
+z2_extern uint8_t                   z2_afx_cfg_state;
+z2_extern uint32_t                  z2_seq_cmd_buf[0x100];
+z2_extern z2_seq_ctl_t              z2_seq_ctl[4];
+z2_extern z2_audio_ctxt_t           z2_audio_ctxt;
 z2_extern char                      z2_disp[];
 z2_extern z2_ctxt_t                 z2_ctxt;
 z2_extern z2_game_t                 z2_game;
 z2_extern z2_link_t                 z2_link;
+z2_extern uint32_t                  z2_cs_bars;
 
 // File indcies
 #if Z2_VERSION==NZSE

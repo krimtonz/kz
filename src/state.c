@@ -8,6 +8,7 @@
 #include "kzresource.h"
 #include "kz.h"
 #include "hb_heap.h"
+#include "audio.h"
 
 static void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
@@ -87,11 +88,51 @@ void relocate_col_hdr(uint32_t hdr){
 void load_state(void *state){
     void *p = state;
 
+    st_skip(&p,sizeof(kz_state_hdr_t));
+
+    z2_sfx_cmd_rd_pos = z2_sfx_cmd_wr_pos;
+    z2_seq_cmd_rd_pos = z2_sfx_cmd_wr_pos;
+    z2_audio_ctxt.cmd_rd_pos = z2_audio_ctxt.cmd_wr_pos;
+    z2_StopSfx();
+
+    struct seq_info {
+        _Bool active;
+        uint16_t seq_idx;
+    } seq_info[4];
+
+    for(int i = 0; i < 4; i++) {
+        struct seq_info *info = &seq_info[i];
+        st_read(&p, &info->active, sizeof(info->active));
+        st_read(&p, &info->seq_idx, sizeof(info->seq_idx));
+    }
+
+    uint8_t cur_config = z2_afx_cfg;
+    uint8_t saved_cfg;
+    st_read(&p, &saved_cfg, sizeof(saved_cfg));
+    if(cur_config != saved_cfg) {
+        z2_afx_cfg = saved_cfg;
+        z2_AfxConfig(saved_cfg);
+        z2_AudioReset(cur_config);
+        z2_AfxCmdWord(0xF8000000, 0x00000000);
+    } else {
+        for(int i = 0; i < 4; i++) {
+            struct seq_info *info = &seq_info[i];
+            z2_seq_ctl_t *ctl = &z2_seq_ctl[i];
+            if (i == 2) {
+                continue;
+            }
+
+            if(info->seq_idx == 0xFFFF || !info->active || info->seq_idx != ctl->seq_idx) {
+                z2_AfxCmdWord(0x83000000 | (i << 16), 0x00000000);
+            }
+        }
+        z2_AfxCmdFlush();
+    }
+
     /* wait for rcp to finish task */
     osRecvMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_BLOCK);
     osSendMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_NOBLOCK);
 
-    st_skip(&p,sizeof(kz_state_hdr_t));
 
     /* record current loaded data */
     int scene_index = z2_game.scene_index;
@@ -283,7 +324,13 @@ void load_state(void *state){
     }
 
     /* load cutscene state */
-    st_read(&p, &z2_cutscene_state, 8);
+    st_read(&p, &z2_cutscene_state, 0x16);
+
+    st_read(&p, z2_cs_info, 0x80);
+
+    st_read(&p, z2_hud_state, 12);
+
+    st_read(&p, &z2_cs_bars, sizeof(z2_cs_bars));
 
     /* load scene file, and create static collision if loading from a different scene */
     if(scene_index != z2_game.scene_index){
@@ -455,6 +502,22 @@ void load_state(void *state){
     st_read(&p, &frame_cnt_1, sizeof(frame_cnt_1));
     st_read(&p, &frame_cnt_2, sizeof(frame_cnt_2));
     zu_gfx_reloc(frame_cnt_1 & 1, frame_cnt_2 & 1);
+
+    for(int i = 0; i < 4; i++) {
+        struct seq_info *info = &seq_info[i];
+        z2_seq_ctl_t *ctl = &z2_seq_ctl[i];
+        z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
+        _Bool cur_active = sequencer->status & 0x80;
+        if(info->seq_idx != 0xFFFF && info->active && !cur_active) {
+            afx_start_seq(i, info->seq_idx);
+        }
+    }
+    z2_AfxCmdFlush();
+    uint8_t cmd_cnt;
+    st_read(&p, &cmd_cnt, sizeof(cmd_cnt));
+    for(uint8_t i = 0; i != cmd_cnt; i++) {
+        st_read(&p, &z2_seq_cmd_buf[z2_seq_cmd_wr_pos++], sizeof(*z2_seq_cmd_buf));
+    }
 }
 
 _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end){
@@ -491,6 +554,16 @@ size_t save_state(void *state){
     int ent_end = -1;
 
     st_skip(&p, sizeof(kz_state_hdr_t));
+
+    for(int i = 0; i < 4; i++) {
+        z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
+        z2_seq_ctl_t *seq_ctl = &z2_seq_ctl[i];
+        _Bool seq_active = (sequencer->status & 0x80) || z2_afx_cfg_state;
+        st_write(&p, &seq_active, sizeof(seq_active));
+        st_write(&p, &seq_ctl->seq_idx, sizeof(seq_ctl->seq_idx));
+    }
+
+    st_write(&p, &z2_afx_cfg, sizeof(z2_afx_cfg));
 
     struct set node_set;
     set_init(&node_set, sizeof(uint32_t), addr_compare);
@@ -624,7 +697,13 @@ size_t save_state(void *state){
     st_write(&p, &ent_end, sizeof(ent_end));
 
     /* save current cutscene state */
-    st_write(&p, &z2_cutscene_state, 8);
+    st_write(&p, &z2_cutscene_state, 0x16);
+
+    st_write(&p, z2_cs_info, 0x80);
+
+    st_write(&p, z2_hud_state, 12);
+
+    st_write(&p, &z2_cs_bars, sizeof(z2_cs_bars));
 
     /* save room transition actors */
     int trans_cnt = z2_game.room_ctx.transition_cnt;
@@ -662,6 +741,12 @@ size_t save_state(void *state){
     }
     st_write(&p, &gfx->frame_cnt_1, sizeof(gfx->frame_cnt_1));
     st_write(&p, &gfx->frame_cnt_2, sizeof(gfx->frame_cnt_2));
+
+    uint8_t cmd_cnt = z2_seq_cmd_wr_pos - z2_seq_cmd_rd_pos;
+    st_write(&p, &cmd_cnt, sizeof(cmd_cnt));
+    for(uint8_t i = z2_seq_cmd_rd_pos; i != z2_seq_cmd_wr_pos; i++) {
+        st_write(&p, &z2_seq_cmd_buf[i], sizeof(*z2_seq_cmd_buf));
+    }
 
     return (char*)p - (char*)state;
 }
