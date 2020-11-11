@@ -25,7 +25,7 @@ static void st_read(void **src, void *dst, size_t len){
 #ifdef WIIVC
     hmemcpy(dst, p, len);
 #else
-    memcpy(p, src, len);
+    memcpy(dst, p, len);
 #endif
     p += len;
     *src = p;
