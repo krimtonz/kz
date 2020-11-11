@@ -40,13 +40,13 @@ struct command kz_commands[KZ_CMD_MAX] = {
 
 #ifndef LITE
 void command_prev_state(void) {
-    kz.state_slot++;
+    kz.state_slot += STATE_MAX - 1;
     kz.state_slot %= STATE_MAX;
     kz_log("select state slot %d", kz.state_slot);
 }
 
 void command_next_state(void) {
-    kz.state_slot += STATE_MAX - 1;
+    kz.state_slot++;
     kz.state_slot %= STATE_MAX;
     kz_log("select state slot %d", kz.state_slot);
 }

@@ -10,7 +10,13 @@
 #include "hb_heap.h"
 #include "audio.h"
 
-static void st_write(void **dst, void *src, size_t len){
+#ifdef WIIVC
+#define MAYBENOINLINE __attribute__ ((noinline))
+#else
+#define MAYBEINLINE
+#endif
+
+static MAYBENOINLINE void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
 #ifdef WIIVC
     hmemcpy(p, src, len);
@@ -21,7 +27,7 @@ static void st_write(void **dst, void *src, size_t len){
     *dst = p;
 }
 
-static void st_read(void **src, void *dst, size_t len){
+static MAYBENOINLINE void st_read(void **src, void *dst, size_t len){
     char *p = *src;
 #ifdef WIIVC
     hmemcpy(dst, p, len);
