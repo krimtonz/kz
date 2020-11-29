@@ -13,7 +13,7 @@
 #ifdef WIIVC
 #define MAYBENOINLINE __attribute__ ((noinline))
 #else
-#define MAYBEINLINE
+#define MAYBENOINLINE
 #endif
 
 static MAYBENOINLINE void st_write(void **dst, void *src, size_t len){
@@ -97,19 +97,23 @@ void load_state(void *state){
     st_skip(&p,sizeof(kz_state_hdr_t));
 
     z2_sfx_cmd_rd_pos = z2_sfx_cmd_wr_pos;
-    z2_seq_cmd_rd_pos = z2_sfx_cmd_wr_pos;
+    z2_seq_cmd_rd_pos = z2_seq_cmd_wr_pos;
     z2_audio_ctxt.cmd_rd_pos = z2_audio_ctxt.cmd_wr_pos;
     z2_StopSfx();
 
     struct seq_info {
         _Bool active;
         uint16_t seq_idx;
+        uint32_t unk_1FC;
+        uint16_t delay;
     } seq_info[4];
 
     for(int i = 0; i < 4; i++) {
         struct seq_info *info = &seq_info[i];
         st_read(&p, &info->active, sizeof(info->active));
         st_read(&p, &info->seq_idx, sizeof(info->seq_idx));
+        st_read(&p, &info->unk_1FC, sizeof(info->unk_1FC));
+        st_read(&p, &info->delay, sizeof(info->delay));
     }
 
     uint8_t cur_config = z2_afx_cfg;
@@ -513,12 +517,24 @@ void load_state(void *state){
         struct seq_info *info = &seq_info[i];
         z2_seq_ctl_t *ctl = &z2_seq_ctl[i];
         z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
+        if(!(sequencer->status & 0x80)) {
+            ctl->unk_21B = 1;
+        }
+        ctl->prev_seq_idx = ctl->seq_idx = info->seq_idx;
+        ctl->unk_1FC = info->unk_1FC;
         _Bool cur_active = sequencer->status & 0x80;
         if(info->seq_idx != 0xFFFF && info->active && !cur_active) {
             afx_start_seq(i, info->seq_idx);
         }
     }
+
+    z2_AfxCmdWord(0xF2000000, 0x00000000);
     z2_AfxCmdFlush();
+    for(int i = 0; i < 4; i++) {
+        struct seq_info *info = &seq_info[i];
+        z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
+        sequencer->delay = info->delay;
+    }
     uint8_t cmd_cnt;
     st_read(&p, &cmd_cnt, sizeof(cmd_cnt));
     for(uint8_t i = 0; i != cmd_cnt; i++) {
@@ -567,6 +583,8 @@ size_t save_state(void *state){
         _Bool seq_active = (sequencer->status & 0x80) || z2_afx_cfg_state;
         st_write(&p, &seq_active, sizeof(seq_active));
         st_write(&p, &seq_ctl->seq_idx, sizeof(seq_ctl->seq_idx));
+        st_write(&p, &seq_ctl->unk_1FC, sizeof(seq_ctl->unk_1FC));
+        st_write(&p, &sequencer->delay, sizeof(sequencer->delay));
     }
 
     st_write(&p, &z2_afx_cfg, sizeof(z2_afx_cfg));

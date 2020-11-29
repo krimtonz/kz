@@ -1518,9 +1518,13 @@ typedef struct {
 } z2_scene_cmd_t;                       /* 0x0008 */
 
 typedef struct {
-    char unk_0x00[0x20A];
-    uint16_t seq_idx;
-    char unk_0x20C[0x10];
+    char unk_0x00[0x1FC];
+    uint32_t unk_1FC;                   /* 0x01FC */
+    char unk_0x200[0xA];                /* 0x0200 */
+    uint16_t seq_idx;                   /* 0x020A */
+    uint16_t prev_seq_idx;              /* 0x020C */
+    char unk_0x20E[0x0D];               /* 0x0210 */
+    uint8_t unk_21B;                    /* 0x021B */
 } z2_seq_ctl_t;                         /* 0x021C */
 
 typedef struct {
@@ -1530,7 +1534,9 @@ typedef struct {
 
 typedef struct {
     uint8_t status;
-    char unk_0x01[0x15F];
+    char unk_0x01[0xF];
+    uint16_t delay;                     /* 0x0010 */
+    char unk_0x12[0x14E];
 } z2_sequencer_t;                       /* 0x0160 */
 
 typedef struct {
