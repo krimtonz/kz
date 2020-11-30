@@ -163,6 +163,10 @@ void free(void *ptr) {
 }
 
 void *realloc(void *ptr, size_t size) {
+    if(size == 0 && ptr == NULL){
+        return NULL;
+    }
+    
     if(size == 0) {
         free(ptr);
         return NULL;

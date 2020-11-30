@@ -508,7 +508,7 @@ void load_state(void *state){
         st_read(&p, dlist->d, (end - dlist->d) * len);
     }
     uint32_t frame_cnt_1;
-    uint32_t frame_cnt_2;
+    uint8_t frame_cnt_2;
     st_read(&p, &frame_cnt_1, sizeof(frame_cnt_1));
     st_read(&p, &frame_cnt_2, sizeof(frame_cnt_2));
     zu_gfx_reloc(frame_cnt_1 & 1, frame_cnt_2 & 1);
