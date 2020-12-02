@@ -9,6 +9,7 @@
 #include "kz.h"
 #include "hb_heap.h"
 #include "audio.h"
+#include "vc.h"
 
 #ifdef WIIVC
 #define MAYBENOINLINE __attribute__ ((noinline))
@@ -51,6 +52,7 @@ static _Bool addr_compare(void *a, void *b){
 }
 
 _Bool load_overlay(void **src, void **tab_addr, uint32_t vrom_start, uint32_t vrom_end, uint32_t vram_start, uint32_t vram_end){
+    FORCE_CLEAN(load_overlay);
     z2_file_table_t *file = NULL;
     for(int i = 0;;i++){
         if(z2_file_table[i].vrom_start == vrom_start && z2_file_table[i].vrom_end == vrom_end){
@@ -92,6 +94,8 @@ void relocate_col_hdr(uint32_t hdr){
 }
 
 void load_state(void *state){
+    FORCE_CLEAN(load_state);
+
     void *p = state;
 
     st_skip(&p,sizeof(kz_state_hdr_t));
@@ -543,6 +547,7 @@ void load_state(void *state){
 }
 
 _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end){
+    FORCE_CLEAN(save_overlay);
     z2_file_table_t *file = NULL;
     for(int i = 0;;i++){
         if(z2_file_table[i].vrom_start == vrom_start && z2_file_table[i].vrom_end == vrom_end){
@@ -569,6 +574,7 @@ _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end
 }
 
 size_t save_state(void *state){
+    FORCE_CLEAN(save_state);
     void *p = state;
 
     /* indicators for table entries */

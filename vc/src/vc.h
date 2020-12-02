@@ -9,6 +9,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdlib.h>
 
 #ifndef VC_VERSION
 #error no vc version specified
@@ -25,25 +26,55 @@ typedef struct func_tree_node_s     func_tree_node_t;
 typedef struct n64_cpu_s            n64_cpu_t;
 typedef struct recomp_ctxt_s        recomp_ctxt_t;
 
+typedef bool (*lb_t)(void *dev_obj, uint32_t addr, uint8_t *dest);
+typedef bool (*lh_t)(void *dev_obj, uint32_t addr, uint16_t *dest);
+typedef bool (*lw_t)(void *dev_obj, uint32_t addr, uint32_t *dest);
+typedef bool (*ld_t)(void *dev_obj, uint32_t addr, uint64_t *dest);
+typedef bool (*sb_t)(void *dev_obj, uint32_t addr, uint8_t *src);
+typedef bool (*sh_t)(void *dev_obj, uint32_t addr, uint16_t *src);
+typedef bool (*sw_t)(void *dev_obj, uint32_t addr, uint32_t *src);
+typedef bool (*sd_t)(void *dev_obj, uint32_t addr, uint64_t *src);
+
+typedef struct{
+    char        unk_0x00_[0x04];    /* 0x00 */
+    void       *dev_obj;            /* 0x04 */
+    uint32_t    kseg0_offset;       /* 0x08 */
+    lb_t        lb;                 /* 0x0C */
+    lh_t        lh;                 /* 0x10 */
+    lw_t        lw;                 /* 0x14 */
+    ld_t        ld;                 /* 0x18 */
+    sb_t        sb;                 /* 0x1C */
+    sh_t        sh;                 /* 0x20 */
+    sw_t        sw;                 /* 0x24 */
+    sd_t        sd;                 /* 0x28 */
+    uint32_t    phys_addr;          /* 0x2C */
+    uint32_t    size;               /* 0x30 */
+} cpu_dev_t;
+
 struct cpu_cache_entry_s {
     int                 n64_addr;
     void               *vc_addr;
     func_tree_node_t   *node;
 };
 
+typedef struct {
+    int     n64_addr;
+    void   *branch_addr;
+} ext_call_t;
+
 struct func_tree_node_s {
-    int                 field_0x0;
+    int                 unk_0x00;
     void               *code;
-    int                 field_0x8;
-    int                *field_0xc;
+    int                 unk_0x08;
+    int                *unk_0x0C;
     int                 n64_start;
     int                 n64_end;
-    int                 code_ref_table;
+    ext_call_t         *code_ref_table;
     int                 ref_cnt;
-    int                 field_0x20;
+    int                 state;
     int                 checksum;
-    int                 field_0x28;
-    int                 field_0x2c;
+    int                 unk_0x28;
+    int                 size;
     int                 alloc_type;
     int                 block_pos;
     int                 code_pos;
@@ -81,7 +112,7 @@ struct n64_cpu_s {
     int                 field_0xb70;
     int                 field_0xb74;
     char                field_0xb78[0x8];
-    int                *mem_domain[256];
+    cpu_dev_t          *mem_domain[256];
     char                mem_idx[65536];
     void               *sm_blk_code;
     void               *lg_blk_code;
@@ -118,23 +149,39 @@ struct recomp_ctxt_s {
     int                 node_cleaned_found;
 };
 
-bool    kz_cpuTreeTake  (func_tree_node_t **out_node, int *out_pos, int size);
+typedef struct {
+    const char *name;
+    size_t size;
+    int unk_08;
+    bool (*event_handler)(void *heap, int event, void *arg);
+} class_type_t;
+
+typedef struct{
+    char        unk_0x00[0x28];
+    n64_cpu_t  *cpu;
+} gClassSystem_t;
+
+bool    kz_treeSearchNode(func_tree_node_t *node, int n64_addr, func_tree_node_t **found_node);
+bool    kz_cpuTreeTake  (func_tree_node_t **out_node, int *out_pos, size_t size);
 bool    kz_treeBalance  (recomp_ctxt_t *ctx);
-int     _start          ();
 
 #define hb_init     ((bool (*)(void**, int)) 0x90000800)
 
-#define vc_extern __attribute__((section(".data")))
+#define vc_extern extern __attribute__((section(".data")))
 vc_extern bool  xlHeapTake      (void **dst, int size);
-vc_extern bool  cpuTreeTake     (func_tree_node_t **out_node, int *out_pos, int size);
+vc_extern bool  cpuTreeTake     (func_tree_node_t **out_node, int *out_pos, size_t size);
 vc_extern bool  treeAdjustRoot  (n64_cpu_t *cpu, int n64_start, int n64_end);
 vc_extern bool  treeInsertNode  (func_tree_node_t **start, int n64_start, int n64_end, func_tree_node_t **new_node);
 vc_extern bool  ramSetSize      (void **dst, int size);
+vc_extern bool  xlObjectMake    (void **obj, void *parent, class_type_t *class);
+vc_extern bool  cpuMapObject    (n64_cpu_t *cpu, void *dev, uint32_t addr_start, uint32_t addr_end, uint32_t arg4);
+vc_extern bool  cpuSetDevicePut (n64_cpu_t *cpu, cpu_dev_t *dev, void *sb, void *sh, void *sw, void *sd);
+vc_extern bool  cpuSetDeviceGet (n64_cpu_t *cpu, cpu_dev_t *dev, void *lb, void *lh, void *lw, void *ld);
+vc_extern bool  treeCallerCheck (n64_cpu_t *cpu, func_tree_node_t *node, uint32_t arg2, uint32_t n64_start, uint32_t n64_end);
+vc_extern gClassSystem_t *gSystem;
 
 extern func_tree_node_t     kz_tree[];
 extern int                  kz_tree_status[];
-extern recomp_ctxt_t       *tree_ctx;
 extern func_tree_node_t    *kz_tree_root;
-extern int                  tree_cnt;
 
 #endif

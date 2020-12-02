@@ -12,40 +12,28 @@
  * 
 */
 
-HOOK bool kz_treeSearchNode(func_tree_node_t *start,int n64_addr,func_tree_node_t **found_node)
+HOOK bool kz_treeSearchNode(func_tree_node_t *node, int n64_addr, func_tree_node_t **found_node) {
+    recomp_ctxt_t *tree_ctx = gSystem->cpu->recomp_ctx;
+    if(node == tree_ctx->code_tree_root || node == tree_ctx->other_tree_root) {
+        if(n64_addr > 0x8003DF00 && n64_addr < 0x80080000) {
+            node = kz_tree;
+        }
+    }
 
-{
-    int iVar1;
-    bool is_kz = false;
-    func_tree_node_t *orig = NULL;
-    
-    if (start == NULL) {
-        return false;
+    while(node != NULL) {
+        if(n64_addr >= node->n64_start && n64_addr < node->n64_end) {
+            *found_node = node;
+            return true;
+        }
+
+        if(n64_addr < node->n64_start) {
+            node = node->left_node;
+        } else if(n64_addr > node->n64_start) {
+            node = node->right_node;
+        } else {
+            node = NULL;
+        }
     }
-    if ((start == tree_ctx->other_tree_root || start == tree_ctx->code_tree_root) && n64_addr > 0x8003DF00 && n64_addr < 0x80080000){
-        orig = start;
-        start = kz_tree;
-    }
-    
-        do {
-            iVar1 = start->n64_start;
-            if ((iVar1 <= n64_addr) && (n64_addr < start->n64_end)) {
-                *found_node = start;
-                return true;
-            }
-            if (n64_addr < iVar1) {
-                start = start->left_node;
-            }
-            else {
-                if (iVar1 < n64_addr) {
-                    start = start->right_node;
-                }
-                else {
-                    start = NULL;
-                }
-            }
-        } while (start != NULL);
-    
+
     return false;
 }
-

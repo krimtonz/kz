@@ -4,40 +4,39 @@
 
 #include "vc.h"
 
-HOOK bool kz_treeInitNode(func_tree_node_t **node,func_tree_node_t *parent,int n64_start,int n64_end)
-
-{
-    bool bVar1;
+HOOK bool kz_treeInitNode(func_tree_node_t **out_node, func_tree_node_t *parent, int n64_start, int n64_end) {
+    func_tree_node_t *new_node;
     int out_pos;
-    func_tree_node_t *out_node;
+    bool (*tree_take)(func_tree_node_t**, int*, size_t);
 
-    bVar1 = false;
-    if(n64_start > 0x8003DF00  && n64_start < 0x80080000){
-        bVar1 = kz_cpuTreeTake(&out_node, &out_pos, 0x48);
-    }else{
-        bVar1 = cpuTreeTake(&out_node,&out_pos,0x48);
+    if(n64_start > 0x8003DF00 && n64_start < 0x80080000) {
+        tree_take = kz_cpuTreeTake;
+    } else {
+        tree_take = cpuTreeTake;
     }
-    if (bVar1 != false) {
-        out_node->n64_start = n64_start;
-        out_node->n64_end = n64_end;
-        out_node->code_ref_table = 0;
-        out_node->ref_cnt = 0;
-        out_node->field_0x20 = 0x21;
-        out_node->field_0x0 = 0;
-        out_node->code = NULL;
-        out_node->field_0x8 = 0;
-        out_node->field_0xc = NULL;
-        out_node->checksum = 0;
-        out_node->field_0x28 = 1;
-        out_node->field_0x2c = 0;
-        out_node->alloc_type = -1;
-        out_node->block_pos = -1;
-        out_node->code_pos = out_pos;
-        out_node->parent_node = parent;
-        out_node->left_node = NULL;
-        out_node->right_node = NULL;
-        *node = out_node;
+
+    if(!tree_take(&new_node, &out_pos, sizeof(func_tree_node_t))) {
+        return false;
     }
-    return bVar1 != false;
+
+    new_node->n64_start = n64_start;
+    new_node->n64_end = n64_end;
+    new_node->code_ref_table = NULL;
+    new_node->ref_cnt = 0;
+    new_node->state = 0x21;
+    new_node->unk_0x00 = 0;
+    new_node->code = NULL;
+    new_node->unk_0x08 = 0;
+    new_node->unk_0x0C = NULL;
+    new_node->checksum = 0;
+    new_node->unk_0x28 = 1;
+    new_node->size = 0;
+    new_node->alloc_type = -1;
+    new_node->block_pos = -1;
+    new_node->code_pos = out_pos;
+    new_node->parent_node = parent;
+    new_node->left_node = NULL;
+    new_node->right_node = NULL;
+    *out_node = new_node;
+    return true;
 }
-

@@ -14,28 +14,28 @@ typedef struct {
 
 extern class_hb_heap_t *hb_heap_obj;
 
-bool kz_ramGetBuffer(gClassRAM_t *ram, char **buf, uint32_t addr, uint32_t *len) {
+bool kz_ramGetBuffer(gClassRAM_t *ram, void **buffer, int addr, int *len) {
+    size_t dram_size = ram->ram_size;
     addr &= ~0xF0000000;
-    if(addr >= 0x8060000 && addr <= 0x8460000){
-        // homeboy hb_heap_obj
-        *buf = hb_heap_obj->heap_ptr + (addr - 0x8060000);
+
+    if(addr >= 0x8060000 && addr <= 0x8460000) {
+        *buffer = hb_heap_obj->heap_ptr + (addr - 0x8060000);
         return true;
     }
 
-    addr &= ~0xFC000000;
+    addr &= 0x3FFFFFF;
 
-    if (ram->ram_size == 0x0) {
+    if(dram_size == 0) {
         return false;
     }
 
-    if ((len != NULL) && (ram->ram_size <= addr + *len)){
-        if((ram->ram_size - addr) < 0x0) {
-            *len = 0x0;
-        } else {
-            *len = ram->ram_size - addr;
+    if(len != NULL && addr + *len >= dram_size) {
+        *len = dram_size - addr;
+        if(*len < 0) {
+            *len = 0;
         }
     }
 
-    *buf = ram->ram + (addr & (ram->ram_size - 0x1));
+    *buffer = ram->ram + addr;
     return true;
 }
