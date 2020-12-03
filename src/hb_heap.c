@@ -3,13 +3,13 @@
 #include "hb_heap.h"
 
 #define HB_HEAP_ADDR 0xA8060000
-#define HB_HEAP_SIZE 0x00400000 // 4 MB
+#define HB_HEAP_SIZE 0x00C00000 // 12 MB
 #define HB_ALIGN(s) (((s) + _Alignof(max_align_t) - 1) & ~(_Alignof(max_align_t) - 1))
 #define HDR_SIZE (HB_ALIGN(sizeof(struct __hb_heap_hdr_s)))
 
 typedef struct __hb_heap_hdr_s{
     int free;
-    size_t size;
+    int size;
     struct __hb_heap_hdr_s *prev;
     struct __hb_heap_hdr_s *next;
 } __hb_heap_hdr_t;
@@ -36,24 +36,30 @@ void *halloc(size_t size){
 
     size = HB_ALIGN(size);
 
-    while(blk_ptr){
-        if(blk_ptr->free && blk_ptr->size >= size){
-            if(blk_ptr->size - size >= HDR_SIZE + HB_ALIGN(1)){
+    while(blk_ptr != NULL) {
+        if(blk_ptr->free && blk_ptr->size >= size) {
+            // Can this block be fragmented? 
+            if(blk_ptr->size - size >= HDR_SIZE + HB_ALIGN(1)) {
                 next_free = (__hb_heap_hdr_t*)((char*)blk_ptr + HDR_SIZE + size);
                 next_free->free = 1;
                 next_free->size = blk_ptr->size - size - HDR_SIZE;
                 next_free->prev = blk_ptr;
-                if(blk_ptr->next != NULL){
+                
+                if(blk_ptr->next != NULL) {
                     blk_ptr->next->prev = next_free;
                 }
+
                 next_free->next = blk_ptr->next;
                 blk_ptr->next = next_free;
                 blk_ptr->size = size;
             }
+
             blk_ptr->free = 0;
-            if(blk_ptr == first_free_block){
+
+            if(blk_ptr == first_free_block) {
                 next_free = blk_ptr->next;
-                while(next_free){
+
+                while(next_free != NULL) {
                     if(next_free->free){
                         first_free_block = next_free;
                         break;
@@ -61,8 +67,10 @@ void *halloc(size_t size){
                     next_free = next_free->next;
                 }
             }
+
             return (char*)blk_ptr + HDR_SIZE;
         }
+
         blk_ptr = blk_ptr->next;
     }
 
@@ -73,14 +81,15 @@ void hfree(void *ptr)
 {
     __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
     if(blk->next != NULL && blk->next->free){
-        blk->size = ((char*)blk->next + blk->next->size) - (char*)blk;
+        blk->size += blk->next->size + HDR_SIZE;
         if(blk->next->next != NULL){
             blk->next->next->prev = blk;
         }
         blk->next = blk->next->next;
     }
+
     if(blk->prev != NULL && blk->prev->free){
-        blk->prev->size = ((char*)blk + blk->size) - (char*)blk->prev;
+        blk->prev->size += blk->size + HDR_SIZE;
         blk->prev->next = blk->next;
         if(blk->next != NULL){
             blk->next->prev = blk->prev;
@@ -89,6 +98,7 @@ void hfree(void *ptr)
     } else {
         blk->free = 1;
     }
+
     if(first_free_block > blk){
         first_free_block = blk;
     }
@@ -98,6 +108,7 @@ __attribute__ ((noinline))
 void *hrealloc(void *ptr, size_t size)
 {
     __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
+
     if(blk->free)
     {
         return NULL;
@@ -105,20 +116,27 @@ void *hrealloc(void *ptr, size_t size)
 
     size = HB_ALIGN(size);
 
-    if(blk->size - HDR_SIZE == size)
+    if(blk->size == size)
     {
         return ptr;
     }
 
-    if(blk->size + HDR_SIZE + HDR_SIZE > size) // we have enough room to fragment this block.
+    if(blk->size - size >= HDR_SIZE + HB_ALIGN(1)) // we have enough room to fragment this block.
     {
         __hb_heap_hdr_t *free = (__hb_heap_hdr_t*)((char*)blk + HDR_SIZE + size);
         free->free = 1;
         free->size = blk->size - size - HDR_SIZE;
+        free->prev = blk;
+
+        if(blk->next != NULL) {
+            blk->next->prev = free;
+        }
+
         free->next = blk->next;
         free->next->prev = free;
-        free->prev = blk;
         blk->next = free;
+        blk->size = size;
+
         if(first_free_block > free) 
         {
             first_free_block = free;
@@ -143,7 +161,7 @@ void *hrealloc(void *ptr, size_t size)
 __attribute__ ((noinline)) 
 size_t hmem_free(void) {
     size_t free = 0;
-    __hb_heap_hdr_t *hdr = (__hb_heap_hdr_t*)HB_HEAP_ADDR;
+    __hb_heap_hdr_t *hdr = first_free_block;
     while(hdr != NULL) {
         if(hdr->free) {
             free += hdr->size;

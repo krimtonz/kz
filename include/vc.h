@@ -1,7 +1,7 @@
 #ifndef _VC_H
 #define _VC_H
 
-#define VC_REGS 0xA8470000
+#define VC_REGS 0xA8C70000
 
 /**
  * @brief Provides a mechanism for force cleaning calls

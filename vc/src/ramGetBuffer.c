@@ -18,7 +18,7 @@ bool kz_ramGetBuffer(gClassRAM_t *ram, void **buffer, int addr, int *len) {
     size_t dram_size = ram->ram_size;
     addr &= ~0xF0000000;
 
-    if(addr >= 0x8060000 && addr <= 0x8460000) {
+    if(addr >= 0x8060000 && addr <= 0x8C60000) {
         *buffer = hb_heap_obj->heap_ptr + (addr - 0x8060000);
         return true;
     }

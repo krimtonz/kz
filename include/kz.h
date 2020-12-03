@@ -34,7 +34,7 @@
 #define KZ_LOG_MAX 10
 #endif
 
-#define STATE_MAX 3
+#define STATE_MAX 20
 
 enum cheats {
     /* 0x00 */ CHEAT_STICKS,

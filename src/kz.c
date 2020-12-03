@@ -342,7 +342,7 @@ static void kz_main(void) {
     if(kz.draw_camera) {
         camera_draw();
     }
-
+    
     gfx_finish();
 }
 

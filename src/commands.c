@@ -85,6 +85,10 @@ void command_save_state(){
 #else
     state = malloc(0x80000);
 #endif
+    if(state == NULL) {
+        kz_log("could not alloc state %d", kz.state_slot);
+        return;
+    }
     size_t size = save_state(state);
 #ifdef WIIVC
     kz_state_hdr_t kz_state;

@@ -45,7 +45,7 @@ static bool sh(void *callback, uint32_t addr, uint16_t *src) {
 }
 
 static bool sw(void *callback, uint32_t addr, uint32_t *src) {
-    addr -= 0x108e0000;
+    addr -= 0x118e0000;
 
     if(addr == 0x00) {
         vc_dev->func_to_clean = *src;
@@ -98,7 +98,7 @@ bool init_vc_dev(void){
         return false;
     }
 
-    if(!cpuMapObject(gSystem->cpu, vc_dev, 0x8470000, 0x8480000, 0)){
+    if(!cpuMapObject(gSystem->cpu, vc_dev, 0x8C70000, 0x8C80000, 0)){
         return false;
     }
 
