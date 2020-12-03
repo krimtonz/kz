@@ -52,23 +52,34 @@ void command_next_state(void) {
 }
 
 void command_load_state(){
-    if(kz.states[kz.state_slot] != NULL){
+    if(!zu_is_ingame()) {
+        kz_log("cannot load state here");
+        return;
+    }
+
+    if(kz.states[kz.state_slot] != NULL) {
         load_state(kz.states[kz.state_slot]);
         kz_log("loaded state %d", kz.state_slot);
-    }else{
+    } else {
         kz_log("no state");
     }
 }
 
 void command_save_state(){
+    if(!zu_is_ingame()) {
+        kz_log("cannot save here");
+        return;
+    }
+
     void *state = kz.states[kz.state_slot];
-    if(state){
+    if(state != NULL) {
 #ifdef WIIVC
         hfree(state);
 #else
         free(state);
 #endif
     }
+
 #ifdef WIIVC
     state = halloc(0x80000); // 512k to start
 #else

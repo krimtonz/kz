@@ -7,6 +7,7 @@ void *halloc(size_t size);
 void hfree(void *ptr);
 void *hrealloc(void *ptr, size_t size);
 void *hmemcpy(void *dst, void *src, size_t size);
+size_t hmem_free(void);
 
 #define gDisplayListDataHB(pgdl,d)      (*(Gfx**)(pgdl)-=(sizeof(d)+            \
                                        sizeof(Gfx)-1)/sizeof(Gfx),            \

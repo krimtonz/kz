@@ -150,16 +150,24 @@ struct recomp_ctxt_s {
 };
 
 typedef struct {
+    char    unk_0x00[4];
+    char   *dram_ptr;
+    size_t  dram_size;
+} n64_ram_t;
+
+typedef struct{
+    char        unk_0x00[0x28];
+    n64_cpu_t  *cpu;
+    void       *pif;
+    n64_ram_t  *ram;
+} gClassSystem_t;
+
+typedef struct {
     const char *name;
     size_t size;
     int unk_08;
     bool (*event_handler)(void *heap, int event, void *arg);
 } class_type_t;
-
-typedef struct{
-    char        unk_0x00[0x28];
-    n64_cpu_t  *cpu;
-} gClassSystem_t;
 
 bool    kz_treeSearchNode(func_tree_node_t *node, int n64_addr, func_tree_node_t **found_node);
 bool    kz_cpuTreeTake  (func_tree_node_t **out_node, int *out_pos, size_t size);
@@ -168,19 +176,21 @@ bool    kz_treeBalance  (recomp_ctxt_t *ctx);
 #define hb_init     ((bool (*)(void**, int)) 0x90000800)
 
 #define vc_extern extern __attribute__((section(".data")))
-vc_extern bool  xlHeapTake      (void **dst, int size);
-vc_extern bool  cpuTreeTake     (func_tree_node_t **out_node, int *out_pos, size_t size);
-vc_extern bool  treeAdjustRoot  (n64_cpu_t *cpu, int n64_start, int n64_end);
-vc_extern bool  treeInsertNode  (func_tree_node_t **start, int n64_start, int n64_end, func_tree_node_t **new_node);
-vc_extern bool  ramSetSize      (void **dst, int size);
-vc_extern bool  xlObjectMake    (void **obj, void *parent, class_type_t *class);
-vc_extern bool  cpuMapObject    (n64_cpu_t *cpu, void *dev, uint32_t addr_start, uint32_t addr_end, uint32_t arg4);
-vc_extern bool  cpuSetDevicePut (n64_cpu_t *cpu, cpu_dev_t *dev, void *sb, void *sh, void *sw, void *sd);
-vc_extern bool  cpuSetDeviceGet (n64_cpu_t *cpu, cpu_dev_t *dev, void *lb, void *lh, void *lw, void *ld);
-vc_extern bool  treeCallerCheck (n64_cpu_t *cpu, func_tree_node_t *node, uint32_t arg2, uint32_t n64_start, uint32_t n64_end);
+vc_extern bool  xlHeapTake          (void **dst, int size);
+vc_extern bool  cpuTreeTake         (func_tree_node_t **out_node, int *out_pos, size_t size);
+vc_extern bool  treeAdjustRoot      (n64_cpu_t *cpu, int n64_start, int n64_end);
+vc_extern bool  treeInsertNode      (func_tree_node_t **start, int n64_start, int n64_end, func_tree_node_t **new_node);
+vc_extern bool  ramSetSize          (void **dst, int size);
+vc_extern bool  xlObjectMake        (void **obj, void *parent, class_type_t *class);
+vc_extern bool  cpuMapObject        (n64_cpu_t *cpu, void *dev, uint32_t addr_start, uint32_t addr_end, uint32_t arg4);
+vc_extern bool  cpuSetDevicePut     (n64_cpu_t *cpu, cpu_dev_t *dev, void *sb, void *sh, void *sw, void *sd);
+vc_extern bool  cpuSetDeviceGet     (n64_cpu_t *cpu, cpu_dev_t *dev, void *lb, void *lh, void *lw, void *ld);
+vc_extern bool  treeCallerCheck     (n64_cpu_t *cpu, func_tree_node_t *node, uint32_t arg2, uint32_t n64_start, uint32_t n64_end);
+vc_extern bool  xlHeapGetFreeArena1 (int *free);
+vc_extern bool  xlHeapGetFreeArena2 (int *free);
 vc_extern gClassSystem_t *gSystem;
 
-extern func_tree_node_t     kz_tree[];
+extern func_tree_node_t    *kz_tree;
 extern int                  kz_tree_status[];
 extern func_tree_node_t    *kz_tree_root;
 

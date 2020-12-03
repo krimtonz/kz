@@ -2,8 +2,10 @@
 #include "vc.h"
 #include "vc_dev.h"
 
-func_tree_node_t kz_tree[0x40] = {0};
-int kz_tree_status[2] = {0};
+#define NUM_TREE_NODES 0x80
+
+func_tree_node_t *kz_tree = NULL;
+int kz_tree_status[NUM_TREE_NODES / 32] = {0};
 func_tree_node_t *kz_tree_root = NULL;
 
 extern __attribute__((section(".bss"))) void *__bss_end;
@@ -63,6 +65,10 @@ ENTRY bool _start(void **dest, int size) {
     }
 
     if(!init_vc_dev()) {
+        return false;
+    }
+
+    if(!xlHeapTake((void**)&kz_tree, NUM_TREE_NODES * sizeof(*kz_tree))) {
         return false;
     }
 

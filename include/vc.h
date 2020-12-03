@@ -18,4 +18,14 @@
 #define FORCE_CLEAN(f) (void)0
 #endif
 
+#ifdef WIIVC
+#define VC_HEAP_STATS(p)                                        \
+    do {                                                        \
+        volatile void **t = (volatile void **)(VC_REGS + 4);    \
+        *t = p;                                                 \
+    } while(0)
+#else
+#define VC_HEAP_STATS(p) (void)0
+#endif
+
 #endif

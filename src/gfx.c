@@ -162,8 +162,8 @@ static void rdp_mode_replace(enum rdp_mode mode, uint64_t val){
 
 void gfx_init(){
 #ifdef WIIVC
-    gfx_disp = (Gfx*)halloc(GFX_SIZE * sizeof(*gfx_disp));
-    gfx_disp_work = (Gfx*)halloc(GFX_SIZE * sizeof(*gfx_disp_work));
+    gfx_disp = (Gfx*)halloc(GFX_SIZE);
+    gfx_disp_work = (Gfx*)halloc(GFX_SIZE);
 #else
     gfx_disp = (Gfx*)malloc(GFX_SIZE);
     gfx_disp_work = (Gfx*)malloc(GFX_SIZE);

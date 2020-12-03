@@ -140,6 +140,19 @@ void *hrealloc(void *ptr, size_t size)
     return new_blk;
 }
 
+__attribute__ ((noinline)) 
+size_t hmem_free(void) {
+    size_t free = 0;
+    __hb_heap_hdr_t *hdr = (__hb_heap_hdr_t*)HB_HEAP_ADDR;
+    while(hdr != NULL) {
+        if(hdr->free) {
+            free += hdr->size;
+        }
+        hdr = hdr->next;
+    }
+    return free;
+}
+
 void *hmemcpy(void *dst, void *src, size_t size)
 {
     char *d = (char*)MIPS_KSEG0_TO_KSEG1(dst);

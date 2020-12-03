@@ -3,6 +3,7 @@
 
 typedef struct {
     uint32_t func_to_clean;
+    uint32_t heap_stats; 
 } vc_dev_t;
 
 static vc_dev_t *vc_dev = NULL;
@@ -16,6 +17,25 @@ static class_type_t vc_dev_class = {
     vc_dev_event
 };
 
+static bool force_clean(void) {
+    func_tree_node_t *node = NULL;
+    if(!kz_treeSearchNode(gSystem->cpu->recomp_ctx->code_tree_root, vc_dev->func_to_clean, &node) &&
+        !kz_treeSearchNode(gSystem->cpu->recomp_ctx->other_tree_root, vc_dev->func_to_clean, &node) &&
+        !kz_treeSearchNode(kz_tree_root, vc_dev->func_to_clean, &node)) {
+
+        return false;
+    }
+
+    treeCallerCheck(gSystem->cpu, node, 1, 0x80000000, 0x80800000);
+}
+
+static void heap_stats(void) {
+    int *free = (int*)(gSystem->ram->dram_ptr + vc_dev->heap_stats);
+
+    xlHeapGetFreeArena1(&free[0]);
+    xlHeapGetFreeArena2(&free[1]);
+}
+
 static bool sb(void *callback, uint32_t addr, uint8_t *src) {
     return false;
 }
@@ -26,18 +46,14 @@ static bool sh(void *callback, uint32_t addr, uint16_t *src) {
 
 static bool sw(void *callback, uint32_t addr, uint32_t *src) {
     addr -= 0x108e0000;
-    vc_dev->func_to_clean = *src;
 
-    func_tree_node_t *node = NULL;
-    if(!kz_treeSearchNode(gSystem->cpu->recomp_ctx->code_tree_root, vc_dev->func_to_clean, &node)) {
-        if(!kz_treeSearchNode(gSystem->cpu->recomp_ctx->other_tree_root, vc_dev->func_to_clean, &node)) {
-            if(!kz_treeSearchNode(kz_tree_root, vc_dev->func_to_clean, &node)) {
-                return false;
-            }
-        }
+    if(addr == 0x00) {
+        vc_dev->func_to_clean = *src;
+        return force_clean();
+    } else if(addr == 0x04) {
+        vc_dev->heap_stats = *src & ~0xFC000000;
+        heap_stats();
     }
-
-    treeCallerCheck(gSystem->cpu, node, 1, 0x80000000, 0x80800000);
 
     return true;
 }
