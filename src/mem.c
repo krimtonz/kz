@@ -13,6 +13,7 @@
 #define HEAP_ALIGN(s) (((s) + _Alignof(max_align_t) - 1) & ~(_Alignof(max_align_t) - 1))
 #define HDR_SIZE (HEAP_ALIGN(sizeof(struct heap_hdr_s)))
 #define HEAP_CNT (sizeof(heap_heads) / sizeof(*heap_heads))
+#define NOINLINE __attribute__ ((noinline)) 
 
 extern char end;
 void *sbrk(int size);
@@ -70,136 +71,128 @@ static void heap_init(void) {
     heap_initialized = 1;
 }
 
-static heap_hdr_t *find_chunk(size_t size) {
-    size += HDR_SIZE;
-    for(int i = 0; i < HEAP_CNT; i++) {
-        heap_hdr_t *hdr = heap_first_free[i];
-        while(hdr != NULL) {
-            if(hdr->free && hdr->size >= size) {
-                hdr->heap = i;
-                return hdr;
-            }
-            hdr = hdr->next;
-        }
-    }
-    return NULL;
-}
-
-void *malloc(size_t size) {
+NOINLINE void *malloc(size_t size) {
     if(!heap_initialized) {
         heap_init();
     }
 
-    size = HEAP_ALIGN(size);
-    heap_hdr_t *blk = find_chunk(size);
-
-    if(blk == NULL) {
+    if(size == 0) {
         return NULL;
     }
 
-    // sbrk enough memory for the block, header, and the next header.
-    if(blk->heap == (HEAP_CNT - 1) && (void*)blk >= sbrk(0)) {
-        sbrk(size + HDR_SIZE + HDR_SIZE);
-    }
+    size = HEAP_ALIGN(size);
 
-    heap_hdr_t *next_free;
-    if((int)(blk->size - size) >= (int)(HDR_SIZE + HEAP_ALIGN(1))) {
-        next_free = (heap_hdr_t*)((char*)blk + HDR_SIZE + size);
-        next_free->free = 1;
-        next_free->heap = blk->heap;
-        next_free->size = blk->size - size - HDR_SIZE;
-        next_free->prev = blk;
-        if(blk->next != NULL) {
-            blk->next->prev = next_free;
-        }
-        next_free->next = blk->next;
-        blk->next = next_free;
-        blk->size = size;
-    }
+    heap_hdr_t *blk, *next_free;
 
-    blk->free = 0;
-    if(blk == heap_first_free[blk->heap]) {
-        next_free = blk->next;
-        while(next_free != NULL) {
-            if(next_free->free) {
-                heap_first_free[blk->heap] = next_free;
-                break;
+    for(int i = 0; i < HEAP_CNT; i++) {
+        for(blk = heap_first_free[i]; blk != NULL; blk = blk->next) {
+            if(blk->free && blk->size >= size) {
+                // using sbrk
+                if(blk->heap == HEAP_CNT - 1) {
+                    if((void*)blk >= sbrk(0)) {
+                        sbrk(size + HDR_SIZE + HDR_SIZE);
+                    }
+                }
+
+                if(blk->size - size >= HDR_SIZE + HEAP_ALIGN(1)) {
+                    next_free = (heap_hdr_t*)((char*)blk + size + HDR_SIZE);
+                    next_free->free = 1;
+                    next_free->size = blk->size - size - HDR_SIZE;
+                    next_free->next = blk->next;
+                    next_free->prev = blk;
+                    next_free->heap = blk->heap;
+                    if(blk->next != NULL) {
+                        blk->next->prev = next_free;
+                    }
+                    blk->next = next_free;
+                    blk->size = size;
+                }
+
+                blk->free = 0;
+
+                if(blk == heap_first_free[i]) {
+                    for(next_free = blk->next; next_free != NULL; next_free = next_free->next) {
+                        if(next_free->free) {
+                            break;
+                        }
+                    }
+                    heap_first_free[i] = next_free;
+                }
+                return (char*)blk + HDR_SIZE;
             }
-            next_free = next_free->next;
         }
     }
 
-    return (char*)blk + HDR_SIZE;
+    return NULL;
 }
 
-void free(void *ptr) {
+NOINLINE void free(void *ptr) {
     if(ptr == NULL) {
         return;
     }
 
-    heap_hdr_t *hdr = (heap_hdr_t*)((char*)ptr - HDR_SIZE);
-    if(hdr->next != NULL && hdr->next->free) {
-        hdr->size = ((char*)hdr->next + hdr->next->size) - (char*)hdr;
-        if(hdr->next->next != NULL) {
-            hdr->next->next->prev = hdr;
+    heap_hdr_t *blk = (heap_hdr_t*)((char*)ptr - HDR_SIZE);
+    if(blk->next != NULL && blk->next->free) {
+        blk->size += blk->next->size + HDR_SIZE;
+        if(blk->next->next != NULL) {
+            blk->next->next->prev = blk;
         }
-        hdr->next = hdr->next->next;
+        blk->next = blk->next->next;
     }
 
-    if(hdr->prev != NULL && hdr->prev->free) {
-        hdr->prev->size = ((char*)hdr + hdr->size) - (char*)hdr->prev;
-        hdr->prev->next = hdr->next;
-        if(hdr->next != NULL) {
-            hdr->next->prev = hdr->prev;
+    if(blk->prev != NULL && blk->prev->free) {
+        blk->prev->size += blk->size + HDR_SIZE;
+        if(blk->next != NULL) {
+            blk->prev->next = blk->next;
+            blk->next->prev = blk->prev;
         }
-        hdr = hdr->prev;
-    } else {
-        hdr->free = 1;
+        blk->prev->next = blk->next;
+        blk = blk->prev;
     }
 
-    if(heap_first_free[hdr->heap] > hdr) {
-        heap_first_free[hdr->heap] = hdr;
+    blk->free = 1;
+
+    if(blk < heap_first_free[blk->heap]) {
+        heap_first_free[blk->heap] = blk;
     }
 }
 
-void *realloc(void *ptr, size_t size) {
-    if(size == 0 && ptr == NULL){
-        return NULL;
+NOINLINE void *realloc(void *ptr, size_t size) {
+    if(ptr == NULL) {
+        return malloc(size);
     }
-    
+
     if(size == 0) {
         free(ptr);
         return NULL;
     }
 
-    if(ptr == NULL) {
-        return malloc(size);
-    }
-
-    heap_hdr_t *hdr = (heap_hdr_t*)((char*)ptr - HDR_SIZE);
-    if(hdr->free) {
-        return NULL;
-    }
-
     size = HEAP_ALIGN(size);
 
-    // reallocing the same size.
-    if(hdr->size == size) {
-        return ptr;
-    }
+    heap_hdr_t *blk, *next_free;
 
-    // requesting a smaller size, and we can fragment the existing block.
-    if((int)(hdr->size - size) >= (int)(HDR_SIZE + HEAP_ALIGN(1))) {
-        heap_hdr_t *free = (heap_hdr_t*)((char*)hdr + HDR_SIZE + size);
-        free->free = 1;
-        free->size = hdr->size - size - HDR_SIZE;
-        free->next = hdr->next;
-        free->next->prev = free;
-        free->prev = hdr;
-        hdr->next = free;
-        if(heap_first_free[free->heap] > free) {
-            heap_first_free[free->heap] = free;
+    blk = (heap_hdr_t*)((char*)ptr - HDR_SIZE);
+    if(blk->size > size && blk->size - size >= HDR_SIZE + HEAP_ALIGN(1)) {
+        next_free = (heap_hdr_t*)((char*)blk + size);
+        next_free->free = 1;
+        next_free->size = blk->size - size - HDR_SIZE;
+        next_free->prev = blk;
+        next_free->next = blk->next;
+        next_free->heap = blk->heap;
+        if(blk->next != NULL) {
+            blk->next->prev = next_free;
         }
+        blk->next = next_free;
+        blk->size = size;
+        if(heap_first_free[blk->heap] == blk) {
+            for(next_free = blk->next; next_free != NULL; next_free = next_free->next) {
+                if(next_free->free) {
+                    break;
+                }
+            }
+            heap_first_free[blk->heap] = next_free;
+        }
+
         return ptr;
     }
 
@@ -208,9 +201,9 @@ void *realloc(void *ptr, size_t size) {
         return NULL;
     }
 
-    memcpy(new_blk, ptr, hdr->size);
-
+    memcpy(new_blk, ptr, blk->size);
     free(ptr);
+
     return new_blk;
 }
 

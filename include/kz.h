@@ -34,7 +34,7 @@
 #define KZ_LOG_MAX 10
 #endif
 
-#define STATE_MAX 20
+#define STATE_MAX 10
 
 enum cheats {
     /* 0x00 */ CHEAT_STICKS,
@@ -68,8 +68,9 @@ typedef struct {
 } position_t;
 
 struct log {
-    char   *mesg;
-    int     time;
+    char        mesg[256];
+    uint16_t    time;
+    int         active;
 };
 
 typedef struct {

@@ -6,10 +6,11 @@
 #define HB_HEAP_SIZE 0x00C00000 // 12 MB
 #define HB_ALIGN(s) (((s) + _Alignof(max_align_t) - 1) & ~(_Alignof(max_align_t) - 1))
 #define HDR_SIZE (HB_ALIGN(sizeof(struct __hb_heap_hdr_s)))
+#define NOINLINE __attribute__ ((noinline)) 
 
 typedef struct __hb_heap_hdr_s{
     int free;
-    int size;
+    size_t size;
     struct __hb_heap_hdr_s *prev;
     struct __hb_heap_hdr_s *next;
 } __hb_heap_hdr_t;
@@ -27,139 +28,136 @@ static void hb_heap_init(){
     hb_heap_initalized = 1;
 }
 
-void *halloc(size_t size){
-    if(!hb_heap_initalized){
+NOINLINE void *halloc(size_t size) {
+    if(!hb_heap_initalized) {
         hb_heap_init();
     }
-    __hb_heap_hdr_t *blk_ptr = first_free_block;
-    __hb_heap_hdr_t *next_free;
+
+    if(size == 0) {
+        return NULL;
+    }
 
     size = HB_ALIGN(size);
 
-    while(blk_ptr != NULL) {
-        if(blk_ptr->free && blk_ptr->size >= size) {
-            // Can this block be fragmented? 
-            if(blk_ptr->size - size >= HDR_SIZE + HB_ALIGN(1)) {
-                next_free = (__hb_heap_hdr_t*)((char*)blk_ptr + HDR_SIZE + size);
-                next_free->free = 1;
-                next_free->size = blk_ptr->size - size - HDR_SIZE;
-                next_free->prev = blk_ptr;
-                
-                if(blk_ptr->next != NULL) {
-                    blk_ptr->next->prev = next_free;
-                }
+    __hb_heap_hdr_t *blk, *next_free;
 
-                next_free->next = blk_ptr->next;
-                blk_ptr->next = next_free;
-                blk_ptr->size = size;
+    for(blk = first_free_block; blk != NULL; blk = blk->next) {
+        if(blk->free && blk->size >= size) {
+            // Enough space to allocate at least 1 aligned unit.
+            if(blk->size - size >= HDR_SIZE + HB_ALIGN(1)) {
+                next_free = (__hb_heap_hdr_t*)((char*)blk + size + HDR_SIZE);
+                next_free->free = 1;
+                next_free->size = blk->size - size - HDR_SIZE;
+                next_free->next = blk->next;
+                next_free->prev = blk;
+                if(blk->next != NULL) {
+                    blk->next->prev = next_free;
+                }
+                blk->next = next_free;
+                blk->size = size;
             }
 
-            blk_ptr->free = 0;
+            blk->free = 0;
 
-            if(blk_ptr == first_free_block) {
-                next_free = blk_ptr->next;
-
-                while(next_free != NULL) {
-                    if(next_free->free){
-                        first_free_block = next_free;
+            if(blk == first_free_block) {
+                for(next_free = blk->next; next_free != NULL; next_free = next_free->next) {
+                    if(next_free->free) {
                         break;
                     }
-                    next_free = next_free->next;
                 }
+                first_free_block = next_free;
             }
 
-            return (char*)blk_ptr + HDR_SIZE;
+            return (void*)((char*)blk + HDR_SIZE);
         }
-
-        blk_ptr = blk_ptr->next;
     }
 
+    // couldn't allocate a block.
     return NULL;
 }
 
-void hfree(void *ptr)
-{
+NOINLINE void hfree(void *ptr) {
+    if(ptr == NULL) {
+        return;
+    }
+
     __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
-    if(blk->next != NULL && blk->next->free){
+    if(blk->next != NULL && blk->next->free) {
+        // combine the blocks into a single larger block.
         blk->size += blk->next->size + HDR_SIZE;
-        if(blk->next->next != NULL){
+        if(blk->next->next != NULL) {
             blk->next->next->prev = blk;
         }
         blk->next = blk->next->next;
     }
 
-    if(blk->prev != NULL && blk->prev->free){
+    if(blk->prev != NULL && blk->prev->free) {
         blk->prev->size += blk->size + HDR_SIZE;
-        blk->prev->next = blk->next;
-        if(blk->next != NULL){
+        if(blk->next != NULL) {
+            blk->prev->next = blk->next;
             blk->next->prev = blk->prev;
         }
+        blk->prev->next = blk->next;
         blk = blk->prev;
-    } else {
-        blk->free = 1;
     }
 
-    if(first_free_block > blk){
+    blk->free = 1;
+
+    if(blk < first_free_block) {
         first_free_block = blk;
     }
 }
 
-__attribute__ ((noinline)) 
-void *hrealloc(void *ptr, size_t size)
-{
-    __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
+NOINLINE void *hrealloc(void *ptr, size_t size) {
+    if(ptr == NULL) {
+        return halloc(size);
+    }
 
-    if(blk->free)
-    {
+    if(size == 0) {
+        hfree(ptr);
         return NULL;
     }
 
     size = HB_ALIGN(size);
 
-    if(blk->size == size)
-    {
-        return ptr;
-    }
-
-    if(blk->size - size >= HDR_SIZE + HB_ALIGN(1)) // we have enough room to fragment this block.
-    {
-        __hb_heap_hdr_t *free = (__hb_heap_hdr_t*)((char*)blk + HDR_SIZE + size);
-        free->free = 1;
-        free->size = blk->size - size - HDR_SIZE;
-        free->prev = blk;
-
+    __hb_heap_hdr_t *blk, *next_free;
+    
+    blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
+    if(blk->size > size && blk->size - size >= HDR_SIZE + HB_ALIGN(1)) {
+        next_free = (__hb_heap_hdr_t*)((char*)blk + size);
+        next_free->free = 1;
+        next_free->size = blk->size - size - HDR_SIZE;
+        next_free->prev = blk;
+        next_free->next = blk->next;
         if(blk->next != NULL) {
-            blk->next->prev = free;
+            blk->next->prev = next_free;
         }
-
-        free->next = blk->next;
-        free->next->prev = free;
-        blk->next = free;
+        blk->next = next_free;
         blk->size = size;
-
-        if(first_free_block > free) 
-        {
-            first_free_block = free;
+        if(first_free_block == blk) {
+            for(next_free = blk->next; next_free != NULL; next_free = next_free->next) {
+                if(next_free->free) {
+                    break;
+                }
+            }
+            first_free_block = next_free;
         }
+
         return ptr;
     }
 
-    // We're expanding this block, so find a new block and free the old block.
     void *new_blk = halloc(size);
-    if(new_blk == NULL)
-    {
+    if(new_blk == NULL) {
         return NULL;
     }
 
     hmemcpy(new_blk, ptr, blk->size);
-
     hfree(ptr);
 
     return new_blk;
 }
 
-__attribute__ ((noinline)) 
-size_t hmem_free(void) {
+NOINLINE size_t hmem_free(void) {
     size_t free = 0;
     __hb_heap_hdr_t *hdr = first_free_block;
     while(hdr != NULL) {
@@ -171,7 +169,7 @@ size_t hmem_free(void) {
     return free;
 }
 
-void *hmemcpy(void *dst, void *src, size_t size)
+NOINLINE void *hmemcpy(void *dst, void *src, size_t size)
 {
     char *d = (char*)MIPS_KSEG0_TO_KSEG1(dst);
     const char *p = (const char*)MIPS_KSEG0_TO_KSEG1(src);

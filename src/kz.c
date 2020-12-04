@@ -298,21 +298,20 @@ static void kz_main(void) {
         gfx_printf(kz.main_menu.x_offset, Z2_SCREEN_HEIGHT - 40, "%s", kz.tooltip);
     }
 
-    for(int i = KZ_LOG_MAX - 1;i >= 0;i--) {
+    for(int i = KZ_LOG_MAX - 1; i >= 0; i--) {
         const int fade_start = 20;
         const int fade_len = 20;
         struct log *log_entry = &kz.log[i];
         uint8_t alpha;
         
-        if(!log_entry->mesg){
+        if(!log_entry->active){
             continue;
         }
 
         log_entry->time++;
         
         if(log_entry->time > (fade_start + fade_len)) {
-            free(log_entry->mesg);
-            log_entry->mesg = NULL;
+            log_entry->active = 0;
             continue;
         } else if(log_entry->time > fade_start) {
             alpha = 0xFF - (log_entry->time - fade_start) * 0xFF / fade_len;
@@ -440,31 +439,21 @@ static void init(void) {
     kz.ready = 1;
 }
 
-void kz_log(const char *format, ...){
+void kz_log(const char *format, ...) {
     struct log *log_entry = &kz.log[KZ_LOG_MAX - 1];
-    if(log_entry->mesg != NULL) {
-        free(log_entry->mesg);
-    }
     
     for(int i = KZ_LOG_MAX - 1; i > 0; i--) {
         kz.log[i] = kz.log[i - 1];
     }
     
+    log_entry = &kz.log[0];
+
     va_list va;
     va_start(va, format);
-    int l = vsnprintf(NULL, 0, format, va);
-    va_end(va);
-    
-    log_entry = &kz.log[0];
-    log_entry->mesg = malloc(l + 1);
-    if(log_entry->mesg == NULL) {
-        return;
-    }
-
-    va_start(va, format);
-    vsnprintf(log_entry->mesg, l + 1, format, va);
+    vsnprintf(log_entry->mesg, 255, format, va);
     va_end(va);
 
+    log_entry->active = 1;
     log_entry->time = 0;
 }
 
