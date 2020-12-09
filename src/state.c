@@ -511,11 +511,28 @@ void load_state(void *state){
         st_read(&p, dlist->buf, (dlist->p - dlist->buf) * len);
         st_read(&p, dlist->d, (end - dlist->d) * len);
     }
+
+    st_read(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x140], 0xA8);
+    st_read(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x2A8], 0x60);
+
     uint32_t frame_cnt_1;
     uint8_t frame_cnt_2;
     st_read(&p, &frame_cnt_1, sizeof(frame_cnt_1));
     st_read(&p, &frame_cnt_2, sizeof(frame_cnt_2));
     zu_gfx_reloc(frame_cnt_1 & 1, frame_cnt_2 & 1);
+
+    static Gfx seg_gfx[17];
+    for(int i = 0; i < 16; i++) {
+        seg_gfx[i] = gsSPSegment(i, z2_segment.segments[i]);
+    }
+    seg_gfx[16] = gsSPEndDisplayList();
+
+    memcpy(z2_disp + 0x148, seg_gfx, sizeof(seg_gfx));
+    memcpy(z2_disp + 0x148 + Z2_DISP_SIZE, seg_gfx, sizeof(seg_gfx));
+
+    gSPDisplayList(z2_game.common.gfx->poly_opa.p++, seg_gfx);
+    gSPDisplayList(z2_game.common.gfx->poly_xlu.p++, seg_gfx);
+    gSPDisplayList(z2_game.common.gfx->overlay.p++, seg_gfx);
 
     for(int i = 0; i < 4; i++) {
         struct seq_info *info = &seq_info[i];
@@ -769,6 +786,10 @@ size_t save_state(void *state){
         st_write(&p, dlist->buf, (dlist->p - dlist->buf) * len);
         st_write(&p, dlist->d, (end - dlist->d) * len);
     }
+    
+    st_write(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x140], 0xA8);
+    st_write(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x2A8], 0x60);
+
     st_write(&p, &gfx->frame_cnt_1, sizeof(gfx->frame_cnt_1));
     st_write(&p, &gfx->frame_cnt_2, sizeof(gfx->frame_cnt_2));
 

@@ -132,12 +132,12 @@ void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx)
                 default: continue;
             }
 
-            if(p->lo >=src_gfx && p->lo<src_gfx + Z2_DISP_SIZE)
+            if(p->lo >=src_gfx && p->lo < src_gfx + Z2_DISP_SIZE)
             {
                 p->lo += dst_gfx - src_gfx;
             }
 
-            if(p->lo >=src_cimg && p->lo<src_cimg + Z2_CIMG_SIZE)
+            if(p->lo >= src_cimg && p->lo < src_cimg + Z2_CIMG_SIZE)
             {
                 p->lo = dst_cimg;
             }

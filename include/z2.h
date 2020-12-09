@@ -1638,6 +1638,7 @@ z2_extern uint32_t                  z2_seq_cmd_buf[0x100];
 z2_extern z2_seq_ctl_t              z2_seq_ctl[4];
 z2_extern z2_audio_ctxt_t           z2_audio_ctxt;
 z2_extern char                      z2_disp[];
+z2_extern Gfx                       z2_seg_disp[18];
 z2_extern z2_ctxt_t                 z2_ctxt;
 z2_extern z2_game_t                 z2_game;
 z2_extern z2_link_t                 z2_link;
