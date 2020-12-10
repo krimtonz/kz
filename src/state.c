@@ -498,18 +498,24 @@ void load_state(void *state){
     zu_disp_ptr_t disp_ptr;
     st_read(&p, &disp_ptr, sizeof(disp_ptr));
     zu_disp_ptr_load(&disp_ptr);
-    z2_disp_buf_t *z2_dlist[4] = {
+    z2_disp_buf_t *z2_dlist[5] = {
         &gfx->work,
         &gfx->poly_opa,
         &gfx->poly_xlu,
         &gfx->overlay,
+        &gfx->unk_0x1B8_buf,
     };
-    for(int i = 0;i < 4;i++){
+    for(int i = 0;i < 5;i++){
         z2_disp_buf_t *dlist = z2_dlist[i];
         size_t len = sizeof(Gfx);
         Gfx *end = dlist->buf + dlist->size / len;
         st_read(&p, dlist->buf, (dlist->p - dlist->buf) * len);
         st_read(&p, dlist->d, (end - dlist->d) * len);
+    }
+    
+    if(z2_game.common.gfx->frame_cnt_1 & 1 == 0) {
+        z2_game.common.gfx->frame_cnt_1++;
+        z2_game.common.gfx->frame_cnt_2++;
     }
 
     st_read(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x140], 0xA8);
@@ -773,20 +779,21 @@ size_t save_state(void *state){
     zu_disp_ptr_t disp_ptr;
     zu_disp_ptr_save(&disp_ptr);
     st_write(&p, &disp_ptr, sizeof(disp_ptr));
-    z2_disp_buf_t *z2_dlist[4] = {
+    z2_disp_buf_t *z2_dlist[5] = {
         &gfx->work,
         &gfx->poly_opa,
         &gfx->poly_xlu,
-        &gfx->overlay
+        &gfx->overlay,
+        &gfx->unk_0x1B8_buf,
     };
-    for(int i = 0;i < 4;i++){
+    for(int i = 0;i < 5;i++){
         z2_disp_buf_t *dlist = z2_dlist[i];
         size_t len = sizeof(Gfx);
         Gfx *end = dlist->buf + dlist->size / len;
         st_write(&p, dlist->buf, (dlist->p - dlist->buf) * len);
         st_write(&p, dlist->d, (end - dlist->d) * len);
     }
-    
+        
     st_write(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x140], 0xA8);
     st_write(&p, &z2_disp[((gfx->frame_cnt_1 & 1) * Z2_DISP_SIZE) + 0x2A8], 0x60);
 

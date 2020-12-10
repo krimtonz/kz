@@ -20,7 +20,9 @@ typedef struct
     uint32_t    poly_xlu_d;     /* 0x0014 */
     uint32_t    overlay_p;      /* 0x0018 */
     uint32_t    overlay_d;      /* 0x001C */
-} zu_disp_ptr_t;                /* 0x0020 */
+    uint32_t    unk_1b8_p;      /* 0x0020 */
+    uint32_t    unk_1b8_d;      /* 0x0024 */
+} zu_disp_ptr_t;                /* 0x0028 */
 
 int     zu_is_ingame        (void);
 void    zu_file_load        (uint32_t vrom_addr, void *ram, size_t size);

@@ -60,6 +60,8 @@ void zu_disp_ptr_save(zu_disp_ptr_t *disp_ptr)
     disp_ptr->poly_xlu_d = gfx->poly_xlu.d - gfx->poly_xlu.buf;
     disp_ptr->overlay_p = gfx->overlay.p - gfx->overlay.buf;
     disp_ptr->overlay_d = gfx->overlay.d - gfx->overlay.buf;
+    disp_ptr->unk_1b8_p = gfx->unk_0x1B8_buf.p - gfx->unk_0x1B8_buf.buf;
+    disp_ptr->unk_1b8_d = gfx->unk_0x1B8_buf.d - gfx->unk_0x1B8_buf.buf;
 }
 
 void zu_disp_ptr_load(zu_disp_ptr_t *disp_ptr)
@@ -73,6 +75,8 @@ void zu_disp_ptr_load(zu_disp_ptr_t *disp_ptr)
     gfx->poly_xlu.d = disp_ptr->poly_xlu_d + gfx->poly_xlu.buf;
     gfx->overlay.p = disp_ptr->overlay_p + gfx->overlay.buf;
     gfx->overlay.d = disp_ptr->overlay_d + gfx->overlay.buf;
+    gfx->unk_0x1B8_buf.p = disp_ptr->unk_1b8_p + gfx->unk_0x1B8_buf.buf;
+    gfx->unk_0x1B8_buf.d = disp_ptr->unk_1b8_d + gfx->unk_0x1B8_buf.buf;
 }
 
 void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx)
@@ -91,11 +95,12 @@ void zu_gfx_reloc(int src_disp_idx, int src_cimg_idx)
     primary.buf = (Gfx*)(dst_gfx + 0x02A8);
     primary.p = primary.buf + 12;
     
-    z2_disp_buf_t *new_disp[6] = {
+    z2_disp_buf_t *new_disp[] = {
         &gfx->work,
         &gfx->poly_opa,
         &gfx->poly_xlu,
         &gfx->overlay,
+        &gfx->unk_0x1B8_buf,
         &primary,
         &segment_setup,
     };
