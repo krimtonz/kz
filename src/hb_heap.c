@@ -124,7 +124,7 @@ NOINLINE void *hrealloc(void *ptr, size_t size) {
     
     blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
     if(blk->size > size && blk->size - size >= HDR_SIZE + HB_ALIGN(1)) {
-        next_free = (__hb_heap_hdr_t*)((char*)blk + size);
+        next_free = (__hb_heap_hdr_t*)((char*)blk + size + HDR_SIZE);
         next_free->free = 1;
         next_free->size = blk->size - size - HDR_SIZE;
         next_free->prev = blk;
