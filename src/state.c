@@ -442,8 +442,8 @@ void load_state(void *state){
                     continue;
                 }
                 z2_obj_t *obj = &z2_game.obj_ctx.obj[col->actor->alloc_index];
-                z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(obj);
-                uint32_t offset = (uint32_t)col->col_hdr - (uint32_t)obj;
+                z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(obj->data);
+                uint32_t offset = (uint32_t)col->col_hdr - (uint32_t)obj->data;
                 relocate_col_hdr(0x06000000 | offset);
             }
         }
