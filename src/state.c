@@ -550,6 +550,10 @@ void load_state(void *state){
     for(uint8_t i = 0; i != cmd_cnt; i++) {
         st_read(&p, &z2_seq_cmd_buf[z2_seq_cmd_wr_pos++], sizeof(*z2_seq_cmd_buf));
     }
+
+    st_read(&p, &z2_oca_note_pos, sizeof(z2_oca_note_pos));
+    st_read(&p, &z2_stored_song, sizeof(z2_stored_song));
+    st_read(&p, z2_oca_state, 0x74);
 }
 
 _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end){
@@ -789,6 +793,10 @@ size_t save_state(void *state){
     for(uint8_t i = z2_seq_cmd_rd_pos; i != z2_seq_cmd_wr_pos; i++) {
         st_write(&p, &z2_seq_cmd_buf[i], sizeof(*z2_seq_cmd_buf));
     }
+
+    st_write(&p, &z2_oca_note_pos, sizeof(z2_oca_note_pos));
+    st_write(&p, &z2_stored_song, sizeof(z2_stored_song));
+    st_write(&p, z2_oca_state, 0x74);
 
     return (char*)p - (char*)state;
 }

@@ -1643,6 +1643,9 @@ z2_extern z2_ctxt_t                 z2_ctxt;
 z2_extern z2_game_t                 z2_game;
 z2_extern z2_link_t                 z2_link;
 z2_extern uint32_t                  z2_cs_bars;
+z2_extern uint8_t                   z2_oca_note_pos;
+z2_extern uint8_t                   z2_cur_oca_song[9];
+z2_extern uint8_t                   z2_oca_state[];
 
 // File indcies
 #if Z2_VERSION==NZSE
