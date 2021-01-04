@@ -47,6 +47,7 @@ enum resource {
     R_KZ_ARROWS,
     R_KZ_FILES,
     R_Z2_RUPEE,
+    R_KZ_KZFLEX,
     R_KZ_END
 };
 

@@ -230,6 +230,7 @@ static const char *resource_names[R_KZ_END] = {
     "arrows",
     "files",
     NULL,
+    "kzflex",
 };
 
 static void *resource_load_items(int resource_id){
@@ -309,6 +310,7 @@ static resource_ctor resource_ctors[R_KZ_END] = {
     grc_ctor,
     grc_ctor,
     resource_rupee_ctor,
+    grc_ctor,
 };
 
 gfx_texture *get_item_texture(uint8_t item_id, _Bool release){

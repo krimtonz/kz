@@ -287,6 +287,10 @@ static void kz_main(void) {
             const char *url = MAKESTRING(URL);
             gfx_printf_color(10, Z2_SCREEN_HEIGHT - 32 - kfont->c_height, COLOR_GREEN, name);
             gfx_printf_color(Z2_SCREEN_WIDTH - 10 - (kfont->c_width * strlen(url)), Z2_SCREEN_HEIGHT - 32 - kfont->c_height, COLOR_GREEN, url);
+
+            gfx_draw_sprite(resource_get(R_KZ_KZFLEX), Z2_SCREEN_WIDTH - 61, Z2_SCREEN_HEIGHT - 106, 0, 51, 32);
+            gfx_draw_sprite(resource_get(R_KZ_KZFLEX), Z2_SCREEN_WIDTH - 61, Z2_SCREEN_HEIGHT - 74, 1, 51, 32);
+
             logo_time--;
         }
 
@@ -337,7 +341,8 @@ static void kz_main(void) {
         }
     }
 #endif
-    
+
+
     if(kz.draw_camera) {
         camera_draw();
     }

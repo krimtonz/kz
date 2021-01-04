@@ -43,8 +43,14 @@
   },
   "files.png": {
       "type" : "texture",
-      "name" : "files",
+      "name" : "files", 
       "format" : "rgba16",
       "tile_height" : 10
+  },
+  "kzflex.png": {
+    "type" : "texture",
+    "name" : "kzflex",
+    "format" : "rgba16",
+    "tile_height" : 32
   }
 }
