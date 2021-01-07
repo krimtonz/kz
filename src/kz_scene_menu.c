@@ -113,7 +113,7 @@ static int free_cam_event(event_handler_t *handler, menu_event_t event, void **e
     if(event == MENU_EVENT_ACTIVATE) {
         kz.free_cam_active = !kz.free_cam_active;
         if(kz.free_cam_active) {
-            set_input_mask(BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_C_LEFT | BUTTON_C_RIGHT, 0xFF, 0xFF);
+            set_input_mask(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
         } else {
             set_input_mask(0x0000, 0x00, 0x00);
         }
@@ -127,7 +127,7 @@ static int lock_cam_event(event_handler_t *handler, menu_event_t event, void **e
     if(event == MENU_EVENT_ACTIVATE) {
         kz.free_cam_locked = !kz.free_cam_locked;
         if(!kz.free_cam_locked && kz.free_cam_active) {
-            set_input_mask(BUTTON_C_DOWN | BUTTON_C_UP | BUTTON_C_LEFT | BUTTON_C_RIGHT, 0xFF, 0xFF);
+            set_input_mask(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
         } else {
             set_input_mask(0x0000, 0x00, 0x00);
         }

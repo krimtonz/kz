@@ -23,6 +23,8 @@
 #define BUTTON_Z                0x2000
 #define BUTTON_B                0x4000
 #define BUTTON_A                0x8000
+#define BUTTON_C_BUTTONS        BUTTON_C_RIGHT | BUTTON_C_LEFT | BUTTON_C_DOWN | BUTTON_C_UP
+#define BUTTON_DPAD             BUTTON_D_RIGHT | BUTTON_D_LEFT | BUTTON_D_DOWN | BUTTON_D_UP
 
 #define INPUT_REPEAT            8
 #define BIND_END                6

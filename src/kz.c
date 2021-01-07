@@ -437,7 +437,7 @@ static void init(void) {
     kz.state_slot = 0;
 #endif
     
-    kz.input_mask = 0x0000;
+    kz.input_mask = BUTTON_DPAD;
     kz.stick_x_mask = 0x00;
     kz.stick_y_mask = 0x00;
 
