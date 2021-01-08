@@ -1062,7 +1062,7 @@ typedef struct {
     void       *icon_item_24;                   /* 0x016C */
     void       *icon_item_map;                  /* 0x0170 */
     void       *icon_text;                      /* 0x0174 */
-    void       *unk_text_0x178;                 /* 0x0178 */
+    void       *icon_name_text;                 /* 0x0178 */
     Gfx        *bg_dlist;                       /* 0x017C */
     char        unk_0x180[0x6C];                /* 0x0180 */
     uint16_t    state;                          /* 0x01EC */
@@ -1582,6 +1582,7 @@ z2_extern void          z2_adjust_stick             (z2_input_t *inp);
 z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram, uint32_t size);
 #if Z2_VERSION==NZSE
 z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, size_t size);
+z2_extern void          z2_LoadArchiveFile2         (uint32_t rom, int arg1, void *ram, size_t size);
 #endif
 z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
@@ -1653,6 +1654,9 @@ z2_extern uint8_t                   z2_oca_state[];
 #define z2_icon_item_static             9 /* need to verify */
 #define z2_icon_item_field_static       10
 #define z2_map_name_static              13
+#define z2_pause_assets                 14
+#define z2_item_names                   17
+#define z2_location_names               18
 #define z2_item_icon_archive            19
 #define z2_icon_item_24_static          20
 #define z2_parameter_static             1126

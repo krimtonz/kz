@@ -35,6 +35,7 @@ z2_set_heap                 = 0x80174C4C;
 z2_adjust_stick             = 0x801754E0;
 z2_DecodeArchiveFile        = 0x80178DAC;
 z2_LoadArchiveFile          = 0x80178E7C;
+z2_LoadArchiveFile2         = 0x80178E3C;
 z2_dmaflashtoram            = 0x80185968;
 z2_dmaramtoflash            = 0x80185B1C;
 z2_AfxCmdFloat              = 0x80193858;

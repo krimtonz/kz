@@ -402,21 +402,27 @@ void load_state(void *state){
     if(z2_game.pause_ctx.state != 0){
         /* we need to load pause screen assets */
 #if Z2_VERSION==NZSE
-        size_t size = z2_file_table[z2_item_icon_archive].vrom_end - z2_file_table[z2_item_icon_archive].vrom_start;
-        z2_LoadArchiveFile(z2_file_table[z2_item_icon_archive].vrom_start, z2_game.pause_ctx.icon_item_static, size);
+        z2_LoadArchiveFile(z2_file_table[z2_item_icon_archive].vrom_start, z2_game.pause_ctx.icon_item_static, 0);
+        z2_LoadArchiveFile(z2_file_table[z2_icon_item_24_static].vrom_start, z2_game.pause_ctx.icon_item_24, 0);
 #else
         zu_file_idx_load(z2_icon_item_static, z2_game.pause_ctx.icon_item_static);
+        zu_file_idx_load(z2_icon_item_24_static, z2_game.pause_ctx.icon_item_24);
 #endif
+        uint32_t rom = z2_game.pause_ctx.screen_idx == 1 ? z2_location_names : z2_item_names;
+        
+        z2_LoadArchiveFile2(z2_file_table[rom].vrom_start, z2_game.pause_ctx.selected_item, z2_game.pause_ctx.icon_name_text, 0x400);
+
+        zu_file_idx_load(z2_pause_assets, z2_game.pause_ctx.bg_dlist);
+        zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
+        zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
+
         int rest_offset = z2_file.current_form * 0x72;
-        for(int i = 0;i < 0x65;i++){
+        for(int i = 0; i < Z2_END_MASK; i++){
             if(!z2_restriction_table[rest_offset + i]){
                 gfx_texture_desaturate(zu_segment_find(z2_icon_item_static_table[i]), 0x1000);
             }
         }
 
-        zu_file_idx_load(z2_icon_item_24_static, z2_game.pause_ctx.icon_item_24);
-        zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
-        zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
     }else{
         /* load objects if they are not currently loaded in the same dram address */
         for(int i = 0;i < 35;i++){
