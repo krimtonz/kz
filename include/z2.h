@@ -1659,6 +1659,7 @@ z2_extern uint8_t                   z2_oca_state[];
 #define z2_location_names               18
 #define z2_item_icon_archive            19
 #define z2_icon_item_24_static          20
+#define z2_do_action_static             25
 #define z2_parameter_static             1126
 #define z2_clock_face_days              1127
 #else
@@ -1666,7 +1667,9 @@ z2_extern uint8_t                   z2_oca_state[];
 #define z2_icon_item_24_static          9
 #define z2_icon_item_field_static       10
 #define z2_map_name_static              13
+#define z2_item_names                   16
 #define z2_item_icon_archive            18
+#define z2_do_action_static             22
 #define z2_parameter_static             1125
 #define z2_clock_face_days              1126
 #endif

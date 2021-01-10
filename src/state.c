@@ -404,15 +404,17 @@ void load_state(void *state){
 #if Z2_VERSION==NZSE
         z2_LoadArchiveFile(z2_file_table[z2_item_icon_archive].vrom_start, z2_game.pause_ctx.icon_item_static, 0);
         z2_LoadArchiveFile(z2_file_table[z2_icon_item_24_static].vrom_start, z2_game.pause_ctx.icon_item_24, 0);
+        uint32_t rom = z2_game.pause_ctx.screen_idx == 1 ? z2_location_names : z2_item_names;
+        z2_LoadArchiveFile2(z2_file_table[rom].vrom_start, z2_game.pause_ctx.selected_item, z2_game.pause_ctx.icon_name_text, 0x400);
 #else
         zu_file_idx_load(z2_icon_item_static, z2_game.pause_ctx.icon_item_static);
         zu_file_idx_load(z2_icon_item_24_static, z2_game.pause_ctx.icon_item_24);
+        z2_DecodeArchiveFile(z2_file_table[z2_item_names].prom_start, z2_game.pause_ctx.selected_item, z2_game.pause_ctx.icon_name_text, 0x400);
 #endif
-        uint32_t rom = z2_game.pause_ctx.screen_idx == 1 ? z2_location_names : z2_item_names;
         
-        z2_LoadArchiveFile2(z2_file_table[rom].vrom_start, z2_game.pause_ctx.selected_item, z2_game.pause_ctx.icon_name_text, 0x400);
-
-        zu_file_idx_load(z2_pause_assets, z2_game.pause_ctx.bg_dlist);
+        zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x480, 0x180);
+        zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
+        //zu_file_idx_load(z2_pause_assets, z2_game.pause_ctx.bg_dlist);
         zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
         zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
 
