@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "vc.h"
 #include "vc_dev.h"
 
@@ -71,6 +72,8 @@ ENTRY bool _start(void **dest, int size) {
     if(!xlHeapTake((void**)&kz_tree, NUM_TREE_NODES * sizeof(*kz_tree))) {
         return false;
     }
+
+    memset(kz_tree, 0, NUM_TREE_NODES * sizeof(*kz_tree));
 
     return true;
 
