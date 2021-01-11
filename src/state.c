@@ -398,6 +398,8 @@ void load_state(void *state){
     /* load the room file */
     osSendMesg(&z2_file_msgqueue, &z2_game.room_ctx.loadfile, OS_MESG_NOBLOCK);
 
+    // Load start button text.
+    zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
 
     if(z2_game.pause_ctx.state != 0){
         /* we need to load pause screen assets */
@@ -406,6 +408,7 @@ void load_state(void *state){
         z2_LoadArchiveFile(z2_file_table[z2_icon_item_24_static].vrom_start, z2_game.pause_ctx.icon_item_24, 0);
         uint32_t rom = z2_game.pause_ctx.screen_idx == 1 ? z2_location_names : z2_item_names;
         z2_LoadArchiveFile2(z2_file_table[rom].vrom_start, z2_game.pause_ctx.selected_item, z2_game.pause_ctx.icon_name_text, 0x400);
+        zu_file_idx_load(z2_pause_assets, z2_game.pause_ctx.bg_dlist);
 #else
         zu_file_idx_load(z2_icon_item_static, z2_game.pause_ctx.icon_item_static);
         zu_file_idx_load(z2_icon_item_24_static, z2_game.pause_ctx.icon_item_24);
@@ -413,8 +416,6 @@ void load_state(void *state){
 #endif
         
         zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x480, 0x180);
-        zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
-        //zu_file_idx_load(z2_pause_assets, z2_game.pause_ctx.bg_dlist);
         zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
         zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
 
