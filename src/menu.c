@@ -1,3 +1,4 @@
+#include "input.h"
 #include "menu.h"
 #include "kz.h"
 
@@ -144,7 +145,10 @@ void menu_draw(menu_t *menu)
             item->draw_proc(item);
             continue;
         }
-
+        if(item->text == NULL) {
+            continue;
+        }
+        
         uint32_t color = item->color;
         if (item == menu->selected_item) {
             color = SELECTED_COLOR;
@@ -229,6 +233,29 @@ int menu_item_trigger_event(menu_item_t *item, menu_event_t event, void **event_
             return true;
         default:
             return false;
+    }
+}
+
+void menu_input(menu_t *menu, void **event_data) {
+    uint16_t pressed = input_pressed();
+    if(pressed & BUTTON_D_DOWN) {
+        menu_trigger_event(menu, MENU_EVENT_NAVIGATE, (void**)MENU_NAV_DOWN);
+    }
+
+    if(pressed & BUTTON_D_UP) {
+        menu_trigger_event(menu, MENU_EVENT_NAVIGATE, (void**)MENU_NAV_UP);
+    }
+
+    if(pressed & BUTTON_D_LEFT) {
+        menu_trigger_event(menu, MENU_EVENT_NAVIGATE, (void**)MENU_NAV_LEFT);
+    }
+
+    if(pressed & BUTTON_D_RIGHT) {
+        menu_trigger_event(menu, MENU_EVENT_NAVIGATE, (void**)MENU_NAV_RIGHT);
+    }
+
+    if(pressed & BUTTON_L) {
+        menu_trigger_event(menu, MENU_EVENT_ACTIVATE, event_data);
     }
 }
 

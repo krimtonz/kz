@@ -127,6 +127,7 @@ int                 menu_item_y(menu_item_t *item);
 void                menu_padding_set(menu_t *menu, uint16_t padding_x, uint16_t padding_y);
 void                menu_cell_set(menu_t *menu, uint16_t cell_width, uint16_t cell_height);
 void                menu_item_offset_set(menu_item_t *item, int16_t offset_x, int16_t offset_y);
+void                menu_input(menu_t *menu, void **event_data);
 
 menu_item_t        *menu_label_add          (menu_t *menu, uint16_t cell_x, uint16_t cell_y, void *text);
 menu_item_t        *menu_submenu_add        (menu_t *menu, uint16_t cell_x, uint16_t cell_y, char *text, menu_t *submenu);
@@ -148,9 +149,9 @@ menu_item_t        *menu_switch_add         (menu_t *menu, uint16_t cell_x, uint
                                              uint32_t on_color, uint32_t off_color,
                                              uint8_t on_tile, uint8_t off_tile,
                                              int width, int height, char *tooltip);
-menu_item_t    *menu_item_list_add  (menu_t *menu, uint16_t cell_x, uint16_t cell_y, uint16_t start_tile, int8_t *options,
-                                     uint8_t option_cnt, int8_t *value_ptr, int8_t *ovl_values, int tiles_cnt,
-                                     menu_sprite_t *sprite, char *tooltip);
+menu_item_t        *menu_item_list_add      (menu_t *menu, uint16_t cell_x, uint16_t cell_y, uint16_t start_tile, int8_t *options,
+                                             uint8_t option_cnt, int8_t *value_ptr, int8_t *ovl_values, int tiles_cnt,
+                                             menu_sprite_t *sprite, char *tooltip);
 
 void                menu_checkbox_set           (menu_item_t *item, int set);
 void                menu_switch_set             (menu_item_t *item, int set);
@@ -158,6 +159,8 @@ void                menu_number_set             (menu_item_t *item, uint32_t val
 void                menu_list_set               (menu_item_t *item, int idx);
 menu_sprite_t      *menu_button_sprite_get      (menu_item_t *item);
 void                menu_keyboard_get           (menu_item_t *item, char **dest);
+void                menu_item_list_set          (menu_item_t *item);
+void                menu_item_list_active_set   (menu_item_t *item, int active);
 
 int                 menu_number_word_event      (event_handler_t *handler, menu_event_t event, void **event_data);
 int                 menu_number_halfword_event  (event_handler_t *handler, menu_event_t event, void **event_data);

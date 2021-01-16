@@ -113,6 +113,8 @@ typedef struct {
     void                   *states[STATE_MAX];
     int                     state_slot;
 #endif
+    menu_t                  pause_menu;
+    menu_item_t            *pause_item_list;
 } kz_ctxt_t;
 
 menu_t *create_warps_menu       (void);
