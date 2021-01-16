@@ -351,6 +351,17 @@ static int menu_item_list_event(event_handler_t *handler, menu_event_t event, vo
     return 0;
 }
 
+void menu_item_list_set(menu_item_t *item) {
+    struct item_data *data = item->data;
+    data->selected_idx = get_option_idx(data) + (data->options == NULL ? 1 : 0);
+    wheel_scroll(data, 1.0f);
+}
+
+void menu_item_list_active_set(menu_item_t *item, int active) {
+    struct item_data *data = item->data;
+    data->active = active;
+}
+
 menu_item_t *menu_item_list_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, uint16_t start_tile, int8_t *options,
                                 uint8_t option_cnt, int8_t *value_ptr, int8_t *ovl_values, int tiles_cnt,
                                 menu_sprite_t *sprite, char *tooltip) 

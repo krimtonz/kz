@@ -416,6 +416,10 @@ void load_state(void *state){
 #endif
         
         zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x480, 0x180);
+<<<<<<< HEAD
+=======
+        zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
+>>>>>>> b64d9fc41e65fea2d47a7bcf13b47c9fa3e03a77
         zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
         zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
 
