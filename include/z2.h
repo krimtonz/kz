@@ -261,6 +261,36 @@ typedef enum {
     Z2_SLOT_FIERCE_DEITY
 } z2_mask_slot_t;
 
+enum pause_page {
+    Z2_PAUSE_ITEM,
+    Z2_PAUSE_MAP,
+    Z2_PAUSE_QUEST,
+    Z2_PAUSE_MASK
+};
+
+enum quest_cell {
+    Z2_QUEST_ODOWLA,
+    Z2_QUEST_GOHT,
+    Z2_QUEST_GYORG,
+    Z2_QUEST_TWINMOLD,
+    Z2_QUEST_SHIELD,
+    Z2_QUEST_SWORD,
+    Z2_QUEST_SONATA,
+    Z2_QUEST_LULLABY,
+    Z2_QUEST_NWBN,
+    Z2_QUEST_ELEGY,
+    Z2_QUEST_OATH,
+    Z2_QUEST_SOT = 12,
+    Z2_QUEST_HEALTING,
+    Z2_QUEST_EPONA,
+    Z2_QUEST_SOARING,
+    Z2_QUEST_STORMS,
+    Z2_QUEST_BOMBERS = 18,
+    Z2_QUEST_QUIVER,
+    Z2_QUEST_BOMB,
+    Z2_QUEST_HEART = 22
+};
+
 typedef struct {
     char        unk_0x00_[0x32];    /* 0x0000 */
     int16_t     time_speed;         /* 0x0032 */

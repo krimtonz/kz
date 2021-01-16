@@ -6,139 +6,7 @@
 #include "z2.h"
 #include "zu.h"
 #include "hb_heap.h"
-#include "mips.h"
-
-#define ONE 0.525731112119133606f
-#define TAU 0.850650808352039932f
-
-typedef struct {
-    Gfx        *p;
-    Gfx        *d;
-    Vtx         v[30];
-    Gfx        *vtx_cmd;
-    Gfx        *tri_cmd;
-    int         vtx_cnt;
-    uint32_t    prev_color;
-} poly_writer_t;
-
-static void poly_writer_init(poly_writer_t *writer, Gfx *gfx_p, Gfx *gfx_d){
-    writer->p = gfx_p;
-    writer->d = gfx_d;
-    writer->vtx_cmd = NULL;
-    writer->tri_cmd = NULL;
-    writer->vtx_cnt = 0;
-    writer->prev_color = 0;
-}
-
-static void poly_writer_flush(poly_writer_t *writer){
-    if(writer->vtx_cmd){
-        size_t vtx_size = sizeof(Vtx) * writer->vtx_cnt;
-        Vtx *vtx_ptr = gDisplayListAlloc(&writer->d, vtx_size);
-#ifdef WIIVC
-        hmemcpy(vtx_ptr, writer->v, vtx_size);
-        vtx_ptr = (void*)(((uint32_t)vtx_ptr - 0xA8060000) | 0x0B000000);
-#else
-        memcpy(vtx_ptr, writer->v, vtx_size);
-#endif
-        *writer->vtx_cmd = gsSPVertex(vtx_ptr, writer->vtx_cnt, 0);
-        writer->vtx_cmd = NULL;
-    }
-
-    if((writer->vtx_cnt % 6) != 0){
-        int vtx_pos = writer->vtx_cnt;
-        *writer->tri_cmd = gsSP1Triangle(vtx_pos - 3, vtx_pos - 2, vtx_pos - 1, 0);
-    }
-
-    writer->tri_cmd = NULL;
-    writer->vtx_cnt = 0;
-}
-
-static void poly_writer_finish(poly_writer_t *writer, Gfx **gfx_p, Gfx **gfx_d){
-    poly_writer_flush(writer);
-
-    *gfx_p = writer->p;
-    *gfx_d = writer->d;
-}
-
-static void poly_writer_append(poly_writer_t *writer, Vtx (*vtx)[3], uint32_t color){
-    if(!writer->vtx_cmd){
-        writer->vtx_cmd = writer->p++;
-    }
-    int vtx_pos = writer->vtx_cnt;
-
-    memcpy(&writer->v[vtx_pos], vtx, sizeof(*vtx));
-
-    if(writer->prev_color != color){
-        // new surface
-        gDPSetPrimColor(writer->p++, 0, 0,
-                        (color >> 24) & 0xFF,
-                        (color >> 16) & 0xFF,
-                        (color >> 8) & 0xFF,
-                        color & 0xFF);
-
-        if((writer->vtx_cnt % 6) != 0){
-            *writer->tri_cmd = gsSP1Triangle(vtx_pos - 3, vtx_pos - 2, vtx_pos - 1, 0);
-            writer->tri_cmd = writer->p++;
-            *writer->tri_cmd = gsSP1Triangle(vtx_pos, vtx_pos + 1, vtx_pos + 2, 0);
-        }
-        writer->prev_color = color;
-    }
-
-    if((vtx_pos % 6) == 0){
-        writer->tri_cmd = writer->p++;
-        *writer->tri_cmd = gsSP2Triangles(vtx_pos, vtx_pos + 1, vtx_pos + 2, 0,
-                                         vtx_pos + 3, vtx_pos + 4, vtx_pos + 5, 0);
-    }
-
-    writer->vtx_cnt += 3;
-    if(writer->vtx_cnt == 30){
-        poly_writer_flush(writer);
-    }
-}
-
-static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){
-    uint32_t    render_mode;
-    uint32_t    blend_cyc1;
-    uint32_t    blend_cyc2;
-    uint8_t     alpha;
-    uint64_t    combiner;
-    uint32_t    geometry;
-
-    if(xlu){
-        render_mode = Z_CMP | IM_RD | CVG_DST_FULL | FORCE_BL;
-        blend_cyc1 = GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
-        blend_cyc2 = GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
-        alpha = 0x80;
-    }else{
-        render_mode = Z_CMP | Z_UPD | IM_RD | CVG_DST_CLAMP | FORCE_BL;
-        blend_cyc1 = GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
-        blend_cyc2 = GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
-        alpha = 0xFF;
-    }
-
-    if(decal){
-        render_mode |= ZMODE_DEC;
-    }else if(xlu){
-        render_mode |= ZMODE_XLU;
-    }else{
-        render_mode |= ZMODE_OPA;
-    }
-
-    combiner = G_CC_MODE(G_CC_MODULATERGB_PRIM_ENVA, G_CC_MODULATERGB_PRIM_ENVA);
-    geometry = G_ZBUFFER | G_SHADE | G_LIGHTING;
-
-    Mtx *mtx_mv = gDisplayListAlloc(poly_d, sizeof(*mtx_mv));
-    guMtxIdent(mtx_mv);
-
-    gSPLoadGeometryMode((*poly_p)++, geometry);
-    gSPTexture((*poly_p)++, qu016(0.5), qu016(0.5), 0, G_TX_RENDERTILE, G_OFF);
-    gSPMatrix((*poly_p)++, mtx_mv, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gDPPipeSync((*poly_p)++);
-    gDPSetCycleType((*poly_p)++, G_CYC_1CYCLE);
-    gDPSetRenderMode((*poly_p)++, render_mode | blend_cyc1, render_mode | blend_cyc2);
-    gDPSetCombine((*poly_p)++, combiner);
-    gDPSetEnvColor((*poly_p)++, 0xFF, 0xFF, 0xFF, alpha);
-}
+#include "poly_writer.h"
 
 /* norm = (v1 - v0) cross (v2 - v0)
  * ((v1.x-v0.x),(v1.y-v0.y),(v1.z-v0.z)) cross ((v2.x-v0.x),(v2.y-v0.y),(v2.z-v0.z))
@@ -257,7 +125,7 @@ void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t 
             // Load vertices if the first or last isn't loaded.  This probably could be further optimized 
             if(i == 0 || vtxstart > min || vtxstart + 31 < max){
 #ifdef WIIVC
-                vtx_first = (void*)(((uint32_t)vtx_first - 0xA8060000) | 0x0B000000);
+                vtx_first = HB_SEG(vtx_first);
 #endif
                 gSPVertex(gfx_p++, vtx_first, 32, 0);
                 vtxstart = min;
@@ -285,9 +153,9 @@ void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t 
     void *dlist = sphere_gfx;
 #ifdef WIIVC
     Mtx *data_m = gDisplayListDataHB(hit_view_d, m);
-    data_m = (void*)(((uint32_t)data_m - 0xA8060000) | 0x0B000000);
+    data_m = HB_SEG(data_m);
     gSPMatrix((*hit_view_p)++, data_m, G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
-    dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
+    dlist = HB_SEG(dlist);
 #else
     gSPMatrix((*hit_view_p)++, gDisplayListData(hit_view_d, m), G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
 #endif
@@ -328,7 +196,7 @@ static void draw_cylinder(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, in
 
         gSPSetGeometryMode(cyl_p++, G_CULL_BACK);
 #ifdef WIIVC
-        cylinder_vtx = (Vtx*)(((uint32_t)cylinder_vtx - 0xA8060000) | 0x0B000000);
+        cylinder_vtx = (Vtx*)HB_SEG(cylinder_vtx);
 #endif
         gSPVertex(cyl_p++, cylinder_vtx, 26, 0);
 
@@ -360,9 +228,9 @@ static void draw_cylinder(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, in
     void *dlist = cylinder_p;
 #if WIIVC
     Mtx *data_m = gDisplayListDataHB(hit_view_d, m);
-    data_m = (void*)(((uint32_t)data_m - 0xA8060000) | 0x0B000000);
+    data_m = HB_SEG(data_m);
     gSPMatrix((*hit_view_p)++, data_m, G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
-    dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
+    dlist = HB_SEG(dlist);
 #else
     gSPMatrix((*hit_view_p)++, gDisplayListData(hit_view_d, m), G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_PUSH);
 #endif
@@ -380,7 +248,7 @@ static void draw_triangle(Gfx **hit_view_p, Gfx **hit_view_d, z2_xyzf_t *v0, z2_
     };
 #if WIIVC
     Vtx *data_v = (Vtx*)gDisplayListDataHB(hit_view_d, v);
-    data_v = (void*)(((uint32_t)data_v - 0xA8060000) | 0x0B000000);
+    data_v = HB_SEG(data_v);
     gSPVertex((*hit_view_p)++, data_v, 3, 0);
 #else
     gSPVertex((*hit_view_p)++, gDisplayListData(hit_view_d, v), 3, 0);
@@ -400,7 +268,7 @@ static void draw_quad(Gfx **hit_view_p, Gfx **hit_view_d, z2_xyzf_t *v0, z2_xyzf
 
 #if WIIVC
     Vtx *data_v = (Vtx*)gDisplayListDataHB(hit_view_d, v);
-    data_v = (void*)(((uint32_t)data_v - 0xA8060000) | 0x0B000000);
+    data_v = HB_SEG(data_v);
     gSPVertex((*hit_view_p)++, data_v, 4, 0);
 #else
     gSPVertex((*hit_view_p)++, gDisplayListData(hit_view_d, v), 4, 0);
@@ -525,12 +393,12 @@ void kz_hitbox_view(){
         
         void *dlist = hit_view_start;
 #ifdef WIIVC
-        gSPSegment((*z2_gfx_p)++, 0xB, 0xA8060000);
-        dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
+        set_hb_seg(z2_gfx_p);
+        dlist = HB_SEG(dlist);
 #endif        
         gSPDisplayList((*z2_gfx_p)++, dlist);
 #ifdef WIIVC
-        gSPSegment((*z2_gfx_p)++, 0xB, MIPS_PHYS_TO_KSEG0(z2_segment.segments[0xB]));
+        restore_hb_seg(z2_gfx_p);
 #endif
     }
 }
@@ -754,8 +622,8 @@ void kz_col_view(){
         gSPSetGeometryMode((*gfx_p)++, G_CULL_BACK);
         void *dlist = static_col;
 #ifdef WIIVC
-        gSPSegment((*gfx_p)++, 0xB, 0xA8060000);
-        dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
+        set_hb_seg(gfx_p);
+        dlist = HB_SEG(dlist);
 #endif
         gSPDisplayList((*gfx_p)++, dlist);
 
@@ -787,12 +655,12 @@ void kz_col_view(){
             gSPEndDisplayList(dynamic_gfx_p++);
             dlist = dynamic_buf;
 #ifdef WIIVC
-            dlist = (void*)(((uint32_t)dlist - 0xA8060000) | 0x0B000000);
+            dlist = HB_SEG(dlist);
 #endif
             gSPDisplayList((*gfx_p)++, dlist);
         }
 #ifdef WIIVC
-        gSPSegment((*gfx_p)++, 0xB, MIPS_PHYS_TO_KSEG0(z2_segment.segments[0xB]));
+        restore_hb_seg(gfx_p);
 #endif
     }
 }

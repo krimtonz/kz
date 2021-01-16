@@ -4,6 +4,7 @@
 #include "kzresource.h"
 #include "gu.h"
 #include "z2.h"
+#include "hb_heap.h"
 
 #ifndef LITE
 static Gfx wheel_state[] = {
@@ -127,7 +128,7 @@ static void draw_item(struct item_data *data, int item, float rot)
 
     Mtx *p_mtx = gfx_data_push(&m, sizeof(m));
 #ifdef WIIVC
-    p_mtx = (Mtx*)(((uint32_t)p_mtx - 0xA8060000) | 0x0B000000);
+    p_mtx = HB_SEG(p_mtx);
 #endif
     gfx_push(gsSPMatrix(p_mtx, G_MTX_MODELVIEW | G_MTX_LOAD),
              gsSPVertex(&mesh, 8, 0));
@@ -178,7 +179,7 @@ static void draw_wheel(menu_item_t *item) {
 
     void *mtx = gfx_data_push(&m, sizeof(m));
 #ifdef WIIVC
-    mtx = (void*)(((uint32_t)mtx - 0xA8060000) + 0x0B000000);
+    mtx = HB_SEG(mtx);
 #endif
     gfx_push(gsSPMatrix(mtx, G_MTX_PROJECTION | G_MTX_LOAD));
     wheel_scroll(data, 1.f / 3.f);

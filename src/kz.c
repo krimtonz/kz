@@ -281,8 +281,8 @@ static void kz_main(void) {
             gfx_printf_color(280, 200, GPACK_RGBA8888(0xFF, 0x00, 0x00, 0xFF), "i");
             z2_pause_ctxt_t *p_ctx = &z2_game.pause_ctx;
             switch(p_ctx->screen_idx) {
-                case 0:
-                case 3:
+                case Z2_PAUSE_ITEM:
+                case Z2_PAUSE_MASK:
                     if(!switched) {
                         void *event_data;
                         menu_input(&kz.pause_menu, &event_data);
@@ -290,26 +290,26 @@ static void kz_main(void) {
                         menu_draw(&kz.pause_menu);
                     }
                     break;
-                case 2:
+                case Z2_PAUSE_QUEST:
                     if(!switched && input_pressed() & BUTTON_L) {
                         switch(p_ctx->quest_cell) {
-                            case 0:
+                            case Z2_QUEST_ODOWLA:
                                 z2_file.odolwas_remains = !z2_file.odolwas_remains;
                                 break;
-                            case 1:
+                            case Z2_QUEST_GOHT:
                                 z2_file.gohts_remains = !z2_file.gohts_remains;
                                 break;
-                            case 2:
+                            case Z2_QUEST_GYORG:
                                 z2_file.gyorgs_remains = !z2_file.gyorgs_remains;
                                 break;
-                            case 3:
+                            case Z2_QUEST_TWINMOLD:
                                 z2_file.twinmolds_remains = !z2_file.twinmolds_remains;
                                 break;
-                            case 4:
+                            case Z2_QUEST_SHIELD:
                                 z2_file.shield++;
                                 z2_file.shield %= 3;
                                 break;
-                            case 5:
+                            case Z2_QUEST_SWORD:
                                 z2_file.sword++;
                                 z2_file.sword %= 4;
                                 if(z2_file.sword == 0) {
@@ -319,53 +319,54 @@ static void kz_main(void) {
                                 }
                                 z2_btnupdate(&z2_game, 0);
                                 break;
-                            case 6:
+                            case Z2_QUEST_SONATA:
                                 z2_file.sonata_of_awakening = !z2_file.sonata_of_awakening;
                                 break;
-                            case 7:
+                            case Z2_QUEST_LULLABY:
                                 z2_file.goron_lullaby = !z2_file.goron_lullaby;
                                 break;
-                            case 8:
+                            case Z2_QUEST_NWBN:
                                 z2_file.new_wave_bossa_nova = !z2_file.new_wave_bossa_nova;
                                 break;
-                            case 9:
+                            case Z2_QUEST_ELEGY:
                                 z2_file.elegy_of_emptiness = !z2_file.elegy_of_emptiness;
                                 break;
-                            case 10:
+                            case Z2_QUEST_OATH:
                                 z2_file.oath_to_order = !z2_file.oath_to_order;
                                 break;
-                            case 12:
+                            case Z2_QUEST_SOT:
                                 z2_file.song_of_time = !z2_file.song_of_time;
                                 break;
-                            case 13:
+                            case Z2_QUEST_HEALTING:
                                 z2_file.song_of_healing = !z2_file.song_of_healing;
                                 break;
-                            case 14:
+                            case Z2_QUEST_EPONA:
                                 z2_file.eponas_song = !z2_file.eponas_song;
                                 break;
-                            case 15:
+                            case Z2_QUEST_SOARING:
                                 z2_file.song_of_soaring = !z2_file.song_of_soaring;
                                 break;
-                            case 16:
+                            case Z2_QUEST_STORMS:
                                 z2_file.song_of_storms = !z2_file.song_of_storms;
                                 break;
-                            case 18:
+                            case Z2_QUEST_BOMBERS:
                                 z2_file.bombers_notebook = !z2_file.bombers_notebook;
                                 break;
-                            case 19:
+                            case Z2_QUEST_QUIVER:
                                 z2_file.quiver++;
                                 z2_file.quiver %= 4;
                                 break;
-                            case 20:
+                            case Z2_QUEST_BOMB:
                                 z2_file.bomb_bag++;
                                 z2_file.bomb_bag %= 4;
                                 break;
-                            case 22:
+                            case Z2_QUEST_HEART:
                                 z2_file.heart_piece++;
                                 z2_file.heart_piece %= 4;
                                 break;
                         }
                     }
+                    break;
             }
         }
     }
@@ -464,7 +465,7 @@ static int pause_menu_event(event_handler_t *handler, menu_event_t event, void *
         return 0;
     }
 
-    int active = *event_data;
+    int active = (int)*event_data;
     if(active) {
         kz.stick_x_mask = 0xFF;
         kz.stick_y_mask = 0xFF;

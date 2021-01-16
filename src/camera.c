@@ -5,6 +5,7 @@
 #include "input.h"
 #include "vec_math.h"
 #include "hb_heap.h"
+#include "poly_writer.h"
 
 void kz_camera_calc(z2_camera_t *camera) {
     sph_coord_t *geo = &kz.cam_sph;
@@ -45,50 +46,6 @@ void kz_camera_calc(z2_camera_t *camera) {
 
     geo_to_vec3f(geo, &geo_vec);
     vec3f_add(&kz.kz_at, &geo_vec, &kz.kz_eye);
-}
-
-static void init_poly_list(Gfx **poly_p, Gfx **poly_d, _Bool xlu, _Bool decal){
-    uint32_t    render_mode;
-    uint32_t    blend_cyc1;
-    uint32_t    blend_cyc2;
-    uint8_t     alpha;
-    uint64_t    combiner;
-    uint32_t    geometry;
-
-    if(xlu){
-        render_mode = Z_CMP | IM_RD | CVG_DST_FULL | FORCE_BL;
-        blend_cyc1 = GBL_c1(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
-        blend_cyc2 = GBL_c2(G_BL_CLR_IN, G_BL_A_IN, G_BL_CLR_MEM, G_BL_1MA);
-        alpha = 0xFF;
-    }else{
-        render_mode = Z_CMP | Z_UPD | IM_RD | CVG_DST_CLAMP | FORCE_BL;
-        blend_cyc1 = GBL_c1(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
-        blend_cyc2 = GBL_c2(G_BL_CLR_IN, G_BL_0, G_BL_CLR_IN, G_BL_1);
-        alpha = 0xFF;
-    }
-
-    if(decal){
-        render_mode |= ZMODE_DEC;
-    }else if(xlu){
-        render_mode |= ZMODE_XLU;
-    }else{
-        render_mode |= ZMODE_OPA;
-    }
-
-    combiner = G_CC_MODE(G_CC_MODULATERGB_PRIM_ENVA, G_CC_MODULATERGB_PRIM_ENVA);
-    geometry = G_ZBUFFER | G_SHADE | G_LIGHTING;
-
-    Mtx *mtx_mv = gDisplayListAlloc(poly_d, sizeof(*mtx_mv));
-    guMtxIdent(mtx_mv);
-
-    gSPLoadGeometryMode((*poly_p)++, geometry);
-    gSPTexture((*poly_p)++, qu016(0.5), qu016(0.5), 0, G_TX_RENDERTILE, G_OFF);
-    gSPMatrix((*poly_p)++, mtx_mv, G_MTX_MODELVIEW | G_MTX_LOAD | G_MTX_NOPUSH);
-    gDPPipeSync((*poly_p)++);
-    gDPSetCycleType((*poly_p)++, G_CYC_1CYCLE);
-    gDPSetRenderMode((*poly_p)++, render_mode | blend_cyc1, render_mode | blend_cyc2);
-    gDPSetCombine((*poly_p)++, combiner);
-    gDPSetEnvColor((*poly_p)++, 0xFF, 0xFF, 0xFF, alpha);
 }
 
 void camera_draw(void) {

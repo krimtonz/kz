@@ -194,12 +194,12 @@ void gfx_finish(void){
     gSPEndDisplayList(gfx_disp_p++);
     void *dl = gfx_disp;
 #ifdef WIIVC
-    dl = (void*)(((uint32_t)dl - 0xA8060000) | 0x0B000000);
-    gSPSegment(z2_ctxt.gfx->overlay.p++, 0xB, 0xA8060000);
+    dl = HB_SEG(dl);
+    set_hb_seg(&z2_ctxt.gfx->overlay.p);
 #endif
     gSPDisplayList(z2_ctxt.gfx->overlay.p++, dl);
 #ifdef WIIVC
-    gSPSegment(z2_ctxt.gfx->overlay.p++, 0xB, MIPS_PHYS_TO_KSEG0(z2_segment.segments[0xB]));
+    restore_hb_seg(&z2_ctxt.gfx->overlay.p);
 #endif
     Gfx *disp_w = gfx_disp_work;
     gfx_disp_work = gfx_disp;
@@ -237,8 +237,8 @@ void gfx_load_tile(gfx_texture *texture, uint16_t tilenum){
     if(texture->source == TEX_SRC_DRAM){
         data = texture->data;
     } else {
-        gSPSegment(gfx_disp_p++, 0xB, 0xA8060000);
-        data = (void*)(((uint32_t)texture->data - 0xA8060000) | 0x0B000000);
+        set_hb_seg(&gfx_disp_p);
+        data = HB_SEG(texture->data);
     }
     data = (void*)((uint32_t)data + (texture->tile_size * tilenum));
     if(texture->img_size == G_IM_SIZ_4b){

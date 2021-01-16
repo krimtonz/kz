@@ -2,7 +2,6 @@
 #include <mips.h>
 #include "hb_heap.h"
 
-#define HB_HEAP_ADDR 0xA8060000
 #define HB_HEAP_SIZE 0x00C00000 // 12 MB
 #define HB_ALIGN(s) (((s) + _Alignof(max_align_t) - 1) & ~(_Alignof(max_align_t) - 1))
 #define HDR_SIZE (HB_ALIGN(sizeof(struct __hb_heap_hdr_s)))
@@ -183,4 +182,12 @@ NOINLINE void *hmemcpy(void *dst, void *src, size_t size)
     }
 
     return dst;
+}
+
+inline void set_hb_seg(Gfx **pgdl) {
+    gSPSegment((*pgdl)++, 0xB, HB_HEAP_ADDR);
+}
+
+inline void restore_hb_seg(Gfx **pgdl) {
+    gSPSegment((*pgdl)++, 0xB, MIPS_PHYS_TO_KSEG0(z2_segment.segments[0xB]));
 }
