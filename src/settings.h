@@ -11,7 +11,7 @@
 #define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)
 
 #define SETTINGS_VER        7
-#define SETTINGS_ADDR       0x20000
+#define SETTINGS_ADDR       0x1C000
 #define SETTINGS_SIZE       (sizeof(struct settings_header) + sizeof(struct settings_data))
 #define SETTINGS_PAD        ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
 #define SETTINGS_MAX        3
