@@ -51,6 +51,8 @@ void        input_disable           (void);
 int         button_time             (int btn);
 int         button_get_index        (uint16_t button_mask);
 void        input_init              (uint16_t *pad, int8_t *stick_x, int8_t *stick_y, uint16_t *binds, int n_binds);
+void        input_mask_set          (uint16_t button, uint8_t x, uint8_t y);
+void        input_mask_clear        (uint16_t button, uint8_t x, uint8_t y);
 
 extern uint32_t button_colors[16];
 

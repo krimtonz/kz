@@ -21,6 +21,7 @@
 #include "printf.h"
 #include "vc.h"
 #include "inventory_map.h"
+#include "cache.h"
 
 #ifdef WIIVC
 #define CPU_COUNTER 46777500
@@ -238,21 +239,78 @@ static void kz_main(void) {
     }
     /* handle command bindings */
     {
+        z2_pause_ctxt_t *p_ctx = &z2_game.pause_ctx;
         _Bool is_pause = z2_player_ovl_cur == &z2_player_ovl_table[0];
         static _Bool item_update = 0;
         static _Bool switched = 0;
+        static uint32_t prev_inst[4];
         if(is_pause && !kz.menu_active) {
             if(button_time(button_get_index(BUTTON_L)) >= INPUT_REPEAT && !switched) {
                 switched = 1;
                 item_update = !item_update;
                 if(item_update) {
+                    if(p_ctx->screen_idx == 0 || p_ctx->screen_idx == 3) {
+                        int8_t *slot = NULL;
+                        int16_t *offset = NULL;
+                        uint16_t *cell = NULL;
+                        uint16_t *x = NULL;
+                        uint16_t *y = NULL;
+                        _Bool has_item = 0;
+                        if(p_ctx->screen_idx == Z2_PAUSE_ITEM) {
+                            slot = z2_file.items;
+                            offset = &p_ctx->item_cell_offset;
+                            cell = &p_ctx->item_cell;
+                            x = &p_ctx->item_x;
+                            y = &p_ctx->item_y;
+                        } else {
+                            slot = z2_file.masks;
+                            offset = &p_ctx->mask_cell_offset;
+                            cell = &p_ctx->mask_cell;
+                            x = &p_ctx->mask_x;
+                            y = &p_ctx->mask_y;
+                        }
+
+                        for(int i = 0; i < 24; i++) {
+                            if(slot[i] != Z2_ITEM_NULL) {
+                                has_item = 1;
+                                break;
+                            }
+                        }
+
+                        if(!has_item) {
+                            *offset = 0;
+                            *cell = 0;
+                            *x = 0;
+                            *y = 0;
+                        }
+                    }
                     reserve_buttons(BUTTON_L | BUTTON_D_UP | BUTTON_D_DOWN);
+                    prev_inst[0] = *(uint32_t*)(z2_player_ovl_cur->ram + mask_right_offset);
+                    prev_inst[1] = *(uint32_t*)(z2_player_ovl_cur->ram + mask_left_offset);
+                    prev_inst[2] = *(uint32_t*)(z2_player_ovl_cur->ram + item_right_offset);
+                    prev_inst[3] = *(uint32_t*)(z2_player_ovl_cur->ram + item_left_offset);
+                    *(uint32_t*)(z2_player_ovl_cur->ram + mask_right_offset) = 0xA600023E;
+                    *(uint32_t*)(z2_player_ovl_cur->ram + mask_left_offset) = 0xA600023E;
+                    *(uint32_t*)(z2_player_ovl_cur->ram + item_right_offset) = 0xA6000238;
+                    *(uint32_t*)(z2_player_ovl_cur->ram + item_left_offset) = 0xA6000238;
+                    osInvalICache(z2_player_ovl_cur->ram + mask_right_offset, 4);
+                    osInvalICache(z2_player_ovl_cur->ram + mask_left_offset, 4);
+                    osInvalICache(z2_player_ovl_cur->ram + item_right_offset, 4);
+                    osInvalICache(z2_player_ovl_cur->ram + item_left_offset, 4);
                 } else {
                     free_buttons(BUTTON_L | BUTTON_D_UP | BUTTON_D_DOWN);
+                    input_mask_clear(0x0000, 0xFF, 0xFF);
+                    *(uint32_t*)(z2_player_ovl_cur->ram + mask_right_offset) = prev_inst[0];
+                    *(uint32_t*)(z2_player_ovl_cur->ram + mask_left_offset) = prev_inst[1];
+                    *(uint32_t*)(z2_player_ovl_cur->ram + item_right_offset) = prev_inst[2];
+                    *(uint32_t*)(z2_player_ovl_cur->ram + item_left_offset) = prev_inst[3];
+                    osInvalICache(z2_player_ovl_cur->ram + mask_right_offset, 4);
+                    osInvalICache(z2_player_ovl_cur->ram + mask_left_offset, 4);
+                    osInvalICache(z2_player_ovl_cur->ram + item_right_offset, 4);
+                    osInvalICache(z2_player_ovl_cur->ram + item_left_offset, 4);
+                    menu_item_list_active_set(kz.pause_item_list, 0);
                 }
-            } else if(!(input_pressed_raw() & BUTTON_L)) {
-                switched = 0;
-            } 
+            }
         } else {
             if(item_update) {
                 item_update = 0;
@@ -279,7 +337,16 @@ static void kz_main(void) {
             }
         } else {
             gfx_printf_color(280, 200, GPACK_RGBA8888(0xFF, 0x00, 0x00, 0xFF), "i");
-            z2_pause_ctxt_t *p_ctx = &z2_game.pause_ctx;
+            static prev_page = 0;
+            if(p_ctx->screen_idx != prev_page) {
+                if(kz.pause_item_list != NULL) {
+                    if(menu_item_list_active_get(kz.pause_item_list) == 1) {
+                        input_mask_clear(0x0000, 0xFF, 0xFF);
+                        menu_item_list_active_set(kz.pause_item_list, 0);
+                    }
+                }
+                prev_page = p_ctx->screen_idx;
+            }
             switch(p_ctx->screen_idx) {
                 case Z2_PAUSE_ITEM:
                 case Z2_PAUSE_MASK:
@@ -368,6 +435,10 @@ static void kz_main(void) {
                     }
                     break;
             }
+        }
+
+        if(switched && !(input_pressed() & BUTTON_L)) {
+            switched = 0;
         }
     }
 
@@ -465,10 +536,14 @@ static int pause_menu_event(event_handler_t *handler, menu_event_t event, void *
         return 0;
     }
 
+    if(pause_ctx->scroll_button != 0) {
+        menu_item_list_active_set(handler->subscriber, 0);
+        return;
+    }
+
     int active = (int)*event_data;
     if(active) {
-        kz.stick_x_mask = 0xFF;
-        kz.stick_y_mask = 0xFF;
+        input_mask_set(0x0000, 0xFF, 0xFF);
         if(pause_ctx->screen_idx == 0) {
             pause_row = &item_map_table[pause_ctx->item_cell];
         } else {
@@ -483,8 +558,7 @@ static int pause_menu_event(event_handler_t *handler, menu_event_t event, void *
         menu_item_list_set(handler->subscriber);
     } else {
         *pause_row->slot = item_val;
-        kz.stick_x_mask = 0x00;
-        kz.stick_y_mask = 0x00;
+        input_mask_clear(0x0000, 0xFF, 0xFF);
     }
     return 1;
 }
@@ -557,10 +631,10 @@ static void init(void) {
         0,      NULL
     };
     
-    menu_item_t *item = menu_item_list_add(&kz.pause_menu, 0, 0, 0, NULL, Z2_ITEM_END - 1, &item_val, NULL, Z2_ITEM_END - 1, &sprite, NULL);
-    kz.pause_menu.selected_item = item;
-    item->draw_proc = NULL;
-    menu_item_register_event(item, MENU_EVENT_ACTIVATE, pause_menu_event, NULL);
+    kz.pause_item_list = menu_item_list_add(&kz.pause_menu, 0, 0, 0, NULL, Z2_ITEM_END - 1, &item_val, NULL, Z2_ITEM_END - 1, &sprite, NULL);
+    kz.pause_menu.selected_item = kz.pause_item_list;
+    kz.pause_item_list->draw_proc = NULL;
+    menu_item_register_event(kz.pause_item_list, MENU_EVENT_ACTIVATE, pause_menu_event, NULL);
 
     kz.memfile = malloc(sizeof(*kz.memfile) * KZ_MEMFILE_MAX);
     memset(kz.memfile, 0, sizeof(*kz.memfile) * KZ_MEMFILE_MAX);

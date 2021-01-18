@@ -1101,7 +1101,11 @@ typedef struct {
     uint16_t    switching_screen;               /* 0x0200 */
     uint16_t    unk_0x202;                      /* 0x0202 */
     uint16_t    screen_idx;                     /* 0x0204 */
-    char        unk_0x206[0x3C];                /* 0x0206 */
+    char        unk_0x206[0x32];                /* 0x0206 */
+    int16_t     item_cell_offset;               /* 0x0238 */
+    char        unk_0x23A[4];                   /* 0x023A */
+    int16_t     mask_cell_offset;               /* 0x023E */
+    char        unk_0x240[2];                   /* 0x0240 */
     uint16_t    item_x;                         /* 0x0242 */
     char        unk_0x244[0x4];                 /* 0x0244 */
     uint16_t    mask_x;                         /* 0x0248 */
@@ -1109,7 +1113,9 @@ typedef struct {
     uint16_t    item_y;                         /* 0x024C */
     char        unk_0x24E[0x4];                 /* 0x024E */
     uint16_t    mask_y;                         /* 0x0252 */
-    char        unk_0x254[0x8];                 /* 0x0254 */
+    char        unk_0x254[0x4];                 /* 0x0254 */
+    uint16_t    scroll_button;                  /* 0x0258 */
+    char        unk_0x25A[0x2];                 /* 0x025A */
     uint16_t    selected_item;                  /* 0x025C */
     uint16_t    item_item;                      /* 0x025E */
     uint16_t    map_item;                       /* 0x0260 */
@@ -1678,6 +1684,24 @@ z2_extern uint32_t                  z2_cs_bars;
 z2_extern uint8_t                   z2_oca_note_pos;
 z2_extern uint8_t                   z2_cur_oca_song[9];
 z2_extern uint8_t                   z2_oca_state[];
+
+// pause menu hacks
+#if Z2_VERSION==NZSE
+#define item_right_offset               0x5F48
+#define item_left_offset                0x5FF4
+#define mask_right_offset               0xA7C4
+#define mask_left_offset                0xA8B0
+#elif Z2_VERSION==NZSJ
+#define item_right_offset               0x5F48
+#define item_left_offset                0x5FF4
+#define mask_right_offset               0xA7C4
+#define mask_left_offset                0xA8B0
+#elif Z2_VERSION==NZSJ10
+#define item_right_offset               0x5F48
+#define item_left_offset                0x5FF4
+#define mask_right_offset               0xA734
+#define mask_left_offset                0xA820
+#endif
 
 // File indcies
 #if Z2_VERSION==NZSE
