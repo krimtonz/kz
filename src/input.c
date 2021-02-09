@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include "input.h"
 #include "mem.h"
+#include "kz.h"
 
 uint32_t button_colors[16] = {
     0xFFF000FF,
@@ -260,4 +261,16 @@ void input_enable(void){
 
 void input_disable(void){
     __input_enabled = 0;
+}
+
+void input_mask_set(uint16_t button, uint8_t x, uint8_t y) {
+    kz.input_mask |= button;
+    kz.stick_x_mask |= x;
+    kz.stick_y_mask |= y;
+}
+
+void input_mask_clear(uint16_t button, uint8_t x, uint8_t y) {
+    kz.input_mask &= ~button;
+    kz.stick_x_mask &= ~x;
+    kz.stick_y_mask &= ~y;
 }

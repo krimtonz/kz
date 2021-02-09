@@ -103,19 +103,13 @@ static int hide_room_onactivate(event_handler_t *handler, menu_event_t event, vo
     return 1;
 }
 
-static void set_input_mask(uint16_t button, uint8_t x, uint8_t y) {
-    kz.input_mask = button;
-    kz.stick_x_mask = x;
-    kz.stick_y_mask = y;
-}
-
 static int free_cam_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     if(event == MENU_EVENT_ACTIVATE) {
         kz.free_cam_active = !kz.free_cam_active;
         if(kz.free_cam_active) {
-            set_input_mask(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
+            input_mask_set(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
         } else {
-            set_input_mask(0x0000, 0x00, 0x00);
+            input_mask_clear(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
         }
     } else if(event == MENU_EVENT_UPDATE) {
         menu_checkbox_set(handler->subscriber, kz.free_cam_active);
@@ -127,9 +121,9 @@ static int lock_cam_event(event_handler_t *handler, menu_event_t event, void **e
     if(event == MENU_EVENT_ACTIVATE) {
         kz.free_cam_locked = !kz.free_cam_locked;
         if(!kz.free_cam_locked && kz.free_cam_active) {
-            set_input_mask(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
+            input_mask_set(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
         } else {
-            set_input_mask(0x0000, 0x00, 0x00);
+            input_mask_clear(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
         }
     } else if(event == MENU_EVENT_UPDATE) {
         menu_checkbox_set(handler->subscriber, kz.free_cam_locked);

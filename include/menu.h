@@ -161,6 +161,7 @@ menu_sprite_t      *menu_button_sprite_get      (menu_item_t *item);
 void                menu_keyboard_get           (menu_item_t *item, char **dest);
 void                menu_item_list_set          (menu_item_t *item);
 void                menu_item_list_active_set   (menu_item_t *item, int active);
+int                 menu_item_list_active_get   (menu_item_t *item);
 
 int                 menu_number_word_event      (event_handler_t *handler, menu_event_t event, void **event_data);
 int                 menu_number_halfword_event  (event_handler_t *handler, menu_event_t event, void **event_data);
