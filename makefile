@@ -27,7 +27,7 @@ ADDRESS_VC			= 0x8003DF60
 ADDRESS_LITE        = 0x8003DF60
 ADDRESS_LDR         = 0x80080000
 ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
-ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 $(CPPFLAGS)
+ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 -DHB_DBG $(CPPFLAGS)
 ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
 ALL_LIBS            = $(LIBS)
 
@@ -138,7 +138,7 @@ $$(VCDIR-$(1))		:
 	mkdir -p $$@
 
 $$(HOMEBOY-$(1))    : $$(VCDIR-$(1))
-	cd $(HOMEBOYDIR) && CPPFLAGS="-DHB_HEAP -DHB_FAT" make bin/hb-$(3)/homeboy.bin
+	cd $(HOMEBOYDIR) && CPPFLAGS="-DHB_DBG -DHB_HEAP -DHB_FAT -DHB_EXCEPTIONS" make bin/hb-$(3)/homeboy.bin
 	cp $(HOMEBOYDIR)/bin/hb-$(3)/homeboy.bin $$@
 endef
 

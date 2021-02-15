@@ -21,10 +21,35 @@
 #define ENTRY __attribute__((section(".init")))
 #define HOOK  __attribute__((section(".text.hook")))
 
+
 typedef struct cpu_cache_entry_s    cpu_cache_entry_t;
 typedef struct func_tree_node_s     func_tree_node_t;
 typedef struct n64_cpu_s            n64_cpu_t;
 typedef struct recomp_ctxt_s        recomp_ctxt_t;
+typedef struct thread_context_s     thread_context_t;
+
+struct thread_context_s {
+    /* 0x0000 */ uint32_t gpr[32];
+    /* 0x0080 */ uint32_t cr;
+    /* 0x0084 */ uint32_t lr;
+    /* 0x0088 */ uint32_t ctr;
+    /* 0x008C */ uint32_t xer;
+    /* 0x0090 */ double fpr[32];
+    /* 0x0190 */ uint64_t fscr;
+    /* 0x0198 */ uint32_t srr0;
+    /* 0x019C */ uint32_t srr1;
+    /* 0x01A0 */ char unk_0x1A0[8];
+    /* 0x01A8 */ uint32_t gqr[7];
+    /* 0x01C8 */ uint64_t ps[32];
+    /* 0x02C8 */ char unk_0x2C8[0x14];
+    /* 0x02DC */ thread_context_t **queue;
+    /* 0x02E0 */ thread_context_t *next;
+    /* 0x02E4 */ thread_context_t *prev;
+    /* 0x02E8 */ char unk_0x2E8[0x1C];
+    /* 0x0304 */ void *stack_start;
+    /* 0x0308 */ void *stack_end;
+    /* 0x030C */ char unk_0x30C[12];
+}; // size = 0x318
 
 typedef bool (*lb_t)(void *dev_obj, uint32_t addr, uint8_t *dest);
 typedef bool (*lh_t)(void *dev_obj, uint32_t addr, uint16_t *dest);

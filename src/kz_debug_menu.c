@@ -8,6 +8,7 @@
 #include "scenes.h"
 #include "input.h"
 #include "printf.h"
+#include "vc.h"
 
 #define MEMORY_MAX  0x80800000
 
@@ -574,10 +575,45 @@ static int flags_inc_onactivate(event_handler_t *callback, menu_event_t event, v
     return 1;
 }
 
+#if WIIVC && defined(HB_DBG)
+static uint32_t heap_frees[4];
+static watch_t mem1_watch = {
+    &heap_frees[0], WATCH_TYPE_U32, 0, 0, 0, NULL
+};
+
+static watch_t mem2_watch = {
+    &heap_frees[1], WATCH_TYPE_U32, 0, 0, 0, NULL
+};
+
+static watch_t recomp_1_watch = {
+    &heap_frees[2], WATCH_TYPE_U32, 0, 0, 0, NULL
+};
+
+static watch_t recomp_2_watch = {
+    &heap_frees[3], WATCH_TYPE_U32, 0, 0, 0, NULL
+};
+
+
+static int dump_vc_mem_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
+    VC_DBG_REGS[0] = 0;
+    return 1;
+}
+
+static int update_vc_heaps(event_handler_t *callback, menu_event_t event, void **event_data) {
+    VC_HEAP_STATS(heap_frees);
+    VC_RECOMP_STATS(&heap_frees[2]);
+    return 1;
+}
+
+#endif
+
 menu_t *create_debug_menu(void){
     static menu_t debug;
     static menu_t objects;
     static menu_t actors;
+#if WIIVC && defined(HB_DBG)
+    static menu_t vc_debug;
+#endif
 
     menu_init(&debug, 0, 0);
     menu_padding_set(&debug, 0, 2);
@@ -706,10 +742,31 @@ menu_t *create_debug_menu(void){
         refresh_flags_table();
     }
 
+#if WIIVC && defined(HB_DBG)
+    {
+        menu_init(&vc_debug, 0, 0);
+        vc_debug.selected_item = menu_button_add(&vc_debug, 0, 0, "return", menu_return, NULL);
+        menu_button_add(&vc_debug, 0, 1, "dump vc mem", dump_vc_mem_onactivate, NULL);
+        menu_item_t *item = menu_label_add(&vc_debug, 0, 2, "MEM1 Free:");
+        menu_item_register_event(item, MENU_EVENT_UPDATE, update_vc_heaps, NULL);
+        menu_watch_add(&vc_debug, 11, 2, &mem1_watch, true);
+        menu_label_add(&vc_debug, 0, 3, "MEM2 Free:");
+        menu_watch_add(&vc_debug, 11, 3, &mem2_watch, true);
+
+        menu_label_add(&vc_debug, 0, 4, "Recomp 1 Free:");
+        menu_watch_add(&vc_debug, 15, 4, &recomp_1_watch, true);
+        menu_label_add(&vc_debug, 0, 5, "Recomp 2 Free:");
+        menu_watch_add(&vc_debug, 15, 5, &recomp_2_watch, true);
+    }
+#endif    
+
     menu_submenu_add(&debug, 0, 1, "memory", &memory);
     menu_submenu_add(&debug, 0, 2, "objects", &objects);
     menu_submenu_add(&debug, 0, 3, "actors", &actors);
     menu_submenu_add(&debug, 0, 4, "flags", &flags);
+#if WIIVC && defined(HB_DBG)
+    menu_submenu_add(&debug, 0, 5, "vc debug", &vc_debug);
+#endif
 
     return &debug;
 }

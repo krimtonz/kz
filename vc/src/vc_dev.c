@@ -4,6 +4,7 @@
 typedef struct {
     uint32_t func_to_clean;
     uint32_t heap_stats; 
+    uint32_t recomp_stats;
 } vc_dev_t;
 
 static vc_dev_t *vc_dev = NULL;
@@ -36,6 +37,38 @@ static void heap_stats(void) {
     xlHeapGetFreeArena2(&free[1]);
 }
 
+static void recomp_stats(void) {
+    int *free = (int*)(gSystem->ram->dram_ptr + vc_dev->recomp_stats);
+    free[0] = 0;
+    free[1] = 0;
+
+    for(int i = 0; i < sizeof(gSystem->cpu->sm_blk_status) / sizeof(*gSystem->cpu->sm_blk_status); i++) {
+        uint32_t blk = gSystem->cpu->sm_blk_status[i];
+        if(blk == 0xFFFFFFFF) {
+            continue;
+        }
+
+        for(int j = 0; j < 32; j++) {
+            if(!(blk & (1 << j))) {
+                free[0]++;
+            }
+        }
+    }
+
+    for(int i = 0; i < sizeof(gSystem->cpu->lg_blk_status) / sizeof(*gSystem->cpu->lg_blk_status); i++) {
+        uint32_t blk = gSystem->cpu->lg_blk_status[i];
+        if(blk == 0xFFFFFFFF) {
+            continue;
+        }
+
+        for(int j = 0; j < 32; j++) {
+            if(!(blk & (1 << j))) {
+                free[1]++;
+            }
+        }
+    }
+}
+
 static bool sb(void *callback, uint32_t addr, uint8_t *src) {
     return false;
 }
@@ -53,6 +86,9 @@ static bool sw(void *callback, uint32_t addr, uint32_t *src) {
     } else if(addr == 0x04) {
         vc_dev->heap_stats = *src & ~0xFC000000;
         heap_stats();
+    } else if(addr == 0x08) {
+        vc_dev->recomp_stats = *src & ~0xFC000000;
+        recomp_stats();
     }
 
     return true;
