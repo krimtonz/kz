@@ -150,11 +150,13 @@ void load_state(void *state){
 
     /* record current loaded data */
     int scene_index = z2_game.scene_index;
+    _Bool is_cur_pause = z2_game.pause_ctx.state >= 3;
 
     struct alloc {
         uint16_t    id;
         void       *ptr;
     };
+
     struct alloc objects[35];
     for(int i = 0;i < 35;i++){
         z2_obj_t *obj = &z2_game.obj_ctx.obj[i];
@@ -427,9 +429,9 @@ void load_state(void *state){
             }
         }
 
-    }else{
+    } else {
         /* load objects if they are not currently loaded in the same dram address */
-        for(int i = 0;i < 35;i++){
+        for(int i = 0; i < 35; i++) {
             struct alloc *p_obj = &objects[i];
             z2_obj_t *c_obj = &z2_game.obj_ctx.obj[i];
             int p_id = p_obj->id;
@@ -439,7 +441,7 @@ void load_state(void *state){
             }
             void *p_ptr = p_obj->ptr;
             void *c_ptr = c_obj->data;
-            if(c_id != 0 && (c_id != p_id || c_ptr != p_ptr)){
+            if(c_id != 0 && ((c_id != p_id || c_ptr != p_ptr) || is_cur_pause)){
                 uint32_t start = z2_obj_table[c_id].vrom_start;
                 uint32_t end = z2_obj_table[c_id].vrom_end;
                 zu_file_load(start, c_ptr, end - start);
