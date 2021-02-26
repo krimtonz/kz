@@ -514,10 +514,11 @@ static void kz_main(void) {
     }
 #endif
 
-
+    /*
     if(kz.draw_camera) {
         camera_draw();
     }
+    */
 
     gfx_finish();
 }
@@ -749,25 +750,29 @@ HOOK int camera_hook(z2_camera_t* camera) {
     int (*camera_update_func)(z2_camera_t*);
     __asm__ volatile("sw $t9, %0" : "=m"(camera_update_func) :: "t9");
     if(!kz.free_cam_active) {
-        int ret = camera_update_func(camera);
+        return camera_update_func(camera);
+        /*
         kz.cam_at = camera->at;
         kz.cam_eye = camera->eye;
         return ret;
+        */
     }
 
+    /*
     camera->at = kz.cam_at;
     camera->eye = kz.cam_eye;
     int ret = camera_update_func(camera);
     kz.cam_at = camera->at;
     kz.cam_eye = camera->eye;
-    
+    */
+
     if(!kz.free_cam_locked) {
         kz_camera_calc(camera);
     }
 
     camera->at = kz.kz_at;
     camera->eye = kz.kz_eye;
-    return ret;
+    return 1;
 }
 
 int main() {

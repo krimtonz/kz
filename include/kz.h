@@ -102,8 +102,10 @@ typedef struct {
     _Bool                   free_cam_active;
     _Bool                   free_cam_locked;
     _Bool                   draw_camera;
+    /*
     z2_xyzf_t               cam_at;
     z2_xyzf_t               cam_eye;
+    */
     z2_xyzf_t               kz_eye;
     z2_xyzf_t               kz_at;
     sph_coord_t             cam_sph;

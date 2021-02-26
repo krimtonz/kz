@@ -202,9 +202,11 @@ menu_t *create_scene_menu(void){
         item = menu_checkbox_add(&camera, 0, 2);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, lock_cam_event, NULL);
         menu_label_add(&camera, 2, 2, "lock free cam");
+        /*
         item = menu_checkbox_add(&camera, 0, 3);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, cam_draw_event, NULL);
         menu_label_add(&camera, 2, 3, "draw camera");
+        */
     }
 
     item = menu_label_add(&scene, 0, 3, "current room");

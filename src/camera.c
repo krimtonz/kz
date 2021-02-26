@@ -48,6 +48,7 @@ void kz_camera_calc(z2_camera_t *camera) {
     vec3f_add(&kz.kz_at, &geo_vec, &kz.kz_eye);
 }
 
+/*
 void camera_draw(void) {
     static Gfx *cam_gfx[2] = { NULL, NULL };
     static int cam_gfx_idx = 0;
@@ -155,5 +156,5 @@ void camera_draw(void) {
     init_poly_list(&xlu->p, &xlu->d, 1, 0);
 
     gSPDisplayList(xlu->p++, cam_gfx_start);
-
 }
+*/
