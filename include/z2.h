@@ -1587,6 +1587,15 @@ typedef struct {
     char unk_0x81F4[4];
 } z2_audio_ctxt_t;
 
+typedef struct {
+    OSThread thread;
+    uint8_t arg_cnt;
+    uint8_t flags;
+    void (*callback)();
+    void *cbArg0;
+    void *cbArg1;
+} z2_slowly_t;
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1620,6 +1629,7 @@ z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile,
 z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, size_t size);
 z2_extern void          z2_LoadArchiveFile2         (uint32_t rom, int arg1, void *ram, size_t size);
 #endif
+z2_extern void          z2_SlowlyStop               (z2_slowly_t *slowly);
 z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_AfxCmdFloat              (uint32_t cmd, float data);
@@ -1681,6 +1691,7 @@ z2_extern z2_ctxt_t                 z2_ctxt;
 z2_extern z2_game_t                 z2_game;
 z2_extern z2_link_t                 z2_link;
 z2_extern uint32_t                  z2_cs_bars;
+z2_extern z2_slowly_t               z2_prerender_slowly;
 z2_extern uint8_t                   z2_oca_note_pos;
 z2_extern uint8_t                   z2_cur_oca_song[9];
 z2_extern uint8_t                   z2_oca_state[];
