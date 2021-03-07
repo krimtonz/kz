@@ -576,24 +576,12 @@ static int flags_inc_onactivate(event_handler_t *callback, menu_event_t event, v
 }
 
 #if WIIVC && defined(HB_DBG)
+static char *mem1_text[2] = { NULL, NULL };
+static char *mem2_text[2] = { NULL, NULL };
+static char *recomp1_text[2] = { NULL, NULL };
+static char *recomp2_text[2] = { NULL, NULL };
+
 static uint32_t heap_frees[4];
-static watch_t mem1_watch = {
-    &heap_frees[0], WATCH_TYPE_U32, 0, 0, 0, NULL
-};
-
-static watch_t mem2_watch = {
-    &heap_frees[1], WATCH_TYPE_U32, 0, 0, 0, NULL
-};
-
-static watch_t recomp_1_watch = {
-    &heap_frees[2], WATCH_TYPE_U32, 0, 0, 0, NULL
-};
-
-static watch_t recomp_2_watch = {
-    &heap_frees[3], WATCH_TYPE_U32, 0, 0, 0, NULL
-};
-
-
 static int dump_vc_mem_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
     VC_DBG_REGS[0] = 0;
     return 1;
@@ -602,6 +590,14 @@ static int dump_vc_mem_onactivate(event_handler_t *callback, menu_event_t event,
 static int update_vc_heaps(event_handler_t *callback, menu_event_t event, void **event_data) {
     VC_HEAP_STATS(heap_frees);
     VC_RECOMP_STATS(&heap_frees[2]);
+    snprintf(mem1_text[0], 256, "0x%08x", heap_frees[0]);
+    snprintf(mem1_text[1], 256, "%.2f KB", (float)heap_frees[0] / 1024);
+    snprintf(mem2_text[0], 256, "0x%08x", heap_frees[1]);
+    snprintf(mem2_text[1], 256, "%.2f KB", (float)heap_frees[1] / 1024);
+    snprintf(recomp1_text[0], 256, "0x%08x blk", heap_frees[2]);
+    snprintf(recomp1_text[1], 256, "%.2f KB", ((float)heap_frees[2] * 512) / 1024);
+    snprintf(recomp2_text[0], 256, "0x%08x blk", heap_frees[3]);
+    snprintf(recomp2_text[1], 256, "%.2f KB", ((float)heap_frees[2] * 2560) / 1024);
     return 1;
 }
 
@@ -749,14 +745,28 @@ menu_t *create_debug_menu(void){
         menu_button_add(&vc_debug, 0, 1, "dump vc mem", dump_vc_mem_onactivate, NULL);
         menu_item_t *item = menu_label_add(&vc_debug, 0, 2, "MEM1 Free:");
         menu_item_register_event(item, MENU_EVENT_UPDATE, update_vc_heaps, NULL);
-        menu_watch_add(&vc_debug, 11, 2, &mem1_watch, true);
-        menu_label_add(&vc_debug, 0, 3, "MEM2 Free:");
-        menu_watch_add(&vc_debug, 11, 3, &mem2_watch, true);
+        mem1_text[0] = calloc(1, 256);
+        mem1_text[1] = calloc(1, 256);
+        menu_label_add(&vc_debug, 11, 2, mem1_text[0]);
+        menu_label_add(&vc_debug, 11, 3, mem1_text[1]);
 
-        menu_label_add(&vc_debug, 0, 4, "Recomp 1 Free:");
-        menu_watch_add(&vc_debug, 15, 4, &recomp_1_watch, true);
-        menu_label_add(&vc_debug, 0, 5, "Recomp 2 Free:");
-        menu_watch_add(&vc_debug, 15, 5, &recomp_2_watch, true);
+        menu_label_add(&vc_debug, 0, 4, "MEM2 Free:");
+        mem2_text[0] = calloc(1, 256);
+        mem2_text[1] = calloc(1, 256);
+        menu_label_add(&vc_debug, 11, 4, mem2_text[0]);
+        menu_label_add(&vc_debug, 11, 5, mem2_text[1]);
+
+        menu_label_add(&vc_debug, 0, 6, "Recomp 1:");
+        recomp1_text[0] = calloc(1, 256);
+        recomp1_text[1] = calloc(1, 256);
+        menu_label_add(&vc_debug, 11, 6, recomp1_text[0]);
+        menu_label_add(&vc_debug, 11, 7, recomp1_text[1]);
+
+        menu_label_add(&vc_debug, 0, 8, "Recomp 2:");
+        recomp2_text[0] = calloc(1, 256);
+        recomp2_text[1] = calloc(1, 256);
+        menu_label_add(&vc_debug, 11, 8, recomp2_text[0]);
+        menu_label_add(&vc_debug, 11, 9, recomp2_text[1]);
     }
 #endif    
 

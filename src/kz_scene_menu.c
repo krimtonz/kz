@@ -131,6 +131,7 @@ static int lock_cam_event(event_handler_t *handler, menu_event_t event, void **e
     return 1;
 }
 
+#if 0
 static int cam_draw_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     if(event == MENU_EVENT_ACTIVATE) {
         kz.draw_camera = !kz.draw_camera;
@@ -139,6 +140,7 @@ static int cam_draw_event(event_handler_t *handler, menu_event_t event, void **e
     }
     return 1;
 }
+#endif
 
 menu_t *create_scene_menu(void){
     static menu_t scene;

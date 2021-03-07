@@ -337,7 +337,7 @@ static void kz_main(void) {
             }
         } else {
             gfx_printf_color(280, 200, GPACK_RGBA8888(0xFF, 0x00, 0x00, 0xFF), "i");
-            static prev_page = 0;
+            static int prev_page = 0;
             if(p_ctx->screen_idx != prev_page) {
                 if(kz.pause_item_list != NULL) {
                     if(menu_item_list_active_get(kz.pause_item_list) == 1) {
@@ -539,7 +539,7 @@ static int pause_menu_event(event_handler_t *handler, menu_event_t event, void *
 
     if(pause_ctx->scroll_button != 0) {
         menu_item_list_active_set(handler->subscriber, 0);
-        return;
+        return 0;
     }
 
     int active = (int)*event_data;
