@@ -355,7 +355,9 @@ static int menu_item_list_event(event_handler_t *handler, menu_event_t event, vo
 void menu_item_list_set(menu_item_t *item) {
     struct item_data *data = item->data;
     data->selected_idx = get_option_idx(data) + (data->options == NULL ? 1 : 0);
+#ifndef LITE
     wheel_scroll(data, 1.0f);
+#endif
 }
 
 void menu_item_list_active_set(menu_item_t *item, int active) {
