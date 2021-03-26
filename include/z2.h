@@ -1602,10 +1602,7 @@ typedef struct {
 #define z2_extern       extern __attribute__ ((section(".data")))
 /* functions */
 z2_extern void          z2_LoadOverlay              (uint32_t vrom_start, uint32_t vrom_end, uint32_t vram_start, uint32_t vram_end, void *dest);
-z2_extern void          osSendMesg                  (OSMesgQueue *mq, OSMesg msg, int32_t flag);
-z2_extern int32_t       osRecvMesg                  (OSMesgQueue *mq, OSMesg msg, int32_t flag);
 z2_extern int32_t       osEPiStartDma               (OSPiHandle *pihandle, OSIoMesg *mb, int32_t direction);
-z2_extern void          osCreateMesgQueue           (OSMesgQueue *mq, OSMesg msg, int32_t count);
 z2_extern int32_t       osEPiReadIo                 (OSPiHandle *pihandle, uint32_t devAddr, uint32_t *data);
 z2_extern int32_t       osEPiWriteIo                (OSPiHandle *pihandle, uint32_t devAddr, uint32_t data);
 z2_extern void          z2_DrawActors               (z2_game_t *game, z2_actor_ctxt_t *actor_ctx);
