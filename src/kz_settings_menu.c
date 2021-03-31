@@ -7,7 +7,6 @@
 #include "menu_file.h"
 #include "menu_bind.h"
 #include "sys.h"
-#include "state.h"
 #include "hb_heap.h"
 
 enum settings_switch_item {
@@ -203,87 +202,6 @@ static int import_memfile_onactivate(event_handler_t *handler, menu_event_t even
     menu_file_get(FILE_MODE_LOAD, "memfile", ".kzm", do_import_memfile, NULL);
     return 1;
 }
-
-static int state_slot_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
-{
-    if(event == MENU_EVENT_ACTIVATE)
-    {
-        int dir = (int)handler->callback_data;
-        if(dir == 1)
-        {
-            kz.state_slot++;
-            kz.state_slot %= STATE_MAX;
-        } 
-        else if(dir == -1)
-        {
-            kz.state_slot += STATE_MAX - 1;
-            kz.state_slot %= STATE_MAX;
-        }
-    }
-    return 1;
-}
-
-static void do_export_state(char *path, void *data){
-    int file = -1;
-    creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-    if(file != -1){
-        kz_state_hdr_t *state = kz.states[kz.state_slot];
-        int res;
-        write(&res, file, state, sizeof(*state));
-        write(&res, file, (char*)state + sizeof(*state), state->size);
-        kz_log("export from state %d", kz.state_slot);
-        close(&res, file);
-    }
-    
-}
-
-static void do_import_state(char *path, void *data){
-    int file = -1;
-    open(&file, path, O_RDONLY);
-    if(file != -1){
-        kz_state_hdr_t *state = kz.states[kz.state_slot];
-        if(state){
-#ifdef WIIVC
-            hfree(state);
-#else
-            free(state);
-            state = malloc(sizeof(*state));
-#endif
-        }
-        int res;
-        struct stat sbuf;
-        stat(&res, path, &sbuf);
-#ifdef WIIVC
-        state = halloc(sbuf.st_size);
-#else
-        state = malloc(sbuf.st_size);
-#endif
-        read(&res, file, (char*)state, sbuf.st_size);
-        kz.states[kz.state_slot] = state;
-        kz_log("imported to state %d", kz.state_slot);
-        close(&res, file);
-    }
-    
-}
-
-static int export_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
-{
-    if(!kz.states[kz.state_slot])
-    {
-        kz_log("no state %d", kz.state_slot);
-        return 1;
-    }
-
-    menu_file_get(FILE_MODE_SAVE, "state", ".kzs", do_export_state, NULL);
-    return 1;
-}
-
-static int import_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
-{
-    menu_file_get(FILE_MODE_LOAD, "state", ".kzs", do_import_state, NULL);
-    return 1;
-}
-
 #endif
 
 static int memfile_action_onlist(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -334,29 +252,16 @@ menu_t *create_settings_menu(void){
     menu_checkbox_set(item, settings->turbo_type);
     menu_label_add(&settingsm, 2, 8, "turbo hold");
 
-    int y = 9;
-#ifndef LITE
-    menu_label_add(&settingsm, 0, y, "state slot");
-    menu_button_add(&settingsm, 15, y, "-", state_slot_onactivate, (void*)-1);
-    static watch_t state_slot_watch;
-    state_slot_watch.address = &kz.state_slot;
-    state_slot_watch.type = WATCH_TYPE_S32;
-    state_slot_watch.floating = 0;
-    menu_watch_add(&settingsm, 16, y, &state_slot_watch, 1);
-    menu_button_add(&settingsm, 17, y++, "+", state_slot_onactivate, (void*)1);
-    menu_button_add(&settingsm, 0, y, "export", export_state_onactivate, NULL);
-    menu_button_add(&settingsm, 8, y++, "import", import_state_onactivate, NULL);
-#endif
-
-    menu_label_add(&settingsm, 0, y, "memfile");
-    menu_button_add(&settingsm, 15, y, "-", memfile_dec_onactivate, NULL);
+    menu_label_add(&settingsm, 0, 9, "memfile");
+    menu_button_add(&settingsm, 15, 9, "-", memfile_dec_onactivate, NULL);
     static watch_t memfile_watch;
     memfile_watch.address = &kz.memfile_slot;
     memfile_watch.type = WATCH_TYPE_U8;
     memfile_watch.floating = 0;
-    menu_watch_add(&settingsm, 16, y, &memfile_watch, 1);
-    menu_button_add(&settingsm, 17, y++, "+", memfile_inc_onactivate, NULL);
+    menu_watch_add(&settingsm, 16, 9, &memfile_watch, 1);
+    menu_button_add(&settingsm, 17, 9, "+", memfile_inc_onactivate, NULL);
 
+    int y = 10;
 #ifndef LITE
     menu_button_add(&settingsm, 0, y, "export", export_memfile_onactivate, NULL);
     menu_button_add(&settingsm, 8, y++, "import", import_memfile_onactivate, NULL);

@@ -16,6 +16,7 @@
 #include "watches.h"
 #include "zu.h"
 #include "vec_math.h"
+#include "state.h"
 
 #define KZ_MEMFILE_MAX 3
 #define KZ_POSITION_MAX 3
@@ -34,7 +35,7 @@
 #define KZ_LOG_MAX 10
 #endif
 
-#define STATE_MAX 10
+#define STATE_MAX 5
 
 enum cheats {
     /* 0x00 */ CHEAT_STICKS,
@@ -112,7 +113,7 @@ typedef struct {
     uint16_t                input_mask;
     uint8_t                 stick_x_mask, stick_y_mask;
 #ifndef LITE
-    void                   *states[STATE_MAX];
+    kz_state_hdr_t         *states[STATE_MAX];
     int                     state_slot;
 #endif
     menu_t                  pause_menu;
@@ -128,6 +129,7 @@ menu_t *create_file_menu        (void);
 menu_t *create_equips_menu      (void);
 menu_t *create_settings_menu    (void);
 #ifndef LITE
+menu_t *create_states_menu      (void);
 menu_t *create_debug_menu       (void);
 #endif
 void    kz_log                  (const char *format, ...);

@@ -614,16 +614,24 @@ static void init(void) {
     menu_submenu_add(&kz.main_menu, 0, 1, "warps", create_warps_menu());
     menu_submenu_add(&kz.main_menu, 0, 2, "cheats", create_cheats_menu());
     menu_submenu_add(&kz.main_menu, 0, 3, "scene", create_scene_menu());
-    menu_submenu_add(&kz.main_menu, 0, 4, "watches", create_watches_menu());
-    menu_submenu_add(&kz.main_menu, 0, 5, "inventory", create_inventory_menu());
-    menu_submenu_add(&kz.main_menu, 0, 6, "equips", create_equips_menu());
-    menu_submenu_add(&kz.main_menu, 0, 7, "file", create_file_menu());
+
 #ifndef LITE
-    menu_submenu_add(&kz.main_menu, 0, 8, "debug", create_debug_menu());
-    menu_submenu_add(&kz.main_menu, 0, 9, "settings", create_settings_menu());
+#define Y 5
+    menu_submenu_add(&kz.main_menu, 0, 4, "states", create_states_menu());
 #else
-    menu_submenu_add(&kz.main_menu, 0, 8, "settings", create_settings_menu());
+#define Y 4
 #endif
+    menu_submenu_add(&kz.main_menu, 0, Y, "watches", create_watches_menu());
+    menu_submenu_add(&kz.main_menu, 0, Y + 1, "inventory", create_inventory_menu());
+    menu_submenu_add(&kz.main_menu, 0, Y + 2, "equips", create_equips_menu());
+    menu_submenu_add(&kz.main_menu, 0, Y + 3, "file", create_file_menu());
+#ifndef LITE
+    menu_submenu_add(&kz.main_menu, 0, Y + 4, "debug", create_debug_menu());
+    menu_submenu_add(&kz.main_menu, 0, Y + 5, "settings", create_settings_menu());
+#else
+    menu_submenu_add(&kz.main_menu, 0, Y + 4, "settings", create_settings_menu());
+#endif
+#undef Y
 
     menu_init(&kz.pause_menu, 0, 0);
     static menu_sprite_t sprite = {
