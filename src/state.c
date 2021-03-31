@@ -348,6 +348,8 @@ void load_state(void *state){
 
     st_read(&p, &z2_cs_bars, sizeof(z2_cs_bars));
 
+    st_read(&p, &z2_framerate_div, sizeof(z2_framerate_div));
+
     /* load scene file, and create static collision if loading from a different scene */
     if(scene_index != z2_game.scene_index){
         z2_scene_table_ent_t *scene_ent = &z2_scene_table[z2_game.scene_index];
@@ -760,6 +762,8 @@ size_t save_state(void *state){
     st_write(&p, z2_hud_state, 12);
 
     st_write(&p, &z2_cs_bars, sizeof(z2_cs_bars));
+
+    st_write(&p, &z2_framerate_div, sizeof(z2_framerate_div));
 
     /* save room transition actors */
     int trans_cnt = z2_game.room_ctx.transition_cnt;
