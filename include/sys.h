@@ -99,7 +99,7 @@ typedef struct {
     };
 } hb_fat_regs_t;
 
-#define hb_fat ((volatile hb_fat_regs_t*)0xA8058000)
+#define hb_fat ((volatile hb_fat_regs_t*)0xA9058000)
 
 #define open(__ret, __path, __oflags) { \
     hb_fat->open.path = (__path); \

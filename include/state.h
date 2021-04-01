@@ -15,6 +15,7 @@ typedef struct {
     uint16_t    z2_version;
     uint16_t    settings_version;
     size_t      size;
+    char        name[64];
 } kz_state_hdr_t;
 
 size_t  save_state  (void *state);

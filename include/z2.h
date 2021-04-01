@@ -1662,6 +1662,7 @@ z2_extern uint16_t                  z2_stored_song;
 z2_extern uint16_t                  z2_link_spawn_obj;
 z2_extern z2_player_ovl_table_t     z2_player_ovl_table[2];
 z2_extern z2_player_ovl_table_t    *z2_player_ovl_cur;
+z2_extern float                     z2_framerate_div;
 z2_extern z2_static_particle_ctxt_t z2_static_particle_ctxt;
 z2_extern z2_file_t                 z2_file;
 z2_extern char                      z2_cs_info[];

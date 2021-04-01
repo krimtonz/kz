@@ -42,13 +42,35 @@ struct command kz_commands[KZ_CMD_MAX] = {
 void command_prev_state(void) {
     kz.state_slot += STATE_MAX - 1;
     kz.state_slot %= STATE_MAX;
-    kz_log("select state slot %d", kz.state_slot);
+    kz_state_hdr_t *state = kz.states[kz.state_slot];
+    if(state != NULL) {
+#ifdef  WIIVC
+        char name[64];
+        hmemcpy(name, state->name, 64);
+#else
+        char *name = state->name
+#endif
+        kz_log("select state slot %d (%s)", kz.state_slot, name);
+    } else {
+        kz_log("select state slot %d (no state)", kz.state_slot);
+    }
 }
 
 void command_next_state(void) {
     kz.state_slot++;
     kz.state_slot %= STATE_MAX;
-    kz_log("select state slot %d", kz.state_slot);
+    kz_state_hdr_t *state = kz.states[kz.state_slot];
+    if(state != NULL) {
+#ifdef  WIIVC
+        char name[64];
+        hmemcpy(name, state->name, 64);
+#else
+        char *name = state->name
+#endif
+        kz_log("select state slot %d (%s)", kz.state_slot, name);
+    } else {
+        kz_log("select state slot %d (no state)", kz.state_slot);
+    }
 }
 
 void command_load_state(){
@@ -57,9 +79,16 @@ void command_load_state(){
         return;
     }
 
-    if(kz.states[kz.state_slot] != NULL) {
-        load_state(kz.states[kz.state_slot]);
-        kz_log("loaded state %d", kz.state_slot);
+    kz_state_hdr_t *state = kz.states[kz.state_slot];
+    if(state != NULL) {
+        load_state(state);
+#ifdef WIIVC
+        char name[64];
+        hmemcpy(name, state->name, 64);
+#else
+        char *name = state->name;
+#endif
+        kz_log("loaded state %d (%s)", kz.state_slot, name);
     } else {
         kz_log("no state");
     }
@@ -71,11 +100,15 @@ void command_save_state(){
         return;
     }
 
-    void *state = kz.states[kz.state_slot];
+    kz_state_hdr_t *state = kz.states[kz.state_slot];
+    char *tmp_name = NULL;
     if(state != NULL) {
+        tmp_name = malloc(sizeof(state->name));
 #ifdef WIIVC
+        hmemcpy(tmp_name, state->name, sizeof(state->name));
         hfree(state);
 #else
+        memcpy(tmp_name, state->name, sizeof(state->name));
         free(state);
 #endif
     }
@@ -95,17 +128,30 @@ void command_save_state(){
     kz_state.size = size;
     kz_state.z2_version = Z2_VERSION;
     kz_state.settings_version = 0;
+    if(tmp_name != NULL) {
+        memcpy(kz_state.name, tmp_name, sizeof(kz_state.name));
+        free(tmp_name);
+    } else {
+        strcpy(kz_state.name, "untitled");
+    }
     hmemcpy(state, &kz_state, sizeof(kz_state));
     state = hrealloc(state, size);
+    kz_log("saved state %d (%s)", kz.state_slot, kz_state.name);
 #else
     kz_state_hdr_t *kz_state = state;
     kz_state->size = size;
     kz_state->z2_version = Z2_VERSION;
     kz_state->settings_version = 0;
+    if(tmp_name != NULL) {
+        memcpy(state->name, tmp_name, sizeof(state->name));
+        free(tmp_name);
+    } else {
+        strcpy(state->name, "untitled");
+    }
     state = realloc(state, kz_state->size);
+    kz_log("saved state %d (%s)", kz.state_slot, state->name);
 #endif
     kz.states[kz.state_slot] = state;
-    kz_log("saved state %d", kz.state_slot);
 }
 #endif
 
