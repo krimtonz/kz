@@ -48,7 +48,7 @@ void command_prev_state(void) {
         char name[64];
         hmemcpy(name, state->name, 64);
 #else
-        char *name = state->name
+        char *name = state->name;
 #endif
         kz_log("select state slot %d (%s)", kz.state_slot, name);
     } else {
@@ -65,7 +65,7 @@ void command_next_state(void) {
         char name[64];
         hmemcpy(name, state->name, 64);
 #else
-        char *name = state->name
+        char *name = state->name;
 #endif
         kz_log("select state slot %d (%s)", kz.state_slot, name);
     } else {
