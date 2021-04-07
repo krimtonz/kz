@@ -342,7 +342,7 @@ void load_state(void *state){
     /* load cutscene state */
     st_read(&p, &z2_cutscene_state, 0x16);
 
-    st_read(&p, z2_cs_info, 0x80);
+    st_read(&p, z2_cs_info, 0xCC);
 
     st_read(&p, z2_hud_state, 12);
 
@@ -757,7 +757,7 @@ size_t save_state(void *state){
     /* save current cutscene state */
     st_write(&p, &z2_cutscene_state, 0x16);
 
-    st_write(&p, z2_cs_info, 0x80);
+    st_write(&p, z2_cs_info, 0xCC);
 
     st_write(&p, z2_hud_state, 12);
 
