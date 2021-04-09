@@ -698,7 +698,7 @@ static void game_state_main(void) {
         kz_exit(z2_ctxt.gamestate_update, &z2_ctxt);
     } else {
         z2_gfx_t *gfx = z2_game.common.gfx;
-        if(z2_ctxt.gamestate_frames != 0){
+        if(z2_ctxt.gamestate_frames != 1) {
             if(gfx->frame_cnt_1 & 1) {
                 memcpy(&z2_disp[Z2_DISP_SIZE], z2_disp, Z2_DISP_SIZE);
             } else {
@@ -707,6 +707,13 @@ static void game_state_main(void) {
 
             zu_disp_ptr_load(&kz.disp_p);
             zu_gfx_reloc(1 - (gfx->frame_cnt_1 & 1), 1 - (gfx->frame_cnt_2 & 1));
+        } else {
+            gDPSetColorImage(gfx->poly_opa.p++, G_IM_FMT_RGBA, G_IM_SIZ_16b, Z2_SCREEN_WIDTH, 0x0F000000);
+            gDPSetCycleType(gfx->poly_opa.p++, G_CYC_FILL);
+            gDPSetRenderMode(gfx->poly_opa.p++, G_RM_NOOP, G_RM_NOOP2);
+            gDPSetFillColor(gfx->poly_opa.p++, 0);
+            gDPFillRectangle(gfx->poly_opa.p++, 0, 0, Z2_SCREEN_WIDTH -1, Z2_SCREEN_HEIGHT - 1);
+            gDPPipeSync(gfx->poly_opa.p++);
         }
 
         z2_game.common.gamestate_frames--;
