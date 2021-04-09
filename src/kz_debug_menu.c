@@ -131,7 +131,7 @@ static void memory_table_update(void){
                 menu_item_remove(memory_item_cells[idx]);
             }
             if(idx % memory_view_size == 0){
-                memory_item_cells[idx] = menu_number_input_add(&memory, 9 + j * 2, 3 + i, 16, memory_view_size * 2);
+                memory_item_cells[idx] = menu_number_input_add(&memory, 10 + j * 2, 3 + i, 16, memory_view_size * 2);
                 menu_item_register_event(memory_item_cells[idx], MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, memory_cell_event, (void*)idx);
             }else{
                 memory_item_cells[idx] = NULL;
@@ -162,7 +162,7 @@ static int memory_size_onlist(event_handler_t *handler, menu_event_t event, void
 
 static void memory_view_draw(menu_item_t *item){
     int orig_x = menu_item_x(item);
-    int x = orig_x + 56 + (memory_view_size * 0x10);
+    int x = orig_x + 64 + (memory_view_size * 0x10);
     int y = menu_item_y(item);
 
     for(int i = 0;i < 8 / memory_view_size;i++){
