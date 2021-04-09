@@ -257,7 +257,8 @@ static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, vo
     int data = (int)item->data;
     dir_entry_t *dirent = set_at(&dir_files, data + file_menu_offset);
     if(dirent->isdir){
-        //chdir(dirent->name);
+        int ret;
+        chdir(&ret, dirent->name);
         update_view();
     }else{
         int len = strlen(dirent->name) - file_menu_extension_len;

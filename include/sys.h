@@ -96,6 +96,9 @@ typedef struct {
             char *path;
             struct stat *stat;
         } stat;
+        struct {
+            char *path;
+        } chdir;
     };
 } hb_fat_regs_t;
 
@@ -168,6 +171,12 @@ typedef struct {
     hb_fat->stat.stat = (__sbuf); \
     hb_fat->n64_buffer = (uint32_t)(__ret); \
     hb_fat->command = SYS_STAT; \
+}(void)0
+
+#define chdir(__ret, __path) { \
+    hb_fat->chdir.path = (__path); \
+    hb_fat->n64_buffer = (uint32_t)(__ret); \
+    hb_fat->command = SYS_CHDIR; \
 }(void)0
 
 #endif
