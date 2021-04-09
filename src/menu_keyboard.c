@@ -203,6 +203,7 @@ static menu_item_t *menu_key_add(menu_t *menu, int x_cell, int y_cell, int row, 
 }
 
 static int accept_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    input_buf[cursor_pos] = '\0';
     if(dest_string){
         if(!*dest_string){
             *dest_string = malloc(sizeof(input_buf));

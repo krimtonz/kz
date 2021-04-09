@@ -45,8 +45,8 @@ enum {
     SYS_SEEK_DIR,
     SYS_TELL_DIR,
     SYS_REWIND_DIR,
-    SYS_RM_DIR,
-    SYS_MK_DIR,
+    SYS_RMDIR,
+    SYS_MKDIR,
     SYS_STAT,
     SYS_LSTAT
 };
@@ -99,6 +99,10 @@ typedef struct {
         struct {
             char *path;
         } chdir;
+        struct {
+            char *path;
+            mode_t mode;
+        } mkdir;
     };
 } hb_fat_regs_t;
 
@@ -177,6 +181,13 @@ typedef struct {
     hb_fat->chdir.path = (__path); \
     hb_fat->n64_buffer = (uint32_t)(__ret); \
     hb_fat->command = SYS_CHDIR; \
+}(void)0
+
+#define mkdir(__ret, __path, __mode) { \
+    hb_fat->mkdir.path = (__path); \
+    hb_fat->mkdir.mode = (__mode); \
+    hb_fat->n64_buffer = (uint32_t)(__ret); \
+    hb_fat->command = SYS_MKDIR; \
 }(void)0
 
 #endif

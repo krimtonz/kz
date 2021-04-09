@@ -19,6 +19,7 @@ static menu_item_t         *file_menu_accept_button = NULL;
 static menu_item_t         *file_menu_clear_button = NULL;
 static menu_item_t         *file_menu_down_button = NULL;
 static menu_item_t         *file_menu_up_button = NULL;
+static menu_item_t         *file_menu_new_folder = NULL;
 static int                  file_menu_offset = 0;
 static const char          *file_menu_default = NULL;
 static const char          *file_menu_extension = NULL;
@@ -29,6 +30,7 @@ static void                *file_menu_callback_data = NULL;
 static struct set           dir_files;
 static _Bool                file_menu_ready = 0;
 static char                *file_menu_text_value;
+static char                *new_folder_string = NULL;
 
 typedef struct {
     char    name[256];
@@ -110,11 +112,13 @@ static void update_view(void){
             file_menu_accept_button->enabled = 0;
             file_menu_clear_button->enabled = 0;
             file_menu_text_entry->enabled = 0;
+            file_menu_new_folder->enabled = 0;
         }else{
             file_menu_accept_button->enabled = 1;
             file_menu_clear_button->enabled = 1;
             file_menu_text_entry->enabled = 1;
-            y = 5;
+            file_menu_new_folder->enabled = 1;
+            y = 6;
         }
         file_menu_up_button->y_cell = y;
         file_menu_down_button->y_cell = y + FILE_ROWS - 1;
@@ -298,6 +302,27 @@ static void menu_file_row_draw(menu_item_t *item){
     gfx_printf_color(x + 10, y,color,"%s",text);
 }
 
+static void menu_new_folder_draw(menu_item_t *item) {
+    int x = menu_item_x(item);
+    int y = menu_item_y(item);
+    uint32_t color = DEFAULT_COLOR;
+    if(item->owner->selected_item == item) {
+        color = SELECTED_COLOR;
+    }
+    gfx_draw_sprite_color(resource_get(resource_handles[R_KZ_FILES]), x, y, 3, 8, 8, color);
+    gfx_printf_color(x + 10, y, color, "create new folder");
+}
+
+static int new_folder_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(event == MENU_EVENT_ACTIVATE) {
+        menu_keyboard_get(handler->subscriber, NULL);
+    } else if (event == MENU_EVENT_KEYBOARD) {
+        int ret;
+        mkdir(&ret, (char*)*event_data, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    }
+    return;
+}
+
 static int file_menu_up_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
     if(file_menu_offset == 0){
         file_menu_offset = dir_files.container.size - FILE_ROWS;
@@ -329,6 +354,11 @@ static void menu_file_init(void){
     file_menu_text_entry = menu_text_input_add(&file_menu, 0, 3, "untitled", &file_menu_text_value, 32);
     file_menu_accept_button = menu_button_add(&file_menu, 0, 4, "accept", accept_onactivate, NULL);
     file_menu_clear_button = menu_button_add(&file_menu, 8, 4, "clear", clear_onactivate, NULL);
+    file_menu_new_folder = menu_add(&file_menu, 0, 5);
+    file_menu_new_folder->draw_proc = menu_new_folder_draw;
+    menu_item_register_event(file_menu_new_folder, MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, new_folder_onactivate, NULL);
+    file_menu_new_folder->interactive = 1;
+    new_folder_string = malloc(256);
     int y = 3;
 
     file_menu_up_button = menu_gfx_button_add(&file_menu, 0, y, scroll_up_sprite, file_menu_up_onactivate, NULL);
