@@ -30,7 +30,7 @@ static void                *file_menu_callback_data = NULL;
 static struct set           dir_files;
 static _Bool                file_menu_ready = 0;
 static char                *file_menu_text_value;
-static char                *new_folder_string = NULL;
+static char                *new_folder_name;
 
 typedef struct {
     char    name[256];
@@ -315,10 +315,12 @@ static void menu_new_folder_draw(menu_item_t *item) {
 
 static int new_folder_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
     if(event == MENU_EVENT_ACTIVATE) {
-        menu_keyboard_get(handler->subscriber, NULL);
+        strcpy(new_folder_name, "new folder");
+        menu_keyboard_get(handler->subscriber, &new_folder_name);
     } else if (event == MENU_EVENT_KEYBOARD) {
         int ret;
-        mkdir(&ret, (char*)*event_data, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        mkdir(&ret, new_folder_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        update_view();
     }
     return;
 }
@@ -358,7 +360,6 @@ static void menu_file_init(void){
     file_menu_new_folder->draw_proc = menu_new_folder_draw;
     menu_item_register_event(file_menu_new_folder, MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, new_folder_onactivate, NULL);
     file_menu_new_folder->interactive = 1;
-    new_folder_string = malloc(256);
     int y = 3;
 
     file_menu_up_button = menu_gfx_button_add(&file_menu, 0, y, scroll_up_sprite, file_menu_up_onactivate, NULL);
@@ -372,6 +373,9 @@ static void menu_file_init(void){
         menu_item_register_event(item, MENU_EVENT_ACTIVATE, menu_file_onactivate, NULL);
         file_menu_rows[i] = item;
     }
+
+    new_folder_name = malloc(256);
+
     file_menu_ready = 1;
 }
 
