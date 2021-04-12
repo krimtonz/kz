@@ -13,7 +13,11 @@ static int prev_state_onactivate(event_handler_t *handler, menu_event_t event, v
     kz.state_slot %= STATE_MAX;
     kz_state_hdr_t *state = kz.states[kz.state_slot];
     if(kz.states[kz.state_slot] != NULL) {
+#ifdef WIIVC
+        hmemcpy(state_name, state->name, 64);
+#else
         strcpy(state_name, state->name);
+#endif
     } else {
         strcpy(state_name, no_state);
     }
@@ -25,7 +29,11 @@ static int next_state_onactivate(event_handler_t *handler, menu_event_t event, v
     kz.state_slot %= STATE_MAX;
     kz_state_hdr_t *state = kz.states[kz.state_slot];
     if(kz.states[kz.state_slot] != NULL) {
+#ifdef WIIVC
+        hmemcpy(state_name, state->name, 64);
+#else
         strcpy(state_name, state->name);
+#endif
     } else {
         strcpy(state_name, no_state);
     }
