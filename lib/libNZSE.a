@@ -21,6 +21,7 @@ z2_LoadRoom                 = 0x8012E96C;
 z2_DrawRoom                 = 0x8012EBA8;
 z2_UnloadRoom               = 0x8012EBF8;
 z2_CreateSkyboxVtx          = 0x80143148;
+z2_LoadSkyboxData           = 0x80143324;
 z2_MotionBlur               = 0x80165460;
 z2_draw_room_1_hook         = 0x80168940;
 z2_draw_room_2_hook         = 0x80168958;

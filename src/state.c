@@ -487,9 +487,11 @@ void load_state(void *state){
         }else{
             z2_CreateSkyboxVtx(&z2_game.skybox_ctx, 5);
         }
+        
+        z2_LoadSkyboxData(&z2_game, &z2_game.skybox_ctx, z2_game.skybox_type);
     }
 
-    /* load hud textures */
+    /* load hud textures */ 
     zu_file_idx_load(z2_parameter_static, z2_game.hud_ctx.parameter_static);
 
     /* update equip buttons */

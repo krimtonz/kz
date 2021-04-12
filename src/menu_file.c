@@ -313,7 +313,7 @@ static void menu_new_folder_draw(menu_item_t *item) {
     gfx_printf_color(x + 10, y, color, "create new folder");
 }
 
-static int new_folder_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+static int new_folder_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     if(event == MENU_EVENT_ACTIVATE) {
         strcpy(new_folder_name, "new folder");
         menu_keyboard_get(handler->subscriber, &new_folder_name);
@@ -322,7 +322,7 @@ static int new_folder_onactivate(event_handler_t *handler, menu_event_t event, v
         mkdir(&ret, new_folder_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         update_view();
     }
-    return;
+    return 1;
 }
 
 static int file_menu_up_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -358,7 +358,7 @@ static void menu_file_init(void){
     file_menu_clear_button = menu_button_add(&file_menu, 8, 4, "clear", clear_onactivate, NULL);
     file_menu_new_folder = menu_add(&file_menu, 0, 5);
     file_menu_new_folder->draw_proc = menu_new_folder_draw;
-    menu_item_register_event(file_menu_new_folder, MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, new_folder_onactivate, NULL);
+    menu_item_register_event(file_menu_new_folder, MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, new_folder_event, NULL);
     file_menu_new_folder->interactive = 1;
     int y = 3;
 
