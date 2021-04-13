@@ -47,11 +47,24 @@ static uint8_t watch_data_sizes[] = {
 
 static void watch_add(watch_t *watch, _Bool setpos);
 
+#if defined(WIIVC) || defined(LITE)
+#define MEMMAX 0x80800000
+#else
+#define MEMMAX 0x80C00000
+#endif
+
 static int watch_address_onnumber(event_handler_t *handler, menu_event_t event, void **event_data){
     struct watch_row *row = handler->callback_data;
     watch_t *watch = row->watch;
     uint32_t value = (uint32_t)*event_data;
     value -= value % watch_data_sizes[watch->type];
+    if(value >= MEMMAX) {
+        kz_log("address too high");
+        value = 0x80000000;
+    } else if(value < 0x80000000) {
+        kz_log("address too low");
+        value = 0x80000000;
+    }
     menu_number_set(handler->subscriber, value);
     watch->address = (void*)value;
     prev_addr = value;

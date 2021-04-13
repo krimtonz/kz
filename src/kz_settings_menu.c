@@ -159,6 +159,48 @@ static int command_inc_onactivate(event_handler_t *handler, menu_event_t event, 
 }
 
 #ifndef LITE
+static void do_export_pos(char *path, void *data){
+    int file = -1;
+    creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(file != -1){
+        position_t *pos = kz.position_save[kz.pos_slot];
+        int res;
+        write(&res, file, pos, sizeof(*pos));
+        kz_log("export from position %d", kz.pos_slot);
+        close(&res, file);
+    }
+}
+
+static void do_import_pos(char *path, void *data){
+    int file = -1;
+    open(&file, path, O_RDONLY);
+    if(file != -1){
+        position_t *pos = kz.position_save[kz.pos_slot];
+        if(pos == NULL){
+            pos = malloc(sizeof(*pos));
+        }
+        int res;
+        read(&res, file, pos, sizeof(*pos));
+        kz.position_save[kz.pos_slot] = pos;
+        kz_log("imported to position %d", kz.pos_slot);
+        close(&res, file);
+    }
+}
+
+static int export_pos_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(kz.position_save[kz.pos_slot] == NULL){
+        kz_log("no position save");
+        return 1;
+    }
+    menu_file_get(FILE_MODE_SAVE, "position", ".kzp", do_export_pos, NULL);
+    return 1;
+}
+
+static int import_pos_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+    menu_file_get(FILE_MODE_LOAD, "position", ".kzp", do_import_pos, NULL);
+    return 1;
+}
+
 static void do_export_memfile(char *path, void *data){
     int file = -1;
     creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
@@ -169,7 +211,6 @@ static void do_export_memfile(char *path, void *data){
         kz_log("export from memfile %d", kz.memfile_slot);
         close(&res, file);
     }
-    
 }
 
 static void do_import_memfile(char *path, void *data){
@@ -186,7 +227,6 @@ static void do_import_memfile(char *path, void *data){
         kz_log("imported to memfile %d", kz.memfile_slot);
         close(&res, file);
     }
-    
 }
 
 static int export_memfile_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
@@ -270,7 +310,6 @@ menu_t *create_settings_menu(void){
     menu_label_add(&settingsm, 0, y, "memfile action");
     item = menu_list_add(&settingsm, 15, y++, memfile_action_text, sizeof(memfile_action_values) / sizeof(*memfile_action_values));
     menu_item_register_event(item, MENU_EVENT_LIST, memfile_action_onlist, NULL);
-
     menu_label_add(&settingsm, 0, y, "saved position");
     menu_button_add(&settingsm, 15, y, "-", position_dec_onactivate, NULL);
     static watch_t position_watch;
@@ -279,6 +318,13 @@ menu_t *create_settings_menu(void){
     position_watch.floating = 0;
     menu_watch_add(&settingsm, 16, y, &position_watch, 1);
     menu_button_add(&settingsm, 17, y++, "+", position_inc_onactivate, NULL);
+
+#ifndef LITE
+    menu_button_add(&settingsm, 0, y, "export", export_pos_onactivate, NULL);
+    menu_button_add(&settingsm, 8, y++, "import", import_pos_onactivate, NULL);
+#endif
+    y++;
+
     menu_submenu_add(&settingsm, 0, y, "commands", &commands);
 
     // Build commands menu
