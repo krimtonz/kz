@@ -68,6 +68,7 @@ genhook "$sym_heap_size_hook" "lis r3, "$heapaddr"@h;ori r3, r3, "$heapaddr"@l;"
 genhook "$sym_ramSetSizeCall" "bl $(vcbranch $sym__start $sym_ramSetSizeCall);"
 genhook "$sym_mem2_heap_size" "lis r4, 0x9010;nop;nop;ori r0, r4, 0x0800;nop;nop;"
 genhook "$sym_ramGetBuffer" "b $(vcbranch $sym_kz_ramGetBuffer $sym_ramGetBuffer);"
+genhook "$sym_rdp_fb_copy_call" "bl $(vcbranch $sym_kz_rdp_frame_buffer_copy $sym_rdp_fb_copy_call);"
 
 echo "0000 00000000 00000064"
 echo "0301 0000018B 0000003D"
