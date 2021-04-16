@@ -225,7 +225,6 @@ static void kz_main(void) {
             if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)) {
                 kz.menu_active = 0;
                 free_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
-                menu_trigger_event(kz_menu, MENU_EVENT_HIDE, event_data);
             } else if(input_bind_pressed_raw(KZ_CMD_RETURN)) {
                 menu_trigger_event(kz_menu, MENU_EVENT_RETURN, &event_data);
             } else {
@@ -236,7 +235,6 @@ static void kz_main(void) {
         } else if(input_bind_pressed_raw(KZ_CMD_TOGGLE_MENU)) {
             kz.menu_active = 1;
             reserve_buttons(BUTTON_L | BUTTON_D_DOWN | BUTTON_D_LEFT | BUTTON_D_RIGHT | BUTTON_D_UP);
-            menu_trigger_event(kz_menu, MENU_EVENT_SHOW, event_data);
         }
     }
     /* handle command bindings */

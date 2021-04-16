@@ -61,7 +61,7 @@ static void menu_navigate(menu_t *menu, menu_nav_t nav) {
 
     void *event_data = NULL;
     if ((near || far) && menu->selected_item != NULL) {
-        menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, &event_data);
+        kz.tooltip = NULL;
     }
 
     if (near) {
@@ -222,14 +222,7 @@ int menu_item_trigger_event(menu_item_t *item, menu_event_t event, void **event_
     // default event handlers
     switch(event) {
         case MENU_EVENT_ENTER:
-            if (kz.tooltip == NULL) {
-                kz.tooltip = item->tooltip;
-            }
-            return true;
-        case MENU_EVENT_EXIT:
-            if (kz.tooltip != NULL) {
-                kz.tooltip = NULL;
-            }
+            kz.tooltip = item->tooltip;
             return true;
         default:
             return false;
@@ -284,9 +277,8 @@ int menu_trigger_event(menu_t *menu, menu_event_t event, void **event_data)
         case MENU_EVENT_ENTER: {
             if (event_data != NULL) {
                 menu_t *submenu = *event_data;
-                menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, event_data);
+                kz.tooltip = NULL;
                 menu_item_trigger_event(submenu->selected_item, MENU_EVENT_ENTER, event_data);
-                menu_trigger_event(menu, MENU_EVENT_EXIT, NULL);
                 menu->child = submenu;
                 submenu->parent = menu;
             }
@@ -306,8 +298,7 @@ int menu_trigger_event(menu_t *menu, menu_event_t event, void **event_data)
             break;
         case MENU_EVENT_RETURN:{
             if (menu->parent != NULL) {
-                menu_trigger_event(menu, MENU_EVENT_EXIT, NULL);
-                menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, event_data);
+                kz.tooltip = NULL;
                 menu_trigger_event(menu->parent, MENU_EVENT_ENTER, NULL);
                 menu_item_trigger_event(menu->parent->selected_item, MENU_EVENT_ENTER, event_data);
                 menu->parent->child = NULL;

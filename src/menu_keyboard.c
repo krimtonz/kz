@@ -7,10 +7,10 @@
 
 #define MAX_STR_LEN         30
 
-#define SHORTCUT_BACKSPACE  (BUTTON_C_LEFT)
-#define SHORTCUT_SHIFT      (BUTTON_C_UP)
-#define SHORTCUT_SPACE      (BUTTON_C_RIGHT)
-#define SHORTCUT_ACCEPT    (BUTTON_C_DOWN)
+#define SHORTCUT_BACKSPACE  (BUTTON_R | BUTTON_D_LEFT)
+#define SHORTCUT_SHIFT      (BUTTON_R | BUTTON_D_UP)
+#define SHORTCUT_SPACE      (BUTTON_R | BUTTON_D_RIGHT)
+#define SHORTCUT_ACCEPT     (BUTTON_R | BUTTON_D_DOWN)
 
 struct key_data {
     int row;
@@ -145,6 +145,9 @@ static int keyboard_event(event_handler_t *handler, menu_event_t event, void **e
             }
         }
     }else if(event == MENU_EVENT_NAVIGATE){
+        if(input_pressed() & BUTTON_R) {
+            return 1;
+        }
         menu_nav_t nav = (menu_nav_t)event_data;
         switch(nav){
         case MENU_NAV_LEFT:
@@ -192,26 +195,31 @@ static void key_draw(menu_item_t *item){
     }
 }
 
-static int key_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    menu_item_t *item = handler->subscriber;
-    struct key_data *data = item->data;
-    const char **source = shifted ? keyboard_shift_rows : keyboard_rows;
-    int c = source[data->row][data->col];
-    if(c == 0x01){
-        shift();
+static int key_event(event_handler_t *handler, menu_event_t event, void **event_data){
+    if(event == MENU_EVENT_ACTIVATE) {
+        menu_item_t *item = handler->subscriber;
+        struct key_data *data = item->data;
+        const char **source = shifted ? keyboard_shift_rows : keyboard_rows;
+        int c = source[data->row][data->col];
+        if(c == 0x01){
+            shift();
+            return 1;
+        }else if(c == 0x08){
+            backspace();
+            return 1;
+        }
+        input_buf[cursor_pos] = source[data->row][data->col];
+        if(cursor_pos < sizeof(input_buf) - 1){
+            cursor_pos++;
+        }
+        if(input_buf[cursor_pos] == 0){
+            input_buf[cursor_pos] = '_';
+        }
         return 1;
-    }else if(c == 0x08){
-        backspace();
+    } else if(event == MENU_EVENT_NAVIGATE && input_pressed_raw() & BUTTON_R) {
         return 1;
     }
-    input_buf[cursor_pos] = source[data->row][data->col];
-    if(cursor_pos < sizeof(input_buf) - 1){
-        cursor_pos++;
-    }
-    if(input_buf[cursor_pos] == 0){
-        input_buf[cursor_pos] = '_';
-    }
-    return 1;
+    return 0;
 }
 
 static menu_item_t *menu_key_add(menu_t *menu, int x_cell, int y_cell, int row, int col){
@@ -223,7 +231,7 @@ static menu_item_t *menu_key_add(menu_t *menu, int x_cell, int y_cell, int row, 
         item->data = data;
         item->draw_proc = key_draw;
         item->interactive = 1;
-        menu_item_register_event(item, MENU_EVENT_ACTIVATE, key_onactivate, NULL);
+        menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_NAVIGATE, key_event, NULL);
     }
     return item;
 }
@@ -232,17 +240,21 @@ static void legend_draw(menu_item_t *item) {
     int x = menu_item_x(item);
     int y = menu_item_y(item);
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y, 1, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 10, y, "backspace");
+    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y, 4, 8, 8);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y, 1, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y, "backspace");
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 10, 0, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 10, y + 10, "space");
+    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y + 10, 4, 8, 8);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 10, 0, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y + 10, "space");
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 20, 3, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 10, y + 20, "caps lock");
+    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y + 20, 4, 8, 8);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 20, 3, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y + 20, "caps lock");
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 30, 2, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 10, y + 30, "accept");
+    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y + 30, 4, 8, 8);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 30, 2, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y + 30, "accept");
     
 }
 
@@ -250,23 +262,9 @@ static int accept_onactivate(event_handler_t *handler, menu_event_t event, void 
     return accept(event_data);
 }
 
-static int keyboard_eventhandler(event_handler_t *handler, menu_event_t event, void **event_data) {
-    switch(event) {
-        case MENU_EVENT_HIDE:
-        case MENU_EVENT_EXIT:
-            input_mask_clear(BUTTON_C_BUTTONS, 0x00, 0x00);
-            break;
-        case MENU_EVENT_SHOW:
-            input_mask_set(BUTTON_C_BUTTONS, 0x00, 0x00);
-            break;
-    }
-    return 0;
-}
-
 static void init_keyboard(void){
     menu_init(&menu_keyboard, 0, 0);
     menu_padding_set(&menu_keyboard, 8, 8);
-    menu_register_event(&menu_keyboard, MENU_EVENT_EXIT | MENU_EVENT_HIDE | MENU_EVENT_SHOW, keyboard_eventhandler, NULL);
 
     menu_keyboard.selected_item = menu_button_add(&menu_keyboard, 0, 0, "return", menu_return, NULL);
     menu_button_add(&menu_keyboard, 0, 2, "accept", accept_onactivate, NULL);
@@ -295,6 +293,5 @@ void menu_keyboard_get(menu_item_t *item, char **dest){
     }
     menu_keyboard.selected_item = menu_keyboard.items.first;
     void *keyboard_data = &menu_keyboard;
-    input_mask_set(BUTTON_Z | BUTTON_C_BUTTONS, 0x00, 0x00);
     menu_trigger_event(&kz.main_menu, MENU_EVENT_ENTER, &keyboard_data);
 }
