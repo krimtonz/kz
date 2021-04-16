@@ -7,10 +7,10 @@
 
 #define MAX_STR_LEN         30
 
-#define SHORTCUT_BACKSPACE  (BUTTON_Z | BUTTON_C_LEFT)
-#define SHORTCUT_SHIFT      (BUTTON_Z | BUTTON_C_UP)
-#define SHORTCUT_SPACE      (BUTTON_Z | BUTTON_C_RIGHT)
-#define SHORTCUT_ACCEPT    (BUTTON_Z | BUTTON_C_DOWN)
+#define SHORTCUT_BACKSPACE  (BUTTON_C_LEFT)
+#define SHORTCUT_SHIFT      (BUTTON_C_UP)
+#define SHORTCUT_SPACE      (BUTTON_C_RIGHT)
+#define SHORTCUT_ACCEPT    (BUTTON_C_DOWN)
 
 struct key_data {
     int row;
@@ -232,21 +232,17 @@ static void legend_draw(menu_item_t *item) {
     int x = menu_item_x(item);
     int y = menu_item_y(item);
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y, 13, 8, 8, 0xFFFFFFFF);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y, 1, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 20, y, "backspace");
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y, 1, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 10, y, "backspace");
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 10, 13, 8, 8, 0xFFFFFFFF);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 10, 0, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 20, y + 10, "space");
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 10, 0, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 10, y + 10, "space");
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 20, 13, 8, 8, 0xFFFFFFFF);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 20, 3, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 20, y + 20, "caps lock");
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 20, 3, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 10, y + 20, "caps lock");
 
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 30, 13, 8, 8, 0xFFFFFFFF);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 30, 2, 8, 8, 0xFFF000FF);
-    gfx_printf(x + 20, y + 30, "accept");
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 30, 2, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 10, y + 30, "accept");
     
 }
 
@@ -258,10 +254,10 @@ static int keyboard_eventhandler(event_handler_t *handler, menu_event_t event, v
     switch(event) {
         case MENU_EVENT_HIDE:
         case MENU_EVENT_EXIT:
-            input_mask_clear(BUTTON_Z | BUTTON_C_BUTTONS, 0x00, 0x00);
+            input_mask_clear(BUTTON_C_BUTTONS, 0x00, 0x00);
             break;
         case MENU_EVENT_SHOW:
-            input_mask_set(BUTTON_Z | BUTTON_C_BUTTONS, 0x00, 0x00);
+            input_mask_set(BUTTON_C_BUTTONS, 0x00, 0x00);
             break;
     }
     return 0;
