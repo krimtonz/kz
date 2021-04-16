@@ -240,20 +240,20 @@ static void legend_draw(menu_item_t *item) {
     int x = menu_item_x(item);
     int y = menu_item_y(item);
 
-    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y, 4, 8, 8);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y, 1, 8, 8, 0xFFF000FF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y, 4, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y, 9, 8, 8, 0xFFFFFFFF);
     gfx_printf(x + 20, y, "backspace");
 
-    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y + 10, 4, 8, 8);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 10, 0, 8, 8, 0xFFF000FF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 10, 4, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 10, 8, 8, 8, 0xFFFFFFFF);
     gfx_printf(x + 20, y + 10, "space");
 
-    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y + 20, 4, 8, 8);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 20, 3, 8, 8, 0xFFF000FF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 20, 4, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 20, 11, 8, 8, 0xFFFFFFFF);
     gfx_printf(x + 20, y + 20, "caps lock");
 
-    gfx_draw_sprite(resource_get(R_KZ_BUTTONS), x, y + 30, 4, 8, 8);
-    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 30, 2, 8, 8, 0xFFF000FF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 30, 4, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 30, 10, 8, 8, 0xFFFFFFFF);
     gfx_printf(x + 20, y + 30, "accept");
     
 }
