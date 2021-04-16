@@ -284,11 +284,11 @@ int menu_trigger_event(menu_t *menu, menu_event_t event, void **event_data)
         case MENU_EVENT_ENTER: {
             if (event_data != NULL) {
                 menu_t *submenu = *event_data;
-                menu->child = submenu;
-                submenu->parent = menu;
                 menu_item_trigger_event(menu->selected_item, MENU_EVENT_EXIT, event_data);
                 menu_item_trigger_event(submenu->selected_item, MENU_EVENT_ENTER, event_data);
                 menu_trigger_event(menu, MENU_EVENT_EXIT, NULL);
+                menu->child = submenu;
+                submenu->parent = menu;
             }
             break;
         }

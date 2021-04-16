@@ -10,6 +10,7 @@
 #define SHORTCUT_BACKSPACE  (BUTTON_Z | BUTTON_C_LEFT)
 #define SHORTCUT_SHIFT      (BUTTON_Z | BUTTON_C_UP)
 #define SHORTCUT_SPACE      (BUTTON_Z | BUTTON_C_RIGHT)
+#define SHORTCUT_ACCEPT    (BUTTON_Z | BUTTON_C_DOWN)
 
 struct key_data {
     int row;
@@ -103,6 +104,29 @@ static inline void shift(){
     shifted = !shifted;
 }
 
+static int accept(void **event_data) {
+    input_buf[cursor_pos] = '\0';
+    if(dest_string){
+        if(!*dest_string){
+            *dest_string = malloc(sizeof(input_buf));
+            if(!*dest_string){
+                return 0;
+            }
+        }
+        int buf_len = strlen(input_buf);
+        if(buf_len > 0 && input_buf[buf_len - 1] == '_'){
+            input_buf[buf_len - 1] = 0;
+        }
+        memcpy(*dest_string, input_buf, sizeof(input_buf));
+    }
+    *event_data = &input_buf;
+    menu_item_trigger_event(keyboard_caller, MENU_EVENT_KEYBOARD, event_data);
+    dest_string = NULL;
+    keyboard_caller = NULL;
+    menu_trigger_event(&menu_keyboard, MENU_EVENT_RETURN, event_data);
+    return 1;
+}
+
 static int keyboard_event(event_handler_t *handler, menu_event_t event, void **event_data){
     if(event == MENU_EVENT_UPDATE){
         uint16_t input = input_pressed();
@@ -111,6 +135,8 @@ static int keyboard_event(event_handler_t *handler, menu_event_t event, void **e
         }
         else if((input & SHORTCUT_SHIFT) == SHORTCUT_SHIFT){
             shift();
+        } else if((input & SHORTCUT_ACCEPT) == SHORTCUT_ACCEPT) {
+            return accept(event_data);
         }
         else if((input & SHORTCUT_SPACE) == SHORTCUT_SPACE){
             if(cursor_pos < MAX_STR_LEN - 1){
@@ -202,32 +228,49 @@ static menu_item_t *menu_key_add(menu_t *menu, int x_cell, int y_cell, int row, 
     return item;
 }
 
+static void legend_draw(menu_item_t *item) {
+    int x = menu_item_x(item);
+    int y = menu_item_y(item);
+
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y, 13, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y, 1, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y, "backspace");
+
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 10, 13, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 10, 0, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y + 10, "space");
+
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 20, 13, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 20, 3, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y + 20, "caps lock");
+
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x, y + 30, 13, 8, 8, 0xFFFFFFFF);
+    gfx_draw_sprite_color(resource_get(R_KZ_BUTTONS), x + 10, y + 30, 2, 8, 8, 0xFFF000FF);
+    gfx_printf(x + 20, y + 30, "accept");
+    
+}
+
 static int accept_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    input_buf[cursor_pos] = '\0';
-    if(dest_string){
-        if(!*dest_string){
-            *dest_string = malloc(sizeof(input_buf));
-            if(!*dest_string){
-                return 0;
-            }
-        }
-        int buf_len = strlen(input_buf);
-        if(buf_len > 0 && input_buf[buf_len - 1] == '_'){
-            input_buf[buf_len - 1] = 0;
-        }
-        memcpy(*dest_string, input_buf, sizeof(input_buf));
+    return accept(event_data);
+}
+
+static int keyboard_eventhandler(event_handler_t *handler, menu_event_t event, void **event_data) {
+    switch(event) {
+        case MENU_EVENT_HIDE:
+        case MENU_EVENT_EXIT:
+            input_mask_clear(BUTTON_Z | BUTTON_C_BUTTONS, 0x00, 0x00);
+            break;
+        case MENU_EVENT_SHOW:
+            input_mask_set(BUTTON_Z | BUTTON_C_BUTTONS, 0x00, 0x00);
+            break;
     }
-    *event_data = &input_buf;
-    menu_item_trigger_event(keyboard_caller, MENU_EVENT_KEYBOARD, event_data);
-    dest_string = NULL;
-    keyboard_caller = NULL;
-    menu_trigger_event(&menu_keyboard, MENU_EVENT_RETURN, event_data);
-    return 1;
+    return 0;
 }
 
 static void init_keyboard(void){
     menu_init(&menu_keyboard, 0, 0);
     menu_padding_set(&menu_keyboard, 8, 8);
+    menu_register_event(&menu_keyboard, MENU_EVENT_EXIT | MENU_EVENT_HIDE | MENU_EVENT_SHOW, keyboard_eventhandler, NULL);
 
     menu_keyboard.selected_item = menu_button_add(&menu_keyboard, 0, 0, "return", menu_return, NULL);
     menu_button_add(&menu_keyboard, 0, 2, "accept", accept_onactivate, NULL);
@@ -237,6 +280,8 @@ static void init_keyboard(void){
             menu_key_add(&menu_keyboard, j, i + 3, i, j);
         }
     }
+    menu_item_t *legend = menu_label_add(&menu_keyboard, 0, sizeof(keyboard_rows) / sizeof(*keyboard_rows) + 4, NULL);
+    legend->draw_proc = legend_draw;
     keyboard_ready = true;
 }
 
@@ -254,5 +299,6 @@ void menu_keyboard_get(menu_item_t *item, char **dest){
     }
     menu_keyboard.selected_item = menu_keyboard.items.first;
     void *keyboard_data = &menu_keyboard;
+    input_mask_set(BUTTON_Z | BUTTON_C_BUTTONS, 0x00, 0x00);
     menu_trigger_event(&kz.main_menu, MENU_EVENT_ENTER, &keyboard_data);
 }

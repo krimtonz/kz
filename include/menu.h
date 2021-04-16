@@ -17,6 +17,8 @@
 #define menu_item_enable(x)     (((menu_item_t*)x)->enabled = 1)
 #define menu_add(x,y,z)         (menu_label_add(x, y, z, NULL))
 
+#define MENU_EVENT_HIDE     (0b1 << 10)
+#define MENU_EVENT_SHOW     (0b1 << 9)
 #define MENU_EVENT_NUMBER   (0b1 << 8)
 #define MENU_EVENT_KEYBOARD (0b1 << 7)
 #define MENU_EVENT_LIST     (0b1 << 6)
