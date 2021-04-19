@@ -123,12 +123,13 @@ static int accept(void **event_data) {
     menu_item_trigger_event(keyboard_caller, MENU_EVENT_KEYBOARD, event_data);
     dest_string = NULL;
     keyboard_caller = NULL;
+    *event_data = 1;
     menu_trigger_event(&menu_keyboard, MENU_EVENT_RETURN, event_data);
     return 1;
 }
 
 static int keyboard_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_UPDATE){
+    if(event == MENU_EVENT_UPDATE) {
         uint16_t input = input_pressed();
         if((input & SHORTCUT_BACKSPACE) == SHORTCUT_BACKSPACE){
             backspace();
@@ -137,14 +138,13 @@ static int keyboard_event(event_handler_t *handler, menu_event_t event, void **e
             shift();
         } else if((input & SHORTCUT_ACCEPT) == SHORTCUT_ACCEPT) {
             return accept(event_data);
-        }
-        else if((input & SHORTCUT_SPACE) == SHORTCUT_SPACE){
+        } else if((input & SHORTCUT_SPACE) == SHORTCUT_SPACE){
             if(cursor_pos < MAX_STR_LEN - 1){
                 input_buf[cursor_pos] = ' ';
                 cursor_pos++;
             }
         }
-    }else if(event == MENU_EVENT_NAVIGATE){
+    } else if(event == MENU_EVENT_NAVIGATE) {
         if(input_pressed() & BUTTON_R) {
             return 1;
         }
@@ -262,11 +262,18 @@ static int accept_onactivate(event_handler_t *handler, menu_event_t event, void 
     return accept(event_data);
 }
 
+static int keyboard_return(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if((int)*event_data == 1) {
+        return 0;
+    }
+    return 1;
+}
+
 static void init_keyboard(void){
     menu_init(&menu_keyboard, 0, 0);
     menu_padding_set(&menu_keyboard, 8, 8);
-
-    menu_keyboard.selected_item = menu_button_add(&menu_keyboard, 0, 0, "return", menu_return, NULL);
+    menu_register_event(&menu_keyboard, MENU_EVENT_RETURN, keyboard_return, (void*)0);
+    menu_keyboard.selected_item = menu_button_add(&menu_keyboard, 0, 0, "return", menu_return, (void*)1);
     menu_button_add(&menu_keyboard, 0, 2, "accept", accept_onactivate, NULL);
     menu_keyboard_input_add(&menu_keyboard, 0, 1);
     for(int i = 0;i < sizeof(keyboard_rows) / sizeof(*keyboard_rows);i++){

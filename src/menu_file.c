@@ -351,7 +351,8 @@ static void menu_file_init(void){
     menu_init(&file_menu, 0, 0);
     file_menu.selected_item = menu_button_add(&file_menu, 0, 0, "return", menu_return, NULL);
     menu_button_add(&file_menu, 0, 1, "reset disk", reset_disk_onactivate, NULL);
-    file_menu_location = menu_label_add(&file_menu, 0, 2, "");
+    file_menu_location = menu_label_add(&file_menu, 0, 2, malloc(32));
+    file_menu_location->text[0] = '\0';
     file_menu_text_value = malloc(32);
     file_menu_text_entry = menu_text_input_add(&file_menu, 0, 3, "untitled", &file_menu_text_value, 32);
     file_menu_accept_button = menu_button_add(&file_menu, 0, 4, "accept", accept_onactivate, NULL);

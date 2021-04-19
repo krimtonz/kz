@@ -320,6 +320,7 @@ void menu_item_offset_set(menu_item_t *item, int16_t x_offset, int16_t y_offset)
 
 int menu_return(event_handler_t *handler, menu_event_t event, void **event_data)
 {
+    *event_data = handler->callback_data;
     menu_trigger_event(&kz.main_menu, MENU_EVENT_RETURN, event_data);
     return 1;
 }
