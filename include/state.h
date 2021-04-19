@@ -11,6 +11,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define STATE_VERSION 0
+
 typedef struct {
     uint16_t    z2_version;
     uint16_t    settings_version;
@@ -18,8 +20,9 @@ typedef struct {
     char        name[64];
 } kz_state_hdr_t;
 
-size_t  save_state  (void *state);
-void    load_state  (void *state);
+size_t  save_state      (void *state);
+void    load_state      (void *state);
+int     state_is_valid  (kz_state_hdr_t *state);
 
 #endif
 #endif

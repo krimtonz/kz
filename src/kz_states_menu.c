@@ -88,12 +88,11 @@ static void do_import_state(char *path, void *data){
     open(&file, path, O_RDONLY);
     if(file != -1){
         kz_state_hdr_t *state = kz.states[kz.state_slot];
-        if(state){
+        if(state != NULL) {
 #ifdef WIIVC
             hfree(state);
 #else
             free(state);
-            state = malloc(sizeof(*state));
 #endif
         }
         int res;
@@ -104,9 +103,20 @@ static void do_import_state(char *path, void *data){
 #else
         state = malloc(sbuf.st_size);
 #endif
-        read(&res, file, (char*)state, sbuf.st_size);
-        kz.states[kz.state_slot] = state;
-        kz_log("imported to state %d", kz.state_slot);
+        read(&res, file, (char*)state, sizeof(*state));
+        int state_res = state_is_valid(state);
+        if(state_res == 0) {
+            read(&res, file, (char*)state + sizeof(*state), sbuf.st_size - sizeof(*state));
+            kz.states[kz.state_slot] = state;
+            kz_log("imported to state %d", kz.state_slot);
+        } else {
+#ifdef WIIVC
+            hfree(state);
+#else
+            free(state);
+#endif
+            kz_log(state_res == -1 ? "wrong mm version" : "wrong state version");
+        }
         close(&res, file);
     }
     

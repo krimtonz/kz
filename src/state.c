@@ -822,4 +822,16 @@ size_t save_state(void *state){
 
     return (char*)p - (char*)state;
 }
+
+int state_is_valid(kz_state_hdr_t *state) {
+    if(state->z2_version != Z2_VERSION) {
+        return -1;
+    }
+
+    if(state->settings_version != STATE_VERSION) {
+        return -2;
+    }
+
+    return 0;
+}
 #endif
