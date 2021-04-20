@@ -443,8 +443,8 @@ void load_state(void *state){
 
     } else {
         // Prerender slowly started, but not done.
-        if((z2_prerender_slowly.flags & 2) && !(z2_prerender_slowly.flags & 1)) {
-            z2_SlowlyStop(&z2_prerender_slowly);
+        if((z2_prerender_bgtask.flags & 2) && !(z2_prerender_bgtask.flags & 1)) {
+            z2_BgTaskStop(&z2_prerender_bgtask);
         }
         /* load objects if they are not currently loaded in the same dram address */
         for(int i = 0; i < 35; i++) {
