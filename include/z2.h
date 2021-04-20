@@ -1596,6 +1596,18 @@ typedef struct {
     void *cbArg1;
 } z2_slowly_t;
 
+typedef struct {
+    int8_t scene_id;    /* 0x00 */
+    int8_t spawn_id;    /* 0x01 */
+    int16_t variable;   /* 0x02 */
+} z2_entrance_rec_t;    /* 0x04 */
+
+typedef struct {
+    int8_t              ent_cnt;        /* 0x00 */
+    z2_entrance_rec_t **entrances;      /* 0x04 */
+    char                filename;       /* 0x08 */
+} z2_extern_ent_tab_t;                  /* 0x0C */
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1659,6 +1671,7 @@ z2_extern z2_rom_file_t             z2_area_tex_table[9];
 z2_extern uint16_t                  z2_link_form_obj_idx[];
 z2_extern z2_rom_file_t             z2_obj_table[];
 z2_extern z2_scene_table_ent_t      z2_scene_table[113];
+z2_extern z2_extern_ent_tab_t       z2_extern_scene_table[110];
 z2_extern uint16_t                  z2_stored_song;
 z2_extern uint16_t                  z2_link_spawn_obj;
 z2_extern z2_player_ovl_table_t     z2_player_ovl_table[2];

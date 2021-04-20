@@ -60,6 +60,7 @@ z2_area_tex_table           = 0x801BD780;
 z2_link_form_obj_idx        = 0x801BD850;
 z2_obj_table                = 0x801BD860;
 z2_scene_table              = 0x801BEDC0;
+z2_extern_scene_table       = 0x801BEDC0;
 z2_stored_song              = 0x801C1AFC;
 z2_link_spawn_obj           = 0x801CB528;
 z2_player_ovl_table         = 0x801CB540;

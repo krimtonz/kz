@@ -339,6 +339,16 @@ void load_state(void *state){
         }
     }
 
+    st_read(&p, z2_extern_scene_table, sizeof(z2_extern_scene_table));
+    for(int i = 0; i < sizeof(z2_extern_scene_table) / sizeof(*z2_extern_scene_table); i++) {
+        z2_extern_ent_tab_t *extern_ent = &z2_extern_scene_table[i];
+        st_read(&p, extern_ent->entrances, sizeof(*extern_ent->entrances) * extern_ent->ent_cnt);
+        for(int j = 0; j < extern_ent->ent_cnt; j++) {
+            z2_entrance_rec_t *ent_rec = extern_ent->entrances[j];
+            st_read(&p, ent_rec, sizeof(*ent_rec));
+        }
+    }
+
     /* load cutscene state */
     st_read(&p, &z2_cutscene_state, 0x16);
 
@@ -755,6 +765,16 @@ size_t save_state(void *state){
         }
     }
     st_write(&p, &ent_end, sizeof(ent_end));
+
+    st_write(&p, z2_extern_scene_table, sizeof(z2_extern_scene_table));
+    for(int i = 0; i < sizeof(z2_extern_scene_table) / sizeof(*z2_extern_scene_table); i++) {
+        z2_extern_ent_tab_t *extern_ent = &z2_extern_scene_table[i];
+        st_write(&p, extern_ent->entrances, sizeof(*extern_ent->entrances) * extern_ent->ent_cnt);
+        for(int j = 0; j < extern_ent->ent_cnt; j++) {
+            z2_entrance_rec_t *ent_rec = extern_ent->entrances[j];
+            st_write(&p, ent_rec, sizeof(*ent_rec));
+        }
+    }
 
     /* save current cutscene state */
     st_write(&p, &z2_cutscene_state, 0x16);
