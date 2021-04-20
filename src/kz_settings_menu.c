@@ -340,7 +340,7 @@ menu_t *create_settings_menu(void){
         menu_gfx_button_add(&commands, 0, 2, scroll_up_sprite, command_dec_onactivate, NULL);
         menu_gfx_button_add(&commands, 0, 14, scroll_down_sprite,  command_inc_onactivate, NULL);
 
-        for(int i = 0;i < 13;i++){
+        for(int i = 0; i < 13; i++){
             command_bindings[i].command_button = menu_button_add(&commands, 2, y, kz_commands[i].text, command_onactivate, (void*)i);
             command_bindings[i].command_bind = menu_bind_add(&commands, 22, y++, i);
         }

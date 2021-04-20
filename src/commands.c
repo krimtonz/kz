@@ -22,20 +22,20 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
     {"title screen",        COMMAND_PRESS,  command_title_screen},
-    {"save memfile",        COMMAND_PRESS,  command_save_memfile},
-    {"load memfile",        COMMAND_PRESS,  command_load_memfile},
-    {"next memfile",        COMMAND_PRESS,  command_next_memfile},
-    {"prev memfile",        COMMAND_PRESS,  command_prev_memfile},
-    {"save position",       COMMAND_PRESS,  command_save_position},
-    {"load position",       COMMAND_PRESS,  command_load_position},
-    {"next position",       COMMAND_PRESS,  command_next_position},
-    {"prev position",       COMMAND_PRESS,  command_prev_position},
 #ifndef LITE
-    {"load state",          COMMAND_PRESS,  command_load_state},
     {"save state",          COMMAND_PRESS,  command_save_state},
+    {"load state",          COMMAND_PRESS,  command_load_state},
     {"prev state",          COMMAND_PRESS,  command_prev_state},
     {"next state",          COMMAND_PRESS,  command_next_state},
 #endif
+    {"save memfile",        COMMAND_PRESS,  command_save_memfile},
+    {"load memfile",        COMMAND_PRESS,  command_load_memfile},
+    {"prev memfile",        COMMAND_PRESS,  command_prev_memfile},
+    {"next memfile",        COMMAND_PRESS,  command_next_memfile},
+    {"save position",       COMMAND_PRESS,  command_save_position},
+    {"load position",       COMMAND_PRESS,  command_load_position},
+    {"prev position",       COMMAND_PRESS,  command_prev_position},
+    {"next position",       COMMAND_PRESS,  command_next_position},
 };
 
 #ifndef LITE
