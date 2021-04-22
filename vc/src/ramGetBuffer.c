@@ -36,6 +36,6 @@ bool kz_ramGetBuffer(gClassRAM_t *ram, void **buffer, int addr, int *len) {
         }
     }
 
-    *buffer = ram->ram + addr;
+    *buffer = ram->ram + (addr & (dram_size - 1));
     return true;
 }
