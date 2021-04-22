@@ -105,9 +105,9 @@ NOINLINE void *malloc(size_t size) {
                         blk->next->prev = next_free;
                     }
                     blk->next = next_free;
-                    blk->size = size;
                 }
 
+                blk->size = size;
                 blk->free = 0;
 
                 if(blk == heap_first_free[i]) {
