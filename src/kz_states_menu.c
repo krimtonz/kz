@@ -1,3 +1,4 @@
+#ifndef LITE
 #include <sys/stat.h>
 #include "kz.h"
 #include "menu.h"
@@ -165,3 +166,4 @@ menu_t *create_states_menu(void) {
     menu_button_add(&states_menu, 8, 3, "import", import_state_onactivate, NULL);
     return &states_menu;
 }
+#endif
