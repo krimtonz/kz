@@ -68,16 +68,19 @@ struct item_map_row item_map_table[] = {
     { "fire arrow",         &z2_file.items[Z2_SLOT_FIRE_ARROW],         Z2_ITEM_FIRE_ARROW },
     { "ice arrow",          &z2_file.items[Z2_SLOT_ICE_ARROW],          Z2_ITEM_ICE_ARROW },
     { "light arrow",        &z2_file.items[Z2_SLOT_LIGHT_ARROW],        Z2_ITEM_LIGHT_ARROW },
+    { "trade quest 1",      &z2_file.items[Z2_SLOT_QUEST_1],              Z2_ITEM_LAND_DEED },
     { "bomb",               &z2_file.items[Z2_SLOT_BOMB],               Z2_ITEM_BOMB },
     { "bombchu",            &z2_file.items[Z2_SLOT_BOMBCHU],            Z2_ITEM_BOMBCHU },
     { "stick",              &z2_file.items[Z2_SLOT_STICK],              Z2_ITEM_STICK },
     { "nut",                &z2_file.items[Z2_SLOT_NUT],                Z2_ITEM_NUT },
     { "magic bean",         &z2_file.items[Z2_SLOT_MAGIC_BEAN],         Z2_ITEM_MAGIC_BEAN },
+    { "trade quest 2",      &z2_file.items[Z2_SLOT_QUEST_2],              Z2_ITEM_LAND_DEED },
     { "powder keg",         &z2_file.items[Z2_SLOT_POWDER_KEG],         Z2_ITEM_POWDER_KEG },
     { "pictograph box",     &z2_file.items[Z2_SLOT_PICTOGRAPH_BOX],     Z2_ITEM_PICTOGRAPH_BOX },
     { "lens of truth",      &z2_file.items[Z2_SLOT_LENS],               Z2_ITEM_LENS },
     { "hookshot",           &z2_file.items[Z2_SLOT_HOOKSHOT],           Z2_ITEM_HOOKSHOT },
     { "great fairy sword",  &z2_file.items[Z2_SLOT_GREAT_FAIRY_SWORD],  Z2_ITEM_GREAT_FAIRY_SWORD },
+    { "trade quest 3",      &z2_file.items[Z2_SLOT_QUEST_3],              Z2_ITEM_LAND_DEED },
 };
 
 struct item_map_row mask_map_table[] = {
