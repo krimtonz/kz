@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <vector/vector.h>
+#include "mem.h"
 #include "gfx.h"
 #include "kzresource.h"
 #include "zu.h"
@@ -455,7 +456,7 @@ gfx_texture *gfx_load_item_texture(uint8_t item_id){
         texture->data = halloc(size * 2);
 #else
         texture->source = TEX_SRC_DRAM;
-        texture->data = malloc(size * 2);
+        texture->data = memalign(8, size * 2);
 #endif
         z2_DecodeArchiveFile(z2_file_table[z2_item_icon_archive].prom_start, item_id, tex_buf, size);
         // Copy colored texture to hb heap
@@ -496,7 +497,7 @@ static gfx_texture *gfx_load_archive(texture_loader *loader){
         texture->data = halloc(tile_size * texture->y_tiles);
 #else
         texture->source= TEX_SRC_DRAM;
-        texture->data = malloc(tile_size * texture->y_tiles);
+        texture->data = memalign(8, tile_size * texture->y_tiles);
 #endif
 
         int i;
@@ -530,7 +531,7 @@ static gfx_texture *gfx_load_from_rom(texture_loader *loader){
         texture->data = halloc(texture->tile_size * texture->y_tiles);
 #else
         texture->source = TEX_SRC_DRAM;
-        texture->data = malloc(texture->tile_size * texture->y_tiles);
+        texture->data = memalign(8, texture->tile_size * texture->y_tiles);
 #endif
         uint16_t file = loader->file;
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);

@@ -220,6 +220,64 @@ void *calloc(size_t item_cnt, size_t item_size) {
 
 void *memalign(size_t align, size_t size) {
     // todo: actually memalign
+
+    if(!heap_initialized) {
+        heap_init();
+    }
+
+    if(size == 0) {
+        return NULL;
+    }
+
+    if((align % sizeof(void*)) != 0) {
+        return NULL;
+    }
+
+    size = (size + (align - 1)) & ~(align - 1);
+
+    heap_hdr_t *blk, *next_free;
+
+    for(int i = 0; i < HEAP_CNT; i++) {
+        for(blk = heap_first_free[i]; blk != NULL; blk = blk->next) {
+            uint32_t blk_addr = (uint32_t)blk + HDR_SIZE;
+            uint32_t align_pad = ((blk_addr + (align - 1)) & ~(align - 1)) - blk_addr;
+            if(blk->free && blk->size >= size + align_pad) {
+                size += align_pad;
+                if(blk->heap == HEAP_CNT - 1) {
+                    if((void*)blk >= sbrk(0)) {
+                        sbrk(size + HDR_SIZE + HDR_SIZE);
+                    }
+                }
+
+                if(blk->size - size >= HDR_SIZE + HEAP_ALIGN(1)) {
+                    next_free = (heap_hdr_t*)((char*)blk + size + HDR_SIZE);
+                    next_free->free = 1;
+                    next_free->size = blk->size - size - HDR_SIZE;
+                    next_free->next = blk->next;
+                    next_free->prev = blk;
+                    next_free->heap = blk->heap;
+                    if(blk->next != NULL) {
+                        blk->next->prev = next_free;
+                    }
+                    blk->next = next_free;
+                }
+
+                blk->size = size;
+                blk->free = 0;
+
+                if(blk == heap_first_free[i]) {
+                    for(next_free = blk->next; next_free != NULL; next_free = next_free->next) {
+                        if(next_free->free) {
+                            break;
+                        }
+                    }
+                    heap_first_free[i] = next_free;
+                }
+                return (char*)blk +align_pad +  HDR_SIZE;
+            }
+        }
+    }
+
     return malloc(size);
 }
 
