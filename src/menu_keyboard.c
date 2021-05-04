@@ -123,7 +123,7 @@ static int accept(void **event_data) {
     menu_item_trigger_event(keyboard_caller, MENU_EVENT_KEYBOARD, event_data);
     dest_string = NULL;
     keyboard_caller = NULL;
-    *event_data = 1;
+    *event_data = (void*)1;
     menu_trigger_event(&menu_keyboard, MENU_EVENT_RETURN, event_data);
     return 1;
 }

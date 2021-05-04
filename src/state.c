@@ -384,6 +384,8 @@ void load_state(void *state){
                 }
             }
         }
+
+        z2_minimap_room_cnt = z2_game.room_cnt;
     }
 
     /* load scene file, and create static collision if loading from a different scene */
@@ -441,7 +443,7 @@ void load_state(void *state){
     // Load start button text.
     zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
 
-    if(z2_game.pause_ctx.state != 0){
+    if(z2_game.pause_ctx.state != 0) {
         /* we need to load pause screen assets */
 #if Z2_VERSION==NZSE
         z2_LoadArchiveFile(z2_file_table[z2_item_icon_archive].vrom_start, z2_game.pause_ctx.icon_item_static, 0);
@@ -457,8 +459,15 @@ void load_state(void *state){
         
         zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x480, 0x180);
         zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
-        zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
+        if(z2_get_map_type(&z2_game) == 0) {
+            zu_file_idx_load(z2_icon_item_field_static, z2_game.pause_ctx.icon_item_map);
+        } else {
+            zu_file_idx_load(11, z2_game.pause_ctx.icon_item_map);
+            z2_load_pause_map(&z2_game, z2_game.pause_ctx.icon_item_map + 0x4BB0);
+        }
+
         zu_file_idx_load(z2_map_name_static, z2_game.pause_ctx.icon_text);
+
 
         int rest_offset = z2_file.current_form * 0x72;
         for(int i = 0; i < Z2_END_MASK; i++){
@@ -468,7 +477,6 @@ void load_state(void *state){
         }
 
     } else {
-        // Prerender slowly started, but not done.
         if((z2_prerender_bgtask.flags & 2) && !(z2_prerender_bgtask.flags & 1)) {
             z2_BgTaskStop(&z2_prerender_bgtask);
         }

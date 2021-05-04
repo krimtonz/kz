@@ -1663,7 +1663,9 @@ z2_extern z2_actor_t   *z2_SpawnActor               (z2_actor_ctxt_t *actor_ctx,
 z2_extern void          z2_DeleteActor              (z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
 z2_extern void          z2_CreateStaticCollision    (z2_col_ctxt_t *col_ctx, z2_game_t *game, z2_col_lut_t *col_lut);
 z2_extern void          z2_pause_persp              (z2_game_t *game);
+z2_extern void          z2_load_pause_map           (z2_game_t *game, void *ptr);
 z2_extern uint32_t      z2_get_mmap_tile_size       (uint16_t map_id);
+z2_extern int           z2_get_map_type             (z2_game_t *game);
 z2_extern void          z2_btnupdate                (z2_game_t *game, uint8_t btn_idx);
 z2_extern void          z2_ActionLabelUpdate        (z2_hud_ctxt_t *hud_ctx, uint16_t action, int btn_idx);
 z2_extern void          z2_LoadRoom                 (z2_game_t *game, z2_room_ctxt_t *room_ctx, uint8_t room_id);
@@ -1677,8 +1679,8 @@ z2_extern void          z2_adjust_stick             (z2_input_t *inp);
 z2_extern void          z2_DecodeArchiveFile        (uint32_t rom, uint8_t tile, void *ram, uint32_t size);
 #if Z2_VERSION==NZSE
 z2_extern void          z2_LoadArchiveFile          (uint32_t rom, void *ram, size_t size);
-z2_extern void          z2_LoadArchiveFile2         (uint32_t rom, int arg1, void *ram, size_t size);
 #endif
+z2_extern void          z2_LoadArchiveFile2         (uint32_t rom, int arg1, void *ram, size_t size);
 z2_extern void          z2_BgTaskStop               (z2_bgtask_t *bgtask);
 z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
@@ -1706,6 +1708,7 @@ z2_extern char                      z2_letter_box_timer[];
 z2_extern char                      z2_cutscene_state[];
 z2_extern z2_gamestate_table_t      z2_gamestate_table[];
 z2_extern z2_minimap_ctxt_t         z2_minimap_ctx;
+z2_extern int                       z2_minimap_room_cnt;
 z2_extern uint32_t                  z2_icon_item_static_table[0x65];
 z2_extern char                      z2_restriction_table[0x23A];
 z2_extern z2_rom_file_t             z2_area_tex_table[9];
@@ -1769,8 +1772,9 @@ z2_extern uint8_t                   z2_oca_state[];
 
 // File indcies
 #if Z2_VERSION==NZSE
-#define z2_icon_item_static             9 /* need to verify */
+#define z2_icon_item_static             9
 #define z2_icon_item_field_static       10
+#define z2_icon_item_dungeon_static     11
 #define z2_map_name_static              13
 #define z2_pause_assets                 14
 #define z2_minimap_assets               16
@@ -1785,6 +1789,7 @@ z2_extern uint8_t                   z2_oca_state[];
 #define z2_icon_item_static             8
 #define z2_icon_item_24_static          9
 #define z2_icon_item_field_static       10
+#define z2_icon_item_dungeon_static     11
 #define z2_map_name_static              13
 #define z2_minimap_assets               15
 #define z2_item_names                   16
