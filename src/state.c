@@ -360,6 +360,32 @@ void load_state(void *state){
 
     st_read(&p, &z2_framerate_div, sizeof(z2_framerate_div));
 
+    {
+        // Load Minimap Details
+        st_read(&p, &z2_minimap_ctx, sizeof(z2_minimap_ctx));
+
+        st_read(&p, *z2_minimap_ctx.room_info, sizeof(**z2_minimap_ctx.room_info) * z2_game.room_cnt);
+
+        z2_minimap_room_info_t *room_info = &(*z2_minimap_ctx.room_info)[z2_minimap_ctx.room];
+
+        if(room_info->map != 0xFFFF) {
+            uint32_t tile_size = z2_get_mmap_tile_size(room_info->map);
+            if(tile_size != 0) {
+                z2_LoadArchiveFile2(z2_file_table[z2_minimap_assets].vrom_start, room_info->map - 0x100, z2_minimap_ctx.cur_tex, tile_size);
+            }
+        }
+
+        if(z2_minimap_ctx.trnsn_room != -1) {
+            room_info = &(*z2_minimap_ctx.room_info)[z2_minimap_ctx.trnsn_room];
+            if(room_info->map != 0xFFFF) {
+               uint32_t tile_size = z2_get_mmap_tile_size(room_info->map);
+                if(tile_size != 0) {
+                    z2_LoadArchiveFile2(z2_file_table[z2_minimap_assets].vrom_start, room_info->map - 0x100, z2_minimap_ctx.prev_tex, tile_size);
+                }
+            }
+        }
+    }
+
     /* load scene file, and create static collision if loading from a different scene */
     if(scene_index != z2_game.scene_index){
         z2_scene_table_ent_t *scene_ent = &z2_scene_table[z2_game.scene_index];
@@ -786,6 +812,10 @@ size_t save_state(void *state){
     st_write(&p, &z2_cs_bars, sizeof(z2_cs_bars));
 
     st_write(&p, &z2_framerate_div, sizeof(z2_framerate_div));
+
+    st_write(&p, &z2_minimap_ctx, sizeof(z2_minimap_ctx));
+
+    st_write(&p, *z2_minimap_ctx.room_info, sizeof(**z2_minimap_ctx.room_info) * z2_game.room_cnt);
 
     /* save room transition actors */
     int trans_cnt = z2_game.room_ctx.transition_cnt;

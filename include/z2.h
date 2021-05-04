@@ -1288,7 +1288,8 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     char                unk_0x16F30[0xDE8];         /* 0x16FA0 */   /* 0x16F80 */
     z2_obj_ctxt_t       obj_ctx;                    /* 0x17D88 */   /* 0x17D68 */
     z2_room_ctxt_t      room_ctx;                   /* 0x186E0 */   /* 0x186C0 */
-    char                unk_0x18768[0xE4];          /* 0x18768 */   /* 0x18748 */
+    char                unk_0x18768[0xE0];          /* 0x18768 */   /* 0x18748 */
+    uint8_t             room_cnt;                   /* 0x18848 */   /* 0x18828 */
     z2_rom_file_t      *room_list;                  /* 0x1884C */   /* 0x1882C */
     char                unk_0x18850[0x24];          /* 0x18850 */   /* 0x18830 */
     uint8_t             skybox_type;                /* 0x18874 */   /* 0x18854 */
@@ -1608,6 +1609,44 @@ typedef struct {
     char                filename;       /* 0x08 */
 } z2_extern_ent_tab_t;                  /* 0x0C */
 
+typedef struct {
+    uint16_t map;                           /* 0x0000 */
+    int16_t x;                              /* 0x0002 */
+    int16_t y;                              /* 0x0004 */
+    int16_t z;                              /* 0x0006 */
+    int16_t unk_0x8;                        /* 0x0008 */
+} z2_minimap_room_info_t;                   /* 0x000A */
+
+typedef struct {
+    z2_minimap_room_info_t **room_info;     /* 0x0000 */
+    int32_t room;                           /* 0x0004 */
+    int16_t target_x;                       /* 0x0008 */
+    int16_t target_y;                       /* 0x000A */
+    int16_t cur_x;                          /* 0x000C */
+    int16_t cur_y;                          /* 0x000E */
+    void *cur_tex;                          /* 0x0010 */
+    int32_t trnsn_room;                     /* 0x0014 */
+    void *prev_tex;                         /* 0x0018 */
+    int16_t unk_0x1C;                       /* 0x001C */
+    int16_t unk_0x1E;                       /* 0x001E */
+    int32_t unk_0x20;                       /* 0x0020 */
+    int32_t trnsn_timer;                    /* 0x0024 */
+    void *tex1;                             /* 0x0028 */
+    void *tex2;                             /* 0x002C */
+    int16_t unk_0x30;                       /* 0x0030 */
+    int16_t unk_0x32;                       /* 0x0032 */
+    int16_t unk_0x34;                       /* 0x0034 */
+    int16_t unk_0x36;                       /* 0x0036 */
+    int16_t unk_0x38;                       /* 0x0038 */
+    int16_t unk_0x3A;                       /* 0x003A */
+    int32_t unk_0x3C;                       /* 0x003C */
+    int16_t unk_0x40;                       /* 0x0040 */
+    int16_t unk_0x42;                       /* 0x0042 */
+    int16_t unk_0x44;                       /* 0x0044 */
+    int32_t unk_0x48;                       /* 0x0048 */
+    int32_t unk_0x4C;                       /* 0x004C */
+} z2_minimap_ctxt_t;                        /* 0x0050 */
+
 #define Z2_DISP_SIZE 0x20310
 #define Z2_CIMG_SIZE 0x25800
 
@@ -1624,6 +1663,7 @@ z2_extern z2_actor_t   *z2_SpawnActor               (z2_actor_ctxt_t *actor_ctx,
 z2_extern void          z2_DeleteActor              (z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
 z2_extern void          z2_CreateStaticCollision    (z2_col_ctxt_t *col_ctx, z2_game_t *game, z2_col_lut_t *col_lut);
 z2_extern void          z2_pause_persp              (z2_game_t *game);
+z2_extern uint32_t      z2_get_mmap_tile_size       (uint16_t map_id);
 z2_extern void          z2_btnupdate                (z2_game_t *game, uint8_t btn_idx);
 z2_extern void          z2_ActionLabelUpdate        (z2_hud_ctxt_t *hud_ctx, uint16_t action, int btn_idx);
 z2_extern void          z2_LoadRoom                 (z2_game_t *game, z2_room_ctxt_t *room_ctx, uint8_t room_id);
@@ -1665,6 +1705,7 @@ z2_extern uint32_t                  z2_event_state_1;
 z2_extern char                      z2_letter_box_timer[];
 z2_extern char                      z2_cutscene_state[];
 z2_extern z2_gamestate_table_t      z2_gamestate_table[];
+z2_extern z2_minimap_ctxt_t         z2_minimap_ctx;
 z2_extern uint32_t                  z2_icon_item_static_table[0x65];
 z2_extern char                      z2_restriction_table[0x23A];
 z2_extern z2_rom_file_t             z2_area_tex_table[9];
@@ -1732,6 +1773,7 @@ z2_extern uint8_t                   z2_oca_state[];
 #define z2_icon_item_field_static       10
 #define z2_map_name_static              13
 #define z2_pause_assets                 14
+#define z2_minimap_assets               16
 #define z2_item_names                   17
 #define z2_location_names               18
 #define z2_item_icon_archive            19
@@ -1744,6 +1786,7 @@ z2_extern uint8_t                   z2_oca_state[];
 #define z2_icon_item_24_static          9
 #define z2_icon_item_field_static       10
 #define z2_map_name_static              13
+#define z2_minimap_assets               15
 #define z2_item_names                   16
 #define z2_item_icon_archive            18
 #define z2_do_action_static             22
