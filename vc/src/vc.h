@@ -141,8 +141,8 @@ struct n64_cpu_s {
     char                mem_idx[65536];
     void               *sm_blk_code;
     void               *lg_blk_code;
-    int                 sm_blk_status[256];
-    int                 lg_blk_status[13];
+    uint32_t            sm_blk_status[256];
+    uint32_t            lg_blk_status[13];
     recomp_ctxt_t      *recomp_ctx;
     char                field_0x113c0[0xDC0];
     int                 field_0x12180;

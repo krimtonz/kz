@@ -2,117 +2,104 @@
 #include <stdbool.h>
 #include "vc.h"
 
-HOOK bool kz_cpuHeapTake(int **code,int cpu,func_tree_node_t *node,int size)
+#define SM_BLK_SIZE 0x200
+#define LG_BLK_SIZE 0xA00
 
+HOOK bool kz_cpuHeapTake(uint32_t **code, n64_cpu_t *cpu, func_tree_node_t *node, size_t size)
 {
-    bool bVar1;
-    int iVar2;
-    int iVar3;
-    bool bVar4;
-    bool ret;
-    uint32_t uVar6;
-    uint32_t *puVar7;
-    int iVar8;
-    int iVar9;
-    int unaff_r25;
-    int unaff_r26;
-    uint32_t *unaff_r27;
-    int iVar10;
-    
-    uVar6 = size + 0x1ff;
-    bVar4 = false;
-    bVar1 = false;
-    iVar10 = ((int)uVar6 >> 9) + (uint32_t)((int)uVar6 < 0 && (uVar6 & 0x1ff) != 0);
-    iVar2 = (size + 0x9ff) / 0xa00 + (size + 0x9ff >> 0x1f);
-    do {
-        iVar3 = node->alloc_type;
-        if (iVar3 == -1) {
-            if(node >= &kz_tree[0] && node < &kz_tree[0x80]){
-                node->alloc_type = 3;
-            }
-            else if (size < 0x3c01) {
-                node->alloc_type = 1;
-            }
-            else {
-                node->alloc_type = 2;
-            }
-        }
-        else {
-            if (iVar3 == 1) {
-                node->alloc_type = 2;
-                bVar1 = true;
-            }
-            else {
-                if (iVar3 == 2) {
-                    node->alloc_type = 1;
-                    bVar1 = true;
+    bool swapped_type = false;
+    bool chunk_found = false;
+    uint32_t *blk_status;
+    uint32_t sm_blk_needed = (size + (SM_BLK_SIZE - 1)) / SM_BLK_SIZE;
+    uint32_t lg_blk_needed = (size + (LG_BLK_SIZE - 1)) / LG_BLK_SIZE;
+    uint32_t blks_needed;
+    int status_cnt;
+
+    while(!swapped_type) {
+        switch(node->alloc_type) {
+            case -1:
+                if(node >= &kz_tree[0] && node < &kz_tree[0x80]){
+                    node->alloc_type = 3;
                 }
-            }
+                else if (size < 0x3c01) {
+                    node->alloc_type = 1;
+                }
+                else {
+                    node->alloc_type = 2;
+                }
+                break;
+            case 1:
+                node->alloc_type = 2;
+                swapped_type = true;
+            case 2:
+                node->alloc_type = 1;
+                swapped_type = true;
+                break;
         }
+
         if (node->alloc_type == 1) {
             node->alloc_type = 1;
-            unaff_r26 = 0x100;
-            unaff_r27 = (uint32_t *)(cpu + 0x10f88);
-            unaff_r25 = iVar10;
-            if ((bVar1) && (0x1f < iVar10)) {
+            status_cnt = sizeof(cpu->sm_blk_status) / sizeof(*cpu->sm_blk_status);
+            blk_status = cpu->sm_blk_status;
+            blks_needed = sm_blk_needed;
+            if (swapped_type && sm_blk_needed > 31) {
+                // We tried swapping from large block to small block, but can't fulfill
+                // the request in a single small block chain.  Try taking from sys memory.
                 node->alloc_type = 3;
                 node->block_pos = -1;
-                return xlHeapTake((void**)code,size);
+                return xlHeapTake((void**)code, size);
             }
         }
         else if (node->alloc_type == 2) {
             node->alloc_type = 2;
-            unaff_r26 = 0xd;
-            unaff_r27 = (uint32_t *)(cpu + 0x11388);
-            unaff_r25 = iVar2 - (iVar2 >> 0x1f);
+            status_cnt = sizeof(cpu->lg_blk_status) / sizeof(*cpu->lg_blk_status);
+            blk_status = cpu->lg_blk_status;
+            blks_needed = lg_blk_needed;
         }
-        if (node->alloc_type == 3 || 0x1f < unaff_r25) {
+
+        if (node->alloc_type == 3 || blks_needed > 31) {
+            // We tried swapping from small blocks to large blocks, but can't fulfill
+            // the request in a single large block chain.  Try taking from sys memory.
             node->alloc_type = 3;
             node->block_pos = -1;
-            return xlHeapTake((void**)code,size);
+            return xlHeapTake((void**)code, size);
         }
-        iVar8 = 0;
-        puVar7 = unaff_r27;
-        iVar3 = unaff_r26;
-        if (0 < unaff_r26) {
-            do {
-                uVar6 = (1 << unaff_r25) - 1;
-                iVar9 = 0x21 - unaff_r25;
-                if (*puVar7 != 0xffffffff) {
-                    do {
-                        if ((*puVar7 & uVar6) == 0) {
-                            bVar4 = true;
-                            *puVar7 = *puVar7 | uVar6;
-                            node->block_pos = unaff_r25 << 0x10 | iVar8 + ((0x21 - unaff_r25) - iVar9);
-                            break;
-                        }
-                        iVar9 = iVar9 + -1;
-                        uVar6 = uVar6 << 1;
-                    } while (iVar9 != 0);
+
+        for(int i = 0; i < status_cnt; i++) {
+            uint32_t needed_mask = (1 << blks_needed) - 1;
+            if(blk_status[i] == 0xFFFFFFFF) {
+                continue;
+            }
+
+            for(int j = 0; j < 32 - blks_needed; j++) {
+                if((blk_status[i] & needed_mask) == 0) {
+                    chunk_found = true;
+                    blk_status[i] |= needed_mask;
+                    node->block_pos = (blks_needed << 16) | ((i * 32) + j);
+                    break;
                 }
-                if (bVar4) break;
-                puVar7 = puVar7 + 1;
-                iVar8 = iVar8 + 0x20;
-                iVar3 = iVar3 + -1;
-            } while (iVar3 != 0);
+
+                needed_mask <<= 1;
+            }
+
+            if(chunk_found) {
+                break;
+            }
         }
-        if (bVar4) {
+
+        if (chunk_found) {
             if (node->alloc_type == 1) {
-                *code = (int *)(*(int *)(cpu + 0x10f80) + (node->block_pos & 0xffffU) * 0x200);
+                *code = cpu->sm_blk_code + ((node->block_pos & 0xFFFF) * SM_BLK_SIZE);
             }
             else {
-                *code = (int *)(*(int *)(cpu + 0x10f84) + (node->block_pos & 0xffffU) * 0xa00);
+                *code = cpu->lg_blk_code + ((node->block_pos & 0xFFFF) * LG_BLK_SIZE);
             }
-            ret = 1;
-            goto LAB_8004c7ec;
+            return true;
         }
-        if (bVar1) {
-            ret = 0;
-            node->alloc_type = -1;
-            node->block_pos = -1;
-LAB_8004c7ec:
-            return ret;
-        }
-    } while( true );
+    }
+
+    node->alloc_type = -1;
+    node->block_pos = -1;
+    return false;
 }
 
