@@ -1,16 +1,14 @@
 local arg = {...}
 
-local opt_no_vc_fix
 local opt_raphnet
 local opt_out_wad
 local opt_ver
+local opt_titleid
+local opt_channame
 local in_wad
 
 while arg[1] do
-    if arg[1] == "--no-vc-fix" then
-        opt_no_vc_fix = 1
-        table.remove(arg, 1)
-    elseif arg[1] == "--raphnet" then
+    if arg[1] == "--raphnet" then
         opt_raphnet = 1
         table.remove(arg, 1)
     elseif arg[1] == "--outwad" then
@@ -19,6 +17,14 @@ while arg[1] do
         table.remove(arg, 1)
     elseif arg[1] == "lite" then
         opt_ver = "lite"
+        table.remove(arg, 1)
+    elseif arg[1] == "--titleid" then
+        opt_titleid = arg[2]
+        table.remove(arg, 1)
+        table.remove(arg, 1)
+    elseif arg[1] == "--channame" then 
+        opt_channame = arg[2]
+        table.remove(arg, 1)
         table.remove(arg, 1)
     else
         in_wad = arg[1]
@@ -79,30 +85,43 @@ else
     mapping_patch = rom_info.wad_patch .. "-remap.gzi"
 end
 
+local title_id
+local channame
+
+if (opt_titleid ~= nil) then
+    title_id = opt_titleid
+else
+    title_id = rom_info.title_id
+end
+
+if (opt_channame ~= nil) then
+    channame = opt_channame
+else
+    channame = rom_info.title
+end
+
 local gzinject_pack = gzinject ..
         " -d \"build/wadextract\"" ..
         " -k \"build/common-key.bin\"" ..
         " -a pack" ..
         " -w \"" .. out_wad .. "\"" ..
-        " -i " .. rom_info.title_id ..
-        " -t \"" .. rom_info.title .. "\"" ..
+        " -i " .. title_id ..
+        " -t \"" .. channame .. "\"" ..
         " -p \"" .. emulator_patch .."\"" ..
         " -p \"" .. mapping_patch .. "\""
 
-if((opt_no_vc_fix == nil or opt_no_vc_fix ~= 1)) then
-    local vcmake = os.execute("make " .. rom_info.vc_fix_inject .. "/kz-vc.gzi")
-    if(vcmake ~= nil and vcmake == true) then
-        gzinject_pack = gzinject_pack ..
-            " -p \"" .. rom_info.vc_fix_inject .. "/kz-vc.gzi\"" ..
-            " --dol-inject \"" .. rom_info.vc_fix_inject .. "/kz-vc.bin\"" ..
-            " --dol-loading \"" .. rom_info.vc_fix_addr .. "\"" ..
-            " --dol-inject \"" .. rom_info.vc_fix_inject .. "/homeboy.bin\"" ..
-            " --dol-loading \"" .. rom_info.hb_addr .. "\"" ..
-            " --dol-after 1"
-    else
-        print("Could not build vc patches\n")
-        return
-    end
+local vcmake = os.execute("make " .. rom_info.vc_fix_inject .. "/kz-vc.gzi")
+if(vcmake ~= nil and vcmake == true) then
+    gzinject_pack = gzinject_pack ..
+        " -p \"" .. rom_info.vc_fix_inject .. "/kz-vc.gzi\"" ..
+        " --dol-inject \"" .. rom_info.vc_fix_inject .. "/kz-vc.bin\"" ..
+        " --dol-loading \"" .. rom_info.vc_fix_addr .. "\"" ..
+        " --dol-inject \"" .. rom_info.vc_fix_inject .. "/homeboy.bin\"" ..
+        " --dol-loading \"" .. rom_info.hb_addr .. "\"" ..
+        " --dol-after 1"
+else
+    print("Could not build vc patches\n")
+    return
 end
 
 gzinject_pack = gzinject_pack ..

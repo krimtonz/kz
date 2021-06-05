@@ -1,6 +1,12 @@
-target              = mips64
 PACKAGE            ?= $(NAME)
-URL                ?= github.com/krimtonz/kz
+PACKAGE_URL        ?= github.com/krimtonz/kz
+ifeq ($(origin PACKAGE_VERSION), undefined)
+PACKAGE_VERSION	   := $(shell git describe --tags --dirty 2>/dev/null)
+ifeq ('$(PACKAGE_VERSION)', '')
+PACKAGE_VERSION		= unknown version
+endif
+endif
+target              = mips64
 CC                  = $(target)-gcc
 LD                  = $(target)-g++
 AS                  = $(target)-gcc -x assembler-with-cpp
@@ -27,7 +33,7 @@ ADDRESS_VC			= 0x8003DF60
 ADDRESS_LITE        = 0x8003DF60
 ADDRESS_LDR         = 0x80080000
 ALL_CFLAGS          = -Iinclude -c -MMD -MP -std=gnu11 -Wall -ffunction-sections -fdata-sections -fno-reorder-blocks -mno-check-zero-division $(CFLAGS)
-ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DURL=$(URL) -DF3DEX_GBI_2 -DHB_DBG $(CPPFLAGS)
+ALL_CPPFLAGS        = -DPACKAGE=$(PACKAGE) -DPACKAGE_URL=$(PACKAGE_URL) -DPACKAGE_VERSION=$(PACKAGE_VERSION) -DF3DEX_GBI_2 -DHB_DBG $(CPPFLAGS)
 ALL_LDFLAGS         = -T gl-n64.ld -L$(LIBDIR) -nostartfiles -specs=nosys.specs -Wl,--gc-sections $(LDFLAGS)
 ALL_LIBS            = $(LIBS)
 
