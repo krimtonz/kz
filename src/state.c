@@ -496,18 +496,33 @@ void load_state(void *state){
                 uint32_t end = z2_obj_table[c_id].vrom_end;
                 zu_file_load(start, c_ptr, end - start);
             }
+        }
 
-            // Relocate dynamic collision.
-            for(int i = 0; i < sizeof(z2_game.col_ctxt.actors) / sizeof(*z2_game.col_ctxt.actors);i++){
-                z2_col_chk_actor_t *col = &z2_game.col_ctxt.actors[i];
-                if(col->actor == NULL){
-                    continue;
-                }
+        // Relocate dynamic collision.
+        for(int i = 0; i < sizeof(z2_game.col_ctxt.actors) / sizeof(*z2_game.col_ctxt.actors);i++){
+            z2_col_chk_actor_t *col = &z2_game.col_ctxt.actors[i];
+            if(col->actor == NULL){
+                continue;
+            }
+
+            if(((uint32_t)col->col_hdr->vtx & 0xF0000000) != 0) {
+                continue; // not segmented.
+            }
+
+            uint32_t segment = ((uint32_t)col->col_hdr->vtx & 0x0F000000) >> 24;
+            int offset = 0;
+            if(segment == 6) {
                 z2_obj_t *obj = &z2_game.obj_ctx.obj[col->actor->alloc_index];
                 z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(obj->data);
-                uint32_t offset = (uint32_t)col->col_hdr - (uint32_t)obj->data;
-                relocate_col_hdr(0x06000000 | offset);
+                offset = ((int)col->col_hdr - (int)obj->data);
+            } else {
+                int offset = (int)col->col_hdr - (int)MIPS_PHYS_TO_KSEG0(z2_segment.segments[segment]);
+                if(offset < 0) {
+                    continue;
+                }
             }
+
+            relocate_col_hdr((segment << 24) | offset);
         }
     }
 
