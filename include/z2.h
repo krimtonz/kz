@@ -1409,7 +1409,7 @@ typedef struct {
     uint32_t            vrom_end;               /* 0x0008 */
     uint32_t            vram_start;             /* 0x000C */
     uint32_t            vram_end;               /* 0x0010 */
-    uint32_t            reloc_off;              /* 0x0014 */
+    int32_t             reloc_off;              /* 0x0014 */
     char               *filename;               /* 0x0018 */
 } z2_player_ovl_table_t;                        /* 0x001C */
 
