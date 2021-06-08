@@ -240,7 +240,7 @@ static void kz_main(void) {
     /* handle command bindings */
     {
         z2_pause_ctxt_t *p_ctx = &z2_game.pause_ctx;
-        _Bool is_pause = z2_player_ovl_cur == &z2_player_ovl_table[0];
+        _Bool is_pause = z2_player_ovl_cur == &z2_player_ovl_table[0] && p_ctx->state == 6;
         static _Bool item_update = 0;
         static _Bool switched = 0;
         static _Bool entered_pause = 0;
