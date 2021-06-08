@@ -110,6 +110,8 @@ void load_state(void *state){
         uint16_t seq_idx;
         uint32_t unk_1FC;
         uint16_t delay;
+        float volume;
+        uint8_t vol_factor[4];
     } seq_info[4];
 
     for(int i = 0; i < 4; i++) {
@@ -118,6 +120,8 @@ void load_state(void *state){
         st_read(&p, &info->seq_idx, sizeof(info->seq_idx));
         st_read(&p, &info->unk_1FC, sizeof(info->unk_1FC));
         st_read(&p, &info->delay, sizeof(info->delay));
+        st_read(&p, &info->volume, sizeof(info->volume));
+        st_read(&p, &info->vol_factor, sizeof(info->vol_factor));
     }
 
     uint8_t cur_config = z2_afx_cfg;
@@ -146,7 +150,6 @@ void load_state(void *state){
     /* wait for rcp to finish task */
     osRecvMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_BLOCK);
     osSendMesg(&z2_ctxt.gfx->task_queue, NULL, OS_MESG_NOBLOCK);
-
 
     /* record current loaded data */
     int scene_index = z2_game.scene_index;
@@ -610,8 +613,12 @@ void load_state(void *state){
         if(!(sequencer->status & 0x80)) {
             ctl->unk_21B = 1;
         }
+        memcpy(&ctl->vol_factor, &info->vol_factor, sizeof(info->vol_factor));
+        ctl->vol_cur = info->volume;
+        ctl->timer = 0;
         ctl->prev_seq_idx = ctl->seq_idx = info->seq_idx;
-        ctl->unk_1FC = info->unk_1FC;
+        //ctl->unk_1FC = info->unk_1FC;
+        z2_AfxCmdFloat(0x41000000, ctl->vol_cur);
         _Bool cur_active = sequencer->status & 0x80;
         if(info->seq_idx != 0xFFFF && info->active && !cur_active) {
             afx_start_seq(i, info->seq_idx);
@@ -631,9 +638,17 @@ void load_state(void *state){
         st_read(&p, &z2_seq_cmd_buf[z2_seq_cmd_wr_pos++], sizeof(*z2_seq_cmd_buf));
     }
 
+    st_read(&p, z2_song_state, 0xAC);
     st_read(&p, &z2_oca_note_pos, sizeof(z2_oca_note_pos));
     st_read(&p, &z2_stored_song, sizeof(z2_stored_song));
     st_read(&p, z2_oca_state, 0x74);
+    st_read(&p, z2_staff_notes, 0x1E);
+    st_read(&p, &z2_song_ptr, sizeof(z2_song_ptr));
+    st_read(&p, &z2_unk_song_pos, sizeof(z2_unk_song_pos));
+
+    uint32_t diff = z2_song_ctr - z2_oca_unk_ctr;
+    z2_song_ctr = z2_audio_ctxt.unk_ctr;
+    z2_oca_unk_ctr = z2_song_ctr - diff;
 }
 
 _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end){
@@ -644,7 +659,9 @@ _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end
             file = &z2_file_table[i];
             break;
         }
-        if(z2_file_table[i].vrom_end == 0) return 0;
+        if(z2_file_table[i].vrom_end == 0) {
+            return 0;
+        } 
     }
     st_write(dst, &src, sizeof(src));
     char *start = src;
@@ -681,6 +698,13 @@ size_t save_state(void *state){
         st_write(&p, &seq_ctl->seq_idx, sizeof(seq_ctl->seq_idx));
         st_write(&p, &seq_ctl->unk_1FC, sizeof(seq_ctl->unk_1FC));
         st_write(&p, &sequencer->delay, sizeof(sequencer->delay));
+        if(seq_ctl->timer != 0) {
+            st_write(&p, &seq_ctl->vol_target, sizeof(seq_ctl->vol_target));
+        } else {
+            st_write(&p, &seq_ctl->vol_cur, sizeof(&seq_ctl->vol_cur));
+        }
+        st_write(&p, &seq_ctl->vol_factor, sizeof(seq_ctl->vol_factor));
+        
     }
 
     st_write(&p, &z2_afx_cfg, sizeof(z2_afx_cfg));
@@ -890,10 +914,13 @@ size_t save_state(void *state){
         st_write(&p, &z2_seq_cmd_buf[i], sizeof(*z2_seq_cmd_buf));
     }
 
+    st_write(&p, z2_song_state, 0xAC);
     st_write(&p, &z2_oca_note_pos, sizeof(z2_oca_note_pos));
     st_write(&p, &z2_stored_song, sizeof(z2_stored_song));
     st_write(&p, z2_oca_state, 0x74);
-
+    st_write(&p, z2_staff_notes, 0x1E);
+    st_write(&p, &z2_song_ptr, sizeof(z2_song_ptr));
+    st_write(&p, &z2_unk_song_pos, sizeof(z2_unk_song_pos));
     return (char*)p - (char*)state;
 }
 

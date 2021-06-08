@@ -1556,12 +1556,18 @@ typedef struct {
 } z2_scene_cmd_t;                       /* 0x0008 */
 
 typedef struct {
-    char unk_0x00[0x1FC];
+    char unk_0x00[0x1C0];
+    float vol_cur;                      /* 0x01C0 */
+    float vol_target;                   /* 0x01C4 */
+    char unk_0x1C8[0x34];               /* 0x01C8 */
     uint32_t unk_1FC;                   /* 0x01FC */
-    char unk_0x200[0xA];                /* 0x0200 */
+    uint16_t timer;                     /* 0x0200 */
+    char unk_0x202[0x8];                /* 0x0202 */
     uint16_t seq_idx;                   /* 0x020A */
     uint16_t prev_seq_idx;              /* 0x020C */
-    char unk_0x20E[0x0D];               /* 0x0210 */
+    char unk_0x20E[0x4];                /* 0x020E */
+    uint8_t vol_factor[4];              /* 0x0212 */
+    char unk_0x216[5];                  /* 0x0216 */
     uint8_t unk_21B;                    /* 0x021B */
 } z2_seq_ctl_t;                         /* 0x021C */
 
@@ -1578,7 +1584,9 @@ typedef struct {
 } z2_sequencer_t;                       /* 0x0160 */
 
 typedef struct {
-    char unk_0x00[0x4460];
+    char unk_0x00[0x28C0];
+    uint32_t unk_ctr; /* 0x28C0 */
+    char unk_0x28C4[0x1B9C];
     z2_sequencer_t sequencers[4]; /* 0x4460 */
     char unk_0x49E0[0x2F98];
     uint8_t cmd_wr_pos; /* 7978 */
@@ -1751,6 +1759,12 @@ z2_extern z2_bgtask_t               z2_prerender_bgtask;
 z2_extern uint8_t                   z2_oca_note_pos;
 z2_extern uint8_t                   z2_cur_oca_song[9];
 z2_extern uint8_t                   z2_oca_state[];
+z2_extern uint32_t                  z2_oca_unk_ctr;
+z2_extern uint8_t                   z2_song_state[];
+z2_extern uint8_t                   z2_staff_notes[];
+z2_extern void                     *z2_song_ptr;
+z2_extern uint32_t                  z2_song_ctr;
+z2_extern uint16_t                  z2_unk_song_pos;
 
 // pause menu hacks
 #if Z2_VERSION==NZSE
