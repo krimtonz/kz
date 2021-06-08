@@ -198,6 +198,7 @@ void load_state(void *state){
         z2_player_ovl_table_t *ent = &z2_player_ovl_table[i];
         if(i == next_ent){
             load_overlay(&p, &ent->ram, ent->vrom_start, ent->vrom_end, ent->vram_start, ent->vram_end);
+            ent->reloc_off = (int)ent->ram - (int)ent->vram_start;
             st_read(&p,&next_ent,sizeof(next_ent));
             set_insert(&ovl_set, &ent->ram);
             z2_player_ovl_cur = ent;
