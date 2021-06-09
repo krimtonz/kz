@@ -611,7 +611,6 @@ static void init(void) {
     load_settings_from_flashram(kz.settings_profile);
     kz_apply_settings();
 
-    input_init(&z2_input_direct.raw.pad, &z2_input_direct.raw.x, &z2_input_direct.raw.y, settings->binds, KZ_CMD_MAX);
     bind_override(KZ_CMD_TOGGLE_MENU);
     bind_override(KZ_CMD_RETURN);
 

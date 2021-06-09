@@ -22,5 +22,6 @@ sw $t1, 0x10($t0)
 j (RAM)
 nop
 .end _start
+.size _start, . - _start
 
 .fill 0x60 - (. - _start)

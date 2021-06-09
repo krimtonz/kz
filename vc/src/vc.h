@@ -220,7 +220,9 @@ vc_extern bool  cpuSetDeviceGet         (n64_cpu_t *cpu, cpu_dev_t *dev, void *l
 vc_extern bool  treeCallerCheck         (n64_cpu_t *cpu, func_tree_node_t *node, uint32_t arg2, uint32_t n64_start, uint32_t n64_end);
 vc_extern bool  xlHeapGetFreeArena1     (int *free);
 vc_extern bool  xlHeapGetFreeArena2     (int *free);
+vc_extern void  unk_status_set          (int idx);
 vc_extern gClassSystem_t *gSystem;
+vc_extern uint16_t        wiimote_pad;
 
 extern func_tree_node_t    *kz_tree;
 extern int                  kz_tree_status[];

@@ -35,24 +35,19 @@ struct bind_item_data {
 };
 
 static int          __button_time[16];
-static uint16_t     __pad_pressed_raw;
-static uint16_t     __pad_pressed;
-static uint16_t     __pad_released;
-static uint16_t     __pad;
-static uint16_t     __pad_reserved;
-static int8_t       __stick_x;
-static int8_t       __stick_y;
-static int         *__bind_component_state;
-static int         *__bind_time;
-static _Bool       *__bind_pressed_raw;
-static _Bool       *__bind_pressed;
-static _Bool       *__bind_override;
-static _Bool        __input_enabled = 1;
-static int          __bind_cnt;
-static uint16_t    *__binds_p;
-static uint16_t    *__pad_p;
-static int8_t      *__x_p;
-static int8_t      *__y_p;
+static uint16_t     pressed_raw;
+static uint16_t     pressed;
+static uint16_t     released;
+static uint16_t     pad_cur;
+static uint16_t     pad_reserved;
+static int8_t       stick_x;
+static int8_t       stick_y;
+static int          bind_component_state[KZ_CMD_MAX];
+static int          bind_time[KZ_CMD_MAX];
+static _Bool        bind_pressed_raw[KZ_CMD_MAX];
+static _Bool        bind_pressed[KZ_CMD_MAX];
+static _Bool        bind_overrides[KZ_CMD_MAX];
+static _Bool        input_enabled = 1;
 
 
 int bind_get_component(uint16_t bind, int index){
@@ -81,7 +76,7 @@ int button_get_index(uint16_t button_mask){
 }
 
 void bind_override(int index){
-    __bind_override[index] = 1;
+    bind_overrides[index] = 1;
 }
 
 uint16_t make_bind(int len, ...){
@@ -104,54 +99,41 @@ uint16_t make_bind(int len, ...){
     return ret;
 }
 
-void input_init(uint16_t *pad, int8_t *stick_x, int8_t *stick_y, uint16_t *binds, int n_binds){
-    __bind_cnt = n_binds;
-    __bind_component_state = calloc(__bind_cnt, sizeof(*__bind_component_state));
-    __bind_time = calloc(__bind_cnt, sizeof(*__bind_time));
-    __bind_pressed_raw = calloc(__bind_cnt, sizeof(*__bind_pressed_raw));
-    __bind_pressed = calloc(__bind_cnt, sizeof(*__bind_pressed));
-    __bind_override = calloc(__bind_cnt, sizeof(*__bind_override));
-    __binds_p = binds;
-    __pad_p = pad;
-    __x_p = stick_x;
-    __y_p = stick_y;
-}
-
 void input_update(void){
-    uint16_t z_pad = *__pad_p;
-    __stick_x = *__x_p;
-    __stick_y = *__y_p;
-    __pad_pressed_raw = (__pad ^ z_pad) & z_pad;
-    __pad_released = (__pad ^ z_pad) & ~z_pad;
-    __pad = z_pad;
-    __pad_pressed = 0;
+    uint16_t z_pad = z2_input_direct.raw.pad;
+    stick_x = z2_input_direct.raw.x;
+    stick_y = z2_input_direct.raw.y;
+    pressed_raw = (pad_cur ^ z_pad) & z_pad;
+    released = (pad_cur ^ z_pad) & ~z_pad;
+    pad_cur = z_pad;
+    pressed = 0;
     for(int i = 0;i < 16;i++){
         uint16_t p = 1 << i;
-        if(__pad & p){
+        if(pad_cur & p){
             __button_time[i]++;
         }else{
             __button_time[i] = 0;
         }
-        if((__pad_pressed_raw & p) || __button_time[i] >= INPUT_REPEAT){
-            __pad_pressed |= p;
+        if((pressed_raw & p) || __button_time[i] >= INPUT_REPEAT){
+            pressed |= p;
         }
     }
     static uint16_t *bind_pad = NULL;
     static _Bool *bind_state = NULL;
     if(bind_pad == NULL){
-        bind_pad = calloc(__bind_cnt, sizeof(*bind_pad));
+        bind_pad = calloc(KZ_CMD_MAX, sizeof(*bind_pad));
     }
     if(bind_state == NULL){
-        bind_state = calloc(__bind_cnt, sizeof(*bind_state));
+        bind_state = calloc(KZ_CMD_MAX, sizeof(*bind_state));
     }
 
-    for(int i = 0;i < __bind_cnt;i++){
-        uint16_t *b =  &__binds_p[i];
+    for(int i = 0;i < KZ_CMD_MAX;i++){
+        uint16_t *b =  &settings->binds[i];
         bind_pad[i] = bind_get_bitmask(*b);
-        int *cs = &__bind_component_state[i];
+        int *cs = &bind_component_state[i];
         int j = 0;
         uint16_t c = 0;
-        if(((__pad_reserved & bind_pad[i]) && !__bind_override[i]) || !__input_enabled){
+        if(((pad_reserved & bind_pad[i]) && !bind_overrides[i]) || !input_enabled){
             *cs = 0;
         }else{
             int css = *cs;
@@ -162,7 +144,7 @@ void input_update(void){
                 }
                 uint8_t csm = 1 << j;
                 if(*cs & csm){
-                    if(__pad & (1 << c)){
+                    if(pad_cur & (1 << c)){
                         continue;
                     }
                     else{
@@ -174,10 +156,10 @@ void input_update(void){
                         break;
                     }
                 }
-                if((__pad_released & (1 << c)) || (css != 0 && (__pad_pressed_raw & ~bind_pad[i]))){
+                if((released & (1 << c)) || (css != 0 && (pressed_raw & ~bind_pad[i]))){
                     *cs = 0;
                     break;
-                }else if(__pad_pressed_raw & (1 << c)){
+                }else if(pressed_raw & (1 << c)){
                     *cs |= csm;
                 }else{
                     break;
@@ -186,69 +168,69 @@ void input_update(void){
         }
         bind_state[i] = (*cs && (j == 4 || c == BIND_END));
     }
-    for(int i = 0;i < __bind_cnt;i++){
+    for(int i = 0;i < KZ_CMD_MAX;i++){
         uint16_t pi = bind_pad[i];
-        for(int j = 0;bind_state[i] && j < __bind_cnt;j++){
+        for(int j = 0;bind_state[i] && j < KZ_CMD_MAX;j++){
             if(!bind_state[j]){
                 continue;
             }
             uint16_t pj = bind_pad[j];
             if(pi != pj && (pi & pj) == pi){
-                __bind_component_state[i] = 0;
+                bind_component_state[i] = 0;
                 bind_state[i] = 0;
             }
         }
-        __bind_pressed_raw[i] = (__bind_time[i] == 0 && bind_state[i]);
+        bind_pressed_raw[i] = (bind_time[i] == 0 && bind_state[i]);
         if(!bind_state[i])
-            __bind_time[i] = 0;
+            bind_time[i] = 0;
         else{
-            __bind_time[i]++;
+            bind_time[i]++;
         }
-        __bind_pressed[i] = (__bind_pressed_raw[i] || __bind_time[i] >= INPUT_REPEAT);
+        bind_pressed[i] = (bind_pressed_raw[i] || bind_time[i] >= INPUT_REPEAT);
     }
 }
 
 _Bool input_bind_held(int index){
-    return __bind_time[index] > 0;
+    return bind_time[index] > 0;
 }
 
 _Bool input_bind_pressed(int index){
-    return __bind_pressed[index];
+    return bind_pressed[index];
 }
 
 _Bool input_bind_pressed_raw(int index){
-    return __bind_pressed_raw[index];
+    return bind_pressed_raw[index];
 }
 
 void reserve_buttons(uint16_t button_bitmask){
-    __pad_reserved |= button_bitmask;
+    pad_reserved |= button_bitmask;
 }
 
 void free_buttons(uint16_t button_bitmask){
-    __pad_reserved ^= button_bitmask;
+    pad_reserved ^= button_bitmask;
 }
 
 uint16_t input_pressed(void){
-    if(!__input_enabled){
+    if(!input_enabled){
         return 0;
     }
-    return __pad_pressed;
+    return pressed;
 }
 
 uint16_t input_pressed_raw(void){
-    return __pad;
+    return pad_cur;
 }
 
 uint16_t pad_pressed_raw(void){
-    return __pad_pressed_raw;
+    return pressed_raw;
 }
 
 int8_t input_x(void){
-    return __stick_x;
+    return stick_x;
 }
 
 int8_t input_y(void){
-    return __stick_y;
+    return stick_y;
 }
 
 int button_time(int btn){
@@ -256,11 +238,11 @@ int button_time(int btn){
 }
 
 void input_enable(void){
-    __input_enabled = 1;
+    input_enabled = 1;
 }
 
 void input_disable(void){
-    __input_enabled = 0;
+    input_enabled = 0;
 }
 
 void input_mask_set(uint16_t button, uint8_t x, uint8_t y) {

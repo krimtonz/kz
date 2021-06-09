@@ -14,6 +14,46 @@ extern __attribute__((section(".bss"))) void *__bss_start;
 extern __attribute__((section(".sbss"))) void *__sbss_end;
 extern __attribute__((section(".sbss"))) void *__sbss_start;
 
+void wiimote_pad_merge(int idx, int16_t *pad) {
+    if(idx == 0) {
+        // DPAD-LEFT
+        if(wiimote_pad & 0x0100) {
+            *pad |= 0x0001;
+        }
+
+        // DPAD-RIGHT
+        if(wiimote_pad & 0x0200) {
+            *pad |= 0x0002;
+        }
+
+        // DPAD-DOWN
+        if(wiimote_pad & 0x0400) {
+            *pad |= 0x0004;
+        }
+
+        // DPAD-UP
+        if(wiimote_pad & 0x0800) {
+            *pad |= 0x0800;
+        }
+
+        // B
+        if(wiimote_pad & 4) {
+            *pad |= 0x0020;
+        }
+
+        // A
+        if(wiimote_pad & 8) {
+            // Set c-stick maximum down.
+            ((int8_t*)pad)[5] = -60;
+        }
+    }
+
+    unk_status_set(idx);
+
+    // replace the displaced instruction.
+    __asm__ volatile("li 23, 0;" :::);
+}
+
 bool kz_cpuTreeTake(func_tree_node_t **out_node, int *out_pos, size_t size){
     bool found_node = false;
 
