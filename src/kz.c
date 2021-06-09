@@ -75,7 +75,6 @@ static void kz_main(void) {
         }
 
         if(reset_pos == sizeof(settings_reset) / sizeof(*settings_reset)) {
-            kz_log("settings reset");
             load_default_settings();
             kz_apply_settings();
             kz.main_menu.x_offset = settings->menu_x;
@@ -779,20 +778,7 @@ HOOK int camera_hook(z2_camera_t* camera) {
     __asm__ volatile("sw $t9, %0" : "=m"(camera_update_func) :: "t9");
     if(!kz.free_cam_active) {
         return camera_update_func(camera);
-        /*
-        kz.cam_at = camera->at;
-        kz.cam_eye = camera->eye;
-        return ret;
-        */
     }
-
-    /*
-    camera->at = kz.cam_at;
-    camera->eye = kz.cam_eye;
-    int ret = camera_update_func(camera);
-    kz.cam_at = camera->at;
-    kz.cam_eye = camera->eye;
-    */
 
     if(!kz.free_cam_locked) {
         kz_camera_calc(camera);

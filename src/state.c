@@ -364,6 +364,8 @@ void load_state(void *state){
 
     st_read(&p, &z2_framerate_div, sizeof(z2_framerate_div));
 
+    st_read(&p, &z2_random, sizeof(z2_random));
+
     {
         // Load Minimap Details
         st_read(&p, &z2_minimap_ctx, sizeof(z2_minimap_ctx));
@@ -860,6 +862,8 @@ size_t save_state(void *state){
     st_write(&p, &z2_cs_bars, sizeof(z2_cs_bars));
 
     st_write(&p, &z2_framerate_div, sizeof(z2_framerate_div));
+
+    st_write(&p, &z2_random, sizeof(z2_random));
 
     st_write(&p, &z2_minimap_ctx, sizeof(z2_minimap_ctx));
 

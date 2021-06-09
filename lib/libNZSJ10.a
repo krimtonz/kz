@@ -6,6 +6,7 @@ osCreateMesgQueue           = 0x800901E0;
 osEPiReadIo                 = 0x80093050;
 osEPiWriteIo                = 0x80094B70;
 z2_vi_counter               = 0x80097B58;
+z2_random                   = 0x80098550;
 z2_file_msgqueue            = 0x8009CED0;
 z2_arena                    = 0x8009E920;
 z2_file_table               = 0x800A14B0;

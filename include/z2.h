@@ -1765,6 +1765,7 @@ z2_extern uint8_t                   z2_staff_notes[];
 z2_extern void                     *z2_song_ptr;
 z2_extern uint32_t                  z2_song_ctr;
 z2_extern uint16_t                  z2_unk_song_pos;
+z2_extern uint32_t                  z2_random;
 
 // pause menu hacks
 #if Z2_VERSION==NZSE
