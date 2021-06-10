@@ -37,8 +37,23 @@ void watch_printf(watch_t *watch, uint32_t color)
             sprintf(buf, "%8lX", *(uint32_t*)address);
             break;
         case WATCH_TYPE_FLOAT:
-            sprintf(buf, "%g", *(float*)address);
-            break;
+        {
+            union {
+                uint32_t uv;
+                float fv;
+            } comp;
+
+            comp.uv = *(uint32_t*)address;
+
+            /* moderately annoying workaround for double rounding issues in _etoa and _ftoa, 
+             * this doesn't solve the rounding issues, but rather fixes a common case of 0.0 */
+            if(comp.uv == 0) {
+                sprintf(buf, "%f", comp.fv);
+            } else {
+                sprintf(buf, "%g", comp.fv);
+            }
+        }
+        break;
     }
 
     gfx_printf_color(watch->x, watch->y, color, "%s", buf);
