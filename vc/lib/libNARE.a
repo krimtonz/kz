@@ -23,5 +23,5 @@ unk_status_set_call     = 0x80081018;
 heap_size_hook          = 0x80091ea4;
 mem2_heap_size          = 0x80091F44;
 unk_status_set          = 0x800DA228;
-wiimote_pad             = 0x801D013E;
+wiimote_pad             = 0x801BCB60;
 gSystem                 = 0x801fb838;

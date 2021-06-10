@@ -17,32 +17,32 @@ extern __attribute__((section(".sbss"))) void *__sbss_start;
 void wiimote_pad_merge(int idx, int16_t *pad) {
     if(idx == 0) {
         // DPAD-LEFT
-        if(wiimote_pad & 0x0100) {
+        if(wiimote_pad & 0x0001) {
             *pad |= 0x0001;
         }
 
         // DPAD-RIGHT
-        if(wiimote_pad & 0x0200) {
+        if(wiimote_pad & 0x0002) {
             *pad |= 0x0002;
         }
 
         // DPAD-DOWN
-        if(wiimote_pad & 0x0400) {
+        if(wiimote_pad & 0x0004) {
             *pad |= 0x0004;
         }
 
         // DPAD-UP
-        if(wiimote_pad & 0x0800) {
-            *pad |= 0x0800;
+        if(wiimote_pad & 0x0008) {
+            *pad |= 0x0008;
         }
 
         // B
-        if(wiimote_pad & 4) {
+        if(wiimote_pad & 0x0400) {
             *pad |= 0x0020;
         }
 
         // A
-        if(wiimote_pad & 8) {
+        if(wiimote_pad & 0x0800) {
             // Set c-stick maximum down.
             ((int8_t*)pad)[5] = -60;
         }
