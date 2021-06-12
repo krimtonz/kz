@@ -84,7 +84,7 @@ _Bool load_overlay(void **src, void **tab_addr, uint32_t vrom_start, uint32_t vr
     return 1;
 }
 
-void relocate_col_hdr(uint32_t hdr){
+__attribute__((noinline)) void relocate_col_hdr(uint32_t hdr){
     z2_col_hdr_t *col_hdr = zu_segment_find(hdr);
     zu_segment_reloc(&col_hdr->vtx);
     zu_segment_reloc(&col_hdr->poly);
@@ -522,7 +522,7 @@ void load_state(void *state){
                 z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(obj->data);
                 offset = ((int)col->col_hdr - (int)obj->data);
             } else {
-                int offset = (int)col->col_hdr - (int)MIPS_PHYS_TO_KSEG0(z2_segment.segments[segment]);
+                offset = (int)col->col_hdr - (int)MIPS_PHYS_TO_KSEG0(z2_segment.segments[segment]);
                 if(offset < 0) {
                     continue;
                 }
