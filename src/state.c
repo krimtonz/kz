@@ -84,7 +84,7 @@ _Bool load_overlay(void **src, void **tab_addr, uint32_t vrom_start, uint32_t vr
     return 1;
 }
 
-__attribute__((noinline)) void relocate_col_hdr(uint32_t hdr){
+void relocate_col_hdr(uint32_t hdr){
     z2_col_hdr_t *col_hdr = zu_segment_find(hdr);
     zu_segment_reloc(&col_hdr->vtx);
     zu_segment_reloc(&col_hdr->poly);
@@ -108,18 +108,14 @@ void load_state(void *state){
     struct seq_info {
         _Bool active;
         uint16_t seq_idx;
-        uint32_t unk_1FC;
-        uint16_t delay;
         float volume;
         uint8_t vol_factor[4];
-    } seq_info[4];
+    } seq_info[5];
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 5; i++) {
         struct seq_info *info = &seq_info[i];
         st_read(&p, &info->active, sizeof(info->active));
         st_read(&p, &info->seq_idx, sizeof(info->seq_idx));
-        st_read(&p, &info->unk_1FC, sizeof(info->unk_1FC));
-        st_read(&p, &info->delay, sizeof(info->delay));
         st_read(&p, &info->volume, sizeof(info->volume));
         st_read(&p, &info->vol_factor, sizeof(info->vol_factor));
     }
@@ -133,7 +129,7 @@ void load_state(void *state){
         z2_AudioReset(cur_config);
         z2_AfxCmdWord(0xF8000000, 0x00000000);
     } else {
-        for(int i = 0; i < 4; i++) {
+        for(int i = 0; i < 5; i++) {
             struct seq_info *info = &seq_info[i];
             z2_seq_ctl_t *ctl = &z2_seq_ctl[i];
             if (i == 2) {
@@ -608,7 +604,7 @@ void load_state(void *state){
     st_read(&p, &frame_cnt_2, sizeof(frame_cnt_2));
     zu_gfx_reloc(frame_cnt_1 & 1, frame_cnt_2 & 1);
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 5; i++) {
         struct seq_info *info = &seq_info[i];
         z2_seq_ctl_t *ctl = &z2_seq_ctl[i];
         z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
@@ -619,21 +615,77 @@ void load_state(void *state){
         ctl->vol_cur = info->volume;
         ctl->timer = 0;
         ctl->prev_seq_idx = ctl->seq_idx = info->seq_idx;
-        //ctl->unk_1FC = info->unk_1FC;
-        z2_AfxCmdFloat(0x41000000, ctl->vol_cur);
-        _Bool cur_active = sequencer->status & 0x80;
-        if(info->seq_idx != 0xFFFF && info->active && !cur_active) {
+
+        if(i == 4 && ctl->seq_idx == 0x0001) {
+            z2_night_sfx_t *night_sfx = &z2_night_sfx[z2_game.night_seq_idx];
+
+            z2_AfxCmdByte(0x46040000, 1);
+            z2_AfxCmdByte(0x46040004, ((night_sfx->unk_0x00 >> 8) & 0xFF));
+            z2_AfxCmdByte(0x46040005, (night_sfx->unk_0x00 & 0xFF));
+
+            afx_start_seq(4, 1);
+
+            for(int j = 0; j < 16; j++) {
+                if(!(night_sfx->unk_0x02 & (1 << j)) && (night_sfx->unk_0x00 & (1 << j))) {
+                    z2_AfxCmdByte(0x06040000 | (j << 8) | 1, 1);
+                }
+            }
+            
+            for(int j = 0; j < 0x64; j += 3) {
+                uint8_t chan = night_sfx->unk_0x04[j + 0];
+                uint8_t param = night_sfx->unk_0x04[j + 1];
+                uint8_t val = night_sfx->unk_0x04[j + 2];
+
+                if(chan == 0xFF) {
+                    break;
+                }
+
+                z2_AfxCmdByte(0x06040000 | (chan << 8) | (param << 0), val);
+            }
+
+            z2_AfxCmdByte(0x06040D07, 0);
+
+            switch(z2_game.night_sfx_state) {
+                case 3:
+                case 4:
+                    // channel 1 on.
+                    z2_AfxCmdByte(0x06040101, 1);
+                    break;
+                case 5:
+                case 6:
+                    // channel 1 off.  channels 2, 3, and 4 on.
+                    z2_AfxCmdByte(0x06040101, 0);
+                    z2_AfxCmdByte(0x06040201, 1);
+                    z2_AfxCmdByte(0x06040301, 1);
+                    z2_AfxCmdByte(0x06040401, 1);
+                    break;
+                case 7:
+                case 8:
+                    // channels 2, 3, and 4 off, channels 5 and 6 on
+                    z2_AfxCmdByte(0x06040201, 0);
+                    z2_AfxCmdByte(0x06040301, 0);
+                    z2_AfxCmdByte(0x06040401, 0);
+                    z2_AfxCmdByte(0x06040501, 1);
+                    z2_AfxCmdByte(0x06040601, 1);
+                    break;
+            }
+
+            if(z2_game.rain_timer1 > 0 || z2_game.rain_timer2 > 0) {
+                // channels 14 and 15 on.
+                z2_AfxCmdByte(0x06040E01, 1);
+                z2_AfxCmdByte(0x06040F01, 1);
+            }
+
+        } else if (info->seq_idx != 0xFFFF && info->active && !(sequencer->status & 0x80)) {
             afx_start_seq(i, info->seq_idx);
         }
+
+        z2_AfxCmdFloat(0x41000000, ctl->vol_cur);
     }
 
     z2_AfxCmdWord(0xF2000000, 0x00000000);
     z2_AfxCmdFlush();
-    for(int i = 0; i < 4; i++) {
-        struct seq_info *info = &seq_info[i];
-        z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
-        sequencer->delay = info->delay;
-    }
+
     uint8_t cmd_cnt;
     st_read(&p, &cmd_cnt, sizeof(cmd_cnt));
     for(uint8_t i = 0; i != cmd_cnt; i++) {
@@ -692,14 +744,12 @@ size_t save_state(void *state){
 
     st_skip(&p, sizeof(kz_state_hdr_t));
 
-    for(int i = 0; i < 4; i++) {
+    for(int i = 0; i < 5; i++) {
         z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
         z2_seq_ctl_t *seq_ctl = &z2_seq_ctl[i];
         _Bool seq_active = (sequencer->status & 0x80) || z2_afx_cfg_state;
         st_write(&p, &seq_active, sizeof(seq_active));
         st_write(&p, &seq_ctl->seq_idx, sizeof(seq_ctl->seq_idx));
-        st_write(&p, &seq_ctl->unk_1FC, sizeof(seq_ctl->unk_1FC));
-        st_write(&p, &sequencer->delay, sizeof(sequencer->delay));
         if(seq_ctl->timer != 0) {
             st_write(&p, &seq_ctl->vol_target, sizeof(seq_ctl->vol_target));
         } else {

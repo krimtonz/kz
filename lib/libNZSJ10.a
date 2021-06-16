@@ -75,6 +75,7 @@ z2_link_spawn_obj           = 0x801CB318;
 z2_player_ovl_table         = 0x801CB330;
 z2_player_ovl_cur           = 0x801CB36C;
 z2_framerate_div            = 0x801CBCB8;
+z2_night_sfx                = 0x801D0F44;
 z2_oca_state                = 0x801D1764;
 z2_oca_unk_ctr              = 0x801D17C8;
 z2_oca_note_pos             = 0x801D17D8;

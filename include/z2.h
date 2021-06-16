@@ -1251,6 +1251,12 @@ typedef struct {
     z2_light_node_t     nodes[32];                  /* 0x0008 */
 } z2_light_queue_t;                                 /* 0x0188 */
 
+typedef struct {
+    uint16_t unk_0x00;                              /* 0x0000 */
+    uint16_t unk_0x02;                              /* 0x0002 */
+    char unk_0x04[0x64];                            /* 0x0004 */
+} z2_night_sfx_t;                                   /* 0x0068 */
+
 typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     z2_ctxt_t           common;                     /* 0x00000 */
     uint16_t            scene_index;                /* 0x000A4 */
@@ -1263,7 +1269,8 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
     z2_camera_t        *active_cameras[4];          /* 0x00800 */
     int16_t             camera_cur;                 /* 0x00810 */
     int16_t             camera_next;                /* 0x00812 */
-    char                unk_0x814[0x4];             /* 0x00814 */
+    uint8_t             seq_idx;                    /* 0x00814 */
+    uint8_t             night_seq_idx;              /* 0x00815 */
     z2_light_node_t    *light_append;               /* 0x00818 */
     char                unk_0x81C[0x14];            /* 0x0081C */
     z2_col_ctxt_t       col_ctxt;                   /* 0x00830 */
@@ -1285,7 +1292,13 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
 #endif
     z2_hud_ctxt_t       hud_ctx;                    /* 0x169E8 */   /* 0x169C8 */
     z2_pause_ctxt_t     pause_ctx;                  /* 0x16D30 */   /* 0x16D10 */
-    char                unk_0x16F30[0xDE8];         /* 0x16FA0 */   /* 0x16F80 */
+    char                unk_0x16FA0[0x148];         /* 0x16FA0 */   /* 0x16F80 */
+    uint8_t             night_sfx_state;            /* 0x170E8 */   /* 0x170C8 */
+    char                unk_0x170E9[0xE];           /* 0x170E9 */   /* 0x170C9 */
+    uint8_t             rain_timer1;                /* 0x170F7 */   /* 0x170D7 */
+    char                unk_0x170F8[2];             /* 0x170F8 */   /* 0x170D8 */
+    uint8_t             rain_timer2;                /* 0x170FA */   /* 0x170DA */
+    char                unk_0x170FB[0xC8D];         /* 0x170FB */   /* 0x170DB */
     z2_obj_ctxt_t       obj_ctx;                    /* 0x17D88 */   /* 0x17D68 */
     z2_room_ctxt_t      room_ctx;                   /* 0x186E0 */   /* 0x186C0 */
     char                unk_0x18768[0xE0];          /* 0x18768 */   /* 0x18748 */
@@ -1587,8 +1600,8 @@ typedef struct {
     char unk_0x00[0x28C0];
     uint32_t unk_ctr; /* 0x28C0 */
     char unk_0x28C4[0x1B9C];
-    z2_sequencer_t sequencers[4]; /* 0x4460 */
-    char unk_0x49E0[0x2F98];
+    z2_sequencer_t sequencers[5]; /* 0x4460 */
+    char unk_0x4B40[0x2E38];
     uint8_t cmd_wr_pos; /* 7978 */
     uint8_t cmd_rd_pos; /* 7979 */
     char unk_0x797A[0x7A];
@@ -1694,7 +1707,7 @@ z2_extern void          z2_dmaflashtoram            (void *ram, uint32_t block, 
 z2_extern void          z2_dmaramtoflash            (void *ram, uint32_t block, uint32_t block_cnt);
 z2_extern void          z2_AfxCmdFloat              (uint32_t cmd, float data);
 z2_extern void          z2_AfxCmdWord               (uint32_t cmd, uint32_t data);
-z2_extern void          z2_AfxCmdByte               (uint32_t cmd, uint8_t data);
+z2_extern void          z2_AfxCmdByte               (uint32_t cmd, int8_t data);
 z2_extern void          z2_AfxCmdShort              (uint32_t cmd, uint16_t data);
 z2_extern void          z2_CheckAfxCfg              (void);
 z2_extern void          z2_AfxConfig                (uint8_t cfg);
@@ -1747,7 +1760,7 @@ z2_extern uint8_t                   z2_seq_cmd_rd_pos;
 z2_extern uint8_t                   z2_afx_cfg;
 z2_extern uint8_t                   z2_afx_cfg_state;
 z2_extern uint32_t                  z2_seq_cmd_buf[0x100];
-z2_extern z2_seq_ctl_t              z2_seq_ctl[4];
+z2_extern z2_seq_ctl_t              z2_seq_ctl[5];
 z2_extern z2_audio_ctxt_t           z2_audio_ctxt;
 z2_extern char                      z2_disp[];
 z2_extern Gfx                       z2_seg_disp[18];
@@ -1766,6 +1779,7 @@ z2_extern void                     *z2_song_ptr;
 z2_extern uint32_t                  z2_song_ctr;
 z2_extern uint16_t                  z2_unk_song_pos;
 z2_extern uint32_t                  z2_random;
+z2_extern z2_night_sfx_t            z2_night_sfx[];
 
 // pause menu hacks
 #if Z2_VERSION==NZSE
