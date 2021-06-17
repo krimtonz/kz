@@ -215,6 +215,13 @@ static _Bool dir_ent_comp(void *a, void *b){
             return 0;
         }
     }
+    while(*a_name) {
+        a_name++;
+    }
+
+    while(*b_name) {
+        b_name++;
+    }
     d = (a_name - dir_a->name) - (b_name - dir_b->name);
     if(d < 0){
         return 1;
