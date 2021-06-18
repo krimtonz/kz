@@ -165,10 +165,27 @@ void command_timer_reset(void){
 }
 
 void command_break(void){
-    z2_game.cutscene_state = 0x03;
-    z2_game.message_state_1 = 0x43;
-    z2_game.message_state_2 = 0x00;
-    z2_game.message_state_3 = 0x02;
+    if(z2_link.action != 0) {
+        z2_link.action = 7;
+    }
+    if(z2_game.cutscene_state != 0) {
+        z2_game.cutscene_state = 0x03;
+    }
+
+    if(z2_game.message_state_1 != 0) {
+        z2_game.message_state_1 = 0x43;
+        z2_game.message_state_2 = 0x00;
+        z2_game.message_state_3 = 0x02;
+    }
+
+    z2_game.cameras[0].set = 1;
+
+    for(int i = 1; i < 4; i++) {
+        if(z2_game.cameras[i].param_flags != -1) {
+            z2_game.cameras[i].param_flags = 0;
+        }
+    }
+
     z2_link.state_flags_1 = 0;
     z2_link.state_flags_2 = 0;
 }

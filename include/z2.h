@@ -33,8 +33,8 @@ typedef union{
 
 typedef struct
 {
-    int16_t x;  /* 0x0000 */ 
-    int16_t y;  /* 0x0002 */ 
+    int16_t x;  /* 0x0000 */
+    int16_t y;  /* 0x0002 */
     int16_t z;  /* 0x0004 */
 } z2_xyz_t; // size = 0x6
 
@@ -788,7 +788,9 @@ typedef struct /* z2_camera_t */
     int16_t         mode;                   /* 0x0144 */
     int16_t         bg_chk_id;              /* 0x0146 */
     int16_t         data_idx;               /* 0x0148 */
-    char            unk_0x14A[0x2D];        /* 0x014A */
+    char            unk_0x14A[0x14];        /* 0x014A */
+    int16_t         param_flags;            /* 0x015E */
+    char            unk_0x160[0x18];        /* 0X0160 */
 } z2_camera_t;                              /* 0x0178 */
 
 typedef struct /* z2_actor_ctxt_t */
@@ -1316,7 +1318,9 @@ typedef struct {                                    /*   NZSE  */   /*  NZSJ  */
 
 typedef struct {
     z2_actor_t          common;                     /* 0x0000 */
-    char                unk_0x144[0x928];           /* 0x0144 */
+    char                unk_0x144[0x250];           /* 0x0144 */
+    uint8_t             action;                     /* 0x0394 */
+    char                unk_0x395[0x6D7];           /* 0x0395 */
     uint32_t            state_flags_1;              /* 0x0A6C */
     uint32_t            state_flags_2;              /* 0x0A70 */
     char                unk_0xA74[0x5C];            /* 0x0A74 */
