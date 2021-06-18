@@ -131,6 +131,22 @@ static int lock_cam_event(event_handler_t *handler, menu_event_t event, void **e
     return 1;
 }
 
+static int set_cam_pos_event(event_handler_t *handler, menu_event_t event, void **event_data) {
+    sph_coord_t sph;
+    z2_xyzf_t at_dir;
+
+    sph.pitch = 0.0f;
+    sph.yaw = 0.0f;
+
+    geo_to_vec3f(&sph, &at_dir);
+
+    kz.kz_at = z2_link.common.pos_2;
+    kz.cam_sph = sph;
+
+    vec3f_add(&kz.kz_at, &at_dir, &kz.kz_eye);
+    return 1;
+}
+
 #if 0
 static int cam_draw_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     if(event == MENU_EVENT_ACTIVATE) {
@@ -204,6 +220,7 @@ menu_t *create_scene_menu(void){
         item = menu_checkbox_add(&camera, 0, 2);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, lock_cam_event, NULL);
         menu_label_add(&camera, 2, 2, "lock free cam");
+        menu_button_add(&camera, 0, 3, "set cam pos to link pos", set_cam_pos_event, NULL);
         /*
         item = menu_checkbox_add(&camera, 0, 3);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, cam_draw_event, NULL);

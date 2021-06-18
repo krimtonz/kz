@@ -25,19 +25,19 @@ void kz_camera_calc(z2_camera_t *camera) {
     shift.pitch = 0.0f;
     shift.yaw = geo->yaw - (M_PI / 2.0f);
     geo_to_vec3f(&shift, &strafe);
-    if(input_pressed() & BUTTON_C_UP){
+    if(input_pressed_raw() & BUTTON_C_UP){
         vec3f_scalar_mul(&move, -45.0f, &move);
         vec3f_add(&kz.kz_at, &move, &kz.kz_at);
     }
-    if(input_pressed() & BUTTON_C_DOWN){
+    if(input_pressed_raw() & BUTTON_C_DOWN){
         vec3f_scalar_mul(&move, 45.0f, &move);
         vec3f_add(&kz.kz_at, &move, &kz.kz_at);
     }
-    if(input_pressed() & BUTTON_C_LEFT){
+    if(input_pressed_raw() & BUTTON_C_LEFT){
         vec3f_scalar_mul(&strafe, 15.0f, &strafe);
         vec3f_add(&kz.kz_at, &strafe, &kz.kz_at);
     }
-    if(input_pressed() & BUTTON_C_RIGHT){
+    if(input_pressed_raw() & BUTTON_C_RIGHT){
         vec3f_scalar_mul(&strafe, -15.0f, &strafe);
         vec3f_add(&kz.kz_at, &strafe, &kz.kz_at);
     }
@@ -139,7 +139,7 @@ void camera_draw(void) {
         guMtxF2L(&mf, &m);
         guMtxF2L(&mfcam, &mcam);
     }
-    
+
     gSPSetGeometryMode(cam_gfx_p++, G_CULL_BACK);
     gSPMatrix(cam_gfx_p++, gDisplayListData(&cam_gfx_d, m), G_MTX_LOAD | G_MTX_MODELVIEW | G_MTX_PUSH);
     gSPDisplayList(cam_gfx_p++, draw_arrow_tris);
