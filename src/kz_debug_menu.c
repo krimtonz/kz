@@ -254,14 +254,23 @@ static int object_pop_onactivate(event_handler_t *handler, menu_event_t event, v
 
 static void actor_info_draw(menu_item_t *item){
     struct actor_info_data *data = item->data;
-    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-    for(int i = 0;i < actor_info.actor_idx;i++){
+    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
+    int cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
+    if(data->actor_idx > cnt) {
+        if(cnt > 0) {
+            data->actor_idx = cnt - 1;
+        } else {
+            data->actor_idx = 0;
+        }
+    }
+
+    for(int i = 0; actor != NULL && i < data->actor_idx; i++) {
         actor = actor->next;
     }
 
     int x = menu_item_x(item);
 
-    if(!actor){
+    if(actor == NULL) {
         strcpy(data->actor_button->text, "<none>");
         gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       n/a");
         item->y_cell++;
@@ -318,9 +327,8 @@ static void actor_info_draw(menu_item_t *item){
     item->y_cell--;
 
     x = menu_item_x(data->actor_button) + item->owner->cell_width * 10;
-    int actor_cnt = z2_game.actor_ctxt.actor_list[actor_info.actor_type].count;
-    int actor_idx = actor_cnt == 0 ? 0 : actor_info.actor_idx + 1;
-    gfx_printf(x, menu_item_y(data->actor_button), "(%02d/%02d)", actor_idx, actor_cnt);
+
+    gfx_printf(x, menu_item_y(data->actor_button), "(%02d/%02d)", data->actor_idx + (cnt == 0 ? 0 : 1), cnt);
 }
 
 static menu_item_t *menu_actor_info_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
@@ -444,7 +452,8 @@ static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, vo
     if(actor_cnt == 0 || actor_info.actor_idx == 0){
         actor_info.actor_type += sizeof(actor_type_values) / sizeof(*actor_type_values) - 1;
         actor_info.actor_type %= sizeof(actor_type_values) / sizeof(*actor_type_values);
-        actor_info.actor_idx = 0;
+        actor_cnt = z2_game.actor_ctxt.actor_list[actor_info.actor_type].count;
+        actor_info.actor_idx = actor_cnt > 0 ? actor_cnt - 1 : 0;
         return 1;
     }
     actor_info.actor_idx += actor_cnt - 1;
@@ -768,7 +777,7 @@ menu_t *create_debug_menu(void){
         menu_label_add(&vc_debug, 11, 8, recomp2_text[0]);
         menu_label_add(&vc_debug, 11, 9, recomp2_text[1]);
     }
-#endif    
+#endif
 
     menu_submenu_add(&debug, 0, 1, "memory", &memory);
     menu_submenu_add(&debug, 0, 2, "objects", &objects);
