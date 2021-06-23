@@ -71,22 +71,20 @@ static int name_onupdate(event_handler_t *handler, menu_event_t event, void **ev
 }
 
 static void do_export_state(char *path, void *data){
-    int file = -1;
-    creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file != -1){
         kz_state_hdr_t *state = kz.states[kz.state_slot];
-        int res;
-        write(&res, file, state, sizeof(*state));
-        write(&res, file, (char*)state + sizeof(*state), state->size);
+
+        write(file, state, sizeof(*state));
+        write(file, (char*)state + sizeof(*state), state->size);
         kz_log("export from state %d", kz.state_slot);
-        close(&res, file);
+        close(file);
     }
-    
+
 }
 
 static void do_import_state(char *path, void *data){
-    int file = -1;
-    open(&file, path, O_RDONLY);
+    int file = open(path, O_RDONLY);
     if(file != -1){
         kz_state_hdr_t *state = kz.states[kz.state_slot];
         if(state != NULL) {
@@ -96,18 +94,18 @@ static void do_import_state(char *path, void *data){
             free(state);
 #endif
         }
-        int res;
+
         struct stat sbuf;
-        stat(&res, path, &sbuf);
+        stat(path, &sbuf);
 #ifdef WIIVC
         state = halloc(sbuf.st_size);
 #else
         state = malloc(sbuf.st_size);
 #endif
-        read(&res, file, (char*)state, sizeof(*state));
+        read(file, (char*)state, sizeof(*state));
         int state_res = state_is_valid(state);
         if(state_res == 0) {
-            read(&res, file, (char*)state + sizeof(*state), sbuf.st_size - sizeof(*state));
+            read(file, (char*)state + sizeof(*state), sbuf.st_size - sizeof(*state));
             kz.states[kz.state_slot] = state;
             kz_log("imported to state %d", kz.state_slot);
         } else {
@@ -118,9 +116,9 @@ static void do_import_state(char *path, void *data){
 #endif
             kz_log(state_res == -1 ? "wrong mm version" : "wrong state version");
         }
-        close(&res, file);
+        close(file);
     }
-    
+
 }
 
 static int export_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
@@ -147,7 +145,7 @@ menu_t *create_states_menu(void) {
         state_name = malloc(64);
     }
     memset(state_name, 0, 64);
-    
+
     strcpy(state_name, no_state);
 
     menu_init(&states_menu, 0, 0);

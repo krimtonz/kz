@@ -160,30 +160,28 @@ static int command_inc_onactivate(event_handler_t *handler, menu_event_t event, 
 
 #ifndef LITE
 static void do_export_pos(char *path, void *data){
-    int file = -1;
-    creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file != -1){
         position_t *pos = kz.position_save[kz.pos_slot];
-        int res;
-        write(&res, file, pos, sizeof(*pos));
+
+        write(file, pos, sizeof(*pos));
         kz_log("export from position %d", kz.pos_slot);
-        close(&res, file);
+        close(file);
     }
 }
 
 static void do_import_pos(char *path, void *data){
-    int file = -1;
-    open(&file, path, O_RDONLY);
+    int file = open(path, O_RDONLY);
     if(file != -1){
         position_t *pos = kz.position_save[kz.pos_slot];
         if(pos == NULL){
             pos = malloc(sizeof(*pos));
         }
-        int res;
-        read(&res, file, pos, sizeof(*pos));
+
+        read(file, pos, sizeof(*pos));
         kz.position_save[kz.pos_slot] = pos;
         kz_log("imported to position %d", kz.pos_slot);
-        close(&res, file);
+        close(file);
     }
 }
 
@@ -202,30 +200,28 @@ static int import_pos_onactivate(event_handler_t *handler, menu_event_t event, v
 }
 
 static void do_export_memfile(char *path, void *data){
-    int file = -1;
-    creat(&file, path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file != -1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
-        int res;
-        write(&res, file, memfile, sizeof(*memfile));
+
+        write(file, memfile, sizeof(*memfile));
         kz_log("export from memfile %d", kz.memfile_slot);
-        close(&res, file);
+        close(file);
     }
 }
 
 static void do_import_memfile(char *path, void *data){
-    int file = -1;
-    open(&file, path, O_RDONLY);
+    int file = open(path, O_RDONLY);
     if(file != -1){
         memfile_t *memfile = kz.memfile[kz.memfile_slot];
         if(!memfile){
             memfile = malloc(sizeof(*memfile));
         }
-        int res;
-        read(&res, file, memfile, sizeof(*memfile));
+
+        read(file, memfile, sizeof(*memfile));
         kz.memfile[kz.memfile_slot] = memfile;
         kz_log("imported to memfile %d", kz.memfile_slot);
-        close(&res, file);
+        close(file);
     }
 }
 

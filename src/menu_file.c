@@ -57,8 +57,7 @@ static _Bool stricmp(const char *a, const char *b){
 
 static _Bool update_file_list(void){
     vector_clear(&dir_files.container);
-    DIR *dir = NULL;
-    opendir(&dir, ".");
+    DIR *dir = opendir(".");
     if(!dir){
         /*
         if(errno == ENODEV){
@@ -73,33 +72,29 @@ static _Bool update_file_list(void){
     }
     getcwd(file_menu_location->text, 32);
     file_menu_location->text[31] = 0;
-    dirent_t dirent;
-    int ret;
-    readdir(&ret, &dirent, dir);
-    while(ret != 0){
-        if((dirent.dir_name[0] == '.' && strcmp(dirent.dir_name, "..")) != 0 ||
-            !(dirent.mode & S_IRUSR)){
-            readdir(&ret, &dirent, dir);
+    dirent_t *dirent;
+    while((dirent = readdir(dir)) != NULL) {
+        if((dirent->dir_name[0] == '.' && strcmp(dirent->dir_name, "..")) != 0 ||
+            !(dirent->mode & S_IRUSR)){
             continue;
         }
-        _Bool isdir = ((dirent.mode & S_IFMT) == S_IFDIR);
-        int name_len = strlen(dirent.dir_name);
-        if(!isdir && (name_len < file_menu_extension_len || !stricmp(&dirent.dir_name[name_len - file_menu_extension_len], file_menu_extension))){
-            readdir(&ret, &dirent, dir);
+        _Bool isdir = ((dirent->mode & S_IFMT) == S_IFDIR);
+        int name_len = strlen(dirent->dir_name);
+        if(!isdir && (name_len < file_menu_extension_len || !stricmp(&dirent->dir_name[name_len - file_menu_extension_len], file_menu_extension))) {
             continue;
         }
+
         dir_entry_t ent;
-        strcpy(ent.name, dirent.dir_name);
+        strcpy(ent.name, dirent->dir_name);
         ent.isdir = isdir;
 
-        memcpy(ent.text, dirent.dir_name, 32);
+        memcpy(ent.text, dirent->dir_name, 32);
         if(name_len > 31){
             strcpy(&ent.text[28],"...");
         }
         set_insert(&dir_files,&ent);
-        readdir(&ret, &dirent, dir);
     }
-    closedir(&ret, dir);
+    closedir(dir);
 
     return 1;
 }
@@ -268,8 +263,7 @@ static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, vo
     int data = (int)item->data;
     dir_entry_t *dirent = set_at(&dir_files, data + file_menu_offset);
     if(dirent->isdir){
-        int ret;
-        chdir(&ret, dirent->name);
+        chdir(dirent->name);
         update_view();
     }else{
         int len = strlen(dirent->name) - file_menu_extension_len;
@@ -325,8 +319,7 @@ static int new_folder_event(event_handler_t *handler, menu_event_t event, void *
         strcpy(new_folder_name, "new folder");
         menu_keyboard_get(handler->subscriber, &new_folder_name);
     } else if (event == MENU_EVENT_KEYBOARD) {
-        int ret;
-        mkdir(&ret, new_folder_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+        mkdir(new_folder_name, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
         update_view();
     }
     return 1;
