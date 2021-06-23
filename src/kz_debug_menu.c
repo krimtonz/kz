@@ -86,8 +86,8 @@ static uint8_t flag_sizes[] = {
     0x64, 0x8, 0x3, 0x10, 0x4, 0x4, 0x10
 };
 
-static uint32_t get_mem_val(void *ptr){
-    switch(memory_view_size){
+static uint32_t get_mem_val(void *ptr) {
+    switch(memory_view_size) {
         case 1:
         return *(uint8_t*)ptr;
         case 2:
@@ -98,8 +98,8 @@ static uint32_t get_mem_val(void *ptr){
     }
 }
 
-static void set_mem_val(void *ptr, uint32_t val){
-    switch(memory_view_size){
+static void set_mem_val(void *ptr, uint32_t val) {
+    switch(memory_view_size) {
         case 1:
         *(uint8_t*)ptr = val & 0xFF;
         break;
@@ -113,149 +113,167 @@ static void set_mem_val(void *ptr, uint32_t val){
     }
 }
 
-static int memory_cell_event(event_handler_t *handler, menu_event_t event, void **event_data){
+static int memory_cell_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     void *ptr = (void*)(memory_start_addr + ((int)handler->callback_data));
-    if(event == MENU_EVENT_NUMBER){
+    if(event == MENU_EVENT_NUMBER) {
         set_mem_val(ptr, (uint32_t)*event_data);
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if(event == MENU_EVENT_UPDATE) {
         menu_number_set(handler->subscriber, get_mem_val(ptr));
     }
+
     return 1;
 }
 
-static void memory_table_update(void){
+static void memory_table_update(void) {
     int idx = 0;
-    for(int i = 0;i < 10;i++){
-        for (int j = 0;j < 8;j++){
-            if(memory_item_cells[idx]){
+
+    for(int i = 0; i < 10; i++){
+        for (int j = 0; j < 8; j++){
+            if(memory_item_cells[idx] != NULL) {
                 menu_item_remove(memory_item_cells[idx]);
             }
-            if(idx % memory_view_size == 0){
+
+            if(idx % memory_view_size == 0) {
                 memory_item_cells[idx] = menu_number_input_add(&memory, 10 + j * 2, 3 + i, 16, memory_view_size * 2);
                 menu_item_register_event(memory_item_cells[idx], MENU_EVENT_NUMBER | MENU_EVENT_UPDATE, memory_cell_event, (void*)idx);
-            }else{
+            } else {
                 memory_item_cells[idx] = NULL;
             }
+
             idx++;
         }
     }
 }
 
-static int memory_start_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_NUMBER){
+static int memory_start_event(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(event == MENU_EVENT_NUMBER) {
         uint32_t value = (uint32_t)*event_data;
         value -= value % memory_view_size;
         memory_start_addr = value;
         memory_table_update();
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if(event == MENU_EVENT_UPDATE) {
         menu_number_set(handler->subscriber, memory_start_addr);
     }
+
     return 1;
 }
 
-static int memory_size_onlist(event_handler_t *handler, menu_event_t event, void **event_data){
+static int memory_size_onlist(event_handler_t *handler, menu_event_t event, void **event_data) {
     memory_view_size = size_values[(int)*event_data];
     memory_start_addr -= memory_start_addr % memory_view_size;
     memory_table_update();
     return 1;
 }
 
-static void memory_view_draw(menu_item_t *item){
+static void memory_view_draw(menu_item_t *item) {
     int orig_x = menu_item_x(item);
     int x = orig_x + 64 + (memory_view_size * 0x10);
     int y = menu_item_y(item);
 
-    for(int i = 0;i < 8 / memory_view_size;i++){
+    for(int i = 0; i < 8 / memory_view_size; i++) {
         gfx_printf(x, y, "%02"PRIx8, ((memory_start_addr + (i * memory_view_size)) & 0xFF));
         x += (2 * memory_view_size) + (memory_view_size * 16);
     }
 
     x = orig_x;
     y += 13;
-    for(int i = 0;i < 10;i++){
+    for(int i = 0; i < 10; i++) {
         gfx_printf(x, y, "%08"PRIx32, memory_start_addr + (i * 8));
         y += 13;
     }
 }
 
-static int memory_inc_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+static int memory_inc_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
     uint32_t new_addr = memory_start_addr + ((input_pressed_raw() & BUTTON_Z) ? 0x50 : 0x8);
-    if(new_addr >= MEMORY_MAX - 0x50){
+
+    if(new_addr >= MEMORY_MAX - 0x50) {
         memory_start_addr = 0x80000000;
-    }else{
+    } else {
         memory_start_addr = new_addr;
     }
+
     memory_table_update();
     return 1;
 }
 
-static int memory_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+static int memory_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
     uint32_t new_addr = memory_start_addr - ((input_pressed_raw() & BUTTON_Z) ? 0x50 : 0x8);
-    if(memory_start_addr <= 0x80000000){
+
+    if(memory_start_addr <= 0x80000000) {
         memory_start_addr = MEMORY_MAX - 0x50;
-    }else{
+    } else {
         memory_start_addr = new_addr;
     }
+
     memory_table_update();
     return 1;
 }
 
-static menu_item_t *menu_memory_view_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
+static menu_item_t *menu_memory_view_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell) {
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
-    if(item){
+    if(item != NULL) {
         item->draw_proc = memory_view_draw;
     }
+
     memory_table_update();
     return item;
 }
 
-static void objects_view_draw(menu_item_t *item){
+static void objects_view_draw(menu_item_t *item) {
     int orig_x = menu_item_x(item);
     int x = orig_x;
     int y = menu_item_y(item);
-    for(int i = 0; i < z2_game.obj_ctx.obj_cnt;i++){
+
+    for(int i = 0; i < z2_game.obj_ctx.obj_cnt; i++) {
         z2_obj_t *obj = &z2_game.obj_ctx.obj[i];
+
         gfx_printf_color(x, y, COLOR_FADED, "%04" PRIx16 " %08" PRIx32, obj->id, obj->data);
         x += 112;
-        if(i & 1){
+        if(i & 1) {
             x = orig_x;
             y += 10;
         }
     }
 }
 
-static menu_item_t *menu_objects_view_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
+static menu_item_t *menu_objects_view_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell) {
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
-    if(item){
+
+    if(item != NULL){
         item->draw_proc = objects_view_draw;
     }
+
     return item;
 }
 
-static int object_push_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(obj_id == 0){
+static int object_push_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(obj_id == 0) {
         return 1;
     }
+
     int idx = z2_game.obj_ctx.obj_cnt++;
     z2_obj_t *obj = z2_game.obj_ctx.obj;
+    size_t size = z2_obj_table[obj_id].vrom_end - z2_obj_table[obj_id].vrom_start;
+
     obj[idx].id = -obj_id;
     obj[idx].loadfile.vrom_addr = 0;
-    size_t size = z2_obj_table[obj_id].vrom_end - z2_obj_table[obj_id].vrom_start;
     obj[idx + 1].data = (char*)obj[idx].data + size;
     return 1;
 }
 
-static int object_pop_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(z2_game.obj_ctx.obj_cnt > 0){
+static int object_pop_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(z2_game.obj_ctx.obj_cnt > 0) {
         z2_game.obj_ctx.obj[--z2_game.obj_ctx.obj_cnt].id = 0;
     }
+
     return 1;
 }
 
-static void actor_info_draw(menu_item_t *item){
+static void actor_info_draw(menu_item_t *item) {
     struct actor_info_data *data = item->data;
     z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
     int cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
+
     if(data->actor_idx > cnt) {
         if(cnt > 0) {
             data->actor_idx = cnt - 1;
@@ -275,7 +293,7 @@ static void actor_info_draw(menu_item_t *item){
         gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       n/a");
         item->y_cell++;
         gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "variable: n/a");
-    }else{
+    } else {
         sprintf(data->actor_button->text, "%08" PRIx32 , (uint32_t)actor);
         gfx_printf_color(x, menu_item_y(item), COLOR_FADED, "id:       %04"PRIx16, actor->id);
         item->y_cell++;
@@ -304,6 +322,7 @@ static void actor_info_draw(menu_item_t *item){
             gdSPDefVtxC(0,      0,      -8192,  0,  0,  0x00,   0x00,   0xFF,   0xFF),
             gdSPDefVtxC(0,      0,      8192,   0,  0,  0x00,   0x00,   0xFF,   0xFF),
         };
+
         static Gfx crosshair[] = {
             gsDPSetCycleType(G_CYC_1CYCLE),
             gsDPSetRenderMode(G_RM_AA_XLU_LINE, G_RM_AA_XLU_LINE2),
@@ -319,6 +338,7 @@ static void actor_info_draw(menu_item_t *item){
             gsSPLine3D(4, 5, 0),
             gsSPEndDisplayList(),
         };
+
         gDPPipeSync(xlu->p++);
         gSPMatrix(xlu->p++, gDisplayListData(&xlu->d, m), G_MTX_LOAD | G_MTX_NOPUSH | G_MTX_MODELVIEW);
         gSPDisplayList(xlu->p++, crosshair);
@@ -331,26 +351,29 @@ static void actor_info_draw(menu_item_t *item){
     gfx_printf(x, menu_item_y(data->actor_button), "(%02d/%02d)", data->actor_idx + (cnt == 0 ? 0 : 1), cnt);
 }
 
-static menu_item_t *menu_actor_info_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
+static menu_item_t *menu_actor_info_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell) {
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
-    if(item){
+
+    if(item != NULL) {
         item->data = &actor_info;
         item->draw_proc = actor_info_draw;
     }
+
     return item;
 }
 
-static int actor_spawn_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(actor_id == 0){
+static int actor_spawn_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(actor_id == 0) {
         z2_link_spawn_obj = z2_link_form_obj_idx[z2_file.current_form];
     }
+
     z2_SpawnActor(&z2_game.actor_ctxt, &z2_game, actor_id, actor_pos[0], actor_pos[1], actor_pos[2],
                   actor_rot[0], actor_rot[1], actor_rot[2],
                   actor_var, 0x7F, 0x3FF, NULL);
     return 1;
 }
 
-static int actor_fetch_link_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
+static int actor_fetch_link_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
     actor_pos[0] = z2_link.common.pos_2.x;
     actor_pos[1] = z2_link.common.pos_2.y;
     actor_pos[2] = z2_link.common.pos_2.z;
@@ -360,81 +383,108 @@ static int actor_fetch_link_onactivate(event_handler_t *handler, menu_event_t ev
     return 1;
 }
 
-static int actor_type_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_LIST){
-        actor_info.actor_type = actor_type_values[(int)*event_data];
-        actor_info.actor_idx = 0;
-    }else if (event == MENU_EVENT_UPDATE){
+static int actor_type_event(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+
+    if(event == MENU_EVENT_LIST) {
+        data->actor_type = actor_type_values[(int)*event_data];
+        data->actor_idx = 0;
+    } else if (event == MENU_EVENT_UPDATE) {
         int idx = 0;
-        for(int i = 0;i < sizeof(actor_type_values) / sizeof(*actor_type_values);i++){
-            if(actor_info.actor_type == actor_type_values[i]){
+        for(int i = 0; i < sizeof(actor_type_values) / sizeof(*actor_type_values); i++) {
+            if(data->actor_type == actor_type_values[i]){
                 idx = i;
                 break;
             }
         }
+
         menu_list_set(handler->subscriber, idx);
     }
+
     return 1;
 }
 
-static int goto_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-    for(int i = 0;i < actor_info.actor_idx;i++){
+static int goto_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
+
+    for(int i = 0; actor != NULL && i < data->actor_idx; i++) {
         actor = actor->next;
     }
-    if(actor){
+
+    if(actor != NULL){
         z2_link.common.pos_2.x = actor->pos_2.x;
         z2_link.common.pos_2.y = actor->pos_2.y;
         z2_link.common.pos_2.z = actor->pos_2.z;
     }
+
     return 1;
 }
 
-static int view_actor_event(event_handler_t *handler, menu_event_t event, void **event_data){
+static int view_actor_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     static int viewing = 0;
     static _Bool hasviewed = 0;
-    if(event == MENU_EVENT_ACTIVATE){
-        z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-        for(int i = 0;i < actor_info.actor_idx;i++){
+
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+
+    if(event == MENU_EVENT_ACTIVATE) {
+        z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
+
+        for(int i = 0; actor != NULL && i < data->actor_idx; i++) {
             actor = actor->next;
         }
-        if(actor){
+
+        if(actor != NULL) {
             z2_game.active_cameras[0]->focus = actor;
             viewing = 8;
             hasviewed = 1;
         }
-    }else if(event == MENU_EVENT_UPDATE){
-        if(!viewing && hasviewed){
+    } else if(event == MENU_EVENT_UPDATE) {
+        if(!viewing && hasviewed) {
             z2_game.active_cameras[0]->focus = &z2_link.common;
             hasviewed = 0;
         }
-        if(viewing){
+
+        if(viewing) {
             viewing--;
         }
     }
+
     return 1;
 }
 
 static int delete_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-    for(int i = 0;i < actor_info.actor_idx;i++){
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
+
+    for(int i = 0; actor != NULL && i < data->actor_idx; i++) {
         actor = actor->next;
     }
-    if(actor){
+
+    if(actor != NULL) {
         z2_DeleteActor(&z2_game.actor_ctxt, actor, &z2_game);
-        if(actor_info.actor_idx != 0 && actor_info.actor_idx >= z2_game.actor_ctxt.actor_list[actor_info.actor_type].count){
-            actor_info.actor_idx--;
+        if(data->actor_idx != 0 && data->actor_idx >= z2_game.actor_ctxt.actor_list[data->actor_type].count) {
+            data->actor_idx--;
         }
     }
+
     return 1;
 }
 
-static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-    for(int i = 0;i < actor_info.actor_idx;i++){
+static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
+
+    for(int i = 0; actor != NULL && i < data->actor_idx; i++) {
         actor = actor->next;
     }
-    if(actor){
+
+    if(actor != NULL) {
         actor_id = actor->id;
         actor_var = actor->variable;
         actor_pos[0] = actor->pos_2.x;
@@ -444,153 +494,179 @@ static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, v
         actor_rot[1] = actor->rot_2.y;
         actor_rot[2] = actor->rot_2.z;
     }
+
     return 1;
 }
 
-static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    int actor_cnt = z2_game.actor_ctxt.actor_list[actor_info.actor_type].count;
-    if(actor_cnt == 0 || actor_info.actor_idx == 0){
-        actor_info.actor_type += sizeof(actor_type_values) / sizeof(*actor_type_values) - 1;
-        actor_info.actor_type %= sizeof(actor_type_values) / sizeof(*actor_type_values);
-        actor_cnt = z2_game.actor_ctxt.actor_list[actor_info.actor_type].count;
-        actor_info.actor_idx = actor_cnt > 0 ? actor_cnt - 1 : 0;
-        return 1;
+static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+    int actor_cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
+
+    if(actor_cnt == 0 || data->actor_idx == 0){
+        data->actor_type += sizeof(actor_type_values) / sizeof(*actor_type_values) - 1;
+        data->actor_type %= sizeof(actor_type_values) / sizeof(*actor_type_values);
+        actor_cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
+        data->actor_idx = actor_cnt > 0 ? actor_cnt - 1 : 0;
+    } else {
+        data->actor_idx += actor_cnt - 1;
+        data->actor_idx %= actor_cnt;
     }
-    actor_info.actor_idx += actor_cnt - 1;
-    actor_info.actor_idx %= actor_cnt;
+
     return 1;
 }
 
-static int actor_inc_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    int actor_cnt = z2_game.actor_ctxt.actor_list[actor_info.actor_type].count;
-    if(actor_cnt == 0 || actor_info.actor_idx >= actor_cnt - 1){
-        actor_info.actor_type++;
-        actor_info.actor_type %= sizeof(actor_type_values) / sizeof(*actor_type_values);
-        actor_info.actor_idx = 0;
-        return 1;
+static int actor_inc_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+    int actor_cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
+
+    if(actor_cnt == 0 || data->actor_idx >= actor_cnt - 1) {
+        data->actor_type++;
+        data->actor_type %= sizeof(actor_type_values) / sizeof(*actor_type_values);
+        data->actor_idx = 0;
+    } else {
+        data->actor_idx++;
+        data->actor_idx %= actor_cnt;
     }
-    actor_info.actor_idx++;
-    actor_info.actor_idx %= actor_cnt;
+
     return 1;
 }
 
-static int actor_button_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[actor_info.actor_type].first;
-    for(int i = 0;i < actor_info.actor_idx;i++){
+static int actor_button_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+    struct actor_info_data *data = item->data;
+    z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
+
+    for(int i = 0; actor != NULL && i < data->actor_idx; i++) {
         actor = actor->next;
     }
+
     memory_start_addr = (uint32_t)actor;
     memory_table_update();
-    menu_trigger_event(&kz.main_menu, MENU_EVENT_ENTER, (void**)&actor_info.memory_menu);
+    menu_trigger_event(&kz.main_menu, MENU_EVENT_ENTER, (void**)&data->memory_menu);
     return 1;
 }
 
-static void refresh_flags_table(void){
+static void refresh_flags_table(void) {
     int idx = 0;
-    for(int i = 0;i < 16;i++){
-        for(int j = 0;j < 16;j++){
+
+    for(int i = 0; i < 16; i++) {
+        for(int j = 0; j < 16; j++) {
             int offset = (i * 2) + (j / 8) + flags_data.offset;
-            if(offset < flag_sizes[flags_data.region]){
+            if(offset < flag_sizes[flags_data.region]) {
                 menu_item_enable(flags_item_cells[idx]);
-            }else{
+            } else {
                 menu_item_disable(flags_item_cells[idx]);
             }
+
             idx++;
         }
     }
 }
 
-static void flags_draw(menu_item_t *item){
+static void flags_draw(menu_item_t *item) {
     int x = menu_item_x(item);
     int y = menu_item_y(item);
 
     gfx_printf(x + 80, y - 8, "%s", flag_region_names[flags_data.region]);
     gfx_printf(x + 56, y, "0123456701234567");
     y += 8;
-    for(int i = 0;i < 16; i++){
+    for(int i = 0; i < 16; i++) {
         uint32_t offset = flags_data.offset + (i * 2);
+
         if(offset > flag_sizes[flags_data.region]-1){
             break;
         }
+
         gfx_printf(x, y, "0x%04" PRIx16, offset);
         y += 8;
     }
 }
 
-menu_item_t *menu_flags_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell){
+menu_item_t *menu_flags_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell) {
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
-    if(item){
+
+    if(item != NULL) {
         item->draw_proc = flags_draw;
     }
+
     return item;
 }
 
-
-static int flag_event(event_handler_t *handler, menu_event_t event, void **event_data){
+static int flag_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     int idx = (int)handler->callback_data;
     uint8_t *addr = (uint8_t*)(flag_start_addr[flags_data.region] + flags_data.offset + (idx / 8));
-    if(event == MENU_EVENT_ACTIVATE){
+
+    if(event == MENU_EVENT_ACTIVATE) {
         *addr = *addr ^ (1 << (idx % 8));
-    }else if(event == MENU_EVENT_UPDATE){
+    } else if(event == MENU_EVENT_UPDATE) {
         menu_item_t *item = handler->subscriber;
-        if((*addr & (1 << (idx % 8))) > 0){
+
+        if((*addr & (1 << (idx % 8))) > 0) {
             menu_switch_set(item, 1);
-        }else{
+        } else {
             menu_switch_set(item, 0);
         }
     }
+
     return 1;
 }
 
-static int flags_prev_onactivate(event_handler_t *callback, menu_event_t event, void **event_data){
-    if(flags_data.region == FLAGS_WEEK_EVENT){
+static int flags_prev_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
+    if(flags_data.region == FLAGS_WEEK_EVENT) {
         flags_data.region = FLAGS_SCENE_COLLECT;
-    }else{
+    } else {
         flags_data.region--;
     }
+
     refresh_flags_table();
     flags_data.offset = 0;
     return 1;
 }
 
-static int flags_next_onactivate(event_handler_t *callback, menu_event_t event, void **event_data){
-    if(flags_data.region == FLAGS_SCENE_COLLECT){
+static int flags_next_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
+    if(flags_data.region == FLAGS_SCENE_COLLECT) {
         flags_data.region = FLAGS_WEEK_EVENT;
-    }else{
+    } else {
         flags_data.region++;
     }
+
     refresh_flags_table();
     flags_data.offset = 0;
     return 1;
 }
 
-static int flags_dec_onactivate(event_handler_t *callback, menu_event_t event, void **event_data){
-    if(flags_data.offset == 0){
+static int flags_dec_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
+    if(flags_data.offset == 0) {
         flags_data.offset = flag_sizes[flags_data.region] - 32;
-    }else{
+    } else {
         flags_data.offset -= 2;
     }
+
     refresh_flags_table();
     return 1;
 }
 
-static int flags_inc_onactivate(event_handler_t *callback, menu_event_t event, void **event_data){
-    if(flags_data.offset + 32 < flag_sizes[flags_data.region]){
+static int flags_inc_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
+    if(flags_data.offset + 32 < flag_sizes[flags_data.region]) {
         flags_data.offset += 2;
-    }else{
+    } else {
         flags_data.offset = 0;
     }
+
     refresh_flags_table();
     return 1;
 }
 
 #if WIIVC && defined(HB_DBG)
+
 static char *mem1_text[2] = { NULL, NULL };
 static char *mem2_text[2] = { NULL, NULL };
 static char *recomp1_text[2] = { NULL, NULL };
 static char *recomp2_text[2] = { NULL, NULL };
-
 static uint32_t heap_frees[4];
+
 static int dump_vc_mem_onactivate(event_handler_t *callback, menu_event_t event, void **event_data) {
     VC_DBG_REGS[0] = 0;
     return 1;
@@ -612,7 +688,7 @@ static int update_vc_heaps(event_handler_t *callback, menu_event_t event, void *
 
 #endif
 
-menu_t *create_debug_menu(void){
+menu_t *create_debug_menu(void) {
     static menu_t debug;
     static menu_t objects;
     static menu_t actors;
@@ -738,7 +814,7 @@ menu_t *create_debug_menu(void){
         menu_flags_add(&flags, 2, 2);
 
         gfx_texture *flags_texture = resource_get(resource_handles[R_KZ_FLAGS]);
-        for(int i = 0;i < 256;i++){
+        for(int i = 0; i < 256; i++) {
             flags_item_cells[i] = menu_switch_add(&flags, (i % 16) + 9, (i / 16) + 3, flags_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 8, 8, NULL);
             menu_item_register_event(flags_item_cells[i], MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, flag_event, (void*)i);
