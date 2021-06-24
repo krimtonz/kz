@@ -50,7 +50,7 @@ void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t 
         vtx = malloc(vtx_cnt * sizeof(*vtx));
 #endif
 
-        // should probably figure out a calculation for gfx count 
+        // should probably figure out a calculation for gfx count
 #ifdef WIIVC
         sphere_gfx = halloc(57 * sizeof(*sphere_gfx));
 #else
@@ -120,9 +120,9 @@ void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t 
                     max = indices[i + j];
                 }
             }
-            
+
             Vtx *vtx_first = &vtx[min];
-            // Load vertices if the first or last isn't loaded.  This probably could be further optimized 
+            // Load vertices if the first or last isn't loaded.  This probably could be further optimized
             if(i == 0 || vtxstart > min || vtxstart + 31 < max){
 #ifdef WIIVC
                 vtx_first = HB_SEG(vtx_first);
@@ -322,6 +322,11 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
                 draw_quad(hit_view_p, hit_view_d, &quad->vertices[0], &quad->vertices[2], &quad->vertices[3], &quad->vertices[1]);
             }
             break;
+            case Z2_HITBOX_SPHERE: {
+                z2_hitbox_sphere_t *sphere = (z2_hitbox_sphere_t*)hitbox;
+                draw_uv_sphere(hit_view_p, hit_view_d, sphere->radius, sphere->pos.x, sphere->pos.y, sphere->pos.z);
+            }
+            break;
         }
     }
 }
@@ -370,7 +375,7 @@ void kz_hitbox_view(){
         Gfx **z2_gfx_p;
         Gfx **z2_gfx_d;
         _Bool xlu = !settings->hit_view_opq;
-        
+
         if(xlu){
             z2_gfx_p = &z2_ctxt.gfx->poly_xlu.p;
             z2_gfx_d = &z2_ctxt.gfx->poly_xlu.d;
@@ -390,12 +395,12 @@ void kz_hitbox_view(){
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.ac_cnt, z2_game.hitbox_ctxt.ac, 0x000000FF);
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.attack_cnt, z2_game.hitbox_ctxt.attack, 0x00FF0000);
         gSPEndDisplayList(hit_view_p++);
-        
+
         void *dlist = hit_view_start;
 #ifdef WIIVC
         set_hb_seg(z2_gfx_p);
         dlist = HB_SEG(dlist);
-#endif        
+#endif
         gSPDisplayList((*z2_gfx_p)++, dlist);
 #ifdef WIIVC
         restore_hb_seg(z2_gfx_p);

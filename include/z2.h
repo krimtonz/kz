@@ -1166,6 +1166,7 @@ enum hitbox_type {
     Z2_HITBOX_CYLINDER,
     Z2_HITBOX_TRI_LIST,
     Z2_HITBOX_QUAD,
+    Z2_HITBOX_SPHERE
 };
 
 typedef struct {
@@ -1199,6 +1200,13 @@ typedef struct {
     int16_t                     y_offset;           /* 0x0044 */
     z2_xyz_t                    pos;                /* 0x0046 */
 } z2_hitbox_cylinder_t;                             /* 0x004C */
+
+typedef struct {
+    z2_hitbox_t                 base;               /* 0x0000 */
+    char                        unk_0x18[0X30];     /* 0X0018 */
+    z2_xyz_t                    pos;                /* 0x0048 */
+    int16_t                     radius;             /* 0x004E */
+} z2_hitbox_sphere_t;                               /* 0x0050 */
 
 typedef struct {
     char                        unk_0x00[0x28];     /* 0x0000 */
