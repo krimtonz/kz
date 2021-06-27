@@ -25,20 +25,23 @@ void kz_camera_calc(z2_camera_t *camera) {
     shift.pitch = 0.0f;
     shift.yaw = geo->yaw - (M_PI / 2.0f);
     geo_to_vec3f(&shift, &strafe);
+
+    float multiplier = (input_pressed_raw() & BUTTON_Z) ? 2.0f : 1.0f;
+
     if(input_pressed_raw() & BUTTON_C_UP){
-        vec3f_scalar_mul(&move, -45.0f, &move);
+        vec3f_scalar_mul(&move, -45.0f * multiplier, &move);
         vec3f_add(&kz.kz_at, &move, &kz.kz_at);
     }
     if(input_pressed_raw() & BUTTON_C_DOWN){
-        vec3f_scalar_mul(&move, 45.0f, &move);
+        vec3f_scalar_mul(&move, 45.0f * multiplier, &move);
         vec3f_add(&kz.kz_at, &move, &kz.kz_at);
     }
     if(input_pressed_raw() & BUTTON_C_LEFT){
-        vec3f_scalar_mul(&strafe, 15.0f, &strafe);
+        vec3f_scalar_mul(&strafe, 15.0f * multiplier, &strafe);
         vec3f_add(&kz.kz_at, &strafe, &kz.kz_at);
     }
     if(input_pressed_raw() & BUTTON_C_RIGHT){
-        vec3f_scalar_mul(&strafe, -15.0f, &strafe);
+        vec3f_scalar_mul(&strafe, -15.0f * multiplier, &strafe);
         vec3f_add(&kz.kz_at, &strafe, &kz.kz_at);
     }
 

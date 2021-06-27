@@ -1,5 +1,6 @@
 #include "line_writer.h"
 #include "kz.h"
+#include "hb_heap.h"
 
 void init_line_gfx(Gfx **gfx_p, Gfx **gfx_d, _Bool xlu) {
     uint32_t render_mode1;

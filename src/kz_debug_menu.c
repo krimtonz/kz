@@ -384,7 +384,6 @@ static int actor_fetch_link_onactivate(event_handler_t *handler, menu_event_t ev
 }
 
 static int actor_type_event(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
 
     if(event == MENU_EVENT_LIST) {
@@ -406,7 +405,6 @@ static int actor_type_event(event_handler_t *handler, menu_event_t event, void *
 }
 
 static int goto_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
     z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
 
@@ -427,7 +425,6 @@ static int view_actor_event(event_handler_t *handler, menu_event_t event, void *
     static int viewing = 0;
     static _Bool hasviewed = 0;
 
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
 
     if(event == MENU_EVENT_ACTIVATE) {
@@ -457,7 +454,6 @@ static int view_actor_event(event_handler_t *handler, menu_event_t event, void *
 }
 
 static int delete_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
     z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
 
@@ -476,7 +472,6 @@ static int delete_actor_onactivate(event_handler_t *handler, menu_event_t event,
 }
 
 static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
     z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
 
@@ -499,7 +494,6 @@ static int copy_actor_onactivate(event_handler_t *handler, menu_event_t event, v
 }
 
 static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
     int actor_cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
 
@@ -517,7 +511,6 @@ static int actor_dec_onactivate(event_handler_t *handler, menu_event_t event, vo
 }
 
 static int actor_inc_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
     int actor_cnt = z2_game.actor_ctxt.actor_list[data->actor_type].count;
 
@@ -534,7 +527,6 @@ static int actor_inc_onactivate(event_handler_t *handler, menu_event_t event, vo
 }
 
 static int actor_button_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
     struct actor_info_data *data = handler->callback_data;
     z2_actor_t *actor = z2_game.actor_ctxt.actor_list[data->actor_type].first;
 

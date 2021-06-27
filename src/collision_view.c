@@ -563,9 +563,11 @@ static size_t calc_poly_cnt(void) {
                poly_cnt++;
         }
     }
+
+    return poly_cnt;
 }
 
-void alloc_col_buf(void **buf, size_t size) {
+void alloc_col_buf(Gfx **buf, size_t size) {
 #ifdef WIIVC
     *buf = halloc(size);
 #else
@@ -573,7 +575,7 @@ void alloc_col_buf(void **buf, size_t size) {
 #endif
 }
 
-void free_col_buf(void **buf) {
+void free_col_buf(Gfx **buf) {
     if(*buf == NULL) {
         return;
     }
@@ -630,6 +632,10 @@ void kz_col_view(){
             free_col_buf(&dynamic_gfx[1]);
             free_col_buf(&dynamic_line[0]);
             free_col_buf(&dynamic_line[1]);
+            break;
+        case COL_VIEW_ACTIVE:
+        case COL_VIEW_START:
+        case COL_VIEW_INACTIVE:
             break;
     }
 
