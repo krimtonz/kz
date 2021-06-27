@@ -44,7 +44,8 @@ struct settings_data {
     uint32_t            cheats;
     union{
         struct {
-            uint32_t                    : 22;
+            uint32_t                    : 21;
+            uint32_t    col_view_line   : 1;
             uint32_t    hit_view_opq    : 1;
             uint32_t    col_view_upd    : 1;
             uint32_t    col_view_red    : 1;

@@ -8,12 +8,13 @@
 #define _COLLISION_VIEW_H
 
 enum col_view_status {
-    COL_VIEW_NONE = -1,
-    COL_VIEW_SHOW,
-    COL_VIEW_DESTROY,
-    COL_VIEW_KILL,
-    COL_VIEW_GENERATE,
-    COL_VIEW_REGENERATE,
+    COL_VIEW_INACTIVE,
+    COL_VIEW_START,
+    COL_VIEW_ACTIVE,
+    COL_VIEW_BEGIN_STOP,
+    COL_VIEW_STOP,
+    COL_VIEW_BEGIN_RESTART,
+    COL_VIEW_RESTART
 };
 
 void    kz_col_view     ();

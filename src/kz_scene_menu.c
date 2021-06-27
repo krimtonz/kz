@@ -7,40 +7,56 @@ static int room_idx;
 
 static int collision_gen_event(event_handler_t *handler, menu_event_t event, void **event_data){
     if(event == MENU_EVENT_ACTIVATE){
-        if(kz.collision_view_status == COL_VIEW_NONE){
-            kz.collision_view_status = COL_VIEW_GENERATE;
+        if(kz.collision_view_status == COL_VIEW_INACTIVE){
+            kz.collision_view_status = COL_VIEW_START;
         }else{
-            kz.collision_view_status = COL_VIEW_KILL;
+            kz.collision_view_status = COL_VIEW_BEGIN_STOP;
         }
     }else if (event == MENU_EVENT_UPDATE){
-        menu_checkbox_set(handler->subscriber, kz.collision_view_status == COL_VIEW_SHOW);
+        menu_checkbox_set(handler->subscriber, kz.collision_view_status == COL_VIEW_ACTIVE);
     }
     return 1;
 }
 
-static int collision_switch_event(event_handler_t *handler, menu_event_t event, void **event_data){
-    if(event == MENU_EVENT_ACTIVATE){
+static int collision_switch_event(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(event == MENU_EVENT_ACTIVATE) {
         int d = (int)handler->callback_data;
-        if(d == 0){
-            settings->col_view_red = !settings->col_view_red;
-            if(kz.collision_view_status == COL_VIEW_SHOW){
-                kz.collision_view_status = COL_VIEW_REGENERATE;
-            }
-        }else if(d == 1){
-            settings->col_view_opq = !settings->col_view_opq;
-        }else{
-            settings->col_view_upd = !settings->col_view_upd;
+        switch(d) {
+            case 0:
+                settings->col_view_red = !settings->col_view_red;
+                if(kz.collision_view_status == COL_VIEW_ACTIVE) {
+                    kz.collision_view_status = COL_VIEW_BEGIN_RESTART;
+                }
+                break;
+            case 1:
+                settings->col_view_opq = !settings->col_view_opq;
+                break;
+            case 2:
+                settings->col_view_upd = !settings->col_view_upd;
+                break;
+            case 3:
+                settings->col_view_line = !settings->col_view_line;
+                break;
+
         }
-    }else if(event == MENU_EVENT_UPDATE){
+    }else if(event == MENU_EVENT_UPDATE) {
         int d = (int)handler->callback_data;
         int set = 0;
-        if(d == 0){
-            set = settings->col_view_red;
-        }else if(d == 1){
-            set = settings->col_view_opq;
-        }else{
-            set = settings->col_view_upd;
+        switch(d) {
+            case 0:
+                set = settings->col_view_red;
+                break;
+            case 1:
+                set = settings->col_view_opq;
+                break;
+            case 2:
+                set = settings->col_view_upd;
+                break;
+            case 3:
+                set = settings->col_view_line;
+                break;
         }
+
         menu_checkbox_set(handler->subscriber, set);
     }
     return 1;
@@ -48,13 +64,13 @@ static int collision_switch_event(event_handler_t *handler, menu_event_t event, 
 
 static int hitbox_gen_event(event_handler_t *handler, menu_event_t event, void **event_data){
     if(event == MENU_EVENT_ACTIVATE){
-        if(kz.hitbox_view_status == COL_VIEW_NONE){
-            kz.hitbox_view_status = COL_VIEW_GENERATE;
+        if(kz.hitbox_view_status == COL_VIEW_INACTIVE){
+            kz.hitbox_view_status = COL_VIEW_START;
         }else{
-            kz.hitbox_view_status = COL_VIEW_KILL;
+            kz.hitbox_view_status = COL_VIEW_BEGIN_STOP;
         }
     }else if(event == MENU_EVENT_UPDATE){
-        menu_checkbox_set(handler->subscriber,kz.hitbox_view_status == COL_VIEW_SHOW);
+        menu_checkbox_set(handler->subscriber,kz.hitbox_view_status == COL_VIEW_ACTIVE);
     }
     return 1;
 }
@@ -180,32 +196,40 @@ menu_t *create_scene_menu(void){
             item = menu_checkbox_add(&collision, 0, 1);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_gen_event, NULL);
             menu_label_add(&collision, 2, 1, "enable collision viewer");
+
             item = menu_checkbox_add(&collision, 2, 2);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)0);
             menu_label_add(&collision, 4, 2, "reduce");
+
             item = menu_checkbox_add(&collision, 2, 3);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)1);
             menu_label_add(&collision, 4, 3, "opaque");
+
             item = menu_checkbox_add(&collision, 2, 4);
+            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)3);
+            menu_label_add(&collision, 4, 4, "wireferame");
+
+            item = menu_checkbox_add(&collision, 2, 5);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)2);
-            menu_label_add(&collision, 4, 4, "update on scene change");
+            menu_label_add(&collision, 4, 5, "update on scene change");
         }
-        item = menu_checkbox_add(&collision, 0, 5);
+
+        item = menu_checkbox_add(&collision, 0, 6);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE, hide_room_onactivate, NULL);
-        menu_label_add(&collision, 2, 5, "hide room");
+        menu_label_add(&collision, 2, 6, "hide room");
 
         // hitbox viewer
         {
-            item = menu_checkbox_add(&collision, 0, 6);
+            item = menu_checkbox_add(&collision, 0, 7);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, hitbox_gen_event, NULL);
-            menu_label_add(&collision, 2, 6, "enable hitbox viewer");
-            item = menu_checkbox_add(&collision, 2, 7);
+            menu_label_add(&collision, 2, 7, "enable hitbox viewer");
+            item = menu_checkbox_add(&collision, 2, 8);
             menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, hitbox_opaque_event, NULL);
-            menu_label_add(&collision, 4, 7, "opaque");
+            menu_label_add(&collision, 4, 8, "opaque");
         }
-        item = menu_checkbox_add(&collision, 0, 8);
+        item = menu_checkbox_add(&collision, 0, 9);
         menu_item_register_event(item, MENU_EVENT_ACTIVATE, hide_actors_onactivate, NULL);
-        menu_label_add(&collision, 2, 8, "hide actors");
+        menu_label_add(&collision, 2, 9, "hide actors");
     }
 
     menu_submenu_add(&scene, 0, 2, "camera", &camera);

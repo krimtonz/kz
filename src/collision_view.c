@@ -1,12 +1,19 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "cache.h"
 #include "collision_view.h"
 #include "kz.h"
 #include "z2.h"
 #include "zu.h"
 #include "hb_heap.h"
 #include "poly_writer.h"
+#include "line_writer.h"
+
+typedef struct {
+    int a;
+    int b;
+} line_t;
 
 /* norm = (v1 - v0) cross (v2 - v0)
  * ((v1.x-v0.x),(v1.y-v0.y),(v1.z-v0.z)) cross ((v2.x-v0.x),(v2.y-v0.y),(v2.z-v0.z))
@@ -50,7 +57,7 @@ void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t 
         vtx = malloc(vtx_cnt * sizeof(*vtx));
 #endif
 
-        // should probably figure out a calculation for gfx count 
+        // should probably figure out a calculation for gfx count
 #ifdef WIIVC
         sphere_gfx = halloc(57 * sizeof(*sphere_gfx));
 #else
@@ -120,9 +127,9 @@ void draw_uv_sphere(Gfx **hit_view_p, Gfx **hit_view_d, int16_t radius, int16_t 
                     max = indices[i + j];
                 }
             }
-            
+
             Vtx *vtx_first = &vtx[min];
-            // Load vertices if the first or last isn't loaded.  This probably could be further optimized 
+            // Load vertices if the first or last isn't loaded.  This probably could be further optimized
             if(i == 0 || vtxstart > min || vtxstart + 31 < max){
 #ifdef WIIVC
                 vtx_first = HB_SEG(vtx_first);
@@ -330,7 +337,7 @@ void kz_hitbox_view(){
     static Gfx *hit_view_disp[2];
     static int hit_view_idx = 0;
 
-    if(kz.hitbox_view_status == COL_VIEW_GENERATE){
+    if(kz.hitbox_view_status == COL_VIEW_START){
 #ifdef WIIVC
         hit_view_disp[0] = halloc(0x800 * sizeof(*hit_view_disp[0]));
         hit_view_disp[1] = halloc(0x800 * sizeof(*hit_view_disp[1]));
@@ -338,11 +345,11 @@ void kz_hitbox_view(){
         hit_view_disp[0] = malloc(0x800 * sizeof(*hit_view_disp[0]));
         hit_view_disp[1] = malloc(0x800 * sizeof(*hit_view_disp[1]));
 #endif
-        kz.hitbox_view_status = COL_VIEW_SHOW;
-    }else if(kz.hitbox_view_status == COL_VIEW_KILL){
-        kz.hitbox_view_status = COL_VIEW_DESTROY;
+        kz.hitbox_view_status = COL_VIEW_ACTIVE;
+    }else if(kz.hitbox_view_status == COL_VIEW_BEGIN_STOP){
+        kz.hitbox_view_status = COL_VIEW_STOP;
         return;
-    }else if(kz.hitbox_view_status == COL_VIEW_DESTROY){
+    }else if(kz.hitbox_view_status == COL_VIEW_STOP){
 
         if(hit_view_disp[0]){
 #ifdef WIIVC
@@ -358,11 +365,11 @@ void kz_hitbox_view(){
             free(hit_view_disp[1]);
 #endif
         }
-        kz.hitbox_view_status = COL_VIEW_NONE;
+        kz.hitbox_view_status = COL_VIEW_INACTIVE;
         return;
     }
 
-    _Bool show = kz.hitbox_view_status == COL_VIEW_SHOW &&
+    _Bool show = kz.hitbox_view_status == COL_VIEW_ACTIVE &&
                  zu_is_ingame() &&
                  z2_game.pause_ctx.state == 0;
 
@@ -370,7 +377,7 @@ void kz_hitbox_view(){
         Gfx **z2_gfx_p;
         Gfx **z2_gfx_d;
         _Bool xlu = !settings->hit_view_opq;
-        
+
         if(xlu){
             z2_gfx_p = &z2_ctxt.gfx->poly_xlu.p;
             z2_gfx_d = &z2_ctxt.gfx->poly_xlu.d;
@@ -390,12 +397,12 @@ void kz_hitbox_view(){
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.ac_cnt, z2_game.hitbox_ctxt.ac, 0x000000FF);
         do_hitbox_view(&hit_view_p, &hit_view_d, z2_game.hitbox_ctxt.attack_cnt, z2_game.hitbox_ctxt.attack, 0x00FF0000);
         gSPEndDisplayList(hit_view_p++);
-        
+
         void *dlist = hit_view_start;
 #ifdef WIIVC
         set_hb_seg(z2_gfx_p);
         dlist = HB_SEG(dlist);
-#endif        
+#endif
         gSPDisplayList((*z2_gfx_p)++, dlist);
 #ifdef WIIVC
         restore_hb_seg(z2_gfx_p);
@@ -403,7 +410,7 @@ void kz_hitbox_view(){
     }
 }
 
-static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *polys, z2_col_type_t *types, int poly_cnt, _Bool redux){
+static void do_poly_list(poly_writer_t *writer, line_writer_t *line_writer, struct vector *line_set, z2_xyz_t *vtx, z2_col_poly_t *polys, z2_col_type_t *types, int poly_cnt, _Bool redux){
     for(int i = 0;i < poly_cnt; i++)
     {
         z2_col_poly_t *poly = &polys[i];
@@ -463,202 +470,285 @@ static void do_poly_list(poly_writer_t *writer, z2_xyz_t *vtx, z2_col_poly_t *po
 
             poly_writer_append(writer, &v, color);
         }
+
+        if(line_writer != NULL) {
+            line_t lab = { polys->va, polys->vb };
+            line_t lbc = { polys->vb, polys->vc };
+            line_t lac = { polys->va, polys->vc };
+
+            _Bool ab = 1;
+            _Bool bc = 1;
+            _Bool ca = 1;
+
+            if(line_set != NULL) {
+                for(int i = 0; i < line_set->size; i++) {
+                    line_t *l = vector_at(line_set, i);
+                    if((l->a == lab.a && l->b == lab.b) || (l->a == lab.b && l->b == lab.a)) {
+                        ab = 0;
+                    }
+
+                    if((l->a == lbc.a && l->b == lbc.b) || (l->a == lbc.b && l->b == lbc.a)) {
+                        bc = 0;
+                    }
+
+                    if((l->a == lac.a && l->b == lac.b) || (l->a == lac.b && l->b == lac.a)) {
+                        ca = 0;
+                    }
+                }
+            }
+
+            Vtx v[3];
+            int vtx_cnt = 0;
+            if(ab || ca) {
+                v[vtx_cnt++] = gdSPDefVtxC(va->x, va->y, va->z, 0, 0, 0, 0, 0, 0xFF);
+            }
+
+            if(ab || bc) {
+                v[vtx_cnt++] = gdSPDefVtxC(vb->x, vb->y, vb->z, 0, 0, 0, 0, 0, 0xFF);
+            }
+
+            if(bc || ca) {
+                v[vtx_cnt++] = gdSPDefVtxC(vc->x, vc->y, vc->z, 0, 0, 0, 0, 0, 0xFF);
+            }
+
+            line_writer_append(line_writer, v, vtx_cnt);
+        }
     }
 }
 
-static void do_dynamic_list(poly_writer_t *writer, z2_col_hdr_t *hdr, uint16_t idx){
+static void do_dynamic_list(poly_writer_t *writer, line_writer_t *line_writer, z2_col_hdr_t *hdr, uint16_t idx){
     z2_col_ctxt_t *col_ctx = &z2_game.col_ctxt;
     while(idx != 0xFFFF){
         z2_col_list_t *list = &col_ctx->dyn.list[idx];
-        do_poly_list(writer, col_ctx->dyn_vtx, &col_ctx->dyn_poly[list->poly_idx],
+        do_poly_list(writer, line_writer, NULL, col_ctx->dyn_vtx, &col_ctx->dyn_poly[list->poly_idx],
                      hdr->type, 1, 0);
         idx = list->list_next;
     }
 }
 
-static void do_dynamic_collision(poly_writer_t *writer){
+static void do_dynamic_collision(poly_writer_t *writer, line_writer_t *line_writer){
     z2_col_ctxt_t *col_ctx = &z2_game.col_ctxt;
     for(int i = 0;i < 32;i++){
         if(col_ctx->dynamic_flags[i].active){
             z2_col_chk_actor_t *col = &col_ctx->actors[i];
-            do_dynamic_list(writer, col->col_hdr, col->ceiling_list_idx);
-            do_dynamic_list(writer, col->col_hdr, col->wall_list_idx);
-            do_dynamic_list(writer, col->col_hdr, col->floor_list_idx);
+            do_dynamic_list(writer, line_writer, col->col_hdr, col->ceiling_list_idx);
+            do_dynamic_list(writer, line_writer, col->col_hdr, col->wall_list_idx);
+            do_dynamic_list(writer, line_writer, col->col_hdr, col->floor_list_idx);
         }
     }
 }
 
-void kz_col_view(){
-    static Gfx *static_col = NULL;
-    static Gfx *dynamic_gfx[2] = { NULL, NULL };
-    static int dynamic_idx = 0;
-    static uint16_t col_view_scene = 0;
-    size_t static_col_size;
-    poly_writer_t writer;
+static size_t calc_poly_cnt(void) {
+    z2_col_hdr_t *col_hdr = z2_game.col_ctxt.col_hdr;
 
-    if(settings->col_view_upd && col_view_scene != z2_game.scene_index && kz.collision_view_status == COL_VIEW_SHOW){
-        kz.collision_view_status = COL_VIEW_REGENERATE;
+    if(!settings->col_view_red) {
+        return col_hdr->n_poly;
+    }
+
+    size_t poly_cnt = 0;
+    z2_col_poly_t *polys = col_hdr->poly;
+    z2_col_type_t *types = col_hdr->type;
+
+    for(int i = 0; i < col_hdr->n_poly; i++) {
+        z2_col_type_t *type = &types[polys[i].type];
+
+        if(type->flags_2.hookshot || type->flags_1.interaction > 1 || type->flags_1.special == 0xC ||
+           type->flags_1.exit != 0 || type->flags_1.special == 5 || type->flags_1.behavior != 0 ||
+           type->flags_2.wall_damage || type->flags_2.terrain == 1) {
+               poly_cnt++;
+        }
+    }
+}
+
+void alloc_col_buf(void **buf, size_t size) {
+#ifdef WIIVC
+    *buf = halloc(size);
+#else
+    *buf = malloc(size);
+#endif
+}
+
+void free_col_buf(void **buf) {
+    if(*buf == NULL) {
         return;
     }
 
-    if(kz.collision_view_status == COL_VIEW_REGENERATE)
-    {
-        if(static_col)
-        {
 #ifdef WIIVC
-            hfree(static_col);
+    hfree(*buf);
 #else
-            free(static_col);
+    free(*buf);
 #endif
-            static_col = NULL;
-        }
 
-        kz.collision_view_status = COL_VIEW_GENERATE;
+    *buf = NULL;
+}
+
+void kz_col_view(){
+    const size_t dyn_poly_size = 0x1000;
+    const size_t dyn_line_size = 0x1000;
+
+    static Gfx *static_col = NULL;
+    static Gfx *static_line = NULL;
+    static Gfx *dynamic_gfx[2] = { NULL, NULL };
+    static Gfx *dynamic_line[2] = { NULL, NULL };
+    static int dynamic_idx = 0;
+    static uint16_t col_view_scene = 0;
+    static uint32_t col_view_prev_line;
+    static uint32_t col_view_prev_reduced;
+
+    poly_writer_t poly_writer;
+    line_writer_t line_writer;
+
+    _Bool line_enable = settings->col_view_line;
+
+    bool enabled = zu_is_ingame() && z2_game.pause_ctx.state == 0;
+    bool init = kz.collision_view_status == COL_VIEW_START || kz.collision_view_status == COL_VIEW_RESTART;
+
+    if(enabled && kz.collision_view_status == COL_VIEW_ACTIVE && settings->col_view_upd &&
+        (col_view_scene != z2_game.scene_index || col_view_prev_line != settings->col_view_line ||
+         col_view_prev_reduced != settings->col_view_red)) {
+             kz.collision_view_status = COL_VIEW_BEGIN_RESTART;
     }
-    else if(kz.collision_view_status == COL_VIEW_GENERATE)
-    {
+
+    switch(kz.collision_view_status) {
+        case COL_VIEW_BEGIN_STOP:
+            kz.collision_view_status = COL_VIEW_STOP;
+            break;
+        case COL_VIEW_BEGIN_RESTART:
+            kz.collision_view_status = COL_VIEW_RESTART;
+            break;
+        case COL_VIEW_STOP:
+            kz.collision_view_status = COL_VIEW_INACTIVE;
+        case COL_VIEW_RESTART:
+            free_col_buf(&static_col);
+            free_col_buf(&static_line);
+            free_col_buf(&dynamic_gfx[0]);
+            free_col_buf(&dynamic_gfx[1]);
+            free_col_buf(&dynamic_line[0]);
+            free_col_buf(&dynamic_line[1]);
+            break;
+    }
+
+    if (enabled && init) {
+        z2_col_hdr_t *col_hdr = z2_game.col_ctxt.col_hdr;
         col_view_scene = z2_game.scene_index;
-        z2_col_hdr_t *hdr = z2_game.col_ctxt.col_hdr;
-        int static_col_cnt = hdr->n_poly;
-        if(settings->col_view_red)
-        {
-            static_col_size = 0;
-            z2_col_poly_t *polys = hdr->poly;
-            z2_col_type_t *types = hdr->type;
-            for(int i = 0;i < static_col_cnt;i++)
-            {
-                z2_col_poly_t *poly = &polys[i];
-                z2_col_type_t *type = &types[poly->type];
-                if(type->flags_2.hookshot)
-                {
-                    static_col_size++;
-                }
-                else if(type->flags_1.interaction > 1)
-                {
-                    static_col_size++;
-                }
-                else if(type->flags_1.special == 0xC)
-                {
-                    static_col_size++;
-                }
-                else if(type->flags_1.exit != 0 || type->flags_1.special == 0x5)
-                {
-                    static_col_size++;
-                }
-                else if(type->flags_1.behavior != 0 || type->flags_2.wall_damage)
-                {
-                    static_col_size++;
-                }
-                else if(type->flags_2.terrain == 1)
-                {
-                    static_col_size++;
-                }
-            }
-            static_col_size *= 9;
-        }
-        else
-        {
-            static_col_size = 9 * static_col_cnt;
-        }
+        col_view_prev_line = settings->col_view_line;
+        col_view_prev_reduced = settings->col_view_red;
 
-        static_col_size += 0x11;
+        size_t poly_cnt = calc_poly_cnt();
+        size_t poly_size = (poly_cnt * 9) + 11;
 
-#ifdef WIIVC
-        static_col = halloc(sizeof(*static_col) * static_col_size);
-#else
-        static_col = malloc(sizeof(*static_col) * static_col_size);
-#endif
+        alloc_col_buf(&static_col, poly_size * sizeof(*static_col));
+        alloc_col_buf(&dynamic_gfx[0], dyn_poly_size * sizeof(*dynamic_gfx[0]));
+        alloc_col_buf(&dynamic_gfx[1], dyn_poly_size * sizeof(*dynamic_gfx[1]));
+
         Gfx *static_col_p = static_col;
-        Gfx *static_col_d = static_col + static_col_size;
-        poly_writer_init(&writer, static_col_p, static_col_d);
-        do_poly_list(&writer, hdr->vtx, hdr->poly, hdr->type, hdr->n_poly, settings->col_view_red);
-        poly_writer_finish(&writer, &static_col_p, &static_col_d);
+        Gfx *static_col_d = static_col + poly_size; 
+        poly_writer_init(&poly_writer, static_col_p, static_col_d);
+
+        Gfx *static_line_p = NULL;
+        Gfx *static_line_d = NULL;
+        line_writer_t *line_writer_p = NULL;
+        struct vector line_set;
+        if(line_enable) {
+            size_t line_size = (poly_cnt * 20) + 24;
+            alloc_col_buf(&static_line, line_size * sizeof(*static_line));
+            alloc_col_buf(&dynamic_line[0], dyn_line_size * sizeof(*dynamic_line[0]));
+            alloc_col_buf(&dynamic_line[1], dyn_line_size * sizeof(*dynamic_line[1]));
+
+            static_line_p = static_line;
+            static_line_d = static_line + line_size;
+            line_writer_p = &line_writer;
+            line_writer_init(line_writer_p, static_line_p, static_line_d);
+            vector_init(&line_set, sizeof(line_t));
+        }
+
+        do_poly_list(&poly_writer, line_writer_p, &line_set, col_hdr->vtx, col_hdr->poly, col_hdr->type, col_hdr->n_poly, settings->col_view_red);
+
+        poly_writer_finish(&poly_writer, &static_col_p, &static_col_d);
         gSPEndDisplayList(static_col_p++);
 
-        kz.collision_view_status = COL_VIEW_SHOW;
-    }
-    else if(kz.collision_view_status == COL_VIEW_KILL)
-    {
-        kz.collision_view_status = COL_VIEW_DESTROY;
-    }
-    else if(kz.collision_view_status == COL_VIEW_DESTROY)
-    {
-        if(static_col)
-        {
-#ifdef WIIVC
-            hfree(static_col);
-#else
-            free(static_col);
-#endif
-            static_col = NULL;
+        if(line_enable) {
+            line_writer_finish(line_writer_p, &static_line_p, &static_line_d);
+            gSPEndDisplayList(static_line_p++);
+            vector_destroy(&line_set);
         }
 
-        kz.collision_view_status = COL_VIEW_NONE;
+        kz.collision_view_status = COL_VIEW_ACTIVE;
     }
 
-    _Bool show = kz.collision_view_status == COL_VIEW_SHOW &&
-                                             zu_is_ingame() &&
-                                             z2_game.pause_ctx.state == 0;
+    bool active = kz.collision_view_status == COL_VIEW_ACTIVE;
 
-    if(show)
-    {
+    if(enabled && (init || (active && settings->col_view_upd))) {
+        Gfx *dyn_poly = NULL;
+        Gfx *dyn_poly_p = NULL;
+        Gfx *dyn_poly_d = NULL;
+        Gfx *dyn_line = NULL;
+        Gfx *dyn_line_p = NULL;
+        Gfx *dyn_line_d = NULL;
+        line_writer_t *line_writer_p = NULL;
+
+        dynamic_idx = (dynamic_idx + 1) % 2;
+
+        dyn_poly = dynamic_gfx[dynamic_idx];
+        dyn_poly_p = dyn_poly;
+        dyn_poly_d = dyn_poly + dyn_poly_size;
+        poly_writer_init(&poly_writer, dyn_poly_p, dyn_poly_d);
+
+        if(line_enable) {
+            dyn_line = dynamic_line[dynamic_idx];
+            dyn_line_p = dyn_line;
+            dyn_line_d = dyn_line + dyn_line_size;
+            line_writer_p = &line_writer;
+            
+            line_writer_init(line_writer_p, dyn_line_p, dyn_line_d);
+        }
+
+        do_dynamic_collision(&poly_writer, line_writer_p);
+
+        poly_writer_finish(&poly_writer, &dyn_poly_p, &dyn_poly_d);
+        gSPEndDisplayList(dyn_poly_p++);
+
+        if(line_enable) {
+            line_writer_finish(line_writer_p, &dyn_line_p, &dyn_line_d);
+            gSPEndDisplayList(dyn_line_p++);
+        }
+    }
+
+    if(enabled && active) {
         Gfx **gfx_p;
         Gfx **gfx_d;
-        _Bool xlu = !settings->col_view_opq;
-
-        if(xlu)
-        {
-            gfx_p = &z2_ctxt.gfx->poly_xlu.p;
-            gfx_d = &z2_ctxt.gfx->poly_xlu.d;
-        }
-        else
-        {
-            gfx_p = &z2_ctxt.gfx->poly_opa.p;
-            gfx_d = &z2_ctxt.gfx->poly_opa.d;
+        if(settings->col_view_opq) {
+            gfx_p = &z2_game.common.gfx->poly_opa.p;
+            gfx_d = &z2_game.common.gfx->poly_opa.d;
+        } else {
+            gfx_p = &z2_game.common.gfx->poly_xlu.p;
+            gfx_d = &z2_game.common.gfx->poly_xlu.d;
         }
 
-        init_poly_list(gfx_p, gfx_d, xlu, 1);
-
+        init_poly_list(gfx_p, gfx_d, !settings->col_view_opq, true);
+        
         gSPSetGeometryMode((*gfx_p)++, G_CULL_BACK);
-        void *dlist = static_col;
 #ifdef WIIVC
         set_hb_seg(gfx_p);
-        dlist = HB_SEG(dlist);
-#endif
-        gSPDisplayList((*gfx_p)++, dlist);
-
-        if(settings->col_view_upd)
-        {
-            if(dynamic_gfx[dynamic_idx] == NULL)
-            {
-#ifdef WIIVC
-                dynamic_gfx[0] = halloc(0x1000 * sizeof(*dynamic_gfx[0]));
-                dynamic_gfx[1] = halloc(0x1000 * sizeof(*dynamic_gfx[1]));
+        gSPDisplayList((*gfx_p)++, HB_SEG(static_col));
+        gSPDisplayList((*gfx_p)++, HB_SEG(dynamic_gfx[dynamic_idx]));
 #else
-                dynamic_gfx[0] = malloc(0x1000 * sizeof(*dynamic_gfx[0]));
-                dynamic_gfx[1] = malloc(0x1000 * sizeof(*dynamic_gfx[1]));
+        gSPDisplayList((*gfx_p)++, static_col);
+        gSPDisplayList((*gfx_p)++, dynamic_gfx[dynamic_idx]);
 #endif
-            }
 
-            Gfx *dynamic_buf = NULL;
-            Gfx *dynamic_gfx_p = NULL;
-            Gfx *dynamic_gfx_d = NULL;
-            poly_writer_t *dynamic_writer = NULL;
+        if(line_enable) {
+            init_line_gfx(gfx_p, gfx_d, !settings->col_view_opq);
 
-            dynamic_buf = dynamic_gfx[dynamic_idx];
-            dynamic_gfx_p = dynamic_buf;
-            dynamic_gfx_d = dynamic_buf + 0x1000;
-            dynamic_writer = &writer;
-            poly_writer_init(dynamic_writer, dynamic_gfx_p, dynamic_gfx_d);
-            do_dynamic_collision(dynamic_writer);
-            poly_writer_finish(dynamic_writer, &dynamic_gfx_p, &dynamic_gfx_d);
-            gSPEndDisplayList(dynamic_gfx_p++);
-            dlist = dynamic_buf;
 #ifdef WIIVC
-            dlist = HB_SEG(dlist);
+            gSPDisplayList((*gfx_p)++, HB_SEG(static_line));
+            gSPDisplayList((*gfx_p)++, HB_SEG(dynamic_line[dynamic_idx]));
+#else
+            gSPDisplayList((*gfx_p)++, static_line);
+            gSPDisplayList((*gfx_p)++, dynamic_line[dynamic_idx]);
 #endif
-            gSPDisplayList((*gfx_p)++, dlist);
         }
+
 #ifdef WIIVC
         restore_hb_seg(gfx_p);
 #endif

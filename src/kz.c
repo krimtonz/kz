@@ -597,8 +597,8 @@ static void init(void) {
     kz.frames_offset = -(int32_t)z2_vi_counter;
     kz.lag_counter = 1;
 
-    kz.collision_view_status = COL_VIEW_NONE;
-    kz.hitbox_view_status = COL_VIEW_NONE;
+    kz.collision_view_status = COL_VIEW_INACTIVE;
+    kz.hitbox_view_status = COL_VIEW_INACTIVE;
     kz.hide_actors = 0;
     kz.hide_room = 0;
 

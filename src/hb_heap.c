@@ -4,22 +4,22 @@
 
 #define HB_HEAP_SIZE 0x00C00000 // 12 MB
 #define HB_ALIGN(s) (((s) + _Alignof(max_align_t) - 1) & ~(_Alignof(max_align_t) - 1))
-#define HDR_SIZE (HB_ALIGN(sizeof(struct __hb_heap_hdr_s)))
-#define NOINLINE __attribute__ ((noinline)) 
+#define HDR_SIZE (HB_ALIGN(sizeof(struct hb_heap_hdr_s)))
+#define NOINLINE __attribute__ ((noinline))
 
-typedef struct __hb_heap_hdr_s{
+typedef struct hb_heap_hdr_s{
     int free;
     size_t size;
-    struct __hb_heap_hdr_s *prev;
-    struct __hb_heap_hdr_s *next;
-} __hb_heap_hdr_t;
+    struct hb_heap_hdr_s *prev;
+    struct hb_heap_hdr_s *next;
+} hb_heap_hdr_t;
 
 static char *hb_heap = (char*)HB_HEAP_ADDR;
-static __hb_heap_hdr_t *first_free_block;
+static hb_heap_hdr_t *first_free_block;
 static _Bool hb_heap_initalized = 0;
 
 static void hb_heap_init(){
-    first_free_block = (__hb_heap_hdr_t*)hb_heap;
+    first_free_block = (hb_heap_hdr_t*)hb_heap;
     first_free_block->free = 1;
     first_free_block->size = HB_HEAP_SIZE - HDR_SIZE;
     first_free_block->prev = NULL;
@@ -38,13 +38,13 @@ NOINLINE void *halloc(size_t size) {
 
     size = HB_ALIGN(size);
 
-    __hb_heap_hdr_t *blk, *next_free;
+    hb_heap_hdr_t *blk, *next_free;
 
     for(blk = first_free_block; blk != NULL; blk = blk->next) {
         if(blk->free && blk->size >= size) {
             // Enough space to allocate at least 1 aligned unit.
             if(blk->size - size >= HDR_SIZE + HB_ALIGN(1)) {
-                next_free = (__hb_heap_hdr_t*)((char*)blk + size + HDR_SIZE);
+                next_free = (hb_heap_hdr_t*)((char*)blk + size + HDR_SIZE);
                 next_free->free = 1;
                 next_free->size = blk->size - size - HDR_SIZE;
                 next_free->next = blk->next;
@@ -80,7 +80,7 @@ NOINLINE void hfree(void *ptr) {
         return;
     }
 
-    __hb_heap_hdr_t *blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
+    hb_heap_hdr_t *blk = (hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
     if(blk->next != NULL && blk->next->free) {
         // combine the blocks into a single larger block.
         blk->size += blk->next->size + HDR_SIZE;
@@ -119,11 +119,11 @@ NOINLINE void *hrealloc(void *ptr, size_t size) {
 
     size = HB_ALIGN(size);
 
-    __hb_heap_hdr_t *blk, *next_free;
-    
-    blk = (__hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
+    hb_heap_hdr_t *blk, *next_free;
+
+    blk = (hb_heap_hdr_t*)((char*)ptr - HDR_SIZE);
     if(blk->size > size && blk->size - size >= HDR_SIZE + HB_ALIGN(1)) {
-        next_free = (__hb_heap_hdr_t*)((char*)blk + size + HDR_SIZE);
+        next_free = (hb_heap_hdr_t*)((char*)blk + size + HDR_SIZE);
         next_free->free = 1;
         next_free->size = blk->size - size - HDR_SIZE;
         next_free->prev = blk;
@@ -158,7 +158,7 @@ NOINLINE void *hrealloc(void *ptr, size_t size) {
 
 NOINLINE size_t hmem_free(void) {
     size_t free = 0;
-    __hb_heap_hdr_t *hdr = first_free_block;
+    hb_heap_hdr_t *hdr = first_free_block;
     while(hdr != NULL) {
         if(hdr->free) {
             free += hdr->size;
