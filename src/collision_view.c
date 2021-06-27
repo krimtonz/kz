@@ -329,6 +329,11 @@ static void do_hitbox_view(Gfx **hit_view_p, Gfx **hit_view_d, int hitbox_cnt, z
                 draw_quad(hit_view_p, hit_view_d, &quad->vertices[0], &quad->vertices[2], &quad->vertices[3], &quad->vertices[1]);
             }
             break;
+            case Z2_HITBOX_SPHERE: {
+                z2_hitbox_sphere_t *sphere = (z2_hitbox_sphere_t*)hitbox;
+                draw_uv_sphere(hit_view_p, hit_view_d, sphere->radius, sphere->pos.x, sphere->pos.y, sphere->pos.z);
+            }
+            break;
         }
     }
 }

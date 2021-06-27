@@ -458,7 +458,7 @@ void load_state(void *state){
         zu_file_idx_load(z2_icon_item_24_static, z2_game.pause_ctx.icon_item_24);
         z2_DecodeArchiveFile(z2_file_table[z2_item_names].prom_start, z2_game.pause_ctx.selected_item, z2_game.pause_ctx.icon_name_text, 0x400);
 #endif
-        
+
         zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x480, 0x180);
         zu_file_load(z2_file_table[z2_do_action_static].vrom_start + 0x480, z2_game.hud_ctx.do_action_static + 0x300, 0x180);
         if(z2_get_map_type(&z2_game) == 0) {
@@ -548,11 +548,11 @@ void load_state(void *state){
         }else{
             z2_CreateSkyboxVtx(&z2_game.skybox_ctx, 5);
         }
-        
+
         z2_LoadSkyboxData(&z2_game, &z2_game.skybox_ctx, z2_game.skybox_type);
     }
 
-    /* load hud textures */ 
+    /* load hud textures */
     zu_file_idx_load(z2_parameter_static, z2_game.hud_ctx.parameter_static);
 
     /* update equip buttons */
@@ -570,7 +570,7 @@ void load_state(void *state){
     z2_ActionLabelUpdate(&z2_game.hud_ctx, z2_game.hud_ctx.action, 1);
 
     /* load current day clock texture */
-    uint32_t vrom = z2_file_table[z2_clock_face_days].vrom_start + (z2_file.day - 1) * 0x510;
+    uint32_t vrom = z2_file_table[z2_clock_face_days].vrom_start + (z2_file.day == 0 ? 0 : z2_file.day - 1) * 0x510;
     void *ram = (char*)z2_game.hud_ctx.do_action_static + 0x780;
     zu_file_load(vrom, ram, 0x510);
 
@@ -630,7 +630,7 @@ void load_state(void *state){
                     z2_AfxCmdByte(0x06040000 | (j << 8) | 1, 1);
                 }
             }
-            
+
             for(int j = 0; j < 0x64; j += 3) {
                 uint8_t chan = night_sfx->unk_0x04[j + 0];
                 uint8_t param = night_sfx->unk_0x04[j + 1];
@@ -715,7 +715,7 @@ _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end
         }
         if(z2_file_table[i].vrom_end == 0) {
             return 0;
-        } 
+        }
     }
     st_write(dst, &src, sizeof(src));
     char *start = src;
@@ -756,7 +756,7 @@ size_t save_state(void *state){
             st_write(&p, &seq_ctl->vol_cur, sizeof(&seq_ctl->vol_cur));
         }
         st_write(&p, &seq_ctl->vol_factor, sizeof(seq_ctl->vol_factor));
-        
+
     }
 
     st_write(&p, &z2_afx_cfg, sizeof(z2_afx_cfg));
