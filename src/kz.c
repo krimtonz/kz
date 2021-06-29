@@ -245,6 +245,8 @@ static void kz_main(void) {
         static _Bool entered_pause = 0;
         static uint32_t prev_inst[4];
         if(is_pause && !kz.menu_active) {
+            input_mask_clear(BUTTON_C_BUTTONS, 0xFF, 0xFF);
+
             if(button_time(button_get_index(BUTTON_L)) >= INPUT_REPEAT && !switched) {
                 switched = 1;
                 item_update = !item_update;
@@ -314,6 +316,10 @@ static void kz_main(void) {
                 }
             }
         } else {
+            if(kz.free_cam_active && !kz.free_cam_locked) {
+                input_mask_set(BUTTON_C_BUTTONS, 0xFF, 0xFF);
+            }
+
             if(item_update) {
                 item_update = 0;
                 switched = 0;
@@ -491,13 +497,13 @@ static void kz_main(void) {
         const int fade_len = 20;
         struct log *log_entry = &kz.log[i];
         uint8_t alpha;
-        
+
         if(!log_entry->active){
             continue;
         }
 
         log_entry->time++;
-        
+
         if(log_entry->time > (fade_start + fade_len)) {
             log_entry->active = 0;
             continue;
@@ -562,7 +568,7 @@ static int pause_menu_event(event_handler_t *handler, menu_event_t event, void *
         } else {
             pause_row = &mask_map_table[pause_ctx->mask_cell];
         }
-        
+
         if(*pause_row->slot == Z2_ITEM_NULL) {
             item_val = pause_row->item;
         } else {
@@ -650,7 +656,7 @@ static void init(void) {
         22,     22,     NULL,   0x64FF78FF,     0,
         0,      NULL
     };
-    
+
     kz.pause_item_list = menu_item_list_add(&kz.pause_menu, 0, 0, 0, NULL, Z2_ITEM_END - 1, &item_val, NULL, Z2_ITEM_END - 1, &sprite, NULL);
     kz.pause_menu.selected_item = kz.pause_item_list;
     kz.pause_item_list->draw_proc = NULL;
@@ -675,7 +681,7 @@ static void init(void) {
 
     kz.state_slot = 0;
 #endif
-    
+
     kz.input_mask = BUTTON_DPAD;
     kz.stick_x_mask = 0x00;
     kz.stick_y_mask = 0x00;
@@ -685,11 +691,11 @@ static void init(void) {
 
 void kz_log(const char *format, ...) {
     struct log *log_entry = &kz.log[KZ_LOG_MAX - 1];
-    
+
     for(int i = KZ_LOG_MAX - 1; i > 0; i--) {
         kz.log[i] = kz.log[i - 1];
     }
-    
+
     log_entry = &kz.log[0];
 
     va_list va;
@@ -750,7 +756,7 @@ HOOK void motion_blur_hook(void) {
     }
 }
 
-HOOK void draw_actors_hook(void) { 
+HOOK void draw_actors_hook(void) {
     if(kz.hide_actors) {
         zu_disp_ptr_t disp_p;
         zu_disp_ptr_save(&disp_p);
