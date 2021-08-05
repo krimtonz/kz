@@ -507,24 +507,9 @@ void load_state(void *state){
                 continue;
             }
 
-            if(((uint32_t)col->col_hdr->vtx & 0xF0000000) != 0) {
-                continue; // not segmented.
-            }
-
-            uint32_t segment = ((uint32_t)col->col_hdr->vtx & 0x0F000000) >> 24;
-            int offset = 0;
-            if(segment == 6) {
-                z2_obj_t *obj = &z2_game.obj_ctx.obj[col->actor->alloc_index];
-                z2_segment.segments[6] = MIPS_KSEG0_TO_PHYS(obj->data);
-                offset = ((int)col->col_hdr - (int)obj->data);
-            } else {
-                offset = (int)col->col_hdr - (int)MIPS_PHYS_TO_KSEG0(z2_segment.segments[segment]);
-                if(offset < 0) {
-                    continue;
-                }
-            }
-
-            relocate_col_hdr((segment << 24) | offset);
+            z2_obj_t *obj = &z2_game.obj_ctx.obj[col->actor->alloc_index];
+            z2_segment.current_object = MIPS_KSEG0_TO_PHYS(obj->data);
+            relocate_col_hdr(col->col_hdr);
         }
     }
 
