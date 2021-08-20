@@ -18,23 +18,31 @@ static int collision_gen_event(event_handler_t *handler, menu_event_t event, voi
     return 1;
 }
 
+enum collison_switch_type {
+    COL_SWITCH_REDUCE,
+    COL_SWITCH_OPAQUE,
+    COL_SWITCH_UPDATE,
+    COL_SWITCH_WIREFRAME,
+    COL_SWITCH_MAX
+};
+
 static int collision_switch_event(event_handler_t *handler, menu_event_t event, void **event_data) {
     if(event == MENU_EVENT_ACTIVATE) {
         int d = (int)handler->callback_data;
         switch(d) {
-            case 0:
+            case COL_SWITCH_REDUCE:
                 settings->col_view_red = !settings->col_view_red;
                 if(kz.collision_view_status == COL_VIEW_ACTIVE) {
                     kz.collision_view_status = COL_VIEW_BEGIN_RESTART;
                 }
                 break;
-            case 1:
+            case COL_SWITCH_OPAQUE:
                 settings->col_view_opq = !settings->col_view_opq;
                 break;
-            case 2:
+            case COL_SWITCH_UPDATE:
                 settings->col_view_upd = !settings->col_view_upd;
                 break;
-            case 3:
+            case COL_SWITCH_WIREFRAME:
                 settings->col_view_line = !settings->col_view_line;
                 break;
 
@@ -43,16 +51,16 @@ static int collision_switch_event(event_handler_t *handler, menu_event_t event, 
         int d = (int)handler->callback_data;
         int set = 0;
         switch(d) {
-            case 0:
+            case COL_SWITCH_REDUCE:
                 set = settings->col_view_red;
                 break;
-            case 1:
+            case COL_SWITCH_OPAQUE:
                 set = settings->col_view_opq;
                 break;
-            case 2:
+            case COL_SWITCH_UPDATE:
                 set = settings->col_view_upd;
                 break;
-            case 3:
+            case COL_SWITCH_WIREFRAME:
                 set = settings->col_view_line;
                 break;
         }
@@ -198,19 +206,19 @@ menu_t *create_scene_menu(void){
             menu_label_add(&collision, 2, 1, "enable collision viewer");
 
             item = menu_checkbox_add(&collision, 2, 2);
-            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)0);
+            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)COL_SWITCH_REDUCE);
             menu_label_add(&collision, 4, 2, "reduce");
 
             item = menu_checkbox_add(&collision, 2, 3);
-            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)1);
+            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)COL_SWITCH_OPAQUE);
             menu_label_add(&collision, 4, 3, "opaque");
 
             item = menu_checkbox_add(&collision, 2, 4);
-            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)3);
-            menu_label_add(&collision, 4, 4, "wireferame");
+            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)COL_SWITCH_WIREFRAME);
+            menu_label_add(&collision, 4, 4, "wireframe");
 
             item = menu_checkbox_add(&collision, 2, 5);
-            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)2);
+            menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, collision_switch_event, (void*)COL_SWITCH_UPDATE);
             menu_label_add(&collision, 4, 5, "update on scene change");
         }
 

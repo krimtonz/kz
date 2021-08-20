@@ -245,7 +245,7 @@ static void kz_main(void) {
         static _Bool entered_pause = 0;
         static uint32_t prev_inst[4];
         if(is_pause && !kz.menu_active) {
-            input_mask_clear(BUTTON_C_BUTTONS, 0xFF, 0xFF);
+            input_mask_clear(BUTTON_C_BUTTONS, 0x00, 0x00);
 
             if(button_time(button_get_index(BUTTON_L)) >= INPUT_REPEAT && !switched) {
                 switched = 1;
@@ -318,6 +318,8 @@ static void kz_main(void) {
         } else {
             if(kz.free_cam_active && !kz.free_cam_locked) {
                 input_mask_set(BUTTON_C_BUTTONS, 0xFF, 0xFF);
+            } else {
+                input_mask_clear(0, 0xFF, 0xFF);
             }
 
             if(item_update) {
