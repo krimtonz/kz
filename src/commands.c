@@ -191,7 +191,11 @@ void command_break(void){
 }
 
 void command_levitate(void){
-    z2_link.common.vel_1.y = 6.0f;
+    _Bool is_pause = z2_player_ovl_cur == &z2_player_ovl_table[0];
+
+    if(!is_pause) {
+        z2_link.common.vel_1.y = 6.0f;
+    }
 }
 
 void command_turbo(void){
