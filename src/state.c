@@ -526,6 +526,8 @@ void load_state(void *state){
     st_read(&p, col->dyn_poly, sizeof(*col->dyn_poly) * col->dyn_poly_max);
     st_read(&p, col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
 
+    st_read(&p, z2_saturation, 0x20);
+
     /* create skybox */
     if(z2_game.skybox_type != 0){
         if(z2_game.skybox_type == 5){
@@ -919,6 +921,8 @@ size_t save_state(void *state){
     st_write(&p, dynamic_col->dyn.list, sizeof(*dynamic_col->dyn.list) * dynamic_col->dyn_list_max);
     st_write(&p, dynamic_col->dyn_poly, sizeof(*dynamic_col->dyn_poly) * dynamic_col->dyn_poly_max);
     st_write(&p, dynamic_col->dyn_vtx, sizeof(*dynamic_col->dyn_vtx) * dynamic_col->dyn_vtx_max);
+
+    st_write(&p, z2_saturation, 0x20);
 
     /* save display lists */
     z2_gfx_t *gfx = z2_ctxt.gfx;
