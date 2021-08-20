@@ -89,6 +89,16 @@ static int command_onactivate(event_handler_t *handler, menu_event_t event, void
     return 1;
 }
 
+static int pause_help_event(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(event == MENU_EVENT_ACTIVATE) {
+        settings->disp_pause_help = !settings->disp_pause_help;
+    } else if(event == MENU_EVENT_UPDATE) {
+        menu_item_t *item = handler->subscriber;
+
+        menu_checkbox_set(item, settings->disp_pause_help);
+    }
+}
+
 static int settings_switch_event(event_handler_t *handler, menu_event_t event, void **event_data){
     enum settings_switch_item sw = (enum settings_switch_item)handler->callback_data;
     if(event == MENU_EVENT_ACTIVATE){
@@ -264,40 +274,43 @@ menu_t *create_settings_menu(void){
     menu_button_add(&settingsm, 0, 2, "save settings", save_profile_onactivate, NULL);
     menu_button_add(&settingsm, 0, 3, "load settings", load_profile_onactivate, NULL);
     menu_button_add(&settingsm, 0, 4, "load default settings", default_settings_onactivate, NULL);
-
     menu_item_t *item = menu_checkbox_add(&settingsm, 0, 5);
-    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_INPUT_DISPLAY);
-    menu_checkbox_set(item, settings->input_display);
-    menu_label_add(&settingsm, 2, 5, "input display");
-    menu_move_button_add(&settingsm, 16, 5, &settings->id_x, &settings->id_y);
+    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, pause_help_event, NULL);
+    menu_label_add(&settingsm, 2, 5, "display pause help text");
 
     item = menu_checkbox_add(&settingsm, 0, 6);
-    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_TIMER);
-    menu_checkbox_set(item, settings->timer);
-    menu_label_add(&settingsm, 2, 6, "timer");
-    menu_move_button_add(&settingsm, 16, 6, &settings->timer_x, &settings->timer_y);
+    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_INPUT_DISPLAY);
+    menu_checkbox_set(item, settings->input_display);
+    menu_label_add(&settingsm, 2, 6, "input display");
+    menu_move_button_add(&settingsm, 16, 6, &settings->id_x, &settings->id_y);
 
     item = menu_checkbox_add(&settingsm, 0, 7);
-    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_LAG_COUNTER);
-    menu_checkbox_set(item, settings->lag_counter);
-    menu_label_add(&settingsm, 2, 7, "lag counter");
-    menu_move_button_add(&settingsm, 16, 7, &settings->lag_x, &settings->lag_y);
+    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_TIMER);
+    menu_checkbox_set(item, settings->timer);
+    menu_label_add(&settingsm, 2, 7, "timer");
+    menu_move_button_add(&settingsm, 16, 7, &settings->timer_x, &settings->timer_y);
 
     item = menu_checkbox_add(&settingsm, 0, 8);
+    menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_LAG_COUNTER);
+    menu_checkbox_set(item, settings->lag_counter);
+    menu_label_add(&settingsm, 2, 8, "lag counter");
+    menu_move_button_add(&settingsm, 16, 8, &settings->lag_x, &settings->lag_y);
+
+    item = menu_checkbox_add(&settingsm, 0, 9);
     menu_item_register_event(item, MENU_EVENT_ACTIVATE | MENU_EVENT_UPDATE, settings_switch_event, (void*)SW_TURBO);
     menu_checkbox_set(item, settings->turbo_type);
-    menu_label_add(&settingsm, 2, 8, "turbo hold");
+    menu_label_add(&settingsm, 2, 9, "turbo hold");
 
-    menu_label_add(&settingsm, 0, 9, "memfile");
-    menu_button_add(&settingsm, 15, 9, "-", memfile_dec_onactivate, NULL);
+    menu_label_add(&settingsm, 0, 10, "memfile");
+    menu_button_add(&settingsm, 15, 10, "-", memfile_dec_onactivate, NULL);
     static watch_t memfile_watch;
     memfile_watch.address = &kz.memfile_slot;
     memfile_watch.type = WATCH_TYPE_U8;
     memfile_watch.floating = 0;
-    menu_watch_add(&settingsm, 16, 9, &memfile_watch, 1);
-    menu_button_add(&settingsm, 17, 9, "+", memfile_inc_onactivate, NULL);
+    menu_watch_add(&settingsm, 16, 10, &memfile_watch, 1);
+    menu_button_add(&settingsm, 17, 10, "+", memfile_inc_onactivate, NULL);
 
-    int y = 10;
+    int y = 11;
 #ifndef LITE
     menu_button_add(&settingsm, 0, y, "export", export_memfile_onactivate, NULL);
     menu_button_add(&settingsm, 8, y++, "import", import_memfile_onactivate, NULL);

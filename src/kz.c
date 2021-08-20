@@ -299,7 +299,9 @@ static void kz_main(void) {
                     osInvalICache(z2_player_ovl_cur->ram + mask_left_offset, 4);
                     osInvalICache(z2_player_ovl_cur->ram + item_right_offset, 4);
                     osInvalICache(z2_player_ovl_cur->ram + item_left_offset, 4);
-                    kz_log("hold L to stop inv edit");
+                    if(settings->disp_pause_help) {
+                        kz_log("hold L to stop inv edit");
+                    }
                 } else {
                     free_buttons(BUTTON_L | BUTTON_D_UP | BUTTON_D_DOWN);
                     input_mask_clear(0x0000, 0xFF, 0xFF);
@@ -312,7 +314,9 @@ static void kz_main(void) {
                     osInvalICache(z2_player_ovl_cur->ram + item_right_offset, 4);
                     osInvalICache(z2_player_ovl_cur->ram + item_left_offset, 4);
                     menu_item_list_active_set(kz.pause_item_list, 0);
-                    kz_log("hold L to start inv edit");
+                    if(settings->disp_pause_help) {
+                        kz_log("hold L to start inv edit");
+                    }
                 }
             }
         } else {
@@ -332,7 +336,9 @@ static void kz_main(void) {
         }
         if(is_pause && !entered_pause) {
             entered_pause = 1;
-            kz_log("hold L to start inv edit");
+            if(settings->disp_pause_help) {
+                kz_log("hold L to start inv edit");
+            }
         } else if(!is_pause && entered_pause) {
             entered_pause = 0;
         }

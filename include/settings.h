@@ -16,7 +16,7 @@
 #define IO_BLOCK_SIZE       0x80
 #define SIZE_TO_BLOCK(x)    ((x + IO_BLOCK_SIZE - 1) / IO_BLOCK_SIZE)
 
-#define SETTINGS_VER        11
+#define SETTINGS_VER        12
 #define SETTINGS_ADDR       0x1C000
 #define SETTINGS_SIZE       (sizeof(struct settings_header) + sizeof(struct settings_data))
 #define SETTINGS_PAD        ((IO_BLOCK_SIZE - (SETTINGS_SIZE & (IO_BLOCK_SIZE - 1))) & (IO_BLOCK_SIZE - 1))
@@ -44,7 +44,8 @@ struct settings_data {
     uint32_t            cheats;
     union{
         struct {
-            uint32_t                    : 21;
+            uint32_t                    : 20;
+            uint32_t    disp_pause_help : 1;
             uint32_t    col_view_line   : 1;
             uint32_t    hit_view_opq    : 1;
             uint32_t    col_view_upd    : 1;
