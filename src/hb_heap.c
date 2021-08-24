@@ -2,7 +2,7 @@
 #include <mips.h>
 #include "hb_heap.h"
 
-#define HB_HEAP_SIZE 0x00C00000 // 12 MB
+#define HB_HEAP_SIZE 0x00400000
 #define HB_ALIGN(s) (((s) + _Alignof(max_align_t) - 1) & ~(_Alignof(max_align_t) - 1))
 #define HDR_SIZE (HB_ALIGN(sizeof(struct hb_heap_hdr_s)))
 #define NOINLINE __attribute__ ((noinline))
