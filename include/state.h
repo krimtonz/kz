@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#define STATE_VERSION 4
+#define STATE_VERSION 5
 
 typedef struct {
     uint16_t    z2_version;

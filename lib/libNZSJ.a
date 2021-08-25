@@ -89,6 +89,7 @@ z2_afx_cfg_state            = 0x801D5E18;
 z2_static_particle_ctxt     = 0x801E4050;
 z2_file                     = 0x801EF710;
 z2_cs_info                  = 0x801F5178;
+z2_hide_clock               = 0x801F5362;
 z2_light_queue              = 0x801F53A0;
 z2_game_arena               = 0x801F5530;
 z2_cs_bars                  = 0x801F6F70;

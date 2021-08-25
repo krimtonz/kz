@@ -527,6 +527,7 @@ void load_state(void *state){
     st_read(&p, col->dyn_vtx, sizeof(*col->dyn_vtx) * col->dyn_vtx_max);
 
     st_read(&p, z2_saturation, 0x20);
+    st_read(&p, &z2_hide_clock, sizeof(z2_hide_clock));
 
     /* create skybox */
     if(z2_game.skybox_type != 0){
@@ -923,6 +924,7 @@ size_t save_state(void *state){
     st_write(&p, dynamic_col->dyn_vtx, sizeof(*dynamic_col->dyn_vtx) * dynamic_col->dyn_vtx_max);
 
     st_write(&p, z2_saturation, 0x20);
+    st_write(&p, &z2_hide_clock, sizeof(z2_hide_clock));
 
     /* save display lists */
     z2_gfx_t *gfx = z2_ctxt.gfx;

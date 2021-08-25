@@ -1793,6 +1793,7 @@ z2_extern uint16_t                  z2_unk_song_pos;
 z2_extern uint32_t                  z2_random;
 z2_extern z2_night_sfx_t            z2_night_sfx[];
 z2_extern char                      z2_saturation[];
+z2_extern char                      z2_hide_clock;
 
 // pause menu hacks
 #if Z2_VERSION==NZSE
