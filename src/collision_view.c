@@ -477,46 +477,48 @@ static void do_poly_list(poly_writer_t *writer, line_writer_t *line_writer, stru
         }
 
         if(line_writer != NULL) {
-            line_t lab = { polys->va, polys->vb };
-            line_t lbc = { polys->vb, polys->vc };
-            line_t lac = { polys->va, polys->vc };
+            if(!skip) {
+                line_t lab = { polys->va, polys->vb };
+                line_t lbc = { polys->vb, polys->vc };
+                line_t lac = { polys->va, polys->vc };
 
-            _Bool ab = 1;
-            _Bool bc = 1;
-            _Bool ca = 1;
+                _Bool ab = 1;
+                _Bool bc = 1;
+                _Bool ca = 1;
 
-            if(line_set != NULL) {
-                for(int i = 0; i < line_set->size; i++) {
-                    line_t *l = vector_at(line_set, i);
-                    if((l->a == lab.a && l->b == lab.b) || (l->a == lab.b && l->b == lab.a)) {
-                        ab = 0;
-                    }
+                if(line_set != NULL) {
+                    for(int i = 0; i < line_set->size; i++) {
+                        line_t *l = vector_at(line_set, i);
+                        if((l->a == lab.a && l->b == lab.b) || (l->a == lab.b && l->b == lab.a)) {
+                            ab = 0;
+                        }
 
-                    if((l->a == lbc.a && l->b == lbc.b) || (l->a == lbc.b && l->b == lbc.a)) {
-                        bc = 0;
-                    }
+                        if((l->a == lbc.a && l->b == lbc.b) || (l->a == lbc.b && l->b == lbc.a)) {
+                            bc = 0;
+                        }
 
-                    if((l->a == lac.a && l->b == lac.b) || (l->a == lac.b && l->b == lac.a)) {
-                        ca = 0;
+                        if((l->a == lac.a && l->b == lac.b) || (l->a == lac.b && l->b == lac.a)) {
+                            ca = 0;
+                        }
                     }
                 }
-            }
 
-            Vtx v[3];
-            int vtx_cnt = 0;
-            if(ab || ca) {
-                v[vtx_cnt++] = gdSPDefVtxC(va->x, va->y, va->z, 0, 0, 0, 0, 0, 0xFF);
-            }
+                Vtx v[3];
+                int vtx_cnt = 0;
+                if(ab || ca) {
+                    v[vtx_cnt++] = gdSPDefVtxC(va->x, va->y, va->z, 0, 0, 0, 0, 0, 0xFF);
+                }
 
-            if(ab || bc) {
-                v[vtx_cnt++] = gdSPDefVtxC(vb->x, vb->y, vb->z, 0, 0, 0, 0, 0, 0xFF);
-            }
+                if(ab || bc) {
+                    v[vtx_cnt++] = gdSPDefVtxC(vb->x, vb->y, vb->z, 0, 0, 0, 0, 0, 0xFF);
+                }
 
-            if(bc || ca) {
-                v[vtx_cnt++] = gdSPDefVtxC(vc->x, vc->y, vc->z, 0, 0, 0, 0, 0, 0xFF);
-            }
+                if(bc || ca) {
+                    v[vtx_cnt++] = gdSPDefVtxC(vc->x, vc->y, vc->z, 0, 0, 0, 0, 0, 0xFF);
+                }
 
-            line_writer_append(line_writer, v, vtx_cnt);
+                line_writer_append(line_writer, v, vtx_cnt);
+            }
         }
     }
 }
@@ -605,15 +607,15 @@ void kz_col_view(){
     poly_writer_t poly_writer;
     line_writer_t line_writer;
 
-    _Bool line_enable = settings->col_view_line;
-
     bool enabled = zu_is_ingame() && z2_game.pause_ctx.state == 0;
     bool init = kz.collision_view_status == COL_VIEW_START || kz.collision_view_status == COL_VIEW_RESTART;
 
-    if(enabled && kz.collision_view_status == COL_VIEW_ACTIVE && settings->col_view_upd &&
-        (col_view_scene != z2_game.scene_index || col_view_prev_line != settings->col_view_line ||
-         col_view_prev_reduced != settings->col_view_red)) {
-             kz.collision_view_status = COL_VIEW_BEGIN_RESTART;
+    if(enabled && kz.collision_view_status == COL_VIEW_ACTIVE && (
+        (settings->col_view_upd && col_view_scene != z2_game.scene_index) ||
+        col_view_prev_line != settings->col_view_line ||
+        col_view_prev_reduced != settings->col_view_red))
+    {
+        kz.collision_view_status = COL_VIEW_BEGIN_RESTART;
     }
 
     switch(kz.collision_view_status) {
@@ -653,14 +655,14 @@ void kz_col_view(){
         alloc_col_buf(&dynamic_gfx[1], dyn_poly_size * sizeof(*dynamic_gfx[1]));
 
         Gfx *static_col_p = static_col;
-        Gfx *static_col_d = static_col + poly_size; 
+        Gfx *static_col_d = static_col + poly_size;
         poly_writer_init(&poly_writer, static_col_p, static_col_d);
 
         Gfx *static_line_p = NULL;
         Gfx *static_line_d = NULL;
         line_writer_t *line_writer_p = NULL;
         struct vector line_set;
-        if(line_enable) {
+        if(col_view_prev_line) {
             size_t line_size = (poly_cnt * 20) + 24;
             alloc_col_buf(&static_line, line_size * sizeof(*static_line));
             alloc_col_buf(&dynamic_line[0], dyn_line_size * sizeof(*dynamic_line[0]));
@@ -678,7 +680,7 @@ void kz_col_view(){
         poly_writer_finish(&poly_writer, &static_col_p, &static_col_d);
         gSPEndDisplayList(static_col_p++);
 
-        if(line_enable) {
+        if(col_view_prev_line) {
             line_writer_finish(line_writer_p, &static_line_p, &static_line_d);
             gSPEndDisplayList(static_line_p++);
             vector_destroy(&line_set);
@@ -705,12 +707,12 @@ void kz_col_view(){
         dyn_poly_d = dyn_poly + dyn_poly_size;
         poly_writer_init(&poly_writer, dyn_poly_p, dyn_poly_d);
 
-        if(line_enable) {
+        if(col_view_prev_line) {
             dyn_line = dynamic_line[dynamic_idx];
             dyn_line_p = dyn_line;
             dyn_line_d = dyn_line + dyn_line_size;
             line_writer_p = &line_writer;
-            
+
             line_writer_init(line_writer_p, dyn_line_p, dyn_line_d);
         }
 
@@ -719,7 +721,7 @@ void kz_col_view(){
         poly_writer_finish(&poly_writer, &dyn_poly_p, &dyn_poly_d);
         gSPEndDisplayList(dyn_poly_p++);
 
-        if(line_enable) {
+        if(col_view_prev_line) {
             line_writer_finish(line_writer_p, &dyn_line_p, &dyn_line_d);
             gSPEndDisplayList(dyn_line_p++);
         }
@@ -737,7 +739,7 @@ void kz_col_view(){
         }
 
         init_poly_list(gfx_p, gfx_d, !settings->col_view_opq, true);
-        
+
         gSPSetGeometryMode((*gfx_p)++, G_CULL_BACK);
 #ifdef WIIVC
         set_hb_seg(gfx_p);
@@ -748,7 +750,7 @@ void kz_col_view(){
         gSPDisplayList((*gfx_p)++, dynamic_gfx[dynamic_idx]);
 #endif
 
-        if(line_enable) {
+        if(col_view_prev_line) {
             init_line_gfx(gfx_p, gfx_d, !settings->col_view_opq);
 
 #ifdef WIIVC
