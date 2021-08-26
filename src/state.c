@@ -603,6 +603,13 @@ void load_state(void *state){
         ctl->vol_cur = info->volume;
         ctl->timer = 0;
         ctl->prev_seq_idx = ctl->seq_idx = info->seq_idx;
+        ctl->unk_0x208 = 0;
+        for(int j = 0; j < 16; j++) {
+            ctl->unk_0x00[j].unk_0x00 = 1.0f;
+            ctl->unk_0x00[j].unk_0x08 = 0.05f;
+            ctl->unk_0x00[j].unk_0x0c = 1.0f;
+            ctl->unk_0x00[j].unk_0x18 = 0;
+        }
 
         if(i == 4 && ctl->seq_idx == 0x0001) {
             z2_night_sfx_t *night_sfx = &z2_night_sfx[z2_game.night_seq_idx];
@@ -743,8 +750,8 @@ size_t save_state(void *state){
         } else {
             st_write(&p, &seq_ctl->vol_cur, sizeof(&seq_ctl->vol_cur));
         }
-        st_write(&p, &seq_ctl->vol_factor, sizeof(seq_ctl->vol_factor));
 
+        st_write(&p, &seq_ctl->vol_factor, sizeof(seq_ctl->vol_factor));
     }
 
     st_write(&p, &z2_afx_cfg, sizeof(z2_afx_cfg));

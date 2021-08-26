@@ -1581,13 +1581,24 @@ typedef struct {
 } z2_scene_cmd_t;                       /* 0x0008 */
 
 typedef struct {
-    char unk_0x00[0x1C0];
+    float unk_0x00;
+    float unk_0x04;
+    float unk_0x08;
+    float unk_0x0c;
+    char unk_0x10[8];
+    uint16_t unk_0x18;
+    uint16_t unk_0x1A;
+} seq_ctl_unk_0x00_t;
+
+typedef struct {
+    seq_ctl_unk_0x00_t unk_0x00[16];    /* 0x0000 */
     float vol_cur;                      /* 0x01C0 */
     float vol_target;                   /* 0x01C4 */
     char unk_0x1C8[0x34];               /* 0x01C8 */
     uint32_t unk_1FC;                   /* 0x01FC */
     uint16_t timer;                     /* 0x0200 */
-    char unk_0x202[0x8];                /* 0x0202 */
+    char unk_0x202[0x6];                /* 0x0202 */
+    uint16_t unk_0x208;                 /* 0x0208 */
     uint16_t seq_idx;                   /* 0x020A */
     uint16_t prev_seq_idx;              /* 0x020C */
     char unk_0x20E[0x4];                /* 0x020E */
