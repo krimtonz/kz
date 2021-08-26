@@ -110,14 +110,17 @@ void load_state(void *state){
         uint16_t seq_idx;
         float volume;
         uint8_t vol_factor[4];
+        uint16_t chan_mute;
     } seq_info[5];
 
     for(int i = 0; i < 5; i++) {
         struct seq_info *info = &seq_info[i];
+        z2_sequencer_t *seq = &z2_audio_ctxt.sequencers[i];
         st_read(&p, &info->active, sizeof(info->active));
         st_read(&p, &info->seq_idx, sizeof(info->seq_idx));
         st_read(&p, &info->volume, sizeof(info->volume));
         st_read(&p, &info->vol_factor, sizeof(info->vol_factor));
+        st_read(&p, &info->chan_mute, sizeof(info->chan_mute));
     }
 
     uint8_t cur_config = z2_afx_cfg;
@@ -596,20 +599,13 @@ void load_state(void *state){
         struct seq_info *info = &seq_info[i];
         z2_seq_ctl_t *ctl = &z2_seq_ctl[i];
         z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
-        if(!(sequencer->status & 0x80)) {
+        if(!(sequencer->enabled)) {
             ctl->unk_21B = 1;
         }
         memcpy(&ctl->vol_factor, &info->vol_factor, sizeof(info->vol_factor));
         ctl->vol_cur = info->volume;
         ctl->timer = 0;
         ctl->prev_seq_idx = ctl->seq_idx = info->seq_idx;
-        ctl->unk_0x208 = 0;
-        for(int j = 0; j < 16; j++) {
-            ctl->unk_0x00[j].unk_0x00 = 1.0f;
-            ctl->unk_0x00[j].unk_0x08 = 0.05f;
-            ctl->unk_0x00[j].unk_0x0c = 1.0f;
-            ctl->unk_0x00[j].unk_0x18 = 0;
-        }
 
         if(i == 4 && ctl->seq_idx == 0x0001) {
             z2_night_sfx_t *night_sfx = &z2_night_sfx[z2_game.night_seq_idx];
@@ -671,11 +667,20 @@ void load_state(void *state){
                 z2_AfxCmdByte(0x06040F01, 1);
             }
 
-        } else if (info->seq_idx != 0xFFFF && info->active && !(sequencer->status & 0x80)) {
+        } else if (info->seq_idx != 0xFFFF && info->active && !(sequencer->enabled)) {
             afx_start_seq(i, info->seq_idx);
         }
 
         z2_AfxCmdFloat(0x41000000, ctl->vol_cur);
+
+        for(int j = 0; j < 16; j++) {
+            _Bool is_mute = info->chan_mute & (1 << j);
+            ctl->unk_0x00[j].unk_0x00 = 1.0f;
+            ctl->unk_0x00[j].unk_0x18 = 0;
+
+            z2_AfxCmdFloat(0x01000000 | (i << 16) | (j << 8), 1.0f);
+            //z2_AfxCmdWord(0x08000000 | (i << 16) | (j << 8), is_mute << 24);
+        }
     }
 
     z2_AfxCmdWord(0xF2000000, 0x00000000);
@@ -742,7 +747,7 @@ size_t save_state(void *state){
     for(int i = 0; i < 5; i++) {
         z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
         z2_seq_ctl_t *seq_ctl = &z2_seq_ctl[i];
-        _Bool seq_active = (sequencer->status & 0x80) || z2_afx_cfg_state;
+        _Bool seq_active = sequencer->enabled || z2_afx_cfg_state;
         st_write(&p, &seq_active, sizeof(seq_active));
         st_write(&p, &seq_ctl->seq_idx, sizeof(seq_ctl->seq_idx));
         if(seq_ctl->timer != 0) {
@@ -752,6 +757,15 @@ size_t save_state(void *state){
         }
 
         st_write(&p, &seq_ctl->vol_factor, sizeof(seq_ctl->vol_factor));
+
+        uint16_t chan_mutes = 0;
+        for(int j = 0; j < 16; j++) {
+            _Bool is_mute = sequencer->channels[j]->flags & 0x10000000;
+
+            chan_mutes |= (is_mute << j);
+        }
+
+        st_write(&p, &chan_mutes, sizeof(chan_mutes));
     }
 
     st_write(&p, &z2_afx_cfg, sizeof(z2_afx_cfg));

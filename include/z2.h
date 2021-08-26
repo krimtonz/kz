@@ -1581,31 +1581,31 @@ typedef struct {
 } z2_scene_cmd_t;                       /* 0x0008 */
 
 typedef struct {
-    float unk_0x00;
-    float unk_0x04;
-    float unk_0x08;
-    float unk_0x0c;
-    char unk_0x10[8];
-    uint16_t unk_0x18;
-    uint16_t unk_0x1A;
-} seq_ctl_unk_0x00_t;
+    /* 0x0000 */ float unk_0x00;
+    /* 0x0004 */ float unk_0x04;
+    /* 0x0008 */ float unk_0x08;
+    /* 0x000C */ float unk_0x0c;
+    /* 0x0010 */ char unk_0x10[8];
+    /* 0x0018 */ uint16_t unk_0x18;
+    /* 0x001A */ uint16_t unk_0x1A;
+} seq_ctl_unk_0x00_t; // size = 0x1C
 
 typedef struct {
-    seq_ctl_unk_0x00_t unk_0x00[16];    /* 0x0000 */
-    float vol_cur;                      /* 0x01C0 */
-    float vol_target;                   /* 0x01C4 */
-    char unk_0x1C8[0x34];               /* 0x01C8 */
-    uint32_t unk_1FC;                   /* 0x01FC */
-    uint16_t timer;                     /* 0x0200 */
-    char unk_0x202[0x6];                /* 0x0202 */
-    uint16_t unk_0x208;                 /* 0x0208 */
-    uint16_t seq_idx;                   /* 0x020A */
-    uint16_t prev_seq_idx;              /* 0x020C */
-    char unk_0x20E[0x4];                /* 0x020E */
-    uint8_t vol_factor[4];              /* 0x0212 */
-    char unk_0x216[5];                  /* 0x0216 */
-    uint8_t unk_21B;                    /* 0x021B */
-} z2_seq_ctl_t;                         /* 0x021C */
+    /* 0x0000 */ seq_ctl_unk_0x00_t unk_0x00[16];
+    /* 0x01C0 */ float vol_cur;
+    /* 0x01C4 */ float vol_target;
+    /* 0x01C8 */ char unk_0x1C8[0x34];
+    /* 0x01FC */ uint32_t unk_1FC;
+    /* 0x0200 */ uint16_t timer;
+    /* 0x0202 */ char unk_0x202[0x6];
+    /* 0x0208 */ uint16_t unk_0x208;
+    /* 0x020A */ uint16_t seq_idx;
+    /* 0x020C */ uint16_t prev_seq_idx;
+    /* 0x020E */ char unk_0x20E[0x4];
+    /* 0x0212 */ uint8_t vol_factor[4];
+    /* 0x0216 */ char unk_0x216[5];
+    /* 0x021B */ uint8_t unk_21B;
+} z2_seq_ctl_t; // size = 0x21C
 
 typedef struct {
     uint32_t    hi;                     /* 0x0000 */
@@ -1613,24 +1613,47 @@ typedef struct {
 } z2_audio_cmd_t;                       /* 0x0008 */
 
 typedef struct {
-    uint8_t status;
-    char unk_0x01[0xF];
-    uint16_t delay;                     /* 0x0010 */
-    char unk_0x12[0x14E];
-} z2_sequencer_t;                       /* 0x0160 */
+    union {
+        struct {
+            /* 0x0000 : 0 */ uint32_t enabled : 1;
+            /* 0x0000 : 1 */ uint32_t : 2;
+            /* 0x0000 : 5 */ uint32_t mute : 1;
+            /* 0x0000 : 6 */ uint32_t : 28;
+        };
+        /* 0x0000 */ uint32_t flags;
+    };
+    /* 0x0004 */ char unk_0x04[0xE0];
+} z2_aud_chan_t; // size = 0xE4
 
 typedef struct {
-    char unk_0x00[0x28C0];
-    uint32_t unk_ctr; /* 0x28C0 */
-    char unk_0x28C4[0x1B9C];
-    z2_sequencer_t sequencers[5]; /* 0x4460 */
-    char unk_0x4B40[0x2E38];
-    uint8_t cmd_wr_pos; /* 7978 */
-    uint8_t cmd_rd_pos; /* 7979 */
-    char unk_0x797A[0x7A];
-    z2_audio_cmd_t cmd_buf[0x100]; /* 0x79F4 */
-    char unk_0x81F4[4];
-} z2_audio_ctxt_t;
+    union {
+        struct {
+            /* 0x0000 : 0 */ uint32_t enabled : 1;
+            /* 0x0000 : 1 */ uint32_t : 31;
+        };
+        /* 0x0000 */ uint32_t flags;
+    };
+    /* 0x0001 */ char unk_0x04[0xC];
+    /* 0x0010 */ uint16_t delay;
+    /* 0x0012 */ char unk_0x12[0x26];
+    /* 0x0038 */ z2_aud_chan_t *channels[16];
+    /* 0x0078 */ char unk_0x078[0xE8];
+} z2_sequencer_t; // size = 0x160
+
+typedef struct {
+    /* 0x0000 */ char unk_0x00[0x28C0];
+    /* 0x28C0 */ uint32_t unk_ctr;
+    /* 0x1B9C */ char unk_0x28C4[0x1B9C];
+    /* 0x4460 */ z2_sequencer_t sequencers[5];
+    /* 0x4B40 */ char unk_0x4B40[0x2D00];
+    /* 0x7840 */ z2_aud_chan_t chan_none;
+    /* 0x7924 */ char unk_0x7924[0x54];
+    /* 0x7978 */ uint8_t cmd_wr_pos;
+    /* 0x7979 */ uint8_t cmd_rd_pos;
+    /* 0x797A */ char unk_0x797A[0x7A];
+    /* 0x79F4 */ z2_audio_cmd_t cmd_buf[0x100];
+    /* 0x81F4 */ char unk_0x81F4[4];
+} z2_audio_ctxt_t; // size = 0x81F8
 
 typedef struct {
     OSThread thread;
