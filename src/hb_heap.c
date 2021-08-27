@@ -173,10 +173,6 @@ NOINLINE void *hmemcpy(void *dst, void *src, size_t size)
     char *d = (char*)MIPS_KSEG0_TO_KSEG1(dst);
     const char *p = (const char*)MIPS_KSEG0_TO_KSEG1(src);
 
-    for(int i = 0; i < size / 4; i++, p += 4, d += 4, size -= 4){
-        *((uint32_t*)d) = *((uint32_t*)p);
-    }
-
     while(size--){
         *d++ = *p++;
     }
