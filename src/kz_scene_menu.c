@@ -145,9 +145,9 @@ static int lock_cam_event(event_handler_t *handler, menu_event_t event, void **e
     if(event == MENU_EVENT_ACTIVATE) {
         kz.free_cam_locked = !kz.free_cam_locked;
         if(!kz.free_cam_locked && kz.free_cam_active) {
-            input_mask_set(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
+            input_mask_set(BUTTON_C_BUTTONS, 0xFF, 0xFF);
         } else {
-            input_mask_clear(BUTTON_C_BUTTONS | BUTTON_DPAD, 0xFF, 0xFF);
+            input_mask_clear(BUTTON_C_BUTTONS, 0xFF, 0xFF);
         }
     } else if(event == MENU_EVENT_UPDATE) {
         menu_checkbox_set(handler->subscriber, kz.free_cam_locked);
