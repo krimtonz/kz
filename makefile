@@ -144,7 +144,7 @@ $$(VCDIR-$(1))		:
 	mkdir -p $$@
 
 $$(HOMEBOY-$(1))    : $$(VCDIR-$(1))
-	cd $(HOMEBOYDIR) && CPPFLAGS="-DHB_DBG -DHB_HEAP -DHB_FAT -DHB_EXCEPTIONS" make bin/hb-$(3)/homeboy.bin
+	cd $(HOMEBOYDIR) && CPPFLAGS="-DHB_DBG -DHB_HEAP -DHB_FAT $(HBCPPFLAGS)" make bin/hb-$(3)/homeboy.bin
 	cp $(HOMEBOYDIR)/bin/hb-$(3)/homeboy.bin $$@
 endef
 
