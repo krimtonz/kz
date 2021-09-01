@@ -115,7 +115,6 @@ void load_state(void *state){
 
     for(int i = 0; i < 5; i++) {
         struct seq_info *info = &seq_info[i];
-        z2_sequencer_t *seq = &z2_audio_ctxt.sequencers[i];
         st_read(&p, &info->active, sizeof(info->active));
         st_read(&p, &info->seq_idx, sizeof(info->seq_idx));
         st_read(&p, &info->volume, sizeof(info->volume));
@@ -512,7 +511,7 @@ void load_state(void *state){
 
             z2_obj_t *obj = &z2_game.obj_ctx.obj[col->actor->alloc_index];
             z2_segment.current_object = MIPS_KSEG0_TO_PHYS(obj->data);
-            relocate_col_hdr(col->col_hdr);
+            relocate_col_hdr((uint32_t)col->col_hdr);
         }
     }
 
@@ -679,7 +678,7 @@ void load_state(void *state){
             ctl->unk_0x00[j].unk_0x18 = 0;
 
             z2_AfxCmdFloat(0x01000000 | (i << 16) | (j << 8), 1.0f);
-            //z2_AfxCmdWord(0x08000000 | (i << 16) | (j << 8), is_mute << 24);
+            z2_AfxCmdWord(0x08000000 | (i << 16) | (j << 8), is_mute << 24);
         }
     }
 

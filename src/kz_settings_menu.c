@@ -97,6 +97,8 @@ static int pause_help_event(event_handler_t *handler, menu_event_t event, void *
 
         menu_checkbox_set(item, settings->disp_pause_help);
     }
+
+    return 1;
 }
 
 static int settings_switch_event(event_handler_t *handler, menu_event_t event, void **event_data){
