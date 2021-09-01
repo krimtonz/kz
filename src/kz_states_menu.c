@@ -53,9 +53,11 @@ static int name_onupdate(event_handler_t *handler, menu_event_t event, void **ev
             strcpy(state_name, state->name);
 #endif
             item->interactive = 1;
+            item->color = 0xFFFFFFFF;
         } else {
             strcpy(state_name, no_state);
             item->interactive = 0;
+            item->color = COLOR_FADED;
         }
     } else if (event == MENU_EVENT_ACTIVATE) {
         menu_keyboard_get(item, &state_name);
@@ -133,6 +135,18 @@ static int export_state_onactivate(event_handler_t *handler, menu_event_t event,
     return 1;
 }
 
+static int export_state_update(event_handler_t *handler, menu_event_t event, void **event_data) {
+    menu_item_t *item = handler->subscriber;
+
+    if(!kz.states[kz.state_slot]) {
+        item->color = COLOR_FADED;
+    } else {
+        item->color = 0xFFFFFFFF;
+    }
+
+    return 1;
+}
+
 static int import_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
 {
     menu_file_get(FILE_MODE_LOAD, "state", ".kzs", do_import_state, NULL);
@@ -158,9 +172,11 @@ menu_t *create_states_menu(void) {
     menu_watch_add(&states_menu, 12, 1, &state_watch, 1);
     menu_button_add(&states_menu, 14, 1, ">", next_state_onactivate, NULL);
     menu_item_t *name_item = menu_label_add(&states_menu, 0, 2, state_name);
+    name_item->color = COLOR_FADED;
     menu_item_register_event(name_item, MENU_EVENT_UPDATE | MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, name_onupdate, NULL);
 
-    menu_button_add(&states_menu, 0, 3, "export", export_state_onactivate, NULL);
+    menu_item_t *item = menu_button_add(&states_menu, 0, 3, "export", export_state_onactivate, NULL);
+    menu_item_register_event(item, MENU_EVENT_UPDATE, export_state_update, NULL);
     menu_button_add(&states_menu, 8, 3, "import", import_state_onactivate, NULL);
     return &states_menu;
 }
