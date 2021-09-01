@@ -22,7 +22,7 @@ struct kz_scene {
     char          **entrances;
 };
 
-#if Z2_VERSION==NZSJ10
+#if Z2_VERSION!=NZSE
 #define CAT_CNT 10
 #else
 #define CAT_CNT 9

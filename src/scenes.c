@@ -724,7 +724,7 @@ struct kz_scene_category scene_categories[] = {
     SCENE_CATEGORY_INIT("other",
             91, 18, 17, 89, 95, 88, 10
     ),
-#if Z2_VERSION==NZSJ10
+#if Z2_VERSION!=NZSE
     SCENE_CATEGORY_INIT("beta",
             8
     ),
