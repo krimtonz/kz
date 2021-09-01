@@ -1,57 +1,35 @@
 #include "scenes.h"
+#include "z2.h"
 
 struct kz_scene scenes[] = {
-    {                                                   /* 0000 */
-        0, 3,
-        "mayor's residence",
-        (char*[]){
+    SCENE_INIT(0, "mayor's residence",
             "east clock town",
             "after couples mask",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0001 */
-        2, 1,
-        "majora's lair",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(2, "majora's lair",
             "moon",
-        },
-    },
-    {                                                   /* 0002 */
-        4, 1,
-        "hags potion shop",
-        (char*[]){
+    ),
+    SCENE_INIT(4, "hags potion shop",
             "southern swamp",
-        },
-    },
-    {                                                   /* 0003 */
-        6, 3,
-        "romani ranch buildings",
-        (char*[]){
+    ),
+    SCENE_INIT(6, "romani ranch buildings",
             "barn from ranch",
             "house from ranch",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)"
-        },
-    },
-    {                                                   /* 0004 */
-        8, 1,
-        "honey & darling",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(8, "honey & darling",
             "east clock town",
-        },
-    },
-    {                                                   /* 0005 */
-        10, 2,
-        "beneath graveyard",
-        (char*[]){
+    ),
+    SCENE_INIT(10, "beneath graveyard",
             "day 2 start",
             "day 1 start",
-        },
-    },
-    {                                                   /* 0006 */
-        12, 11,
-        "southern swamp (clear)",
-        (char*[]){
+    ),
+    SCENE_INIT(12, "southern swamp (clear)",
             "swamp road",
             "boat house",
             "woodfall",
@@ -63,29 +41,17 @@ struct kz_scene scenes[] = {
             "swamp spider house",
             "ikana canyon",
             "owl statue",
-        },
-    },
-    {                                                   /* 0007 */
-        14, 4,
-        "curiosity shop",
-        (char*[]){
+    ),
+    SCENE_INIT(14, "curiosity shop",
             "west clock town",
             "kafei's hideout from laundry pool",
             "spying start",
             "spying end",
-        },
-    },
-    {                                                   /* 0008 */
-        16, 1,
-        "test map",
-        (char*[]){
+    ),
+    SCENE_INIT(16, "test map",
             "unknown",
-        },
-    },
-    {                                                   /* 0009 */
-        20, 17,
-        "grottos",
-        (char*[]){
+    ),
+    SCENE_INIT(20, "grottos",
             "ocean gossip stones",
             "swamp gossip stones",
             "canyon gossip stones",
@@ -103,28 +69,24 @@ struct kz_scene scenes[] = {
             "maze straight (b)",
             "maze grotto (upper)",
             "lens of truth",
-        },
-    },
-    {                                                   /* 0010 */
-        28, 10,
-        "cutscene map",
-        (char*[]){
+    ),
+    SCENE_INIT(28, "cutscene map",
             "unknown",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
             "unknown (crash)",
+#endif
             "unknown",
             "unknown",
             "unknown",
             "unknown",
             "unknown",
             "unknown",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0011 */
-        32, 15,
-        "ikana canyon",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(32, "ikana canyon",
             "ikana road",
             "ghost hut",
             "music box house",
@@ -135,17 +97,13 @@ struct kz_scene scenes[] = {
             "after stone tower",
             "ikana castle",
             "after house opens",
-            "song of storms cave from ikana after house opened",
+            "song of storms cave (house open)",
             "fairy fountain",
             "secret shrine",
             "from song of storms cave",
-            "song of storms cave from ikana before house opened",
-        },
-    },
-    {                                                   /* 0012 */
-        34, 15,
-        "pirates fortress",
-        (char*[]){
+            "song of storms cave (house closed) ",
+    ),
+    SCENE_INIT(34, "pirates fortress",
             "exterior pirates fortress",
             "lower hookshot room",
             "upper hookshot room",
@@ -160,82 +118,52 @@ struct kz_scene scenes[] = {
             "oob hookshot room",
             "balcony",
             "upper hookshot room",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0013 */
-        36, 1,
-        "milk bar",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(36, "milk bar",
             "east clock town",
-        },
-    },
-    {                                                   /* 0014 */
-        38, 2,
-        "stone tower temple",
-        (char*[]){
+    ),
+    SCENE_INIT(38, "stone tower temple",
             "intro",
             "no intro",
-        },
-    },
-    {                                                   /* 0015 */
-        40, 2,
-        "treasure chest shop",
-        (char*[]){
+    ),
+    SCENE_INIT(40, "treasure chest shop",
             "east clock town",
             "after game",
-        },
-    },
-    {                                                   /* 0016 */
-        42, 3,
-        "stone tower temple (inverted)",
-        (char*[]){
+    ),
+    SCENE_INIT(42, "stone tower temple (inverted)",
             "main entrance",
             "boss room entrance",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0017 */
-        44, 3,
-        "clock tower",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(44, "clock tower",
             "first encounter",
             "after song of time",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0018 */
-        46, 5,
-        "before clock town",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(46, "before clock town",
             "falling from cliff",
             "inside clock tower",
             "transformed to deku",
             "void respawn",
             "song of time flashback",
-        },
-    },
-    {                                                   /* 0019 */
-        48, 3,
-        "woodfall temple",
-        (char*[]){
+    ),
+    SCENE_INIT(48, "woodfall temple",
             "main entrance",
             "prison after odolwa",
             "deku princess room",
-        },
-    },
-    {                                                   /* 0020 */
-        50, 2,
-        "path to mountain village",
-        (char*[]){
+    ),
+    SCENE_INIT(50, "path to mountain village",
             "termina field",
             "mountain village",
-        },
-    },
-    {                                                   /* 0021 */
-        52, 7,
-        "ikana castle",
-        (char*[]){
+    ),
+    SCENE_INIT(52, "ikana castle",
             "beneath the well",
             "ikana canyon",
             "exterior from interior",
@@ -243,43 +171,23 @@ struct kz_scene scenes[] = {
             "powder keg hole",
             "block hole",
             "throne room"
-        },
-    },
-    {                                                   /* 0022 */
-        54, 2,
-        "deku playground",
-        (char*[]){
+    ),
+    SCENE_INIT(54, "deku playground",
             "north clock town",
             "after game",
-        },
-    },
-    {                                                   /* 0023 */
-        56, 1,
-        "odolwa",
-        (char*[]){
+    ),
+    SCENE_INIT(56, "odolwa",
             "woodfall temple",
-        },
-    },
-    {                                                   /* 0024 */
-        58, 2,
-        "town shooting gallery",
-        (char*[]){
+    ),
+    SCENE_INIT(58, "town shooting gallery",
             "east clock town (intro)",
             "east clock town (no intro)",
-        },
-    },
-    {                                                   /* 0025 */
-        60, 2,
-        "snowhead temple",
-        (char*[]){
+    ),
+    SCENE_INIT(60, "snowhead temple",
             "snowhead (intro)",
             "snowhead (no intro)",
-        },
-    },
-    {                                                   /* 0026 */
-        62, 7,
-        "milk road",
-        (char*[]){
+    ),
+    SCENE_INIT(62, "milk road",
             "termina field",
             "romani ranch",
             "gorman track (track exit)",
@@ -287,12 +195,8 @@ struct kz_scene scenes[] = {
             "owl statue",
             "unknown",
             "unknown",
-        },
-    },
-    {                                                   /* 0027 */
-        64, 16,
-        "pirates fortress interior",
-        (char*[]){
+    ),
+    SCENE_INIT(64, "pirates fortress interior",
             "hookshot room",
             "hookshot room upper",
             "100 rupee room",
@@ -305,31 +209,21 @@ struct kz_scene scenes[] = {
             "outside, underwater",
             "outside, telescope",
             "unknown",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
             "unknown (crash)",
             "unknown (crash)",
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0028 */
-        66, 1,
-        "swamp shooting gallery",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(66, "swamp shooting gallery",
             "road to southern swamp",
-        },
-    },
-    {                                                   /* 0029 */
-        68, 2,
-        "pinnacle rock",
-        (char*[]){
+    ),
+    SCENE_INIT(68, "pinnacle rock",
             "great bay coast",
             "void respawn",
-        },
-    },
-    {                                                   /* 0030 */
-        70, 10,
-        "fairy fountain",
-        (char*[]){
+    ),
+    SCENE_INIT(70, "fairy fountain",
             "clock town",
             "woodfall",
             "snowhead",
@@ -340,42 +234,22 @@ struct kz_scene scenes[] = {
             "after double magic",
             "after double defense",
             "after great fairy sword",
-        },
-    },
-    {                                                   /* 0031 */
-        72, 1,
-        "swamp spider house",
-        (char*[]){
+    ),
+    SCENE_INIT(72, "swamp spider house",
             "southern swamp",
-        },
-    },
-    {                                                   /* 0032 */
-        74, 1,
-        "oceanside spider house",
-        (char*[]){
+    ),
+    SCENE_INIT(74, "oceanside spider house",
             "great bay coast",
-        },
-    },
-    {                                                   /* 0033 */
-        76, 3,
-        "observatory",
-        (char*[]){
+    ),
+    SCENE_INIT(76, "observatory",
             "east clock town",
             "termina field",
             "after telescope",
-        },
-    },
-    {                                                   /* 0034 */
-        78, 1,
-        "deku trial",
-        (char*[]){
+    ),
+    SCENE_INIT(78, "deku trial",
             "moon",
-        },
-    },
-    {                                                   /* 0035 */
-        80, 11,
-        "deku palace",
-        (char*[]){
+    ),
+    SCENE_INIT(80, "deku palace",
             "southern swamp",
             "thrown out",
             "deku king chamber",
@@ -387,19 +261,11 @@ struct kz_scene scenes[] = {
             "jp grotto right, second room",
             "bean seller",
             "jp grotto right, first room",
-        },
-    },
-    {                                                   /* 0036 */
-        82, 1,
-        "mountain smithy",
-        (char*[]){
+    ),
+    SCENE_INIT(82, "mountain smithy",
             "moutain village",
-        },
-    },
-    {                                                   /* 0037 */
-        84, 18,
-        "termina field",
-        (char*[]){
+    ),
+    SCENE_INIT(84, "termina field",
             "west clock town",
             "road to southern swamp",
             "great bay coast",
@@ -416,44 +282,24 @@ struct kz_scene scenes[] = {
             "cremia hug",
             "skullkid cutscene",
             "west clock town",
-        },
-    },
-    {                                                   /* 0038 */
-        86, 1,
-        "post office",
-        (char*[]){
+    ),
+    SCENE_INIT(86, "post office",
             "west clock town",
-        },
-    },
-    {                                                   /* 0039 */
-        88, 1,
-        "marine lab",
-        (char*[]){
+    ),
+    SCENE_INIT(88, "marine lab",
             "great bay coast",
-        },
-    },
-    {                                                   /* 0040 */
-        90, 2,
-        "dampes house",
-        (char*[]){
+    ),
+    SCENE_INIT(90, "dampes house",
             "beneath the graveyard",
             "graveyard",
-        },
-    },
-    {                                                   /* 0041 */
-        94, 4,
-        "goron shrine",
-        (char*[]){
+    ),
+    SCENE_INIT(94, "goron shrine",
             "goron village",
             "goron shop",
             "after lullaby",
             "goron village (no intro)",
-        },
-    },
-    {                                                   /* 0042 */
-        96, 9,
-        "zora hall",
-        (char*[]){
+    ),
+    SCENE_INIT(96, "zora hall",
             "zora cape",
             "zora cape (turtle)",
             "zora shop",
@@ -463,20 +309,12 @@ struct kz_scene scenes[] = {
             "mikau & tijo's room",
             "stage",
             "after rehearsal",
-        },
-    },
-    {                                                   /* 0043 */
-        98, 2,
-        "trading post",
-        (char*[]){
+    ),
+    SCENE_INIT(98, "trading post",
             "west clock town (intro)",
             "west clock town (no intro)",
-        },
-    },
-    {                                                   /* 0044 */
-        100, 12,
-        "romani ranch",
-        (char*[]){
+    ),
+    SCENE_INIT(100, "romani ranch",
             "milk road",
             "after target practice",
             "barn",
@@ -489,23 +327,17 @@ struct kz_scene scenes[] = {
             "failing aliens",
             "after aliens intro",
             "leaving with cremia",
-        },
-    },
-    {                                                   /* 0045 */
-        102, 5,
-        "twinmold",
-        (char*[]){
+    ),
+    SCENE_INIT(102, "twinmold",
             "inverted stone tower",
             "inverted stone tower",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
             "unknown (crash)",
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0046 */
-        104, 14,
-        "great bay coast",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(104, "great bay coast",
             "termina field",
             "zora cape",
             "void respawn",
@@ -520,12 +352,8 @@ struct kz_scene scenes[] = {
             "owl statue",
             "thrown out",
             "after jumping game",
-        },
-    },
-    {                                                   /* 0047 */
-        106, 10,
-        "zora cape",
-        (char*[]){
+    ),
+    SCENE_INIT(106, "zora cape",
             "great bay coast",
             "zora hall",
             "zora hall (turtle)",
@@ -536,19 +364,11 @@ struct kz_scene scenes[] = {
             "great bay temple",
             "after great bay temple",
             "unknown",
-        },
-    },
-    {                                                   /* 0048 */
-        108, 1,
-        "lottery shop",
-        (char*[]){
+    ),
+    SCENE_INIT(108, "lottery shop",
             "west clock town",
-        },
-    },
-    {                                                   /* 0049 */
-        112, 7,
-        "pirates fortress exterior",
-        (char*[]){
+    ),
+    SCENE_INIT(112, "pirates fortress exterior",
             "great bay coast",
             "pirates fortress",
             "underwater passage",
@@ -556,87 +376,47 @@ struct kz_scene scenes[] = {
             "kicked out",
             "hookshot platform",
             "passage door",
-        },
-    },
-    {                                                   /* 0050 */
-        114, 1,
-        "fisherman's hut",
-        (char*[]){
+    ),
+    SCENE_INIT(114, "fisherman's hut",
             "great bay coast",
-        },
-    },
-    {                                                   /* 0051 */
-        116, 1,
-        "goron shop",
-        (char*[]){
+    ),
+    SCENE_INIT(116, "goron shop",
             "goron shrine",
-        },
-    },
-    {                                                   /* 0052 */
-        118, 4,
-        "deku king's chamber",
-        (char*[]){
+    ),
+    SCENE_INIT(118, "deku king's chamber",
             "deku palace",
             "deku palace (upper)",
             "monkey released",
             "front of king",
-        },
-    },
-    {                                                   /* 0053 */
-        120, 1,
-        "goron trial",
-        (char*[]){
+    ),
+    SCENE_INIT(120, "goron trial",
             "moon",
-        },
-    },
-    {                                                   /* 0054 */
-        122, 3,
-        "road to southern swamp",
-        (char*[]){
+    ),
+    SCENE_INIT(122, "road to southern swamp",
             "termina field",
             "southern swamp",
             "swamp shooting gallery",
-        },
-    },
-    {                                                   /* 00555 */
-        124, 2,
-        "doggy racetrack",
-        (char*[]){
+    ),
+    SCENE_INIT(124, "doggy racetrack",
             "romani ranch",
             "after race",
-        },
-    },
-    {                                                   /* 0056 */
-        126, 2,
-        "cucco shack",
-        (char*[]){
+    ),
+    SCENE_INIT(126, "cucco shack",
             "romani ranch",
             "after bunny hood",
-        },
-    },
-    {                                                   /* 0057 */
-        128, 6,
-        "ikana graveyard",
-        (char*[]){
+    ),
+    SCENE_INIT(128, "ikana graveyard",
             "road to ikana",
             "grave 1",
             "grave 2",
             "grave 3",
             "dampe's house",
             "after keeta defeated",
-        },
-    },
-    {                                                   /* 0058 */
-        130, 1,
-        "goht",
-        (char*[]){
+    ),
+    SCENE_INIT(130, "goht",
             "snowhead temple",
-        },
-    },
-    {                                                   /* 0059 */
-        132, 11,
-        "southern swamp (poison)",
-        (char*[]){
+    ),
+    SCENE_INIT(132, "southern swamp (poison)",
             "road to southern swamp",
             "boat house",
             "woodfall",
@@ -648,69 +428,43 @@ struct kz_scene scenes[] = {
             "swamp spider house",
             "ikana canyon",
             "owl statue",
-        },
-    },
-    {                                                   /* 0060 */
-        134, 5,
-        "woodfall",
-        (char*[]){
+    ),
+    SCENE_INIT(134, "woodfall",
             "southern swamp",
             "unknown",
             "fairy fountain",
             "unknown",
             "owl statue",
-        },
-    },
-    {                                                   /* 0061 */
-        136, 2,
-        "zora trial",
-        (char*[]){
+    ),
+    SCENE_INIT(136, "zora trial",
             "moon",
             "void respawn",
-        },
-    },
-    {                                                   /* 0062 */
-        138, 5,
-        "goron village (spring)",
-        (char*[]){
+    ),
+    SCENE_INIT(138, "goron village (spring)",
             "path to goron village (spring)",
             "unknown",
             "goron shrine",
             "lens of truth",
             "void out",
-        },
-    },
-    {                                                   /* 0063 */
-        140, 3,
-        "great bay temple",
-        (char*[]){
+    ),
+    SCENE_INIT(140, "great bay temple",
             "zora cape (waving)",
             "zora cape",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0064 */
-        142, 4,
-        "waterfall",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(142, "waterfall",
             "zora cape",
             "race start",
             "race end",
             "game won",
-        },
-    },
-    {                                                   /* 0065 */
-        144, 2,
-        "beneath the well",
-        (char*[]){
+    ),
+    SCENE_INIT(144, "beneath the well",
             "ikana canyon",
             "ikana castle",
-        },
-    },
-    {                                                   /* 0066 */
-        146, 7,
-        "zora hall rooms",
-        (char*[]){
+    ),
+    SCENE_INIT(146, "zora hall rooms",
             "mikau from zora hall",
             "japas from zora hall",
             "lulu from zora hall",
@@ -718,38 +472,22 @@ struct kz_scene scenes[] = {
             "japa after jam session",
             "zora shop from zora hall",
             "evan after composing song",
-        },
-    },
-    {                                                   /* 0067 */
-        148, 5,
-        "goron village (winter)",
-        (char*[]){
+    ),
+    SCENE_INIT(148, "goron village (winter)",
             "path to goron village (winter)",
             "deku flower",
             "goron shrine",
             "lens of truth",
             "void out",
-        },
-    },
-    {                                                   /* 0068 */
-        150, 2,
-        "goron graveyard",
-        (char*[]){
+    ),
+    SCENE_INIT(150, "goron graveyard",
             "mountain village",
             "receiving goron mask",
-        },
-    },
-    {                                                   /* 0069 */
-        152, 1,
-        "sakon's hideout",
-        (char*[]){
+    ),
+    SCENE_INIT(152, "sakon's hideout",
             "ikana canyon",
-        },
-    },
-    {                                                   /* 0070 */
-        154, 9,
-        "mountain village (winter)",
-        (char*[]){
+    ),
+    SCENE_INIT(154, "mountain village (winter)",
             "after snowhead",
             "mountain smithy",
             "path to goron village (winter)",
@@ -759,87 +497,49 @@ struct kz_scene scenes[] = {
             "path to mountain village",
             "unknown",
             "owl statue",
-        },
-    },
-    {                                                   /* 0071 */
-        156, 3,
-        "ghost hut",
-        (char*[]){
+    ),
+    SCENE_INIT(156, "ghost hut",
             "ikana canyon",
             "after minigame",
             "beat minigame",
-        },
-    },
-    {                                                   /* 0072 */
-        158, 3,
-        "deku shrine",
-        (char*[]){
+    ),
+    SCENE_INIT(158, "deku shrine",
             "deku palace",
             "deku palace",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0073 */
-        160, 3,
-        "road to ikana",
-        (char*[]){
+#endif
+    ),
+    SCENE_INIT(160, "road to ikana",
             "termina field",
             "ikana canyon",
             "ikana graveyard",
-        },
-    },
-    {                                                   /* 0074 */
-        162, 1,
-        "swordsman school",
-        (char*[]){
+    ),
+    SCENE_INIT(162, "swordsman school",
             "west clock town",
-        },
-    },
-    {                                                   /* 0075 */
-        164, 1,
-        "music box house",
-        (char*[]){
+    ),
+    SCENE_INIT(164, "music box house",
             "ikana canyon",
-        },
-    },
-    {                                                   /* 0076 */
-        166, 1,
-        "igos du ikana",
-        (char*[]){
+    ),
+    SCENE_INIT(166, "igos du ikana",
             "ikana castle",
-        },
-    },
-    {                                                   /* 0077 */
-        168, 3,
-        "boat house",
-        (char*[]){
+    ),
+    SCENE_INIT(168, "boat house",
             "southern swamp",
             "koume",
             "tingle's dad",
-        },
-    },
-    {                                                   /* 0078 */
-        170, 4,
-        "stone tower",
-        (char*[]){
+    ),
+    SCENE_INIT(170, "stone tower",
             "ikana canyon",
             "unknown",
             "stone tower temple",
             "owl statue",
-        },
-    },
-    {                                                   /* 0079 */
-        172, 2,
-        "stone tower (inverted)",
-        (char*[]){
+    ),
+    SCENE_INIT(172, "stone tower (inverted)",
             "after inverting",
             "stone tower temple",
-        },
-    },
-    {                                                   /* 0080 */
-        174, 9,
-        "mountain village (spring)",
-        (char*[]){
+    ),
+    SCENE_INIT(174, "mountain village (spring)",
             "after snowhead",
             "mountain smithy",
             "path to goron village (spring)",
@@ -849,85 +549,49 @@ struct kz_scene scenes[] = {
             "path to mountain village",
             "after snowhead (cutscene)",
             "owl statue",
-        },
-    },
-    {                                                   /* 0081 */
-        176, 4,
-        "path to snowhead",
-        (char*[]){
+    ),
+    SCENE_INIT(176, "path to snowhead",
             "mountain village",
             "unknown",
             "snowhead",
             "unknown",
             "unknown",
-        },
-    },
-    {                                                   /* 0082 */
-        178, 4,
-        "snowhead",
-        (char*[]){
+    ),
+    SCENE_INIT(178, "snowhead",
             "path to snowhead",
             "snowhead temple",
             "fairy fountain",
             "owl statue",
-        },
-    },
-    {                                                   /* 0083 */
-        180, 3,
-        "path to goron village (winter)",
-        (char*[]){
+    ),
+    SCENE_INIT(180, "path to goron village (winter)",
             "mountain village (winter)",
             "goron village (winter)",
             "goron racetrack",
-        },
-    },
-    {                                                   /* 0084 */
-        182, 3,
-        "path to goron village (spring)",
-        (char*[]){
+    ),
+    SCENE_INIT(182, "path to goron village (spring)",
             "mountain village (spring)",
             "goron village (spring)",
             "goron racetrack",
-        },
-    },
-    {                                                   /* 0085 */
-        184, 2,
-        "gyorg",
-        (char*[]){
+    ),
+    SCENE_INIT(184, "gyorg",
             "great bay temple",
             "falling cutscene",
-        },
-    },
-    {                                                   /* 0086 */
-        186, 1,
-        "secret shrine",
-        (char*[]){
+    ),
+    SCENE_INIT(186, "secret shrine",
             "ikana canyon",
-        },
-    },
-    {                                                   /* 0087 */
-        188, 6,
-        "stock pot inn",
-        (char*[]){
+    ),
+    SCENE_INIT(188, "stock pot inn",
             "east clock town (main)",
             "east clock town (balcony)",
             "granny's story",
             "anju meeting",
             "eavesdropping anju",
             "after eavesdropping",
-        },
-    },
-    {                                                   /* 0088 */
-        190, 1,
-        "great bay (cutscene)",
-        (char*[]){
+    ),
+    SCENE_INIT(190, "great bay (cutscene)",
             "zora cape",
-        },
-    },
-    {                                                   /* 0089 */
-        192, 7,
-        "clock tower interior",
-        (char*[]){
+    ),
+    SCENE_INIT(192, "clock tower interior",
             "twisted hallway",
             "south clock town",
             "deku mask cutscene",
@@ -935,57 +599,29 @@ struct kz_scene scenes[] = {
             "song of time",
             "twisted hallway",
             "majora's mask cutscene",
-        },
-    },
-    {                                                   /* 0090 */
-        194, 1,
-        "woods of mystery",
-        (char*[]){
+    ),
+    SCENE_INIT(194, "woods of mystery",
             "southern swamp",
-        },
-    },
-    {                                                   /* 0091 */
-        196, 3,
-        "lost woods",
-        (char*[]){
+    ),
+    SCENE_INIT(196, "lost woods",
             "kicked off epona",
             "song of time cutscene",
             "unknown",
-        },
-    },
-    {                                                   /* 0092 */
-        198, 1,
-        "link trial",
-        (char*[]){
+    ),
+    SCENE_INIT(198, "link trial",
             "moon",
-        },
-    },
-    {                                                   /* 0093 */
-        200, 1,
-        "moon",
-        (char*[]){
+    ),
+    SCENE_INIT(200, "moon",
             "clock tower",
-        },
-    },
-    {                                                   /* 0094 */
-        202,2,
-        "bomb shop",
-        (char*[]){
+    ),
+    SCENE_INIT(202, "bomb shop",
             "west clock town",
             "west clock town",
-        },
-    },
-    {                                                   /* 0095 */
-        204, 1,
-        "giants chamber",
-        (char*[]){
+    ),
+    SCENE_INIT(204, "giants chamber",
             "oath to order",
-        },
-    },
-    {                                                   /* 0096 */
-        206, 6,
-        "gorman race track",
-        (char*[]){
+    ),
+    SCENE_INIT(206, "gorman race track",
             "milk road",
             "unknown",
             "beat minigame",
@@ -993,21 +629,13 @@ struct kz_scene scenes[] = {
             "milk road fence cutscene",
             "unknown",
             "start minigame",
-        },
-    },
-    {                                                   /* 0097 */
-        208, 3,
-        "goron racetrack",
-        (char*[]){
+    ),
+    SCENE_INIT(208, "goron racetrack",
             "path to mountain village",
             "race start",
             "race end",
-        },
-    },
-    {                                                   /* 0098 */
-        210, 13,
-        "east clock town",
-        (char*[]){
+    ),
+    SCENE_INIT(210, "east clock town",
             "termina field",
             "south clock town",
             "observatory",
@@ -1020,13 +648,11 @@ struct kz_scene scenes[] = {
             "stock pot inn (main)",
             "stock pot inn (upper)",
             "milk bar",
+#ifdef ENABLE_CRASH_WARP
             "unknown (crash)",
-        },
-    },
-    {                                                   /* 0099 */
-        212, 10,
-        "west clock town",
-        (char*[]){
+#endif
+    ),                                                      /* 098 */
+    SCENE_INIT(212, "west clock town",
             "termina field",
             "south clock town (lower)",
             "south clock town (upper)",
@@ -1037,12 +663,8 @@ struct kz_scene scenes[] = {
             "post office",
             "lottery shop",
             "termina field",
-        },
-    },
-    {                                                   /* 0100 */
-        214, 8,
-        "north clock town",
-        (char*[]){
+    ),                                                      /* 099 */
+    SCENE_INIT(214, "north clock town",
             "termina field",
             "east clock town",
             "south clock town",
@@ -1051,12 +673,8 @@ struct kz_scene scenes[] = {
             "bombers code",
             "after bomberrs",
             "after sakon",
-        },
-    },
-    {                                                   /* 0101 */
-        216, 11,
-        "south clock town",
-        (char*[]){
+    ),                                                      /* 100 */
+    SCENE_INIT(216, "south clock town",
             "clock tower interior",
             "termina field",
             "east clock town (upper)",
@@ -1067,18 +685,15 @@ struct kz_scene scenes[] = {
             "east clock town (lower)",
             "clock tower",
             "owl statue",
-            "clock tower (after song of time)",
-        },
-    },
-    {                                                   /* 0102 */
-        218, 3,
-        "laundry pool",
-        (char*[]){
+            "clock tower (after song of time)"
+    ),                                                      /* 101 */
+    SCENE_INIT(218, "laundry pool",
             "south clock town",
-            "kafei's hideout",
-            "unknown (crash)",
-        },
-    },
+            "kafei's hideout"
+#ifdef ENABLE_CRASH_WARP
+            , "unknown (crash)"
+#endif
+    )                                                   /* 102 */
 };
 
 struct kz_scene_category scene_categories[] = {
@@ -1136,10 +751,12 @@ struct kz_scene_category scene_categories[] = {
             91, 18, 17, 89, 95, 88, 10
         }
     },
+#if Z2_VERSION==NZSJ10
     {
         "beta",
         1, (uint8_t[]){
             8
         }
     },
+#endif
 };
