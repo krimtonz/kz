@@ -212,6 +212,8 @@ static z2_item_t texture_map[] = {
 
 menu_sprite_t   *scroll_up_sprite = NULL;
 menu_sprite_t   *scroll_down_sprite = NULL;
+menu_sprite_t   *pexport_sprite = NULL;
+menu_sprite_t   *pimport_sprite = NULL;
 
 int resource_handles[R_KZ_END] = { 0 };
 
@@ -231,6 +233,7 @@ static const char *resource_names[R_KZ_END] = {
     "files",
     NULL,
     "kzflex",
+    "sd",
 };
 
 static void *resource_load_items(int resource_id){
@@ -311,6 +314,7 @@ static resource_ctor resource_ctors[R_KZ_END] = {
     grc_ctor,
     resource_rupee_ctor,
     grc_ctor,
+    grc_ctor,
 };
 
 gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
@@ -350,9 +354,25 @@ void kz_resource_init(){
         0,      NULL,
     };
 
+    static menu_sprite_t export_sprite = {
+        NULL,   1,  1,  DEFAULT_COLOR,  DEFAULT_COLOR,
+        12,      12,      NULL,           0,
+        0,      0,      NULL
+    };
+
+    static menu_sprite_t import_sprite = {
+        NULL,   0,  0,  DEFAULT_COLOR,  DEFAULT_COLOR,
+        12,      12,      NULL,           0,
+        0,      0,      NULL
+    };
+
     up_sprite.texture = resource_get(resource_handles[R_KZ_ARROWS]);
     down_sprite.texture = resource_get(resource_handles[R_KZ_ARROWS]);
+    export_sprite.texture = resource_get(resource_handles[R_KZ_SD]);
+    import_sprite.texture = resource_get(resource_handles[R_KZ_SD]);
 
     scroll_up_sprite = &up_sprite;
     scroll_down_sprite = &down_sprite;
+    pexport_sprite = &export_sprite;
+    pimport_sprite = &import_sprite;
 }

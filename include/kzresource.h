@@ -48,6 +48,7 @@ enum resource {
     R_KZ_FILES,
     R_Z2_RUPEE,
     R_KZ_KZFLEX,
+    R_KZ_SD,
     R_KZ_END
 };
 
@@ -69,6 +70,8 @@ void            resource_init       (void);
 
 extern menu_sprite_t           *scroll_up_sprite;
 extern menu_sprite_t           *scroll_down_sprite;
+extern menu_sprite_t           *pexport_sprite;
+extern menu_sprite_t           *pimport_sprite;
 extern int resource_handles[R_KZ_END];
 
 #endif

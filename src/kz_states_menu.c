@@ -5,6 +5,7 @@
 #include "menu_file.h"
 #include "sys.h"
 #include "hb_heap.h"
+#include "kzresource.h"
 
 static const char *no_state = "no state";
 static char *state_name = NULL;
@@ -135,21 +136,24 @@ static int export_state_onactivate(event_handler_t *handler, menu_event_t event,
     return 1;
 }
 
-static int export_state_update(event_handler_t *handler, menu_event_t event, void **event_data) {
-    menu_item_t *item = handler->subscriber;
-
-    if(!kz.states[kz.state_slot]) {
-        item->color = COLOR_FADED;
-    } else {
-        item->color = 0xFFFFFFFF;
-    }
-
-    return 1;
-}
-
 static int import_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
 {
     menu_file_get(FILE_MODE_LOAD, "state", ".kzs", do_import_state, NULL);
+    return 1;
+}
+
+static int delete_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    if(kz.states[kz.state_slot]) {
+#ifdef WIIVC
+        hfree(kz.states[kz.state_slot]);
+#else
+        free(kz.states[kz.state_slot]);
+#endif
+        kz.states[kz.state_slot] = NULL;
+    } else {
+        kz_log("no state %d", kz.state_slot);
+    }
+
     return 1;
 }
 
@@ -175,9 +179,17 @@ menu_t *create_states_menu(void) {
     name_item->color = COLOR_FADED;
     menu_item_register_event(name_item, MENU_EVENT_UPDATE | MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, name_onupdate, NULL);
 
-    menu_item_t *item = menu_button_add(&states_menu, 0, 3, "export", export_state_onactivate, NULL);
-    menu_item_register_event(item, MENU_EVENT_UPDATE, export_state_update, NULL);
-    menu_button_add(&states_menu, 8, 3, "import", import_state_onactivate, NULL);
+    menu_gfx_button_add(&states_menu, 0, 4, pexport_sprite, export_state_onactivate, NULL)->tooltip = "export state";
+    menu_gfx_button_add(&states_menu, 4, 4, pimport_sprite, import_state_onactivate, NULL)->tooltip = "import state";
+
+    static menu_sprite_t clear_state_sprite = {
+        NULL,   2,  2,  DEFAULT_COLOR,  DEFAULT_COLOR,
+        12,      12,      NULL,           0,
+        0,      0,      NULL
+    };
+
+    clear_state_sprite.texture = resource_get(R_KZ_SD);
+    menu_gfx_button_add(&states_menu, 8, 4, &clear_state_sprite, delete_state_onactivate, NULL)->tooltip = "clear state";
     return &states_menu;
 }
 #endif

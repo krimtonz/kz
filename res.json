@@ -43,7 +43,7 @@
   },
   "files.png": {
       "type" : "texture",
-      "name" : "files", 
+      "name" : "files",
       "format" : "rgba16",
       "tile_height" : 10
   },
@@ -52,5 +52,11 @@
     "name" : "kzflex",
     "format" : "rgba16",
     "tile_height" : 32
+  },
+  "sd.png": {
+    "type" : "texture",
+    "name" : "sd",
+    "format" : "rgba16",
+    "tile_height": 10
   }
 }
