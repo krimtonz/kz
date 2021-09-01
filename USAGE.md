@@ -46,6 +46,7 @@ kz also implements the following features beyond the menu:
 * A lag counter
 * A real-time timer
 * Various commands.
+* An inventory editor within the pause screen.
 
 All of these are configurable in the [settings menu](#210-settings)
 
@@ -55,9 +56,11 @@ If when rebinding the activate menu command, you find yourself in a state where 
 ### 2.1 Warps
 The warps menu contains a listing of all the entrances in the game categorized into 10 categories.  These categories are based on the central clock town area, the 4 cardinal directions of normal gameplay, overworld, and other miscellaneous scenes.  Under each category is a listing of scenes, if a scene has multiple entrances selecting that scene will enter a menu with all available entrances. Selecting an entrance will immediately warp you to that entrance.  If a scene only has one entrance, selecting that scene will warp you to that single entrance.
 
-***Warning:*** The test map is only available on jp 1.0, other versions of the game will crash even though the entrance exists.
+**Note:** The Beta category is only available in the 1.0 japanese version of the game.
 
-***Warning:*** Warping while not in a normal playing state of the game (spinning n64 logo, file select screen) will cause *undefined beahvior*
+**Note:** By default entrances that are known to crash are disabled, if kz was compiled with these entrances enabled, using these entrances will most likely crash.
+
+***Warning:*** Warping while not in a normal playing state of the game (i.e. spinning n64 logo, file select screen) will cause *undefined beahvior*
 ### 2.2 Cheats
 The cheats menu will allow you to enable/disable various cheats.
 
@@ -68,29 +71,36 @@ Arrows, bombs, bombchus, powder kegs, sticks, nuts, health, magic, and rupees wi
 `no item restriction` will allow you to use any item as any form.
 **Note:** The fierce diety mask is a special case.  While the cheat will work for this mask, the c button will still be dimmed out though it is usable.  Putting the mask on or off will cause the HUD to be faded out until a scene change occurs.
 
-`isg` will keep link's sword in a swinging state.
+`isg` will keep link's sword in a swinging state mimicking the infinite sword glitch.  Disabling the cheat will not instantly stop isg, you must cancel using the normal isg cancellation methods.  
+**Note:** while the cheat is enabled, the normal cancellations for isg will not work i.e non-targeted shielding.
 
 `freeze time` will not allow the 3 day timer to progress.
 ### 2.3 Scene
 The scene menu contains information about the currently loaded scene.
-**current room** shows you which room is currently loaded.  If no room is currently loaded 255 will be displayed.
-
-**num rooms** shows you how many rooms are in the current scene.
-
-**unload room** will unload all rooms in the current scene.
-
+**current room** shows you which room is currently loaded.  If no room is currently loaded 255 will be displayed.  
+**num rooms** shows you how many rooms are in the current scene.  
+**unload room** will unload all rooms in the current scene.  
 **load room** will load the room specified by the index next to the button, if the index is the currently loaded room, then the room is unloaded.  If the index is larger than the number of rooms in the scene, no action is taken.
 
 #### 2.3.1 Collision
-The collision menu will allow control over kz's collision feature.  Enabling the collision viewer will draw polygons over the scene's collision.  Under the enable checkbox the collision viewer has these options:
+The collision menu will allow control over kz's collision viewer feature.  Enabling the collision viewer will draw polygons over the scene's collision.  Under the enable checkbox the collision viewer has these options:
 * **reduce** When this option is enabled only special types of collision are displayed.  This will use less memory and cause less graphics lag.
 * **opaque** When this option is enabled the polygons that are displayed will not be see through and will appear as solid colors.
 * **wireframe** When this option is enabled lines will be drawn around each polygon.  **Note:** This option typically causes heavy lag.
 * **autoupdate** When this option is enabled dynamic collision will also be displayed, also when a new scene is loaded the collision will be regenerated for the new scene.
 
+The collision viewer uses these colors to identify special types of collision
+* **blue** the surface is hookshotable
+* **purple** the surface can be interacted with, such as ladders of vines
+* **red** special void planes
+* **cyan** loading zones
+* **green** surfaces that can cause damage or slow link down
+* **yellow** slippery slopes
+* **white** normal collision 
+
 The hide room option will prevent the game from rendering the currently loaded room.
 
-The hitbox viewer will display the simple collisions, the opaque option is the same as it is for the collision viewer.  The hitbox viewer will display hitboxes with the following colors:
+The hitbox viewer will display the colliders, the opaque option is the same as it is for the collision viewer.  The hitbox viewer will display hitboxes with the following colors:
 
 * **Red:** causes damage when collided with a blue hitbox.
 * **Blue:** hitbox which can receive damage from a red hitbox
