@@ -811,7 +811,9 @@ typedef struct {
     /* 0x0144 */ int16_t         mode;
     /* 0x0146 */ int16_t         bg_chk_id;
     /* 0x0148 */ int16_t         data_idx;
-    /* 0x014A */ char            unk_0x14A[0x14];
+    /* 0x014A */ char            unk_0x14A[0x10];
+    /* 0x015A */ uint16_t        roll;
+    /* 0x015C */ char            unk_0x15C[2];
     /* 0x015E */ int16_t         param_flags;
     /* 0x0160 */ char            unk_0x160[0x18];
 } z2_camera_t; // size = 0x178

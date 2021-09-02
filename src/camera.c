@@ -10,7 +10,11 @@
 void kz_camera_calc(z2_camera_t *camera) {
     sph_coord_t *geo = &kz.cam_sph;
 
-    geo->yaw -= input_x() / 500.0f;
+    if(input_pressed_raw() & BUTTON_Z) {
+        camera->roll += input_x() * 20;
+    } else {
+        geo->yaw -= input_x() / 500.0f;
+    }
     geo->pitch += input_y() / 500.0f;
 
     if(geo->pitch < -((M_PI / 2.0f) + 0.02f) ){

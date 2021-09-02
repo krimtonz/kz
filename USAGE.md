@@ -122,14 +122,15 @@ this will release the button restrictions that are placed when the free camera i
 **set cam pos to link pos** this will move the free camera's position to links current position
 
 #### Controlling the Free Camera
-Using the control stick will rotate the camera.
+Using the control stick will rotate the camera.  
+If holding **Z** the camera will roll when moving the control stick left or right.
 
 **c-up** will move the camera forwards (zoom in)  
 **c-down** will move the the camera backwards (zoom out)  
 **c-right** will move the camera to the right (strafe right)  
 **c-left** will move the camera to the left (strafe left)
 
-When using the c buttons to move the camera, holding the **z** button will move the camera faster.
+When using the c buttons to move the camera, holding the **Z** button will move the camera faster.
 
 ## 2.4 States
 The states menu will allow you to change the active savestate slot, create a name for your save state, and export and import states to the SD card.  See the [states section](#3-save-states) for more information on save states.
