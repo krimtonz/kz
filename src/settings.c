@@ -92,8 +92,8 @@ void load_settings_from_flashram(int profile){
     char *settings_temp = malloc(blk_cnt * IO_BLOCK_SIZE);
     z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
     struct settings *settings_profile = (struct settings*)(settings_temp + IO_BLOCK_SIZE + profile * sizeof(*settings_profile));
-    if(settings_profile->header.version > 0 && settings_profile->header.version == FULL_SETTINGS){
-        if(settings_profile->header.magic[0] == 'k' && settings_profile->header.magic[1] == 'z' && settings_profile->header.magic[2] == 'k' && settings_profile->header.magic[3] == 'z'){
+    if(settings_profile->header.version == FULL_SETTINGS){
+        if(settings_profile->header.magic_32 == 'kzkz') {
             memcpy((void*)&settings_info, (void*)settings_profile, sizeof(*settings_profile));
             kz_log("loaded settings profile %d",profile);
         }else{

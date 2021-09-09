@@ -31,7 +31,10 @@
 #define TURBO_HOLD          1
 
 struct settings_header {
-    char        magic[4];
+    union {
+        char        magic[4];
+        uint32_t    magic_32;
+    };
     uint32_t    version;
 };
 
