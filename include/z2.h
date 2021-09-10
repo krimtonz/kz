@@ -1851,6 +1851,8 @@ z2_extern uint32_t                  z2_random;
 z2_extern z2_night_sfx_t            z2_night_sfx[];
 z2_extern char                      z2_saturation[];
 z2_extern char                      z2_hide_clock;
+z2_extern char                      z2_quake_requests[0x90];
+z2_extern int16_t                   z2_quake_request_cnt;
 
 // pause menu hacks
 #if Z2_VERSION==NZSE

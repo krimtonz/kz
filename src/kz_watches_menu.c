@@ -141,7 +141,10 @@ void clear_watches(void){
         delete_row(row);
         row = next;
     }
-    add_button->y_cell = 1;
+
+    if(add_button) {
+        add_button->y_cell = 1;
+    }
 }
 
 void init_watch_rows(void){
