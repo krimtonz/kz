@@ -8,13 +8,9 @@ static _Alignas(128) struct settings settings_info;
 struct settings_data *settings = &settings_info.data;
 
 void load_default_settings(void){
-    settings_info.header.magic[0] = 'k';
-    settings_info.header.magic[1] = 'z';
-    settings_info.header.magic[2] = 'k';
-    settings_info.header.magic[3] = 'z';
+    settings_info.header.magic_32 = SETTINGS_MAGIC;
     settings_info.header.version = FULL_SETTINGS;
-    list_destroy(&kz.watches);
-    list_init(&kz.watches, sizeof(watch_t));
+    clear_watches();
     settings->watch_cnt = 0;
     settings->binds[KZ_CMD_TOGGLE_MENU] = make_bind(2, BUTTON_R, BUTTON_L);
     settings->binds[KZ_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
@@ -93,7 +89,7 @@ void load_settings_from_flashram(int profile){
     z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
     struct settings *settings_profile = (struct settings*)(settings_temp + IO_BLOCK_SIZE + profile * sizeof(*settings_profile));
     if(settings_profile->header.version == FULL_SETTINGS){
-        if(settings_profile->header.magic_32 == 'kzkz') {
+        if(settings_profile->header.magic_32 == SETTINGS_MAGIC) {
             memcpy((void*)&settings_info, (void*)settings_profile, sizeof(*settings_profile));
             kz_log("loaded settings profile %d",profile);
         }else{
