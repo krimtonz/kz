@@ -34,5 +34,6 @@ int write(int file, void *buf, uint32_t byte_cnt);
 dirent_t *readdir(DIR *dir);
 int closedir(DIR *dir);
 DIR *opendir(const char *dir);
+int reset_disk(void);
 
 #endif

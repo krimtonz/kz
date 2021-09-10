@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <stdarg.h>
 #include "mem.h"
 #include "sys.h"
@@ -28,12 +29,14 @@ enum {
     SYS_RMDIR,
     SYS_MKDIR,
     SYS_STAT,
-    SYS_LSTAT
+    SYS_LSTAT,
+    SYS_RESET
 };
 
 typedef struct {
     uint32_t command;
     void *n64_buffer;
+    int err;
     union {
         struct {
             const char *path;
@@ -113,10 +116,15 @@ int open(const char *path, int open_flags, ...) {
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_OPEN;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     return ret;
 }
 
 int creat(const char *path, mode_t mode) {
+
     return open(path, O_WRONLY | O_CREAT | O_TRUNC, mode);
 }
 
@@ -131,6 +139,12 @@ DIR *opendir(const char *dir) {
     hb_fat->n64_buffer = &dir_desc->dir;
     hb_fat->command = SYS_OPEN_DIR;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+        free(dir_desc);
+        return NULL;
+    }
+
     return (DIR*)dir_desc;
 }
 
@@ -144,6 +158,10 @@ int closedir(DIR *dir) {
 
     free(dir_desc);
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     return ret;
 }
 
@@ -156,9 +174,14 @@ dirent_t *readdir(DIR *dir) {
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_READ_DIR;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     if(ret == 0) {
         return NULL;
     }
+
 
     return &dir_desc->dirent;
 }
@@ -172,6 +195,10 @@ int write(int file, void *buf, uint32_t byte_cnt) {
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_WRITE;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     return ret;
 }
 
@@ -184,6 +211,10 @@ int read(int file, void *buf, uint32_t byte_cnt) {
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_READ;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     return ret;
 }
 
@@ -194,6 +225,10 @@ int close(int file) {
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_CLOSE;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     return ret;
 }
 
@@ -201,6 +236,10 @@ char *getcwd(char *buf, size_t size) {
     hb_fat->getcwd.buf = buf;
     hb_fat->getcwd.size = size;
     hb_fat->command = SYS_GET_CWD;
+
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
 
     return buf;
 }
@@ -213,6 +252,10 @@ int stat(const char *path, struct stat *buf) {
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_STAT;
 
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
     return ret;
 }
 
@@ -222,6 +265,10 @@ int chdir(const char *path) {
     hb_fat->chdir.path =path;
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_CHDIR;
+
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
 
     return ret;
 }
@@ -233,6 +280,23 @@ int mkdir(const char *path, mode_t mode) {
     hb_fat->mkdir.mode = mode;
     hb_fat->n64_buffer = &ret;
     hb_fat->command = SYS_MKDIR;
+
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
+
+    return ret;
+}
+
+int reset_disk(void) {
+    int ret = -1;
+
+    hb_fat->command = SYS_RESET;
+    hb_fat->n64_buffer = &ret;
+
+    if(hb_fat->err) {
+        errno = hb_fat->err;
+    }
 
     return ret;
 }

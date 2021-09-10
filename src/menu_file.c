@@ -59,7 +59,6 @@ static _Bool update_file_list(void){
     vector_clear(&dir_files.container);
     DIR *dir = opendir(".");
     if(!dir){
-        /*
         if(errno == ENODEV){
             strcpy(file_menu_location->text, "no disk");
         }else if(errno == ENOENT){
@@ -67,7 +66,6 @@ static _Bool update_file_list(void){
         }else{
             strncpy(file_menu_location->text, strerror(errno), 31);
         }
-        */
         return 0;
     }
     getcwd(file_menu_location->text, 32);
@@ -139,6 +137,7 @@ static void update_view(void){
         file_menu_accept_button->enabled = 0;
         file_menu_clear_button->enabled = 0;
         file_menu_text_entry->enabled = 0;
+        file_menu_new_folder->enabled = 0;
         for(int i = 0; i < FILE_ROWS;i++){
             file_menu_rows[i]->enabled = 0;
         }
@@ -242,7 +241,7 @@ static void return_path(char *path){
 }
 
 static int reset_disk_onactivate(event_handler_t *handler, menu_event_t event, void **event_data){
-    //reset_disk();
+    reset_disk();
     update_view();
     file_menu_offset = 0;
     return 1;
