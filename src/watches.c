@@ -45,9 +45,9 @@ void watch_printf(watch_t *watch, uint32_t color)
 
             comp.uv = *(uint32_t*)address;
 
-            /* moderately annoying workaround for double rounding issues in _etoa and _ftoa, 
+            /* moderately annoying workaround for double rounding issues in _etoa and _ftoa,
              * this doesn't solve the rounding issues, but rather fixes a common case of 0.0 */
-            if(comp.uv == 0) {
+            if(comp.uv == 0 || comp.uv == 0x80000000) {
                 sprintf(buf, "%f", comp.fv);
             } else {
                 sprintf(buf, "%g", comp.fv);
