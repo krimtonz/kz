@@ -91,7 +91,7 @@ static void kz_main(void) {
             int x = settings->id_x;
             int y = settings->id_y;
             gfx_printf(x, y, "%4i %4i", input_x(), input_y());
-            gfx_texture *btn_tex = resource_get(resource_handles[R_KZ_BUTTONS]);
+            gfx_texture *btn_tex = resource_get(R_KZ_BUTTONS);
             static const int8_t btns[] = { 15, 14, 12, 13, 3, 2, 0, 1, 5, 4, 11, 10, 8, 9};
             uint16_t pad = input_pressed_raw();
             for(int i = 0; i < sizeof(btns) / sizeof(*btns); i++) {
@@ -527,7 +527,7 @@ static void kz_main(void) {
     }
 
 #ifdef LITE
-    struct item_texture *textures = resource_get(resource_handles[R_Z2_ITEMS]);
+    struct item_texture *textures = resource_get(R_Z2_ITEMS);
     for(int i = 0;i < Z2_ITEM_END;i++){
         if(!textures[i].texture || !textures[i].release){
             continue;

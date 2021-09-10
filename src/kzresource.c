@@ -7,27 +7,62 @@
 #include "z2.h"
 #include "hb.h"
 
-static struct list  resource_list;
-static int          next_resource_id = 0;
+static void *resources[R_KZ_END];
 
-static resource_ent_t *resource_find(int resource_id){
-    for(resource_ent_t *ent = resource_list.first;ent;ent = list_next(ent)){
-        if(ent->resource_id == resource_id){
-            return ent;
-        }
-    }
-    return NULL;
-}
+static void *grc_ctor(int resource_id);
+static void *resource_load_items(int resource_id);
+static void *resource_buttons_ctor(int resource_id);
+static void *resource_owl_ctor(int resource_id);
+static void *resource_note_ctor(int resource_id);
+static void *resource_dungeon_items_ctor(int resource_id);
+static void *resource_rupee_ctor(int reousrce_id);
+
+static resource_ctor resource_ctors[R_KZ_END] = {
+    grc_ctor,
+    grc_ctor,
+    resource_load_items,
+    resource_buttons_ctor,
+    resource_owl_ctor,
+    resource_note_ctor,
+    resource_dungeon_items_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    grc_ctor,
+    resource_rupee_ctor,
+    grc_ctor,
+    grc_ctor,
+};
+
+static const char *resource_names[R_KZ_END] = {
+    "checkbox",
+    "icons",
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    NULL,
+    "font",
+    "buttons",
+    "amounts",
+    "flags",
+    "arrows",
+    "files",
+    NULL,
+    "kzflex",
+    "sd",
+};
 
 void *grc_ctor(int resource_id){
-    resource_ent_t *ent = resource_find(resource_id);
     gfx_texture *kztext = malloc(sizeof(*kztext));
     if(!kztext){
         return kztext;
     }
     memset(kztext, 0, sizeof(*kztext));
     void *grctexture;
-    if(!grc_resource_get(ent->resource_name, &grctexture, NULL)){
+    if(!grc_resource_get(resource_names[resource_id], &grctexture, NULL)){
         return kztext;
     }
     struct grc_texture *gtext = grctexture;
@@ -43,36 +78,11 @@ void *grc_ctor(int resource_id){
 }
 
 void *resource_get(int resource_id){
-    resource_ent_t *ent = resource_find(resource_id);
-    if(ent){
-        if(!ent->data){
-            ent->data = ent->ctor(resource_id);
-        }
-        return ent->data;
+    if(!resources[resource_id]) {
+        resources[resource_id] = resource_ctors[resource_id](resource_id);
     }
-    return NULL;
-}
 
-void resource_free(int resource_id){
-    resource_ent_t *ent = resource_find(resource_id);
-    if(ent){
-        if(ent->dtor){
-            ent->dtor(resource_id);
-        }
-        list_erase(&resource_list, ent);
-    }
-}
-
-resource_ent_t *resource_create(const char *name, resource_ctor ctor, resource_dtor dtor){
-    resource_ent_t *new_ent = list_push_back(&resource_list, NULL);
-    if(new_ent){
-        new_ent->resource_name = name;
-        new_ent->resource_id = next_resource_id++;
-        new_ent->data = NULL;
-        new_ent->ctor = ctor;
-        new_ent->dtor = dtor;
-    }
-    return new_ent;
+    return resources[resource_id];
 }
 
 #if Z2_VERSION!=NZSE
@@ -215,27 +225,6 @@ menu_sprite_t   *scroll_down_sprite = NULL;
 menu_sprite_t   *pexport_sprite = NULL;
 menu_sprite_t   *pimport_sprite = NULL;
 
-int resource_handles[R_KZ_END] = { 0 };
-
-static const char *resource_names[R_KZ_END] = {
-    "checkbox",
-    "icons",
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    NULL,
-    "font",
-    "buttons",
-    "amounts",
-    "flags",
-    "arrows",
-    "files",
-    NULL,
-    "kzflex",
-    "sd",
-};
-
 static void *resource_load_items(int resource_id){
     struct item_texture *textures = malloc(sizeof(*textures) * Z2_ITEM_END);
     memset(textures, 0, sizeof(*textures) * Z2_ITEM_END);
@@ -298,30 +287,11 @@ static void *resource_rupee_ctor(int resource_id){
     return gfx_load(&loader);
 }
 
-static resource_ctor resource_ctors[R_KZ_END] = {
-    grc_ctor,
-    grc_ctor,
-    resource_load_items,
-    resource_buttons_ctor,
-    resource_owl_ctor,
-    resource_note_ctor,
-    resource_dungeon_items_ctor,
-    grc_ctor,
-    grc_ctor,
-    grc_ctor,
-    grc_ctor,
-    grc_ctor,
-    grc_ctor,
-    resource_rupee_ctor,
-    grc_ctor,
-    grc_ctor,
-};
-
 gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
 #if Z2_VERSION!=NZSE
     item_id = texture_map[item_id];
 #endif
-    struct item_texture *item = (struct item_texture*)resource_get(resource_handles[R_Z2_ITEMS]) + item_id;
+    struct item_texture *item = (struct item_texture*)resource_get(R_Z2_ITEMS) + item_id;
 #ifdef LITE
     item->last_access_counter = 0;
     item->release = release;
@@ -334,14 +304,6 @@ gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
 }
 
 void kz_resource_init(){
-    list_init(&resource_list, sizeof(resource_ent_t));
-    for(int i = 0; i < R_KZ_END; i++) {
-        resource_ent_t *res = resource_create(resource_names[i], resource_ctors[i], NULL);
-        if(res){
-            resource_handles[i] = res->resource_id;
-        }
-    }
-
     static menu_sprite_t up_sprite = {
         NULL,   0,      0,      DEFAULT_COLOR,  DEFAULT_COLOR,
         8,      8,      NULL,   DEFAULT_COLOR,   0,
@@ -366,10 +328,10 @@ void kz_resource_init(){
         0,      0,      NULL
     };
 
-    up_sprite.texture = resource_get(resource_handles[R_KZ_ARROWS]);
-    down_sprite.texture = resource_get(resource_handles[R_KZ_ARROWS]);
-    export_sprite.texture = resource_get(resource_handles[R_KZ_SD]);
-    import_sprite.texture = resource_get(resource_handles[R_KZ_SD]);
+    up_sprite.texture = resource_get(R_KZ_ARROWS);
+    down_sprite.texture = resource_get(R_KZ_ARROWS);
+    export_sprite.texture = resource_get(R_KZ_SD);
+    import_sprite.texture = resource_get(R_KZ_SD);
 
     scroll_up_sprite = &up_sprite;
     scroll_down_sprite = &down_sprite;

@@ -138,11 +138,11 @@ static void draw_item(struct item_data *data, int item, float rot)
         if (has_null(data)) {
             ovl_idx++;
         }
-        
+
         if (item<data->start_tile) {
             item = item + data->start_tile;
         }
-        
+
         if (data->tiles_cnt > 0 && item>data->tiles_cnt) {
             item = data->start_tile;
         }
@@ -153,7 +153,7 @@ static void draw_item(struct item_data *data, int item, float rot)
         if (data->ovl_values != NULL) {
             int ovl_tile = data->ovl_values[ovl_idx];
             if (ovl_tile >= 0) {
-                gfx_load_tile(resource_get(resource_handles[R_KZ_AMOUNTS]), ovl_tile);
+                gfx_load_tile(resource_get(R_KZ_AMOUNTS), ovl_tile);
                 gfx_push(gsSP2Triangles(4, 5, 6, 4, 6, 5, 7, 4));
             }
         }
@@ -284,7 +284,7 @@ static void menu_item_list_draw(menu_item_t *item)
         if (data->ovl_values) {
             int ovl_tile = data->ovl_values[idx];
             if (ovl_tile >= 0) {
-                gfx_draw_sprite(resource_get(resource_handles[R_KZ_AMOUNTS]), menu_item_x(item) + 8, menu_item_y(item) + 11,
+                gfx_draw_sprite(resource_get(R_KZ_AMOUNTS), menu_item_x(item) + 8, menu_item_y(item) + 11,
                                       ovl_tile, 8, 4);
             }
         }
@@ -303,7 +303,7 @@ static void menu_item_list_draw(menu_item_t *item)
     }
 }
 
-static int menu_item_list_event(event_handler_t *handler, menu_event_t event, void **event_data) 
+static int menu_item_list_event(event_handler_t *handler, menu_event_t event, void **event_data)
 {
     menu_item_t *item = handler->subscriber;
     struct item_data *data = item->data;
@@ -372,7 +372,7 @@ int menu_item_list_active_get(menu_item_t *item) {
 
 menu_item_t *menu_item_list_add(menu_t *menu, uint16_t x_cell, uint16_t y_cell, uint16_t start_tile, int8_t *options,
                                 uint8_t option_cnt, int8_t *value_ptr, int8_t *ovl_values, int tiles_cnt,
-                                menu_sprite_t *sprite, char *tooltip) 
+                                menu_sprite_t *sprite, char *tooltip)
 {
     menu_item_t *item = menu_add(menu, x_cell, y_cell);
     if (item != NULL) {

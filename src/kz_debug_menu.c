@@ -805,7 +805,7 @@ menu_t *create_debug_menu(void) {
 
         menu_flags_add(&flags, 2, 2);
 
-        gfx_texture *flags_texture = resource_get(resource_handles[R_KZ_FLAGS]);
+        gfx_texture *flags_texture = resource_get(R_KZ_FLAGS);
         for(int i = 0; i < 256; i++) {
             flags_item_cells[i] = menu_switch_add(&flags, (i % 16) + 9, (i / 16) + 3, flags_texture, NULL, DEFAULT_COLOR, DEFAULT_COLOR,
                             0, 1, 8, 8, NULL);
