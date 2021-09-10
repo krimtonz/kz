@@ -30,12 +30,12 @@ static uint8_t get_equip_value(struct equip_option *data){
 static int b_button_event(event_handler_t *handler, menu_event_t event, void **event_data){
     if(event == MENU_EVENT_ACTIVATE){
         if((int)*event_data == 0){
-            z2_file.form_button_item[z2_file.current_form == 4 ? 0 : z2_file.current_form].b = b_val;
+            z2_file.form_button_item[0].b = b_val;
             z2_btnupdate(&z2_game, 0);
         }
     }
     if(event == MENU_EVENT_UPDATE){
-        b_val = z2_file.form_button_item[z2_file.current_form == 4 ? 0 : z2_file.current_form].b;
+        b_val = z2_file.form_button_item[0].b;
     }
     return 1;
 }
