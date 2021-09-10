@@ -1314,7 +1314,11 @@ typedef struct {
     /* 0x01F2C  0x01F2C */ int8_t              cutscene_state;
     /* 0x01F2D  0x01F2D */ char                unk_0x1F2D[0x27B3];
     /* 0x046E0  0x046E0 */ z2_skybox_ctxt_t    skybox_ctx;
-    /* 0x04900  0x04900 */ char                unk_0x4900[0x11F2A];
+    /* 0x04900  0x04900 */ char                unk_0x4900[0x11F00];
+    /* 0x16800  0x16800 */ void               *message_bg_tex;
+    /* 0x16804  0x16804 */ char                unk_0x16804[0xE];
+    /* 0x16812  0x16812 */ uint8_t             message_bg_type;
+    /* 0x16813  0x16813 */ char                unk_0x16813[0x17];
     /* 0x1682A  0x1682A */ uint8_t             message_state_1;
     /* 0x1682B  0x1682B */ char                unk_0x1682B[0xFD];
     /* 0x18928  0x18928 */ uint8_t             message_state_2;
@@ -1853,6 +1857,7 @@ z2_extern char                      z2_saturation[];
 z2_extern char                      z2_hide_clock;
 z2_extern char                      z2_quake_requests[0x90];
 z2_extern int16_t                   z2_quake_request_cnt;
+z2_extern int16_t                   z2_message_static_offsets[];
 
 // pause menu hacks
 #if Z2_VERSION==NZSE
@@ -1885,6 +1890,7 @@ z2_extern int16_t                   z2_quake_request_cnt;
 #define z2_item_icon_archive            19
 #define z2_icon_item_24_static          20
 #define z2_do_action_static             25
+#define z2_message_static               26
 #define z2_parameter_static             1126
 #define z2_clock_face_days              1127
 #else
@@ -1897,6 +1903,7 @@ z2_extern int16_t                   z2_quake_request_cnt;
 #define z2_item_names                   16
 #define z2_item_icon_archive            18
 #define z2_do_action_static             22
+#define z2_message_static               23
 #define z2_parameter_static             1125
 #define z2_clock_face_days              1126
 #endif

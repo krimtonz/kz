@@ -568,6 +568,9 @@ void load_state(void *state){
     void *ram = (char*)z2_game.hud_ctx.do_action_static + 0x780;
     zu_file_load(vrom, ram, 0x510);
 
+    /* load message box textures */
+    zu_file_load(z2_file_table[z2_message_static].vrom_start + z2_message_static_offsets[z2_game.message_bg_type] * 0x1000, z2_game.message_bg_tex, 0x1000);
+
     /* load display lists */
     z2_gfx_t *gfx = z2_ctxt.gfx;
     zu_disp_ptr_t disp_ptr;

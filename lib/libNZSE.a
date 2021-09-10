@@ -72,6 +72,7 @@ z2_scene_table              = 0x801C3CA0;
 z2_extern_scene_table       = 0x801C5720;
 z2_unk_song_pos             = 0x801C6A74;
 z2_stored_song              = 0x801C6A7C;
+z2_message_static_offsets   = 0x801CFC78;
 z2_staff_notes              = 0x801CFC98;
 z2_link_spawn_obj           = 0x801D0B58;
 z2_player_ovl_table         = 0x801D0B70;
