@@ -485,7 +485,13 @@ typedef struct {
 #else
     /* 0x0FEC */ char                unk_0x0FEC_[0x20];
     /* 0x100C */ char                event_inf[0x8];
-    /* 0x1014 */ char                unk_0x1014[0x2C8C];
+    /* 0x1014 */ char                unk_0x1014[6];
+    /* 0x101A */ char                hsw_timer_active[6];
+    /* 0x1020 */ uint64_t            hsw_catch_start[6];
+    /* 0x1050 */ uint64_t            hsw_expire[6];
+    /* 0x1080 */ uint64_t            hsw_timer[6];
+    /* 0x10B0 */ uint64_t            hsw_offset[6];
+    /* 0x10E0 */ char                unk_0x10E0[0x2BC0];
 #endif
     /* 0x3CA0   0x3F50 */ int32_t             file_index;
     /* 0x3CA4   0x3F54 */ char                unk_0x3CA4[0x08];
@@ -494,7 +500,14 @@ typedef struct {
 #if Z2_VERSION==NZSE
     /* 0x3CB4          */ char                unk_0x03CB4[0x264];
 #else
-    /*          0x3F64 */ char                unk_0x03F64[0x338];
+    /*          0x3F64 */ char                unk_0x03F64[0x268];
+    /*          0x41CC */ char                hsw_timer_active[6];
+    /*          0x41D2 */ char                unk_0x41D2[0x6];
+    /*          0x41D8 */ uint64_t            hsw_catch_start[6];
+    /*          0x4208 */ uint64_t            hsw_expire[6];
+    /*          0x4238 */ uint64_t            hsw_timer[6];
+    /*          0x4268 */ uint64_t            hsw_offset[6];
+    /*          0x4298 */ char                unk_0x4298[4];
 #endif
     /* 0x3F18   0x429C */ uint8_t             restriction_flags[0x4];
 #if Z2_VERSION==NZSE
@@ -1787,6 +1800,7 @@ z2_extern void          z2_AfxConfig                (uint8_t cfg);
 z2_extern void          z2_AudioReset               (uint8_t cfg);
 z2_extern void          z2_StopSfx                  (void);
 z2_extern void          z2_AfxCmdFlush              (void);
+z2_extern uint64_t      osGetTime                   (void);
 
 /* data */
 z2_extern int32_t                   z2_vi_counter;
@@ -1858,6 +1872,8 @@ z2_extern char                      z2_hide_clock;
 z2_extern char                      z2_quake_requests[0x90];
 z2_extern int16_t                   z2_quake_request_cnt;
 z2_extern int16_t                   z2_message_static_offsets[];
+z2_extern uint64_t                  z2_timer_change_val;
+z2_extern uint8_t                   z2_timer_pause;
 
 // pause menu hacks
 #if Z2_VERSION==NZSE

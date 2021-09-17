@@ -97,8 +97,17 @@ void load_state(void *state){
     FORCE_CLEAN(load_state);
 
     void *p = state;
+    uint64_t save_time;
+    uint64_t load_time;
+    uint64_t offset;
 
     st_skip(&p,sizeof(kz_state_hdr_t));
+
+    load_time = osGetTime();
+
+    st_read(&p, &save_time, sizeof(save_time));
+
+    offset = load_time - save_time;
 
     z2_sfx_cmd_rd_pos = z2_sfx_cmd_wr_pos;
     z2_seq_cmd_rd_pos = z2_seq_cmd_wr_pos;
@@ -228,6 +237,20 @@ void load_state(void *state){
 
     /* load file data */
     st_read(&p, &z2_file, sizeof(z2_file));
+
+    st_read(&p, &z2_timer_change_val, sizeof(z2_timer_change_val));
+
+    st_read(&p, &z2_timer_pause, sizeof(z2_timer_pause));
+
+    z2_timer_change_val += offset;
+
+    for(int i = 0; i < 6; i++) {
+        if(z2_file.hsw_timer_active[i]) {
+            z2_file.hsw_catch_start[i] += offset;
+            //z2_file.hsw_offset[i] += offset;
+        }
+    }
+
 
     /* load static context */
     st_read(&p, z2_file.static_ctx, sizeof(*z2_file.static_ctx));
@@ -750,6 +773,10 @@ size_t save_state(void *state){
 
     st_skip(&p, sizeof(kz_state_hdr_t));
 
+    uint64_t cur_time = osGetTime();
+
+    st_write(&p, &cur_time, sizeof(cur_time));
+
     for(int i = 0; i < 5; i++) {
         z2_sequencer_t *sequencer = &z2_audio_ctxt.sequencers[i];
         z2_seq_ctl_t *seq_ctl = &z2_seq_ctl[i];
@@ -821,6 +848,10 @@ size_t save_state(void *state){
 
     /* save currently loaded file data */
     st_write(&p, &z2_file, sizeof(z2_file));
+
+    st_write(&p, &z2_timer_change_val, sizeof(z2_timer_change_val));
+
+    st_write(&p, &z2_timer_pause, sizeof(z2_timer_pause));
 
     /* save static context */
     st_write(&p, z2_file.static_ctx, sizeof(*z2_file.static_ctx));
