@@ -88,10 +88,20 @@ void load_settings_from_flashram(int profile){
     char *settings_temp = malloc(blk_cnt * IO_BLOCK_SIZE);
     z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
     struct settings *settings_profile = (struct settings*)(settings_temp + IO_BLOCK_SIZE + profile * sizeof(*settings_profile));
+    uint32_t cur_cheats = settings_info.data.cheats;
+
     if(settings_profile->header.version == FULL_SETTINGS){
         if(settings_profile->header.magic_32 == SETTINGS_MAGIC) {
             memcpy((void*)&settings_info, (void*)settings_profile, sizeof(*settings_profile));
             kz_log("loaded settings profile %d",profile);
+            if((cur_cheats & (1 << CHEAT_FREEZE_TIME)) && !(settings_profile->data.cheats & (1 << CHEAT_FREEZE_TIME))) {
+                if(kz.prev_timespeed == 0x80000000){
+                    z2_file.timespeed = 0;
+                }else{
+                    z2_file.timespeed = kz.prev_timespeed;
+                }
+                kz.prev_timespeed = 0x80000000;
+            }
         }else{
             load_default_settings();
             kz_log("invalid magic");
