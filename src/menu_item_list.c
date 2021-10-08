@@ -132,6 +132,7 @@ static void draw_item(struct item_data *data, int item, float rot)
 #endif
     gfx_push(gsSPMatrix(p_mtx, G_MTX_MODELVIEW | G_MTX_LOAD),
              gsSPVertex(&mesh, 8, 0));
+
     gfx_texture *texture;
     if (item >= 0) {
         int ovl_idx = item;
@@ -162,10 +163,12 @@ static void draw_item(struct item_data *data, int item, float rot)
 
 static void draw_wheel(menu_item_t *item) {
     struct item_data *data = item->data;
+
     if (!data->active) {
         return;
     }
 
+    gfx_draw_rectangle((Z2_SCREEN_WIDTH / 2) - (32 / 2), (Z2_SCREEN_HEIGHT / 2) - (32 / 2), 32, 32, 0x0000FF80);
     gfx_push(gsDisplayList(&wheel_state, 0));
 
     Mtx m;
@@ -192,6 +195,7 @@ static void draw_wheel(menu_item_t *item) {
 
     for (int i = 0; i < data->option_cnt; i++) {
         float rota = data->wheel_rotation + M_PI * 2.f / data->option_cnt * n;
+
         draw_item(data, get_item_id(data, n), rota);
         n = (n + 1) % data->option_cnt;
     }

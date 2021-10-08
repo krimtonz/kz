@@ -665,7 +665,7 @@ static void init(void) {
         0,      NULL
     };
 
-    kz.pause_item_list = menu_item_list_add(&kz.pause_menu, 0, 0, 0, NULL, Z2_ITEM_END - 1, &item_val, NULL, Z2_ITEM_END - 1, &sprite, NULL);
+    kz.pause_item_list = menu_item_list_add(&kz.pause_menu, 0, 0, 0, NULL, Z2_ITEM_END, &item_val, NULL, Z2_ITEM_END, &sprite, NULL);
     kz.pause_menu.selected_item = kz.pause_item_list;
     kz.pause_item_list->draw_proc = NULL;
     menu_item_register_event(kz.pause_item_list, MENU_EVENT_ACTIVATE, pause_menu_event, NULL);
