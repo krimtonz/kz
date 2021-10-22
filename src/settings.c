@@ -3,6 +3,7 @@
 #include "kz.h"
 #include "input.h"
 #include "mem.h"
+#include "vc.h"
 
 static _Alignas(128) struct settings settings_info;
 struct settings_data *settings = &settings_info.data;
@@ -59,6 +60,8 @@ void load_default_settings(void){
 }
 
 void save_settings_to_flashram(int profile){
+    FORCE_CLEAN(save_settings_to_flashram);
+
     settings->watch_cnt = kz.watches.size;
     if(kz.watches.first){
         int i = 0;
@@ -84,6 +87,8 @@ void save_settings_to_flashram(int profile){
 }
 
 void load_settings_from_flashram(int profile){
+    FORCE_CLEAN(load_settings_from_flashram);
+
     int blk_cnt = SIZE_TO_BLOCK(sizeof(struct settings) * SETTINGS_MAX) + 1;
     char *settings_temp = malloc(blk_cnt * IO_BLOCK_SIZE);
     z2_dmaflashtoram(settings_temp, SIZE_TO_BLOCK(SETTINGS_ADDR), blk_cnt);
