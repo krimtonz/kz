@@ -195,11 +195,17 @@ void command_break(void){
 void command_skip_cutscene(void){
     z2_cutscene_ctx_t* cs_ctx = (z2_cutscene_ctx_t*)&z2_game.fake_cs_ctx;
     int32_t *cutscene_ptr = cs_ctx->segment;
-    int32_t end_frame = cutscene_ptr[1];
+    int32_t end_frame;
 
     if (!z2_cutscene_is_playing_cs(&z2_game)) {
         return;
     }
+
+    if (cutscene_ptr == NULL) {
+        return;
+    }
+
+    end_frame = cutscene_ptr[1]
 
     for (uint16_t currentFrame = cs_ctx->frames; currentFrame < end_frame-10; currentFrame++) {
         uint16_t frame_aux = cs_ctx->frames;
