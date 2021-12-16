@@ -1303,6 +1303,42 @@ typedef struct {
     /* 0x0004 */ char unk_0x04[0x64];
 } z2_night_sfx_t; // size = 0x0068
 
+typedef union {
+    int32_t i;
+    float   f;
+    int16_t s[2];
+    int8_t  b[4];
+} z2_cutscene_data;
+
+typedef struct {
+    /* 0x0 */ z2_cutscene_data* data;
+    /* 0x4 */ int16_t           next_entrance_index;
+    /* 0x6 */ uint8_t           unk6;
+    /* 0x7 */ uint8_t           unk7;
+} z2_cutscene_entry; // size = 0x8
+
+typedef struct {
+    /* 0x0 */ uint16_t base;
+    /* 0x2 */ uint16_t start_frame;
+    /* 0x4 */ uint16_t end_frame;
+    /* 0x6 */ uint16_t unk_06;
+} z2_cs_cmd_base_t; // size = 0x8
+
+typedef struct {
+    /* 0x00 */ uint8_t             scene_cs_count;
+    /* 0x04 */ void*               segment;
+    /* 0x08 */ uint8_t             state;
+    /* 0x0C */ float               unk_0C;
+    /* 0x10 */ uint16_t            frames;
+    /* 0x12 */ uint16_t            unk_12;
+    /* 0x14 */ int32_t             unk_14;
+    /* 0x18 */ uint16_t            unk_18;
+    /* 0x1A */ uint8_t             unk_1A;
+    /* 0x1B */ uint8_t             unk_1B;
+    /* 0x1C */ char                unk_1C[0x34];
+    /* 0x50 */ z2_cutscene_entry*  scene_cs_list;
+} z2_cutscene_ctx_t; // size = 0x54
+
 typedef struct {
     /* NZSE     NZSJ */
     /* 0x00000  0x00000 */ z2_ctxt_t           common;
@@ -1322,7 +1358,7 @@ typedef struct {
     /* 0x0081C  0x0081C */ char                unk_0x81C[0x14];
     /* 0x00830  0x00830 */ z2_col_ctxt_t       col_ctxt;
     /* 0x01CA0  0x01CA0 */ z2_actor_ctxt_t     actor_ctxt;
-    /* 0x01F24  0x01F24 */ char                unk_0x1F24[0x04];
+    /* 0x01F24  0x01F24 */ int32_t             fake_cs_ctx;
     /* 0x01F28  0x01F28 */ void               *cutscene_ptr;
     /* 0x01F2C  0x01F2C */ int8_t              cutscene_state;
     /* 0x01F2D  0x01F2D */ char                unk_0x1F2D[0x27B3];
@@ -1769,6 +1805,8 @@ z2_extern z2_actor_t   *z2_SpawnActor               (z2_actor_ctxt_t *actor_ctx,
                                                      int16_t actor_variable, int camera_cmd_idx, int spawn_time_flags, void *param_13);
 z2_extern void          z2_DeleteActor              (z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
 z2_extern void          z2_CreateStaticCollision    (z2_col_ctxt_t *col_ctx, z2_game_t *game, z2_col_lut_t *col_lut);
+z2_extern void          z2_cutscene_terminator_impl (z2_game_t *game, z2_cutscene_ctx_t *cs_ctx, z2_cs_cmd_base_t *cmd);
+z2_extern uint8_t       z2_cutscene_is_playing_cs   (z2_game_t *game);
 z2_extern void          z2_pause_persp              (z2_game_t *game);
 z2_extern void          z2_load_pause_map           (z2_game_t *game, void *ptr);
 z2_extern uint32_t      z2_get_mmap_tile_size       (uint16_t map_id);

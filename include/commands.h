@@ -10,6 +10,7 @@
 #include "z2.h"
 
 enum {
+    KZ_CMD_SKIP_CUTSCENE,
     KZ_CMD_TOGGLE_MENU,
     KZ_CMD_RETURN,
     KZ_CMD_LEVITATE,
@@ -52,6 +53,7 @@ struct command {
     void              (*proc)();
 };
 
+void    command_skip_cutscene   (void);
 void    command_levitate        (void);
 void    command_void            (void);
 void    command_reloadarea      (void);

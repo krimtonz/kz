@@ -8,6 +8,7 @@
 #include "hb_heap.h"
 
 struct command kz_commands[KZ_CMD_MAX] = {
+    {"skip cutscene",       COMMAND_PRESS,  command_skip_cutscene},
     {"toggle menu",         COMMAND_PRESS,  NULL},
     {"return",              COMMAND_PRESS,  NULL },
     {"levitate",            COMMAND_HOLD,   command_levitate},
@@ -188,6 +189,27 @@ void command_break(void){
 
     z2_link.state_flags_1 = 0;
     z2_link.state_flags_2 = 0;
+}
+
+
+void command_skip_cutscene(void){
+    z2_cs_cmd_base_t cmd = {1,0,0,0};
+    //
+    z2_cutscene_ctx_t* cs_ctx = (z2_cutscene_ctx_t*)&z2_game.fake_cs_ctx;
+    int32_t *cutscene_ptr = cs_ctx->segment;
+    int32_t end_frame = cutscene_ptr[1];
+
+    int16_t next_entrance_index = cs_ctx->scene_cs_list[cs_ctx->unk_12].next_entrance_index;
+
+    if (!z2_cutscene_is_playing_cs(&z2_game)) {
+        return;
+    }
+
+    if (next_entrance_index == -1) {
+        cs_ctx->frames = end_frame - 40;
+    } else {
+        z2_cutscene_terminator_impl(&z2_game, cs_ctx, &cmd);
+    }
 }
 
 void command_levitate(void){
