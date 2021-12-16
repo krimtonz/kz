@@ -193,21 +193,28 @@ void command_break(void){
 
 
 void command_skip_cutscene(void){
-    z2_cs_cmd_base_t cmd = {1,0,0,0};
-    //
     z2_cutscene_ctx_t* cs_ctx = (z2_cutscene_ctx_t*)&z2_game.fake_cs_ctx;
     int32_t *cutscene_ptr = cs_ctx->segment;
     int32_t end_frame = cutscene_ptr[1];
-
-    int16_t next_entrance_index = cs_ctx->scene_cs_list[cs_ctx->unk_12].next_entrance_index;
 
     if (!z2_cutscene_is_playing_cs(&z2_game)) {
         return;
     }
 
-    if (next_entrance_index == -1) {
-        cs_ctx->frames = end_frame - 40;
-    } else {
+    for (uint16_t currentFrame = cs_ctx->frames; currentFrame < end_frame-10; currentFrame++) {
+        uint16_t frame_aux = cs_ctx->frames;
+        z2_cutscene_process_cmd_wrp(&z2_game, cs_ctx);
+        if (frame_aux == cs_ctx->frames) {
+            // Bypass commands that manipulate the current frame, like textboxes
+            cs_ctx->frames++;
+        }
+    }
+
+    int16_t next_entrance_index = cs_ctx->scene_cs_list[cs_ctx->unk_12].next_entrance_index;
+    if (next_entrance_index != -1) {
+        // The end of this cutscene triggers another cutscene, so just trigger it immediately
+        z2_cs_cmd_base_t cmd = {1,0,0,0};
+
         z2_cutscene_terminator_impl(&z2_game, cs_ctx, &cmd);
     }
 }

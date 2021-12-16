@@ -17,6 +17,7 @@ z2_DeleteActor              = 0x800BB498;
 z2_CreateStaticCollision    = 0x800C3334;
 z2_camera_update_hook       = 0x800DF0B8;
 z2_cutscene_terminator_impl = 0x800EB364;
+z2_cutscene_process_cmd_wrp = 0x800ED980;
 z2_cutscene_is_playing_cs   = 0x800EE2F4;
 z2_pause_persp              = 0x800F4A10;
 z2_load_pause_map           = 0x801068FC;

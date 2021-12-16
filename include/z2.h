@@ -1806,6 +1806,7 @@ z2_extern z2_actor_t   *z2_SpawnActor               (z2_actor_ctxt_t *actor_ctx,
 z2_extern void          z2_DeleteActor              (z2_actor_ctxt_t *actor_ctx, z2_actor_t *actor, z2_game_t *game);
 z2_extern void          z2_CreateStaticCollision    (z2_col_ctxt_t *col_ctx, z2_game_t *game, z2_col_lut_t *col_lut);
 z2_extern void          z2_cutscene_terminator_impl (z2_game_t *game, z2_cutscene_ctx_t *cs_ctx, z2_cs_cmd_base_t *cmd);
+z2_extern void          z2_cutscene_process_cmd_wrp (z2_game_t *game, z2_cutscene_ctx_t *cs_ctx);
 z2_extern uint8_t       z2_cutscene_is_playing_cs   (z2_game_t *game);
 z2_extern void          z2_pause_persp              (z2_game_t *game);
 z2_extern void          z2_load_pause_map           (z2_game_t *game, void *ptr);
