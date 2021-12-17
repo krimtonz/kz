@@ -1326,16 +1326,19 @@ typedef struct {
 
 typedef struct {
     /* 0x00 */ uint8_t             scene_cs_count;
-    /* 0x04 */ void*               segment;
+    /* 0x04 */ z2_cutscene_data*   cs_data;
     /* 0x08 */ uint8_t             state;
     /* 0x0C */ float               unk_0C;
     /* 0x10 */ uint16_t            frames;
-    /* 0x12 */ uint16_t            unk_12;
-    /* 0x14 */ int32_t             unk_14;
+    /* 0x12 */ uint16_t            current_cs_index;
+    /* 0x14 */ int32_t             cs_cam_id;
     /* 0x18 */ uint16_t            unk_18;
     /* 0x1A */ uint8_t             unk_1A;
     /* 0x1B */ uint8_t             unk_1B;
-    /* 0x1C */ char                unk_1C[0x34];
+    /* 0x1C */ void*               camera_focus;
+    /* 0x20 */ void*               camera_position;
+    /* 0x24 */ void*               player_action;
+    /* 0x28 */ void*               actor_actions[10]; 
     /* 0x50 */ z2_cutscene_entry*  scene_cs_list;
 } z2_cutscene_ctx_t; // size = 0x54
 
@@ -1358,10 +1361,8 @@ typedef struct {
     /* 0x0081C  0x0081C */ char                unk_0x81C[0x14];
     /* 0x00830  0x00830 */ z2_col_ctxt_t       col_ctxt;
     /* 0x01CA0  0x01CA0 */ z2_actor_ctxt_t     actor_ctxt;
-    /* 0x01F24  0x01F24 */ int32_t             fake_cs_ctx;
-    /* 0x01F28  0x01F28 */ void               *cutscene_ptr;
-    /* 0x01F2C  0x01F2C */ int8_t              cutscene_state;
-    /* 0x01F2D  0x01F2D */ char                unk_0x1F2D[0x27B3];
+    /* 0x01F24  0x01F24 */ z2_cutscene_ctx_t   cs_ctx;
+    /* 0x01F78  0x01F78 */ char                unk_0x1F78[0x2768];
     /* 0x046E0  0x046E0 */ z2_skybox_ctxt_t    skybox_ctx;
     /* 0x04900  0x04900 */ char                unk_0x4900[0x11F00];
     /* 0x16800  0x16800 */ void               *message_bg_tex;
