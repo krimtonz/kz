@@ -378,6 +378,7 @@ kz implements the following commands
 * reload scene - reloads the current scene at the last entrance
 * void out - activates a void out
 * break free - breaks out of a cutscene
+* skip cutscene - skips a cutscene, playing the next one if exists
 * pause - pauses the game at the current frame. see [frame advancing](#9-frame-advancing)
 * advance - advances a single frame. see [frame advancing](#9-frame-advancing)
 * reset lag counter - resets the lag counter to 0
@@ -396,7 +397,6 @@ kz implements the following commands
 * load position - set's link's position to the position saved in the current slot
 * next position - moves to the next position slot
 * prev position - moves to the previous position slot
-* skip cutscene - skips a cutscene, playing the next one if exists
 
 ## 6 Keyboard
 kz implements an on screen keyboard for easy text editing.  There are a few shortcuts to make editing a bit faster.

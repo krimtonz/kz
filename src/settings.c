@@ -21,6 +21,7 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_RELOAD] = BIND_END;
     settings->binds[KZ_CMD_VOID] = BIND_END;
     settings->binds[KZ_CMD_BREAK] = BIND_END;
+    settings->binds[KZ_CMD_SKIP_CUTSCENE] = BIND_END;
     settings->binds[KZ_CMD_PAUSE] = make_bind(1, BUTTON_D_UP);
     settings->binds[KZ_CMD_ADVANCE] = make_bind(1, BUTTON_D_DOWN);
     settings->binds[KZ_CMD_RESET_LAG] = BIND_END;
@@ -41,7 +42,6 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_PREV_POSITION] = BIND_END;
     settings->binds[KZ_CMD_NEXT_POSITION] = BIND_END;
     settings->binds[KZ_CMD_TITLE_SCREEN] = BIND_END;
-    settings->binds[KZ_CMD_SKIP_CUTSCENE] = BIND_END;
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 20;

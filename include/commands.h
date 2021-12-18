@@ -18,6 +18,7 @@ enum {
     KZ_CMD_RELOAD,
     KZ_CMD_VOID,
     KZ_CMD_BREAK,
+    KZ_CMD_SKIP_CUTSCENE,
     KZ_CMD_PAUSE,
     KZ_CMD_ADVANCE,
     KZ_CMD_RESET_LAG,
@@ -38,7 +39,6 @@ enum {
     KZ_CMD_LOAD_POSITION,
     KZ_CMD_PREV_POSITION,
     KZ_CMD_NEXT_POSITION,
-    KZ_CMD_SKIP_CUTSCENE,
     KZ_CMD_MAX
 };
 
@@ -59,6 +59,7 @@ void    command_reloadarea      (void);
 void    command_fall            (void);
 void    command_turbo           (void);
 void    command_break           (void);
+void    command_skip_cutscene   (void);
 void    command_pause           (void);
 void    command_advance         (void);
 void    command_return          (void);
@@ -74,7 +75,6 @@ void    command_load_position   (void);
 void    command_next_position   (void);
 void    command_prev_position   (void);
 void    command_title_screen    (void);
-void    command_skip_cutscene   (void);
 #ifndef LITE
 void    command_load_state      (void);
 void    command_save_state      (void);

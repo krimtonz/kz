@@ -16,6 +16,7 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"reload scene",        COMMAND_PRESS,  command_reloadarea},
     {"void out",            COMMAND_PRESS,  command_void},
     {"break free",          COMMAND_PRESS,  command_break},
+    {"skip cutscene",       COMMAND_PRESS,  command_skip_cutscene},
     {"pause",               COMMAND_PRESS,  command_pause},
     {"advance",             COMMAND_PRESS,  command_advance},
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
@@ -36,7 +37,6 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"load position",       COMMAND_PRESS,  command_load_position},
     {"prev position",       COMMAND_PRESS,  command_prev_position},
     {"next position",       COMMAND_PRESS,  command_next_position},
-    {"skip cutscene",       COMMAND_PRESS,  command_skip_cutscene},
 };
 
 #ifndef LITE
