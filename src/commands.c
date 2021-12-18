@@ -8,7 +8,6 @@
 #include "hb_heap.h"
 
 struct command kz_commands[KZ_CMD_MAX] = {
-    {"skip cutscene",       COMMAND_PRESS,  command_skip_cutscene},
     {"toggle menu",         COMMAND_PRESS,  NULL},
     {"return",              COMMAND_PRESS,  NULL },
     {"levitate",            COMMAND_HOLD,   command_levitate},
@@ -37,6 +36,7 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"load position",       COMMAND_PRESS,  command_load_position},
     {"prev position",       COMMAND_PRESS,  command_prev_position},
     {"next position",       COMMAND_PRESS,  command_next_position},
+    {"skip cutscene",       COMMAND_PRESS,  command_skip_cutscene},
 };
 
 #ifndef LITE

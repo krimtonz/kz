@@ -10,7 +10,6 @@
 #include "z2.h"
 
 enum {
-    KZ_CMD_SKIP_CUTSCENE,
     KZ_CMD_TOGGLE_MENU,
     KZ_CMD_RETURN,
     KZ_CMD_LEVITATE,
@@ -39,6 +38,7 @@ enum {
     KZ_CMD_LOAD_POSITION,
     KZ_CMD_PREV_POSITION,
     KZ_CMD_NEXT_POSITION,
+    KZ_CMD_SKIP_CUTSCENE,
     KZ_CMD_MAX
 };
 

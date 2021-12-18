@@ -13,7 +13,6 @@ void load_default_settings(void){
     settings_info.header.version = FULL_SETTINGS;
     clear_watches();
     settings->watch_cnt = 0;
-    settings->binds[KZ_CMD_SKIP_CUTSCENE] = BIND_END;
     settings->binds[KZ_CMD_TOGGLE_MENU] = make_bind(2, BUTTON_R, BUTTON_L);
     settings->binds[KZ_CMD_RETURN] = make_bind(2, BUTTON_R, BUTTON_D_LEFT);
     settings->binds[KZ_CMD_LEVITATE] = make_bind(1, BUTTON_L);
@@ -42,6 +41,7 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_PREV_POSITION] = BIND_END;
     settings->binds[KZ_CMD_NEXT_POSITION] = BIND_END;
     settings->binds[KZ_CMD_TITLE_SCREEN] = BIND_END;
+    settings->binds[KZ_CMD_SKIP_CUTSCENE] = BIND_END;
     settings->input_display = 1;
     settings->id_x = 16;
     settings->id_y = Z2_SCREEN_HEIGHT - 20;
