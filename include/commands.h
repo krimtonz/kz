@@ -53,7 +53,6 @@ struct command {
     void              (*proc)();
 };
 
-void    command_skip_cutscene   (void);
 void    command_levitate        (void);
 void    command_void            (void);
 void    command_reloadarea      (void);
@@ -75,6 +74,7 @@ void    command_load_position   (void);
 void    command_next_position   (void);
 void    command_prev_position   (void);
 void    command_title_screen    (void);
+void    command_skip_cutscene   (void);
 #ifndef LITE
 void    command_load_state      (void);
 void    command_save_state      (void);

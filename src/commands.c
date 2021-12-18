@@ -191,9 +191,8 @@ void command_break(void){
     z2_link.state_flags_2 = 0;
 }
 
-
 void command_skip_cutscene(void){
-    z2_cutscene_ctx_t* cs_ctx = (z2_cutscene_ctx_t*)&z2_game.cs_ctx;
+    z2_cutscene_ctx_t* cs_ctx = &z2_game.cs_ctx;
     z2_cutscene_data *cutscene_ptr = cs_ctx->cs_data;
     int32_t end_frame;
 
