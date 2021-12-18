@@ -510,13 +510,13 @@ typedef struct {
     /*          0x4298 */ char                unk_0x4298[4];
 #endif
     /* 0x3F18   0x429C */ uint8_t             restriction_flags[0x4];
-#if Z2_VERSION==NZSE
-    /* 0x3F1C          */ char                unk_0x3F1C[0x4C];
-#else
-    /*          0x42A0 */ char                unk_0x42A0[0x1A];
+    /* 0x3F1C   0x42A0 */ char                unk_0x3F1C[0x1A];
+#if Z2_VERSION!=NZSE
     /*          0x42BA */ char                event_inf[0x8];
-    /*          0x42C2 */ char                unk_0x42C2[0x32];
 #endif
+    /* 0x3F36   0x42C2 */ char                unk_0x3F36[0x16];
+    /* 0x3F4C   0x42D8 */ uint8_t             cutscene_trigger;
+    /* 0x3F4D   0x42D9 */ char                unk_0x3F4D[0x1B];
     /* 0x3F68   0x42F4 */
     struct {
         /* 0x0000 */ uint32_t    chest;
