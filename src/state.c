@@ -17,13 +17,18 @@
 #define MAYBENOINLINE
 #endif
 
+static _Bool save_wr = 0;
+
 static MAYBENOINLINE void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
+
+    if(save_wr) {
 #ifdef WIIVC
-    hmemcpy(p, src, len);
+        hmemcpy(p, src, len);
 #else
-    memcpy(p, src, len);
+        memcpy(p, src, len);
 #endif
+    }
     p += len;
     *dst = p;
 }
@@ -766,6 +771,8 @@ _Bool save_overlay(void **dst, void *src, uint32_t vrom_start, uint32_t vrom_end
 size_t save_state(void *state){
     FORCE_CLEAN(save_state);
     void *p = state;
+
+    save_wr = (p != NULL);
 
     /* indicators for table entries */
     int ent_start = 0;

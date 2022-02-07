@@ -113,10 +113,12 @@ void command_save_state(){
 #endif
     }
 
+    size_t state_size = save_state(NULL);
+
 #ifdef WIIVC
-    state = halloc(0x80000); // 512k to start
+    state = halloc(state_size);
 #else
-    state = malloc(0x80000);
+    state = malloc(state_size);
 #endif
     if(state == NULL) {
         kz_log("could not alloc state %d", kz.state_slot);
@@ -135,7 +137,6 @@ void command_save_state(){
         strcpy(kz_state.name, "untitled");
     }
     hmemcpy(state, &kz_state, sizeof(kz_state));
-    state = hrealloc(state, size);
     kz_log("saved state %d (%s)", kz.state_slot, kz_state.name);
 #else
     kz_state_hdr_t *kz_state = state;
@@ -148,7 +149,6 @@ void command_save_state(){
     } else {
         strcpy(state->name, "untitled");
     }
-    state = realloc(state, kz_state->size);
     kz_log("saved state %d (%s)", kz.state_slot, state->name);
 #endif
     kz.states[kz.state_slot] = state;
