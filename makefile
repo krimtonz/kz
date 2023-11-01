@@ -166,8 +166,8 @@ $(KZ-FULL)          :   CPPFLAGS    +=	-DKZ_VERSION=KZ_FULL
 $(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto
 $(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects
 $(KZ-VC)			:	CPPFLAGS	+=	-DKZ_VERSION=KZ_VC
-$(ELF-VC)			:	LDFLAGS		?=	-O3 -flto
-$(KZ-VC)			:	CFLAGS		?=	-O3 -flto -ffat-lto-objects
+$(ELF-VC)			:	LDFLAGS		?= -O2 -fno-optimize-strlen
+$(KZ-VC)			:	CFLAGS		?= -O2 -fno-optimize-strlen -ffat-lto-objects
 $(KZ-LITE)          :   CPPFLAGS    +=	-DLITE -DKZ_VERSION=KZ_LITE
 $(KZ-LITE)          :   CFLAGS      ?=  -Os
 $(ELF-LITE)         :   LDFLAGS     ?=	-Os
