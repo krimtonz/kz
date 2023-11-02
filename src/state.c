@@ -1045,6 +1045,20 @@ size_t save_state(void *state){
     return (char*)p - (char*)state;
 }
 
+struct state_compat {
+    uint16_t    state_version;
+    int16_t     compat_versions[10];
+};
+
+static struct state_compat compatabilities[] = {
+    {
+        .state_version = 8,
+        .compat_versions = {
+            7, -1
+        }
+    }
+};
+
 int state_is_valid(kz_state_hdr_t *state) {
     if(state->z2_version != Z2_VERSION) {
         return -1;
@@ -1057,7 +1071,7 @@ int state_is_valid(kz_state_hdr_t *state) {
     for(int i = 0; i < sizeof(compatabilities) / sizeof(*compatabilities);i++){
         struct state_compat *compat = &compatabilities[i];
 
-        if(!compat->state_version == STATE_VERSION){
+        if(compat->state_version != STATE_VERSION){
             continue;
         }
 
@@ -1074,19 +1088,5 @@ int state_is_valid(kz_state_hdr_t *state) {
 
     return 0;
 }
-
-struct state_compat {
-    uint16_t    state_version;
-    int16_t     compat_versions[10];
-};
-
-static struct state_compat compatabilities[] = {
-    {
-        .state_version = 8,
-        .compat_versions = {
-            7, -1
-        }
-    }
-};
 
 #endif
