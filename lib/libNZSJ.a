@@ -98,6 +98,7 @@ z2_hide_clock               = 0x801F5362;
 z2_light_queue              = 0x801F53A0;
 z2_game_arena               = 0x801F5530;
 z2_quake_requests           = 0x801F5E30;
+z2_camera_wobble_effect     = 0x801F5EC0;
 z2_cs_bars                  = 0x801F6F70;
 z2_saturation               = 0x801F7130;
 z2_prerender_bgtask         = 0x801F7230;

@@ -182,6 +182,11 @@ void gfx_init(){
     for(int i = 0; i < 8; i++) {
         vector_init(&gfx_chars[i], sizeof(gfx_char_t));
     }
+
+#ifdef WIIVC
+    set_hb_seg(&gfx_disp_p);
+    restore_hb_seg(&gfx_disp_p);
+#endif
 }
 
 void gfx_begin(void){
@@ -450,7 +455,7 @@ gfx_texture *gfx_load_item_texture(uint8_t item_id){
         texture->tile_width = 32;
         texture->tile_height = 32;
         texture->img_fmt = G_IM_FMT_RGBA;
-        texture->img_size = G_IM_SIZ_32b;        
+        texture->img_size = G_IM_SIZ_32b;
 #ifdef WIIVC
         texture->source = TEX_SRC_HB;
         texture->data = halloc(size * 2);
@@ -537,7 +542,7 @@ static gfx_texture *gfx_load_from_rom(texture_loader *loader){
         void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
         zu_file_idx_load(file, tempdata);
 
-        for(int i = 0; i < loader->num_tiles; i++) 
+        for(int i = 0; i < loader->num_tiles; i++)
         {
 #ifdef WIIVC
             hmemcpy(texture->data + (i * tile_size), (char*)tempdata + loader->offset + (i * tile_size), tile_size);

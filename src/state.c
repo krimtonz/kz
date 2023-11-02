@@ -396,6 +396,8 @@ void load_state(void *state){
 
     st_read(&p, &z2_quake_request_cnt, sizeof(z2_quake_request_cnt));
 
+    st_read(&p, &z2_camera_wobble_effect, sizeof(z2_camera_wobble_effect));
+
     {
         // Load Minimap Details
         st_read(&p, &z2_minimap_ctx, sizeof(z2_minimap_ctx));
@@ -971,6 +973,8 @@ size_t save_state(void *state){
     st_write(&p, z2_quake_requests, sizeof(z2_quake_requests));
 
     st_write(&p, &z2_quake_request_cnt, sizeof(z2_quake_request_cnt));
+
+    st_write(&p, z2_camera_wobble_effect, sizeof(z2_camera_wobble_effect));
 
     st_write(&p, &z2_minimap_ctx, sizeof(z2_minimap_ctx));
 

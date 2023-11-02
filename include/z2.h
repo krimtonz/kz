@@ -1870,6 +1870,7 @@ z2_extern z2_night_sfx_t            z2_night_sfx[];
 z2_extern char                      z2_saturation[];
 z2_extern char                      z2_hide_clock;
 z2_extern char                      z2_quake_requests[0x90];
+z2_extern char                      z2_camera_wobble_effect[0x24];
 z2_extern int16_t                   z2_quake_request_cnt;
 z2_extern int16_t                   z2_message_static_offsets[];
 z2_extern uint64_t                  z2_timer_change_val;
