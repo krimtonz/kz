@@ -397,7 +397,7 @@ void load_state(void *state){
 
     st_read(&p, &z2_quake_request_cnt, sizeof(z2_quake_request_cnt));
 
-    if(hdr.z2_version >= 8){
+    if(hdr.state_version >= 8){
         st_read(&p, &z2_camera_wobble_effect, sizeof(z2_camera_wobble_effect));
     }
 
@@ -1064,7 +1064,7 @@ int state_is_valid(kz_state_hdr_t *state) {
         return -1;
     }
 
-    if(state->settings_version == STATE_VERSION){
+    if(state->state_version == STATE_VERSION){
         return 0;
     }
 
@@ -1080,7 +1080,7 @@ int state_is_valid(kz_state_hdr_t *state) {
                 return -2;
             }
 
-            if(compat->compat_versions[j] == state->settings_version){
+            if(compat->compat_versions[j] == state->state_version){
                 return 0;
             }
         }

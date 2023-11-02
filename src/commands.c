@@ -129,7 +129,7 @@ void command_save_state(){
     kz_state_hdr_t kz_state;
     kz_state.size = size;
     kz_state.z2_version = Z2_VERSION;
-    kz_state.settings_version = STATE_VERSION;
+    kz_state.state_version = STATE_VERSION;
     if(tmp_name != NULL) {
         memcpy(kz_state.name, tmp_name, sizeof(kz_state.name));
         free(tmp_name);
@@ -142,7 +142,7 @@ void command_save_state(){
     kz_state_hdr_t *kz_state = state;
     kz_state->size = size;
     kz_state->z2_version = Z2_VERSION;
-    kz_state->settings_version = STATE_VERSION;
+    kz_state->state_version = STATE_VERSION;
     if(tmp_name != NULL) {
         memcpy(state->name, tmp_name, sizeof(state->name));
         free(tmp_name);
