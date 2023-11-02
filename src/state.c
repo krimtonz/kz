@@ -106,7 +106,8 @@ void load_state(void *state){
     uint64_t load_time;
     uint64_t offset;
 
-    st_skip(&p,sizeof(kz_state_hdr_t));
+    kz_state_hdr_t hdr;
+    st_read(&p, &hdr, sizeof(hdr));
 
     load_time = osGetTime();
 
@@ -396,7 +397,9 @@ void load_state(void *state){
 
     st_read(&p, &z2_quake_request_cnt, sizeof(z2_quake_request_cnt));
 
-    st_read(&p, &z2_camera_wobble_effect, sizeof(z2_camera_wobble_effect));
+    if(hdr.z2_version >= 8){
+        st_read(&p, &z2_camera_wobble_effect, sizeof(z2_camera_wobble_effect));
+    }
 
     {
         // Load Minimap Details
@@ -1047,10 +1050,43 @@ int state_is_valid(kz_state_hdr_t *state) {
         return -1;
     }
 
-    if(state->settings_version != STATE_VERSION) {
-        return -2;
+    if(state->settings_version == STATE_VERSION){
+        return 0;
+    }
+
+    for(int i = 0; i < sizeof(compatabilities) / sizeof(*compatabilities);i++){
+        struct state_compat *compat = &compatabilities[i];
+
+        if(!compat->state_version == STATE_VERSION){
+            continue;
+        }
+
+        for(int j = 0; j < sizeof(compat->compat_versions) / sizeof(*compat->compat_versions); j++){
+            if(compat->compat_versions[j] == -1){
+                return -2;
+            }
+
+            if(compat->compat_versions[j] == state->settings_version){
+                return 0;
+            }
+        }
     }
 
     return 0;
 }
+
+struct state_compat {
+    uint16_t    state_version;
+    int16_t     compat_versions[10];
+};
+
+static struct state_compat compatabilities[] = {
+    {
+        .state_version = 8,
+        .compat_versions = {
+            7, -1
+        }
+    }
+};
+
 #endif
