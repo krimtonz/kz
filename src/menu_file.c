@@ -264,6 +264,7 @@ static int menu_file_onactivate(event_handler_t *handler, menu_event_t event, vo
     if(dirent->isdir){
         chdir(dirent->name);
         update_view();
+        file_menu_offset = 0;
     }else{
         int len = strlen(dirent->name) - file_menu_extension_len;
         char *path = malloc(len + 1);
