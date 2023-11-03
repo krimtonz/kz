@@ -1875,6 +1875,9 @@ z2_extern int16_t                   z2_quake_request_cnt;
 z2_extern int16_t                   z2_message_static_offsets[];
 z2_extern uint64_t                  z2_timer_change_val;
 z2_extern uint8_t                   z2_timer_pause;
+z2_extern uint64_t                  z2_timer_pause_time;
+z2_extern uint8_t                   z2_timer_is_paused;
+z2_extern uint8_t                   z2_weather_state;
 
 // pause menu hacks
 #if Z2_VERSION==NZSE

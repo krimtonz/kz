@@ -722,6 +722,11 @@ static void game_state_main(void) {
         }
         kz_exit(z2_ctxt.gamestate_update, &z2_ctxt);
     } else {
+        if(!z2_timer_is_paused){
+            z2_timer_pause_time = osGetTime();
+            z2_timer_is_paused = true;
+        }
+
         z2_gfx_t *gfx = z2_game.common.gfx;
         if(z2_ctxt.gamestate_frames != 1) {
             if(gfx->frame_cnt_1 & 1) {

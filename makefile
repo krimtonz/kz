@@ -163,8 +163,8 @@ $(KZ-NZSJ)          :   LIBS	    :=	-lNZSJ
 $(KZ-NZSJ10)        :   CPPFLAGS    ?=	-DZ2_VERSION=NZSJ10
 $(KZ-NZSJ10)        :   LIBS	    :=	-lNZSJ10
 $(KZ-FULL)          :   CPPFLAGS    +=	-DKZ_VERSION=KZ_FULL
-$(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto
-$(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto -ffat-lto-objects
+$(ELF-FULL)         :   LDFLAGS     ?=	-O3 -flto=auto
+$(KZ-FULL)          :   CFLAGS      ?=  -O3 -flto=auto -ffat-lto-objects
 $(KZ-VC)			:	CPPFLAGS	+=	-DKZ_VERSION=KZ_VC
 $(ELF-VC)			:	LDFLAGS		?= -O2 -fno-optimize-strlen
 $(KZ-VC)			:	CFLAGS		?= -O2 -fno-optimize-strlen -ffat-lto-objects

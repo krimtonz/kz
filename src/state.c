@@ -430,6 +430,7 @@ void load_state(void *state){
     }
 
     /* load scene file, and create static collision if loading from a different scene */
+    int orig_skybox_id = -1;
     if(scene_index != z2_game.scene_index){
         z2_scene_table_ent_t *scene_ent = &z2_scene_table[z2_game.scene_index];
         size_t size = scene_ent->vrom_end - scene_ent->vrom_start;
@@ -446,6 +447,7 @@ void load_state(void *state){
             }
             if(cmd->cmd == 0x11){
                 z2_sky_scene_cmd_t *sky_cmd = (z2_sky_scene_cmd_t*)cmd;
+                orig_skybox_id = sky_cmd->sky_id & 3;
                 if(sky_cmd->tex_idx == 0){
                     break;
                 }
@@ -567,16 +569,19 @@ void load_state(void *state){
 
     st_read(&p, z2_saturation, 0x20);
     st_read(&p, &z2_hide_clock, sizeof(z2_hide_clock));
+    if(hdr.state_version >= 8){
+        st_read(&p, &z2_weather_state, sizeof(z2_weather_state));
+    }
 
     /* create skybox */
-    if(z2_game.skybox_type != 0){
-        if(z2_game.skybox_type == 5){
+    if(orig_skybox_id > 0){
+        if(orig_skybox_id == 5){
             z2_CreateSkyboxVtx(&z2_game.skybox_ctx, 6);
         }else{
             z2_CreateSkyboxVtx(&z2_game.skybox_ctx, 5);
         }
 
-        z2_LoadSkyboxData(&z2_game, &z2_game.skybox_ctx, z2_game.skybox_type);
+        z2_LoadSkyboxData(&z2_game, &z2_game.skybox_ctx, orig_skybox_id);
     }
 
     /* load hud textures */
@@ -1001,6 +1006,8 @@ size_t save_state(void *state){
 
     st_write(&p, z2_saturation, 0x20);
     st_write(&p, &z2_hide_clock, sizeof(z2_hide_clock));
+
+    st_write(&p, &z2_weather_state, sizeof(z2_weather_state));
 
     /* save display lists */
     z2_gfx_t *gfx = z2_ctxt.gfx;
