@@ -16,6 +16,7 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"reload scene",        COMMAND_PRESS,  command_reloadarea},
     {"void out",            COMMAND_PRESS,  command_void},
     {"break free",          COMMAND_PRESS,  command_break},
+    {"skip cutscene",       COMMAND_PRESS,  command_skip_cutscene},
     {"pause",               COMMAND_PRESS,  command_pause},
     {"advance",             COMMAND_PRESS,  command_advance},
     {"reset lag counter",   COMMAND_PRESS,  command_lag_reset},
@@ -168,8 +169,8 @@ void command_break(void){
     if(z2_link.action != 0) {
         z2_link.action = 7;
     }
-    if(z2_game.cutscene_state != 0) {
-        z2_game.cutscene_state = 0x03;
+    if(z2_game.cs_ctx.state != 0) {
+        z2_game.cs_ctx.state = 0x03;
     }
 
     if(z2_game.message_state_1 != 0) {
@@ -188,6 +189,41 @@ void command_break(void){
 
     z2_link.state_flags_1 = 0;
     z2_link.state_flags_2 = 0;
+}
+
+void command_skip_cutscene(void){
+    z2_cutscene_ctx_t* cs_ctx = &z2_game.cs_ctx;
+    z2_cutscene_data *cutscene_ptr = cs_ctx->cs_data;
+    int32_t end_frame;
+
+    if (!z2_cutscene_is_playing_cs(&z2_game)) {
+        return;
+    }
+
+    if (cutscene_ptr == NULL) {
+        return;
+    }
+
+    end_frame = cutscene_ptr[1].i;
+
+    // Execute every command until the end of the cutscene data
+    for (uint16_t currentFrame = cs_ctx->frames; currentFrame < end_frame-10; currentFrame++) {
+        uint16_t frame_aux = cs_ctx->frames;
+
+        z2_cutscene_process_cmd_wrp(&z2_game, cs_ctx);
+        if (frame_aux == cs_ctx->frames) {
+            // Bypass commands that manipulate the current frame, like textboxes
+            cs_ctx->frames++;
+        }
+    }
+
+    int16_t next_entrance_index = cs_ctx->scene_cs_list[cs_ctx->current_cs_index].next_entrance_index;
+    if (next_entrance_index != -1) {
+        // The end of this cutscene triggers another cutscene, so just trigger it immediately
+        z2_cs_cmd_base_t cmd = {1,0,0,0};
+
+        z2_cutscene_terminator_impl(&z2_game, cs_ctx, &cmd);
+    }
 }
 
 void command_levitate(void){

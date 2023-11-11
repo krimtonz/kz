@@ -1,38 +1,40 @@
 # User Manual
 
 ## 0 Table of Contents
-* [0 Table of Contents](#0-table-of-contents)
-* [1 Introduction](#1-introduction)
-* [2 Menus](#2-menus)
-    * [2.1 Warps](#21-warps)
-    * [2.2 Cheats](#22-cheats)
-    * [2.3 Scene](#23-scene)
-        * [2.3.1 Collision](#231-collision)
-        * [2.3.2 Camera](#232-camera)
-    * [2.4 States](#24-states)
-    * [2.5 Watches](#25-watches)
-    * [2.6 Inventory](#26-inventory)
-        * [2.6.1 Items](#261-items)
-        * [2.6.2 Masks](#262-masks)
-        * [2.6.3 Quest Status](#263-quest-status)
-        * [2.6.4 Amounts](#264-amounts)
-    * [2.7 Equips](#27-equips)
-    * [2.8 File](#28-file)
-    * [2.9 Debug](#29-debug)
-        * [2.9.1 Memory](#291-memory)
-        * [2.9.2 Objects](#292-objects)
-        * [2.9.3 Actors](#293-actors)
-        * [2.9.4 Flags](#294-flags)
-        * [2.9.5 VC Debug](#295-vc-debug)
-    * [2.10 Settings](#210-settings)
-* [3 Save States](#3-save-states)
-* [4 Lite Version](#4-lite-version)
-* [5 Commands](#5-commands)
-* [6 Keyboard](#6-keyboard)
-* [7 SD Features](#7-sd-features)
-* [8 Memfiles](#8-memfiles)
-* [9 Frame Advancing](#9-frame-advancing)
-* [10 Pause Screen Editor](#10-pause-screen-editor)
+- [User Manual](#user-manual)
+  - [0 Table of Contents](#0-table-of-contents)
+  - [1 Introduction](#1-introduction)
+  - [2 Menus](#2-menus)
+    - [2.1 Warps](#21-warps)
+    - [2.2 Cheats](#22-cheats)
+    - [2.3 Scene](#23-scene)
+      - [2.3.1 Collision](#231-collision)
+      - [2.3.2 Camera](#232-camera)
+      - [Controlling the Free Camera](#controlling-the-free-camera)
+  - [2.4 States](#24-states)
+    - [2.5 Watches](#25-watches)
+    - [2.6 Inventory](#26-inventory)
+      - [2.6.1 Items](#261-items)
+      - [2.6.2 Masks](#262-masks)
+      - [2.6.3 Quest Status](#263-quest-status)
+      - [2.6.4 Amounts](#264-amounts)
+    - [2.7 Equips](#27-equips)
+    - [2.8 File](#28-file)
+    - [2.9 Debug](#29-debug)
+      - [2.9.1 Memory](#291-memory)
+      - [2.9.2 Objects](#292-objects)
+      - [2.9.3 Actors](#293-actors)
+      - [2.9.4 Flags](#294-flags)
+      - [2.9.5 VC Debug](#295-vc-debug)
+    - [2.10 Settings](#210-settings)
+  - [3 Save States](#3-save-states)
+  - [4 Lite Version](#4-lite-version)
+  - [5 Commands](#5-commands)
+  - [6 Keyboard](#6-keyboard)
+  - [7 SD Features](#7-sd-features)
+  - [8 Memfiles](#8-memfiles)
+  - [9 Frame Advancing](#9-frame-advancing)
+  - [10 Pause Screen Editor](#10-pause-screen-editor)
 
 ## 1 Introduction
 The main interface for kz, is used by bringing up the menu which by default is done by pressing the `R + L` Buttons.
@@ -376,12 +378,13 @@ kz implements the following commands
 * reload scene - reloads the current scene at the last entrance
 * void out - activates a void out
 * break free - breaks out of a cutscene
+* skip cutscene - skips a cutscene, playing the next one if exists
 * pause - pauses the game at the current frame. see [frame advancing](#9-frame-advancing)
 * advance - advances a single frame. see [frame advancing](#9-frame-advancing)
 * reset lag counter - resets the lag counter to 0
 * start/stop timer - starts or stops the timer
 * reset timer - sets the timer to 0
-* title scrren - returns to the title screen 
+* title scrren - returns to the title screen
 * save state - creates a save state
 * load state - loads the current save state
 * prev state - moves to the previous save state slot

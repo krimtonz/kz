@@ -18,6 +18,7 @@ enum {
     KZ_CMD_RELOAD,
     KZ_CMD_VOID,
     KZ_CMD_BREAK,
+    KZ_CMD_SKIP_CUTSCENE,
     KZ_CMD_PAUSE,
     KZ_CMD_ADVANCE,
     KZ_CMD_RESET_LAG,
@@ -58,6 +59,7 @@ void    command_reloadarea      (void);
 void    command_fall            (void);
 void    command_turbo           (void);
 void    command_break           (void);
+void    command_skip_cutscene   (void);
 void    command_pause           (void);
 void    command_advance         (void);
 void    command_return          (void);

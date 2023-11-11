@@ -21,6 +21,7 @@ void load_default_settings(void){
     settings->binds[KZ_CMD_RELOAD] = BIND_END;
     settings->binds[KZ_CMD_VOID] = BIND_END;
     settings->binds[KZ_CMD_BREAK] = BIND_END;
+    settings->binds[KZ_CMD_SKIP_CUTSCENE] = BIND_END;
     settings->binds[KZ_CMD_PAUSE] = make_bind(1, BUTTON_D_UP);
     settings->binds[KZ_CMD_ADVANCE] = make_bind(1, BUTTON_D_DOWN);
     settings->binds[KZ_CMD_RESET_LAG] = BIND_END;
