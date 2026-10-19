@@ -1,4 +1,3 @@
-#ifndef LITE
 #include <vector/vector.h>
 #include <set/set.h>
 #include <stdlib.h>
@@ -400,5 +399,3 @@ void menu_file_get(file_mode_t mode, const char *default_fn, const char *extensi
     menu_trigger_event(&kz.main_menu, MENU_EVENT_ENTER, &menu);
     update_view();
 }
-
-#endif

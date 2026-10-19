@@ -5,6 +5,7 @@
 #include "settings.h"
 #include "z2.h"
 #include "state.h"
+#include "macro.h"
 #include "hb_heap.h"
 
 struct command kz_commands[KZ_CMD_MAX] = {
@@ -22,12 +23,10 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"start/stop timer",    COMMAND_PRESS,  command_timer},
     {"reset timer",         COMMAND_PRESS,  command_timer_reset},
     {"title screen",        COMMAND_PRESS,  command_title_screen},
-#ifndef LITE
     {"save state",          COMMAND_PRESS,  command_save_state},
     {"load state",          COMMAND_PRESS,  command_load_state},
     {"prev state",          COMMAND_PRESS,  command_prev_state},
     {"next state",          COMMAND_PRESS,  command_next_state},
-#endif
     {"save memfile",        COMMAND_PRESS,  command_save_memfile},
     {"load memfile",        COMMAND_PRESS,  command_load_memfile},
     {"prev memfile",        COMMAND_PRESS,  command_prev_memfile},
@@ -36,9 +35,10 @@ struct command kz_commands[KZ_CMD_MAX] = {
     {"load position",       COMMAND_PRESS,  command_load_position},
     {"prev position",       COMMAND_PRESS,  command_prev_position},
     {"next position",       COMMAND_PRESS,  command_next_position},
+    {"record macro",        COMMAND_PRESS,  command_record_macro},
+    {"play macro",          COMMAND_PRESS,  command_play_macro},
 };
 
-#ifndef LITE
 void command_prev_state(void) {
     kz.state_slot += STATE_MAX - 1;
     kz.state_slot %= STATE_MAX;
@@ -82,6 +82,11 @@ void command_load_state(){
     kz_state_hdr_t *state = kz.states[kz.state_slot];
     if(state != NULL) {
         load_state(state);
+        /* continue the macro from where it was when the state was saved */
+        int32_t macro_frame = kz.state_macro_frame[kz.state_slot];
+        if(macro_frame >= 0 && macro_mode() != MACRO_IDLE) {
+            macro_seek(macro_frame);
+        }
 #ifdef WIIVC
         char name[64];
         hmemcpy(name, state->name, 64);
@@ -101,6 +106,40 @@ void command_save_state(){
     }
 
     kz_state_hdr_t *state = kz.states[kz.state_slot];
+#ifdef LITE
+    char name[sizeof(state->name)];
+    if(state != NULL) {
+        memcpy(name, state->name, sizeof(name));
+    } else {
+        strcpy(name, "untitled");
+    }
+
+    /* try to keep the old state until the new one has been saved */
+    kz_state_hdr_t *new_state = save_state_alloc();
+    if(new_state == NULL && state != NULL) {
+        state_free(state);
+        state = NULL;
+        kz.states[kz.state_slot] = NULL;
+        kz.state_macro_frame[kz.state_slot] = -1;
+        new_state = save_state_alloc();
+    }
+
+    if(new_state == NULL) {
+        kz_log("not enough memory for state %d", kz.state_slot);
+        return;
+    }
+
+    if(state != NULL) {
+        state_free(state);
+    }
+
+    new_state->z2_version = Z2_VERSION;
+    new_state->state_version = STATE_HDR_VERSION;
+    memcpy(new_state->name, name, sizeof(name));
+    kz.states[kz.state_slot] = new_state;
+    kz.state_macro_frame[kz.state_slot] = macro_mode() != MACRO_IDLE ? (int32_t)macro_frame() : -1;
+    kz_log("saved state %d (%s, %dkb)", kz.state_slot, new_state->name, (new_state->size + 1023) / 1024);
+#else
     char *tmp_name = NULL;
     if(state != NULL) {
         tmp_name = malloc(sizeof(state->name));
@@ -152,8 +191,17 @@ void command_save_state(){
     kz_log("saved state %d (%s)", kz.state_slot, state->name);
 #endif
     kz.states[kz.state_slot] = state;
-}
+    kz.state_macro_frame[kz.state_slot] = macro_mode() != MACRO_IDLE ? (int32_t)macro_frame() : -1;
 #endif
+}
+
+void command_record_macro(void){
+    macro_record();
+}
+
+void command_play_macro(void){
+    macro_play();
+}
 
 void command_timer(void){
     kz.timer_running = !kz.timer_running;

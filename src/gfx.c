@@ -314,6 +314,10 @@ void gfx_destroy_texture(gfx_texture *texture){
 /* sprite drawing functions */
 
 void gfx_draw_sprite_color(gfx_texture *texture, int x, int y, int tile, int width, int height, uint32_t color){
+    /* a texture that could not be allocated is not drawn */
+    if(texture == NULL || texture->data == NULL){
+        return;
+    }
     gfx_load_tile(texture, tile);
     rdp_mode_set_apply(RDP_MODE_COLOR, color);
     rdp_mode_replace(RDP_MODE_COMBINE, G_CC_MODE(G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM));
@@ -463,6 +467,10 @@ gfx_texture *gfx_load_item_texture(uint8_t item_id){
         texture->source = TEX_SRC_DRAM;
         texture->data = memalign(8, size * 2);
 #endif
+        if(texture->data == NULL){
+            free(texture);
+            return NULL;
+        }
         z2_DecodeArchiveFile(z2_file_table[z2_item_icon_archive].prom_start, item_id, tex_buf, size);
         // Copy colored texture to hb heap
 
@@ -504,6 +512,10 @@ static gfx_texture *gfx_load_archive(texture_loader *loader){
         texture->source= TEX_SRC_DRAM;
         texture->data = memalign(8, tile_size * texture->y_tiles);
 #endif
+        if(texture->data == NULL){
+            free(texture);
+            return NULL;
+        }
 
         int i;
         uint8_t j;
@@ -539,7 +551,14 @@ static gfx_texture *gfx_load_from_rom(texture_loader *loader){
         texture->data = memalign(8, texture->tile_size * texture->y_tiles);
 #endif
         uint16_t file = loader->file;
-        void *tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
+        void *tempdata = NULL;
+        if(texture->data != NULL){
+            tempdata = malloc(z2_file_table[file].vrom_end - z2_file_table[file].vrom_start);
+        }
+        if(tempdata == NULL){
+            gfx_destroy_texture(texture);
+            return NULL;
+        }
         zu_file_idx_load(file, tempdata);
 
         for(int i = 0; i < loader->num_tiles; i++)

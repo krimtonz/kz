@@ -293,8 +293,9 @@ gfx_texture *get_item_texture(uint8_t item_id, _Bool release){
 #endif
     struct item_texture *item = (struct item_texture*)resource_get(R_Z2_ITEMS) + item_id;
 #ifdef LITE
+    /* memory is short in lite, so all item icons are released when unused */
     item->last_access_counter = 0;
-    item->release = release;
+    item->release = 1;
 #endif
     if(item->texture){
         return item->texture;

@@ -170,7 +170,6 @@ static int command_inc_onactivate(event_handler_t *handler, menu_event_t event, 
     return 1;
 }
 
-#ifndef LITE
 static void do_export_pos(char *path, void *data){
     int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file != -1){
@@ -250,7 +249,6 @@ static int import_memfile_onactivate(event_handler_t *handler, menu_event_t even
     menu_file_get(FILE_MODE_LOAD, "memfile", ".kzm", do_import_memfile, NULL);
     return 1;
 }
-#endif
 
 static int memfile_action_onlist(event_handler_t *handler, menu_event_t event, void **event_data){
     settings->memfile_action = memfile_action_values[(int)*event_data];
@@ -339,11 +337,9 @@ menu_t *create_settings_menu(void){
     menu_watch_add(&settings_page2, 16, 1, &memfile_watch, 1);
     menu_button_add(&settings_page2, 17, 1, "+", memfile_inc_onactivate, NULL);
     y = 2;
-#ifndef LITE
     menu_gfx_button_add(&settings_page2, 0, y, pexport_sprite, export_memfile_onactivate, NULL)->tooltip = "export memfile";
     menu_gfx_button_add(&settings_page2, 4, y, pimport_sprite, import_memfile_onactivate, NULL)->tooltip = "import memfile";
     y += 2;
-#endif
 
     menu_label_add(&settings_page2, 0, y, "memfile action");
     item = menu_list_add(&settings_page2, 15, y++, memfile_action_text, sizeof(memfile_action_values) / sizeof(*memfile_action_values));
@@ -357,10 +353,8 @@ menu_t *create_settings_menu(void){
     menu_watch_add(&settings_page2, 16, y, &position_watch, 1);
     menu_button_add(&settings_page2, 17, y++, "+", position_inc_onactivate, NULL);
 
-#ifndef LITE
     menu_gfx_button_add(&settings_page2, 0, y, pexport_sprite, export_pos_onactivate, NULL)->tooltip = "export position";
     menu_gfx_button_add(&settings_page2, 4, y, pimport_sprite, import_pos_onactivate, NULL)->tooltip = "import position";
-#endif
 
     return &settingsm;
 }

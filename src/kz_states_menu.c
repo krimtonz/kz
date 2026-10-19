@@ -1,11 +1,15 @@
-#ifndef LITE
-#include <sys/stat.h>
 #include "kz.h"
 #include "menu.h"
+#include "kzresource.h"
+#include <sys/stat.h>
 #include "menu_file.h"
 #include "sys.h"
+#ifdef LITE
+#include "mem.h"
+#include "printf.h"
+#else
 #include "hb_heap.h"
-#include "kzresource.h"
+#endif
 
 static const char *no_state = "no state";
 static char *state_name = NULL;
@@ -73,6 +77,90 @@ static int name_onupdate(event_handler_t *handler, menu_event_t event, void **ev
     return 1;
 }
 
+#ifdef LITE
+static char state_mem_text[40];
+
+static int state_mem_onupdate(event_handler_t *handler, menu_event_t event, void **event_data) {
+    size_t total;
+    mem_largest_free(&total);
+    kz_state_hdr_t *state = kz.states[kz.state_slot];
+    int state_kb = state != NULL ? (state->size + 1023) / 1024 : 0;
+    snprintf(state_mem_text, sizeof(state_mem_text), "size %dkb free %dkb", state_kb, (int)(total / 1024));
+    return 1;
+}
+
+static int file_write(void *ctx, const void *buf, size_t len){
+    return write(*(int*)ctx, (void*)buf, len) == len;
+}
+
+static int file_read(void *ctx, void *buf, size_t len){
+    return read(*(int*)ctx, buf, len) == len;
+}
+
+static void do_export_state(char *path, void *data){
+    int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+    if(file == -1) {
+        kz_log("could not create file");
+        return;
+    }
+
+    /* the compressed state, header included */
+    if(!state_write_file(kz.states[kz.state_slot], file_write, &file)) {
+        kz_log("could not write state");
+    } else {
+        kz_log("exported state %d", kz.state_slot);
+    }
+    close(file);
+}
+
+static void do_import_state(char *path, void *data){
+    int file = open(path, O_RDONLY);
+    if(file == -1) {
+        kz_log("could not open file");
+        return;
+    }
+
+    struct stat sbuf;
+    kz_state_hdr_t hdr;
+    if(stat(path, &sbuf) != 0 || sbuf.st_size < sizeof(hdr) || !file_read(&file, &hdr, sizeof(hdr))) {
+        kz_log("could not read state");
+        close(file);
+        return;
+    }
+
+    int state_res = state_is_valid(&hdr);
+    if(state_res != 0 || hdr.size != sbuf.st_size) {
+        kz_log(state_res == -1 ? "wrong mm version" : "wrong state version");
+        close(file);
+        return;
+    }
+
+    /* keep the state in this slot unless its memory is needed */
+    int error;
+    kz_state_hdr_t *state = state_read_file(&hdr, file_read, &file, &error);
+    if(state == NULL && error == STATE_READ_MEMORY && kz.states[kz.state_slot] != NULL) {
+        state_free(kz.states[kz.state_slot]);
+        kz.states[kz.state_slot] = NULL;
+        /* nothing was read yet, so the file is still positioned after the header */
+        state = state_read_file(&hdr, file_read, &file, &error);
+    }
+    close(file);
+
+    if(state == NULL) {
+        if(error == STATE_READ_MEMORY) {
+            kz_log("not enough memory for state %d", kz.state_slot);
+        } else {
+            kz_log("could not read state");
+        }
+        return;
+    }
+
+    state_free(kz.states[kz.state_slot]);
+    kz.states[kz.state_slot] = state;
+    kz.state_macro_frame[kz.state_slot] = -1;
+    kz_log("imported to state %d", kz.state_slot);
+}
+#else
 static void do_export_state(char *path, void *data){
     int file = creat(path, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
     if(file != -1){
@@ -110,6 +198,7 @@ static void do_import_state(char *path, void *data){
         if(state_res == 0) {
             read(file, (char*)state + sizeof(*state), sbuf.st_size - sizeof(*state));
             kz.states[kz.state_slot] = state;
+            kz.state_macro_frame[kz.state_slot] = -1;
             kz_log("imported to state %d", kz.state_slot);
         } else {
 #ifdef WIIVC
@@ -123,6 +212,8 @@ static void do_import_state(char *path, void *data){
     }
 
 }
+
+#endif
 
 static int export_state_onactivate(event_handler_t *handler, menu_event_t event, void **event_data)
 {
@@ -146,6 +237,8 @@ static int delete_state_onactivate(event_handler_t *handler, menu_event_t event,
     if(kz.states[kz.state_slot]) {
 #ifdef WIIVC
         hfree(kz.states[kz.state_slot]);
+#elif defined(LITE)
+        state_free(kz.states[kz.state_slot]);
 #else
         free(kz.states[kz.state_slot]);
 #endif
@@ -179,6 +272,11 @@ menu_t *create_states_menu(void) {
     name_item->color = COLOR_FADED;
     menu_item_register_event(name_item, MENU_EVENT_UPDATE | MENU_EVENT_ACTIVATE | MENU_EVENT_KEYBOARD, name_onupdate, NULL);
 
+#ifdef LITE
+    menu_item_t *mem_item = menu_label_add(&states_menu, 0, 3, state_mem_text);
+    mem_item->color = COLOR_FADED;
+    menu_item_register_event(mem_item, MENU_EVENT_UPDATE, state_mem_onupdate, NULL);
+#endif
     menu_gfx_button_add(&states_menu, 0, 4, pexport_sprite, export_state_onactivate, NULL)->tooltip = "export state";
     menu_gfx_button_add(&states_menu, 4, 4, pimport_sprite, import_state_onactivate, NULL)->tooltip = "import state";
 
@@ -192,4 +290,3 @@ menu_t *create_states_menu(void) {
     menu_gfx_button_add(&states_menu, 8, 4, &clear_state_sprite, delete_state_onactivate, NULL)->tooltip = "clear state";
     return &states_menu;
 }
-#endif

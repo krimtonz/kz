@@ -1,3 +1,5 @@
+/* homeboy sd access for kz-full and kz-vc, kz-lite uses sd.c */
+#ifndef LITE
 #include <errno.h>
 #include <stdarg.h>
 #include "mem.h"
@@ -298,3 +300,4 @@ int reset_disk(void) {
 
     return ret;
 }
+#endif

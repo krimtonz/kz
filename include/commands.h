@@ -24,12 +24,10 @@ enum {
     KZ_CMD_TIMER,
     KZ_CMD_TIMER_RESET,
     KZ_CMD_TITLE_SCREEN,
-#ifndef LITE
     KZ_CMD_SAVE_STATE,
     KZ_CMD_LOAD_STATE,
     KZ_CMD_PREV_STATE,
     KZ_CMD_NEXT_STATE,
-#endif
     KZ_CMD_SAVE_MEMFILE,
     KZ_CMD_LOAD_MEMFILE,
     KZ_CMD_PREV_MEMFILE,
@@ -38,6 +36,8 @@ enum {
     KZ_CMD_LOAD_POSITION,
     KZ_CMD_PREV_POSITION,
     KZ_CMD_NEXT_POSITION,
+    KZ_CMD_RECORD_MACRO,
+    KZ_CMD_PLAY_MACRO,
     KZ_CMD_MAX
 };
 
@@ -73,12 +73,12 @@ void    command_load_position   (void);
 void    command_next_position   (void);
 void    command_prev_position   (void);
 void    command_title_screen    (void);
-#ifndef LITE
 void    command_load_state      (void);
 void    command_save_state      (void);
 void    command_prev_state      (void);
 void    command_next_state      (void);
-#endif
+void    command_record_macro    (void);
+void    command_play_macro      (void);
 
 extern struct command kz_commands[KZ_CMD_MAX];
 

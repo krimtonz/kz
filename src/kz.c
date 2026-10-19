@@ -17,6 +17,7 @@
 #include "hb_heap.h"
 #include "sys.h"
 #include "state.h"
+#include "macro.h"
 #include "mem.h"
 #include "printf.h"
 #include "vc.h"
@@ -465,6 +466,13 @@ static void kz_main(void) {
         }
     }
 
+    /* print macro status */
+    if(macro_mode() == MACRO_RECORDING) {
+        gfx_printf_color(Z2_SCREEN_WIDTH - 100, 44, 0xFF4040FF, "rec %d", (int)macro_frame());
+    } else if(macro_mode() == MACRO_PLAYING) {
+        gfx_printf_color(Z2_SCREEN_WIDTH - 100, 44, 0x40FF40FF, "play %d/%d", (int)macro_frame(), (int)macro_length());
+    }
+
     /* print frame advance status */
     if(kz.pending_frames == 0) {
         gfx_draw_sprite(resource_get(R_Z2_ICON), Z2_SCREEN_WIDTH - 40, 20, 3, 20, 20);
@@ -640,12 +648,9 @@ static void init(void) {
     menu_submenu_add(&kz.main_menu, 0, 2, "cheats", create_cheats_menu());
     menu_submenu_add(&kz.main_menu, 0, 3, "scene", create_scene_menu());
 
-#ifndef LITE
-#define Y 5
+#define Y 6
     menu_submenu_add(&kz.main_menu, 0, 4, "states", create_states_menu());
-#else
-#define Y 4
-#endif
+    menu_submenu_add(&kz.main_menu, 0, 5, "macro", create_macro_menu());
     menu_submenu_add(&kz.main_menu, 0, Y, "watches", create_watches_menu());
     menu_submenu_add(&kz.main_menu, 0, Y + 1, "inventory", create_inventory_menu());
     menu_submenu_add(&kz.main_menu, 0, Y + 2, "equips", create_equips_menu());
@@ -682,13 +687,14 @@ static void init(void) {
 
     memset(&kz.log, 0, sizeof(kz.log));
 
-#ifndef LITE
     for(int i = 0; i < STATE_MAX; i++) {
         kz.states[i] = NULL;
+        kz.state_macro_frame[i] = -1;
     }
 
+    macro_init();
+
     kz.state_slot = 0;
-#endif
 
     kz.input_mask = BUTTON_DPAD;
     kz.stick_x_mask = 0x00;
@@ -760,6 +766,7 @@ HOOK void input_hook(void) {
         inp->raw.x &= ~kz.stick_x_mask;
         inp->raw.y &= ~kz.stick_y_mask;
         z2_adjust_stick(inp);
+        macro_update_input(inp);
     }
 }
 

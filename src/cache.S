@@ -64,7 +64,7 @@ osInvalDCache:
     addiu   $t0, $t0, 0x10
 .L5:
     andi    $t2, $t1, 0xf
-    beq     $t2, 0, .L5
+    beq     $t2, 0, .L6
     subu    $t1, $t1, $t2
     cache   0x15, 0x0010($t1)
     sltu    $at, $t1, $t0
@@ -112,6 +112,7 @@ osWritebackDCache:
 .L10:
     cache   0x19, 0x0000($t0)
     sltu    $at, $t0, $t1
+    addiu   $t0, $t0, 0x10
     bne     $at, 0, .L10
 .L11:
     jr      $ra

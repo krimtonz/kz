@@ -8,6 +8,7 @@ osEPiReadIo                 = 0x800920B0;
 osEPiWriteIo                = 0x80093BB0;
 z2_vi_counter               = 0x80096B78;
 z2_random                   = 0x80097530;
+z2_Rand_Seed                = 0x80086FD0;
 z2_file_msgqueue            = 0x8009B2C0;
 z2_arena                    = 0x8009CD20;
 z2_file_table               = 0x8009F8B0;

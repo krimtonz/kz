@@ -25,6 +25,7 @@
         * [2.9.4 Flags](#294-flags)
         * [2.9.5 VC Debug](#295-vc-debug)
     * [2.10 Settings](#210-settings)
+    * [2.11 Macro](#211-macro)
 * [3 Save States](#3-save-states)
 * [4 Lite Version](#4-lite-version)
 * [5 Commands](#5-commands)
@@ -33,6 +34,7 @@
 * [8 Memfiles](#8-memfiles)
 * [9 Frame Advancing](#9-frame-advancing)
 * [10 Pause Screen Editor](#10-pause-screen-editor)
+* [11 Macros](#11-macros)
 
 ## 1 Introduction
 The main interface for kz, is used by bringing up the menu which by default is done by pressing the `R + L` Buttons.
@@ -135,12 +137,13 @@ When using the c buttons to move the camera, holding the **Z** button will move 
 ## 2.4 States
 The states menu will allow you to change the active savestate slot, create a name for your save state, and export and import states to the SD card.  See the [states section](#3-save-states) for more information on save states.
 
-**Note**: sd card features are only enabled for the WiiVC version of kz.
+**Note**: sd card features are available in the WiiVC version, and in lite versions on flashcarts (see [SD Features](#7-sd-features)).
 
 **cur state** This will allow you to switch the change the active state. kz allows the saving of up to 5 states numbered from 0 to 4 use the **<** and **>** buttons to switch between them.  
 **state name** underneath the **cur state** section there will be a name for the current state.  **no state** will be displayed if currently no state is saved in the selected state.  **untitled** will be displayed as the default name when a state is created in the selected slot for the first time.  Selecting the state name will bring up a keyboard to rename the state.  
 **export** will allow you to export the currently saved state to the sd card  
-**import** will allow you to select an exported state to import to the current selected slot.
+**import** will allow you to select an exported state to import to the current selected slot.  
+**size/free** (lite versions only) displays the compressed size of the current state, and the amount of free memory kz has available for states.
 
 ### 2.5 Watches
 The Watches menu provides a list of custom memory watches
@@ -348,6 +351,17 @@ The `import` button will allow you to import a saved position from the sd card i
 
 The `commands` menu will allow you to customize the bindings for command activation.  To change a binding, select the button combination or `none`.  This will change the text or button combination to green indication that input is pending.  You can use up to 4 buttons in an activator, and as soon as all buttons are released the binding is saved.  Press and hold the button combination to unbind a command.
 
+### 2.11 Macro
+The macro menu records and plays back controller input.  It sits under the states menu in the main menu.  See [macros](#11-macros) for how recording and playback work.
+
+**record** starts recording at the current macro frame.  While recording the button reads `stop recording`.  
+**play** plays the macro from the current macro frame, or from the start if the macro already finished.  While playing the button reads `stop playing`.  
+**rewind** moves the current macro frame back to 0.  
+**trim** removes every recorded frame after the current macro frame.  
+**clear** deletes the macro.  
+Underneath is the current macro frame, the length of the macro, and `rec` or `play` while a macro is recording or playing.  
+**export** saves the macro to the sd card as a `.kzmc` file, and **import** loads one.  See [sd features](#7-sd-features).
+
 ## 3 Save States
 Save states are implemented in a way which only saves information which is needed to reconstruct the state of the game when the state is created.  Because of this there are a few things that are not restored in the same state when the savestate was created.
 
@@ -360,7 +374,15 @@ The lite version of kz, allows most of the kz features to be used on systems tha
 
 Because kz-lite must be placed in a much smaller memory area, features had to be elimiated in order to make this viable.  The [debug menu](#29-debug) is removed completely.
 
-SD Features are not implemented in lite versions.
+[SD Features](#7-sd-features) work in lite versions when the rom is run from a flashcart with an SD card.
+
+### Save States in Lite
+Lite versions do not have enough free memory to hold an uncompressed save state, so states are compressed as they are created and decompressed directly back into game memory when they are loaded.  A state does not need one contiguous block of memory, it can use any free memory kz has.  How many states fit depends on how much is going on in the scene; a typical state is around 100kb, and in testing there was room for two.  The [states menu](#24-states) shows the compressed size of the selected state, and how much memory kz has free.
+
+* Saving a state into a slot that already holds a state replaces it.  If there is not enough memory to keep both while saving, the old state is freed first.
+* If there is still not enough memory, `not enough memory for state` is displayed.  Clearing states in other slots will free memory.
+* 64kb of memory is always kept free for kz itself.  When memory is very low, some menu icons may not be drawn until a state is cleared.
+* States exported from a lite version can only be imported by lite versions, and states exported from the full or WiiVC versions cannot be imported by lite versions.
 
 Item icons that are normally displayed in the [inventory menu](#26-inventory) are replaced with check boxes to enable/disable those items.  A tooltip is provided so which item is being switched is known.
 
@@ -394,6 +416,8 @@ kz implements the following commands
 * load position - set's link's position to the position saved in the current slot
 * next position - moves to the next position slot
 * prev position - moves to the previous position slot
+* record macro - starts or stops recording a macro (not bound by default).  see [macros](#11-macros)
+* play macro - starts or stops playing a macro (not bound by default).  see [macros](#11-macros)
 
 ## 6 Keyboard
 kz implements an on screen keyboard for easy text editing.  There are a few shortcuts to make editing a bit faster.
@@ -405,7 +429,9 @@ While holding `R`:
 * `D-Down` : Accept
 
 ## 7 SD Features
-kz is able to communicate with the SD Card in the WiiVC Version.
+kz is able to communicate with the SD Card in the WiiVC Version, and in lite versions running on an n64 flashcart with an SD card: 64drive, EverDrive-64 X-series, EverDrive-64 v1-v3 and ED64+, and SummerCart64.  In lite versions the SD card must be formatted as FAT32 (FAT16 also works), exFAT is not supported.
+
+States, memfiles, positions and macros can be exported to and imported from the SD card.
 
 When a feature is used that needs the sd card, a files menu will pop up.
 
@@ -442,3 +468,20 @@ When the game is paused using the `pause` or `advance` commands, the game will s
 
 ## 10 Pause Screen Editor
 Holding the `L` Button (`c-stick-down` on VC) while in the pause screen will enable inventory editing.  When this mode is enabled a red `i` will be shown in the lower right corner of the screen.  This mode will allow you to move the cursor into any item or mask slot in order to select an item to place in that slot.  When on the `Quest Status` subscreen, selecting each item in the menu with the `L` button will toggle that item as obtained or not.  
+
+## 11 Macros
+A macro is a recording of controller input, one entry per game frame, that kz can play back into the game in place of the controller.  It works together with save states the same way as macros in gz:
+
+1. Save a state where the macro should start, or start recording first and save states along the way.
+2. Use `record macro` (or **record** in the [macro menu](#211-macro)) and play.  The red `rec` counter in the top right shows the current macro frame.
+3. Use `record macro` again to stop.
+4. Load the state and use `play macro`.  The green `play` counter shows the frame being played and the length of the macro.  When the last frame has been played, `macro finished` is displayed and the controller takes over again.
+
+Every save state remembers the macro frame it was saved at while a macro was recording or playing.  Loading that state while a macro is recording or playing moves the macro back to that frame, so the inputs line up with the game again.  This means a mistake can be fixed by loading an earlier state while recording: recording continues from the frame the state was saved at, and replaces the frames that were recorded after it.  Frames past the end of the new recording are kept; use **trim** to remove them.
+
+For each frame the macro stores the buttons that are held, pressed and released, and the raw and adjusted control stick positions.  The game reseeds its random number generator when a scene is loaded.  kz records that seed while recording and gives the game the same seed while playing, so scene loads during a macro play out the same way.
+
+Playback is frame exact only when it starts from the same game state the recording started from, which in practice means loading the state that was saved while recording.  Some things are not handled:
+* While a macro is playing, controller input to the game is ignored, but kz commands such as `load state` still work.
+* States exported to the sd card do not keep their macro frame.
+* Macro files can only be imported into the same mm version they were recorded on.

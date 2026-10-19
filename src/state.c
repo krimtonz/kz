@@ -1,4 +1,3 @@
-#ifndef LITE
 #include <stdint.h>
 #include <set/set.h>
 #include <mips.h>
@@ -7,9 +6,15 @@
 #include "zu.h"
 #include "kzresource.h"
 #include "kz.h"
-#include "hb_heap.h"
 #include "audio.h"
 #include "vc.h"
+#ifdef LITE
+#include "mem.h"
+#include "state_lz.h"
+#include "state_chunk.h"
+#else
+#include "hb_heap.h"
+#endif
 
 #ifdef WIIVC
 #define MAYBENOINLINE __attribute__ ((noinline))
@@ -19,6 +24,43 @@
 
 static _Bool save_wr = 0;
 
+/* reads uncompressed data, used for the state header */
+static MAYBENOINLINE void st_read_raw(void **src, void *dst, size_t len){
+    char *p = *src;
+#ifdef WIIVC
+    hmemcpy(dst, p, len);
+#else
+    memcpy(dst, p, len);
+#endif
+    p += len;
+    *src = p;
+}
+
+#ifdef LITE
+/*
+* kz-lite cannot spare the memory for an uncompressed state, so every chunk
+* is lz compressed as it is written, and decompressed straight back into game
+* memory as it is read.
+*
+* the compressed state does not need contiguous memory: it is stored in a list
+* of state_chunk_t, so it can use whatever free blocks the heap has.  the state
+* header is at the start of the first chunk's data.
+*/
+static lz_stream_t  st_out;
+static lz_stream_t  st_in;
+static lz_hash_t   *st_hash;
+static _Bool        st_failed;
+
+static void st_write(void **dst, void *src, size_t len){
+    if(save_wr && !st_failed && !lz_compress(&st_out, src, len, st_hash)) {
+        st_failed = 1;
+    }
+}
+
+static void st_read(void **src, void *dst, size_t len){
+    lz_decompress(&st_in, dst, len);
+}
+#else
 static MAYBENOINLINE void st_write(void **dst, void *src, size_t len){
     char *p = *dst;
 
@@ -34,15 +76,9 @@ static MAYBENOINLINE void st_write(void **dst, void *src, size_t len){
 }
 
 static MAYBENOINLINE void st_read(void **src, void *dst, size_t len){
-    char *p = *src;
-#ifdef WIIVC
-    hmemcpy(dst, p, len);
-#else
-    memcpy(dst, p, len);
-#endif
-    p += len;
-    *src = p;
+    st_read_raw(src, dst, len);
 }
+#endif
 
 static void st_skip(void **dest, size_t len){
     char *p = *dest;
@@ -107,7 +143,10 @@ void load_state(void *state){
     uint64_t offset;
 
     kz_state_hdr_t hdr;
-    st_read(&p, &hdr, sizeof(hdr));
+    st_read_raw(&p, &hdr, sizeof(hdr));
+#ifdef LITE
+    state_stream_open(&st_in, state, p);
+#endif
 
     load_time = osGetTime();
 
@@ -1049,8 +1088,58 @@ size_t save_state(void *state){
     st_write(&p, z2_staff_notes, 0x1E);
     st_write(&p, &z2_song_ptr, sizeof(z2_song_ptr));
     st_write(&p, &z2_unk_song_pos, sizeof(z2_unk_song_pos));
+
+#ifdef LITE
+    /* 0 if the compressed state did not fit in memory */
+    return !st_failed;
+#else
     return (char*)p - (char*)state;
+#endif
 }
+
+#ifdef LITE
+kz_state_hdr_t *save_state_alloc(void){
+    chunk_alloc_t alloc;
+    if(!chunk_alloc_init(&alloc)) {
+        return NULL;
+    }
+
+    /* compress into the largest free block first, more chunks are added as needed */
+    state_chunk_t *first = chunk_new(&alloc, 0);
+    if(first == NULL) {
+        return NULL;
+    }
+
+    /* the hash table is only needed while compressing, it may dip into the reserve */
+    size_t hash_size = sizeof(*st_hash) * LZ_HASH_SIZE;
+    st_hash = malloc(hash_size);
+    if(st_hash == NULL && first->cap > hash_size + STATE_CHUNK_MIN + 0x40) {
+        first->used = first->cap - hash_size - 0x40;
+        chunk_trim(&alloc, first);
+        st_hash = malloc(hash_size);
+    }
+    if(st_hash == NULL) {
+        chunks_free(first);
+        return NULL;
+    }
+    memset(st_hash, 0, hash_size);
+
+    kz_state_hdr_t *state = (kz_state_hdr_t*)first->data;
+    chunk_out_open(&st_out, &alloc, sizeof(*state));
+    st_failed = 0;
+
+    int ok = save_state(state);
+    free(st_hash);
+    st_hash = NULL;
+    if(!ok) {
+        chunks_free(alloc.first);
+        return NULL;
+    }
+
+    state->size = chunk_out_close(&st_out, &alloc);
+    return state;
+}
+#endif
 
 struct state_compat {
     uint16_t    state_version;
@@ -1070,6 +1159,10 @@ int state_is_valid(kz_state_hdr_t *state) {
     if(state->z2_version != Z2_VERSION) {
         return -1;
     }
+
+#ifdef LITE
+    return state->state_version == STATE_HDR_VERSION ? 0 : -2;
+#endif
 
     if(state->state_version == STATE_VERSION){
         return 0;
@@ -1095,5 +1188,3 @@ int state_is_valid(kz_state_hdr_t *state) {
 
     return 0;
 }
-
-#endif
